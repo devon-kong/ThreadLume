@@ -101,3 +101,6 @@
 | E.互动 | NOT_TESTED | 补充实现：面板操作条镜像原生状态（like/unlike testid 翻转）并委托原生按钮（第 3 类自动化）；**写入仍 NOT_TESTED** | BROWSER-RO（likeActive=false 状态镜像实测） |
 | F.MV3 生命周期 | MV3（挂载）+ BROWSER-RO（拆除等价） | 路由机制重写（移除 history 包装）：popstate+Navigation API+500ms 有界轮询；六场景（SPA 进入/切换/back/forward/home 拆除/重复进入）全通过；双重注入幂等 | BROWSER-RO（登录态隔离世界，跨世界路由观测实证）+ MV3 |
 | F.登录态 MV3 | NOT_MEASURED | 维持 NOT_MEASURED；用户操作材料 `exploration-poc/MV3-LOGIN-VERIFY.md` 已备齐（Chrome 155 限制与 ego-browser 限制均已留档） | 留档尝试记录 |
+| F.登录态 MV3（第三轮更新） | NOT_MEASURED | **ego 登录会话检查单 10/10 通过**：以 Chromium 原生隔离世界自动注入（addScriptToEvaluateOnNewDocument+worldName）在真实登录会话逐项实测（52vw/计数 parity 含零计数 aria 回退/回复焦点/切换/back-forward/关闭语义/直达不跳出/重载/无残留/暗色合成输入跟随） | BROWSER-RO（登录态，等效 manifest 注入语义）；「Chrome 隔离 profile 真实扩展包加载」仍待用户检查单（MV3-LOGIN-VERIFY.md），两种验证互补 |
+| B.计数展示（第三轮更新） | — | 零计数按钮无文本→补 aria-label 数值回退（「0 喜欢次数。喜欢」→0），非零值与 aria 逐值一致；缺失仍显「未知」不造 0 | BROWSER-RO（2a/2b 实测） |
+| A.主题（第三轮更新） | 暗色 NOT_MEASURED | 主题跟随机制实测：合成暗色输入→面板暗色、恢复原值→浅色（未改账号设置）；补 body 观察器+500ms 轮询重涂+透明回退读 color-scheme；真实 X 设置切换仍留给用户检查单 | BROWSER-RO（D 项实测） |

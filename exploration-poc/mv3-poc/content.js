@@ -57,8 +57,11 @@
         removeReader();
       }
     } else if (id && document.getElementById(PANE_ID)) {
-      // React may remount the focal cell and drop the tag; re-tag while reading
+      // React may remount the focal cell and drop the tag; re-tag while reading.
+      // Also re-apply theme on the bounded poll: cheap and robust against any
+      // theme-change mutation the observers might miss.
       ensureFocalTag(id);
+      applyTheme();
     }
   }
 
@@ -84,12 +87,13 @@
   function readTheme() {
     const bg = getComputedStyle(document.body).backgroundColor;
     const m = bg.match(/(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)/);
-    let dark = true;
     if (m) {
       const [r, g, b] = [+m[1], +m[2], +m[3]];
-      dark = (0.2126 * r + 0.7152 * g + 0.0722 * b) < 128;
+      return (0.2126 * r + 0.7152 * g + 0.0722 * b) < 128 ? "dark" : "light";
     }
-    return dark ? "dark" : "light";
+    // transparent body (X paints elsewhere): fall back to the root color-scheme
+    if (getComputedStyle(document.documentElement).colorScheme === "light") return "light";
+    return "dark";
   }
 
   function applyTheme() {
@@ -105,7 +109,9 @@
   function watchTheme() {
     themeObserver?.disconnect();
     themeObserver = new MutationObserver(() => applyTheme());
+    // X may switch themes via root or body class/style changes; watch both.
     themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "style", "data-theme"] });
+    if (document.body) themeObserver.observe(document.body, { attributes: true, attributeFilter: ["class", "style"] });
     applyTheme();
   }
 
@@ -123,7 +129,11 @@
     // X flips the testid with state: like/unlike, retweet/unretweet, bookmark/unbookmark
     const active = Boolean(root.querySelector(`[data-testid="un${name}"]`));
     const node = root.querySelector(`[data-testid="${name}"], [data-testid="un${name}"]`);
-    return { value: parseCount(node?.innerText), active, known: Boolean(node) };
+    // zero-count buttons render no text; the number lives in aria-label ("0 喜欢次数。喜欢")
+    const aria = node?.getAttribute("aria-label") || "";
+    const fromAria = aria ? parseCount(aria.match(/^([\d.,]+\s*[KMkM]?)/)?.[1] ?? "") : null;
+    const value = parseCount(node?.innerText) ?? fromAria;
+    return { value, active, known: Boolean(node) };
   }
 
   function focalCellByStatusId(focalId) {

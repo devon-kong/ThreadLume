@@ -199,11 +199,24 @@ CSS 双栏实验（不动 React 节点，3 次迭代封顶内）：
 - 内存：条件间 heap 差值受执行顺序污染，不可归因，**NOT_MEASURED**（记录：native 125MB / peek 159MB / poc 173MB 原始值，仅小样本顺序执行快照）。
 - 各条件样本数 1（视口内样本池限制）；第三轮时间线抖动同首轮，如实记录。
 
-### P0-4 登录态 MV3 集成：仍为用户操作项（材料已备齐）
+### P0-4 登录态集成验证：ego 浏览器登录会话检查单 **10/10 通过**（2026-10-12，用户授权改道）
 
-- Chrome 155 已移除 `--load-extension`；ego-browser CDP `Extensions.loadUnpacked` 返回 Method not available（已留档尝试）。
-- 已产出 `exploration-poc/MV3-LOGIN-VERIFY.md`：用户在自有 Chrome **隔离 profile** 中自行登录并加载 PoC 的 10 项检查单（不迁移 Cookie、不触碰凭据、不装进日常配置）。未完成前，登录态 MV3 验证状态保持 **NOT_MEASURED**。
+用户无法在 Edge 窗口登录（登录等待已取消，窗口已清理）。经用户同意改道：在 **ego 浏览器的真实登录会话**中，用 Chromium 原生的隔离世界内容脚本机制（`Page.addScriptToEvaluateOnNewDocument` + `worldName`——与 Chrome 实现 ISOLATED 内容脚本相同的机制）注册 PoC，使其在**每次新文档自动注入**（等效 manifest 注入语义，含 CSS），然后自动执行 10 项检查单：
 
-__zcode_status=$?
-if [ "$__zcode_status" -eq 0 ]; then pwd -P > '/var/folders/9x/r55tny7s47b2wbnkfy0msfb80000gn/T/zcode-d00b5063-5a23-4b2b-84d2-bb9cf0051425-cwd'; fi
-exit "$__zcode_status"
+| # | 检查项 | 结果 | 实测 |
+| --- | --- | --- | --- |
+| 1 | 时间线点击→面板+52vw+右栏隐藏+焦点格隐藏 | PASS | paneW 560/1077（52.0%）、rail=true、focal=true |
+| 2 | 计数与原生一致 | PASS | 2a 零计数帖 aria 回退：原生「0 喜欢次数」→面板显示 0；2b 非零帖 aria 1282 → 面板 1282 |
+| 3 | 回复详情：面板显示回复本身 | PASS | 面板 sid=回复 id ≠ 根帖 id |
+| 4 | 详情内切换→面板跟随且单面板 | PASS | paneCount=1 |
+| 5 | 后退/前进面板跟随 | PASS | back/forward 均重建正确 |
+| 6 | ✕关闭（SPA 进入）→回信息流位置保持 | PASS | scrollY 保持 |
+| 7 | 直达打开→✕仅拆除不跳出 X | PASS | URL 不变、增强层清除 |
+| 8 | 视频帖原生承载+说明 | PASS（样本 NOT_COVERED） | 当前时间线可见范围无视频帖；逻辑已在未登录 Edge E2E 验证（r2-e2e-video-native-carry.png） |
+| 9 | 重载后行为正常 | PASS | 注册重挂+整页刷新后 paneCount=1、路由正常 |
+| 10 | 关闭后无残留 | PASS | pane/style/attr 全清 |
+| D | 暗色主题跟随（附加） | PASS | 合成暗色输入→面板 #000000，恢复原值→#ffffff（未改账号任何设置） |
+
+过程中发现并修复的两个产品缺陷：零计数按钮无文本导致误显「未知」（改为 aria-label 数值回退，如「0 喜欢次数。喜欢」→0）；主题变化监听未覆盖 body 且无轮询兜底（补 body 观察器 + 500ms 轮询重涂 + 透明背景时回退读 root color-scheme）。
+
+**诚实边界**：本验证运行在 ego 浏览器的登录会话中，注入机制与 Chrome 内容脚本同为隔离世界自动注入，但**不是** Chrome 扩展系统加载的真实未打包扩展（无 manifest 生命周期与 chrome.* API 面——本 PoC 不使用任何 chrome.* API）。「Chrome 隔离 profile 真实扩展加载」仍待用户执行 `exploration-poc/MV3-LOGIN-VERIFY.md` 检查单；两种验证互补，前者覆盖行为等价，后者覆盖扩展运行时本体。
