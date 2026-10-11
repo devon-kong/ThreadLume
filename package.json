@@ -1,0 +1,36 @@
+{
+  "name": "tuzai-x-popover",
+  "version": "0.8.10",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DoraRabbitYan/peek.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DoraRabbitYan/peek/issues"
+  },
+  "homepage": "https://github.com/DoraRabbitYan/peek#readme",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build:preview && npm run build:extension",
+    "build:preview": "vite build && node scripts/prepare-sites-build.mjs",
+    "build:extension": "node scripts/build-extension.mjs",
+    "preview": "vite preview",
+    "test": "npm run build:preview && npm run build:extension && node --test tests/extension-core.test.mjs tests/follow.test.mjs tests/sites-worker.test.mjs tests/acceptance-mentions.test.mjs tests/acceptance-subreplies.test.mjs tests/acceptance-polls.test.mjs tests/acceptance-media.test.mjs tests/acceptance-reload.test.mjs tests/bookmark-folders.test.mjs",
+    "test:sites": "node --test tests/sites-worker.test.mjs"
+  },
+  "dependencies": {
+    "@phosphor-icons/web": "^2.1.2",
+    "@vitejs/plugin-react": "5.0.4",
+    "hls.js": "^1.7.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "vite": "6.4.3"
+  },
+  "devDependencies": {
+    "@phosphor-icons/core": "^2.1.1",
+    "sharp": "^0.35.3"
+  }
+}
