@@ -2,6 +2,8 @@
 
 日期：2026-10-12。执行：本地 Agent（ZCode），按《Peek 扩展优化：第一轮探索任务书（评审修订版）》（2026-10-11 附件 `Peek-探索任务书-修订版-20261011.md`）执行。本文件是探索报告，不是已验收的改造方案。
 
+> **第二轮补证（2026-10-12）**：首轮产物经评审"有条件通过、不批准迁移"并给出 P0 清单。本轮已按清单完成 PoC v2 修复与复测，见文末「第二轮补证结果」章节——该章节与首轮正文冲突之处，以补证章节为准（核心变化：问题 A 已有实锤证据，R1 交互模型判定为不等价）。
+
 ## 1. 执行摘要
 
 1. **同源 iframe 路线被 X 的响应头直接阻断**：详情文档返回 `X-Frame-Options: DENY`，任何祖先（包括 x.com 自身与 chrome-extension:// 页面）都无法内嵌。行为验证一致（iframe 注入 14 秒 contentDocument 恒为 null）。该路线在合规手段内无解，已停止。
@@ -138,3 +140,70 @@ CSS 双栏实验（不动 React 节点，3 次迭代封顶内）：
 | gefei55/aibizhe 等性能轮换样本 | 0 | 0 | 2（点击→详情→back 计时往返；第三轮因时间线状态抖动作废未触发） | — |
 
 翻译探针 0 次触发（原生"显示翻译"按钮为静态目验）；未登录 MV3 验证页面为公开帖只读渲染。真实账号写入：0。
+
+---
+
+## 第二轮补证结果（P0 逐项，2026-10-12）
+
+评审意见：有条件通过探索阶段，不批准正式迁移；先做 P0 补证。以下为逐项执行与验证记录。环境标注沿用首轮口径：BROWSER-RO＝登录会话 CDP 试验（本轮为**隔离世界注入**，比首轮更接近真实内容脚本执行环境）；MV3＝隔离 Edge 149 加载扩展的运行时验证（未登录）。
+
+### P0-2 路由机制：缺陷确认 → 重写 → 六场景复测通过
+
+- **评审判断成立**：ISOLATED 世界对 `history.pushState/replaceState` 的包装无法观测主世界 SPA 调用（两个世界各自持有独立的 JS 包装对象）。首轮 PoC 的路由只在直达加载时有效——这是实质性缺陷，评审发现正确。
+- **修复**：完全移除 history 包装。新机制 = popstate + hashchange + Navigation API（`window.navigation.addEventListener("navigate")`，隔离世界可用性做了运行时守卫）+ **500ms 有界 pathname 轮询兜底**（2Hz 常数开销，不触碰 X 内部运行时）。状态 id 变更即重建，非详情路由即拆除。
+- **复测**（登录会话、隔离世界注入真实 X 会话）：
+  - 时间线点击 → 详情（主世界 SPA 导航）：面板自动建立（sid 与点击帖一致）——跨世界路由观测生效；
+  - 详情内切换到另一帖（引用/回复链接）：面板重建为新帖；
+  - `history.back()` / `history.forward()`：面板正确消失/重建；
+  - 回到 /home：面板拆除、X 右栏与原生列布局还原（cellW 598 恢复）；
+  - 重复进入同一帖：paneCount 恒为 1（无双挂载）；
+  - 双重注入（模拟扩展重载）：安装守卫生效，无重复观察器。
+
+### P0-2 关闭语义：历史感知关闭
+
+- `sessionNavigated` 标记本文档是否发生过 X 站内路由变更：发生过 → 关闭= `history.back()`；直达/外部进入 → 关闭=仅拆除增强层，**不导航**。
+- 实测：直达详情页点 ✕ → 面板消失、URL 不变（未跳出 X）；SPA 进入后点 ✕ → 回到来源视图（/home）。
+
+### P0-3 焦点帖功能补齐
+
+- 焦点定位：一律按 URL status id 匹配（登录态=cell 内时间戳 permalink；未登录=会话容器内规范 permalink 且取最后一个匹配），**任何路径都不再用"第一个 article"**。回复详情页实测面板显示回复自身（回复 2 · 喜欢 142），非祖先根帖。
+- 数字解析：`parseCount` 支持 K/M/千分位，缺失显示「未知」绝不造 0。真实函数经 CDP 测试钩子单测 **9/9 通过**（"1.2K"→1200、"3M"→3e6、""→null 等）。
+- 引用内容：全文提取（不再截断 160 字符），含引用作者与引用图片。
+- 图片 URL：保留原始查询参数（不再 strip `?` 后缀）。
+- 富媒体焦点帖（视频/GIF/投票/卡片）：**原生焦点格保持可见**，由右栏原生区域完整承载，面板显示说明条——左栏不再假装承接它拿不到的内容。实测视频帖（richNote 出现，原生格未隐藏）。
+- 互动镜像：面板操作条（回复/转推/点赞/收藏/复制链接）镜像原生状态（testid like/unlike 等翻转检测，likeActive=false 实测）并**委托给原生按钮**（isTrusted=false 的第 3 类自动化，任务书 8.3 口径）；本轮验证全程未执行任何写入，写入 NOT_TESTED。
+
+### P0-1 双栏 UI 与主题
+
+- 评审指出的参照容器错位已修：左栏 `52vw`，评论格 `margin-left:52vw; width:48vw`——同一参照系；阅读态隐藏 X 右侧推荐栏（`sidebarColumn` display:none）与左侧主导航。
+- 登录态实测：paneW **560px / vw 1077（=52.0%）**，cellW 517（≈48%+边框），railHidden=true，focalHidden=true，paneCount=1。截图 `evidence/r2-loggedin-layout.png`。
+- 主题：面板读取 X 当前主题计算色板（浅色实测 #ffffff 生效）；暗色路径同一代码，**未实测**（不改动用户账号主题设置），标 NOT_MEASURED。
+- React 重渲染抹掉焦点格标记的问题：路由轮询内 re-tag 自愈（T2 不一致现象已解释并修复）。
+- 同环境截图对照：`evidence/r2-loggedin-layout.png`（PoC，登录态）vs `evidence/r2-loggedin-original-peek.png`（原版，同会话同视口）vs `docs/peek-preview.png`（官方基线）。
+
+### 问题 A（能否保留不跳转的独立浮层）：**不能——体验不等价，实锤**
+
+- 证据：登录会话从时间线 SPA 进入详情后，**其他时间线帖子不在 DOM 中**（`otherTimelinePostStillInDom: false`）——X 原生导航是页面级替换，时间线被卸载，不是"背景保留 + 浮层覆盖"。
+- 对照：同一点击，原版 Peek 停留在 `/home`（浮层覆盖，`r2-loggedin-original-peek.png`）；R1 路线 URL 变为 `/status/...`。
+- 结论：R1 的"关闭返回"恢复是像素级的，但交互模型与原版"不跳走"不等价。按评审要求**明确判定不等价**，不降低验收标准。架构取舍移交用户（见 architecture-decision.md 修订版）。
+
+### P1 性能与接口调用对照（小样本原始数据；非 p95；同会话同视口）
+
+| 条件 | 点击→首段正文 | 点击→回复可读 | 窗口内 GraphQL 请求数 | 其中扩展自构造 | 关闭残留 |
+| --- | --- | --- | --- | --- | --- |
+| 原生 X 详情（SPA） | 856ms | 856ms | 12 | 0 | — |
+| 原版 Peek 0.8.10（CDP harness 注入） | 98ms（覆盖层+DOM 回退首显） | 覆盖层标记 98ms（回复经 GraphQL 后到） | 1 | **1**（READ_THREAD） | 无（Esc 后无覆盖层节点，停留 /home） |
+| PoC v2（隔离世界注入） | 390ms（面板） | 1835ms（原生评论格） | 12 | **0** | 无（面板移除，返回 /home） |
+
+- 说明：GraphQL 计数为窗口期内 `/i/api/graphql/` 请求总数（CDP Network 元数据，未存头/体）；PoC 条件的 12 个全部来自 X 自己的 SPA 详情加载，PoC 自身零内部请求。原版首显 98ms 依赖点击瞬间 DOM 快照回退，完整数据仍等 GraphQL。
+- 内存：条件间 heap 差值受执行顺序污染，不可归因，**NOT_MEASURED**（记录：native 125MB / peek 159MB / poc 173MB 原始值，仅小样本顺序执行快照）。
+- 各条件样本数 1（视口内样本池限制）；第三轮时间线抖动同首轮，如实记录。
+
+### P0-4 登录态 MV3 集成：仍为用户操作项（材料已备齐）
+
+- Chrome 155 已移除 `--load-extension`；ego-browser CDP `Extensions.loadUnpacked` 返回 Method not available（已留档尝试）。
+- 已产出 `exploration-poc/MV3-LOGIN-VERIFY.md`：用户在自有 Chrome **隔离 profile** 中自行登录并加载 PoC 的 10 项检查单（不迁移 Cookie、不触碰凭据、不装进日常配置）。未完成前，登录态 MV3 验证状态保持 **NOT_MEASURED**。
+
+__zcode_status=$?
+if [ "$__zcode_status" -eq 0 ]; then pwd -P > '/var/folders/9x/r55tny7s47b2wbnkfy0msfb80000gn/T/zcode-d00b5063-5a23-4b2b-84d2-bb9cf0051425-cwd'; fi
+exit "$__zcode_status"

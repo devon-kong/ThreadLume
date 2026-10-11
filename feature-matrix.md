@@ -84,3 +84,20 @@
 | 本地打包（Phosphor/hls.js/brand icon） | build-extension.mjs | hls.js 与 Phosphor 可按需缩减（原生播放器/原生图标） | SRC（构建脚本核验） |
 | 设置存储 chrome.storage.sync | popup.js/content.js | 保留（增强开关/翻译设置） | SRC |
 | MV3 内容脚本生命周期 | manifest document_idle | PoC 已验证 SPA 路由监听+挂载/拆除（pushState 包装+popstate） | MV3（挂载）+ BROWSER-RO（拆除等价；MV3 内 pushState 清理测试因未登录路由重定向不可判读，见报告 §6.1） |
+
+---
+
+## 第二轮修订（2026-10-12，P0 补证后）
+
+| 条目 | 首轮记录 | 第二轮修订 | 证据 |
+| --- | --- | --- | --- |
+| A.双栏比例 52:48 | 部分保留（纯 CSS 边界） | **vw 统一参照后成立**：paneW 560/1077（52.0%）、cellW 517（≈48%）、右栏推荐栏隐藏、焦点格隐藏 | BROWSER-RO（登录态隔离世界注入）+ 截图 r2-loggedin-layout.png |
+| A.主题 | 原生承载未实现 | 浅色跟随实测生效；**暗色 NOT_MEASURED**（不改用户账号主题） | BROWSER-RO（theme=#ffffff） |
+| A.Esc/关闭 | 等价保留（机制不同） | 语义修复：SPA 进入→back；直达/外部进入→仅拆除不导航（实测不跳出 X） | BROWSER-RO + MV3 |
+| A.入口点击 | 导航式（不等价风险） | **判定不等价（实锤）**：SPA 后其他时间线帖不在 DOM；原版停留 /home、R1 变 /status/ | BROWSER-RO（otherTimelinePostStillInDom=false）+ 截图对照 |
+| B.作者/时间/计数 | 等价保留 | 维持；计数 K/M 解析与「未知」展示修复并通过真实函数单测 9/9 | MV3 CDP 测试钩子 |
+| B.富媒体（视频/投票/卡片） | 原生承载 | 明确策略：焦点含富媒体时**原生格保持可见**，面板显示承载说明，不假装等价 | BROWSER-RO（视频帖 richNote 实测） |
+| C.评论 | 等价保留 | 维持（原生承载，分页/上下文不变） | BROWSER-RO |
+| E.互动 | NOT_TESTED | 补充实现：面板操作条镜像原生状态（like/unlike testid 翻转）并委托原生按钮（第 3 类自动化）；**写入仍 NOT_TESTED** | BROWSER-RO（likeActive=false 状态镜像实测） |
+| F.MV3 生命周期 | MV3（挂载）+ BROWSER-RO（拆除等价） | 路由机制重写（移除 history 包装）：popstate+Navigation API+500ms 有界轮询；六场景（SPA 进入/切换/back/forward/home 拆除/重复进入）全通过；双重注入幂等 | BROWSER-RO（登录态隔离世界，跨世界路由观测实证）+ MV3 |
+| F.登录态 MV3 | NOT_MEASURED | 维持 NOT_MEASURED；用户操作材料 `exploration-poc/MV3-LOGIN-VERIFY.md` 已备齐（Chrome 155 限制与 ego-browser 限制均已留档） | 留档尝试记录 |
