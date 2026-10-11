@@ -1,0 +1,55 @@
+/* Peek Native Carrier PoC — left reading pane + native replies column. */
+#peek-poc-pane {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 52%;
+  min-width: 480px;
+  z-index: 60;
+  overflow-y: auto;
+  background: #000;
+  color: #e7e9ea;
+  border-right: 1px solid #2f3336;
+  font: 15px/20px -apple-system, "Segoe UI", system-ui, sans-serif;
+  box-sizing: border-box;
+}
+#peek-poc-pane .peek-poc-bar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.92);
+  border-bottom: 1px solid #2f3336;
+  font-size: 13px;
+}
+#peek-poc-pane .peek-poc-close {
+  border: 0;
+  background: transparent;
+  color: #e7e9ea;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 9999px;
+}
+#peek-poc-pane .peek-poc-close:hover { background: #181818; }
+#peek-poc-pane .peek-poc-brand { font-weight: 700; }
+#peek-poc-pane .peek-poc-open { margin-left: auto; color: #1d9bf0; text-decoration: none; font-size: 13px; }
+#peek-poc-pane .peek-poc-body { padding: 16px 20px 32px; }
+#peek-poc-pane .peek-poc-author { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+#peek-poc-pane .peek-poc-author img { width: 40px; height: 40px; border-radius: 50%; }
+#peek-poc-pane .peek-poc-author span { color: #71767b; margin-left: 8px; font-size: 15px; }
+#peek-poc-pane .peek-poc-text { white-space: pre-wrap; margin-bottom: 12px; }
+#peek-poc-pane .peek-poc-photo { width: 100%; border-radius: 14px; margin: 6px 0; border: 1px solid #2f3336; }
+#peek-poc-pane .peek-poc-quote {
+  border: 1px solid #2f3336;
+  border-radius: 14px;
+  padding: 12px;
+  color: #71767b;
+  margin: 10px 0;
+  white-space: pre-wrap;
+}
+#peek-poc-pane .peek-poc-counts { color: #71767b; margin-top: 10px; }
+#peek-poc-pane .peek-poc-note { color: #71767b; margin-top: 14px; font-size: 12px; }

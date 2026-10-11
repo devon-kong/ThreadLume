@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peek</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="popup-card">
+      <header>
+        <img src="../icons/icon48.png" alt="">
+        <div><strong>Peek</strong><span>双栏阅读 X 帖子与评论</span></div>
+      </header>
+      <section class="settings-list">
+        <label class="toggle-row">
+          <div><strong>启用浮层</strong><span>点击帖子正文时打开</span></div>
+          <input id="enabled" type="checkbox" checked>
+          <span class="toggle" aria-hidden="true"></span>
+        </label>
+        <label class="toggle-row">
+          <div><strong>自动翻译外语帖子</strong><span>默认显示中文，可随时看原文</span></div>
+          <input id="auto-translate" type="checkbox" checked>
+          <span class="toggle" aria-hidden="true"></span>
+        </label>
+      </section>
+      <section class="privacy-note">
+        <span data-phosphor-icon="shield-check" aria-hidden="true"></span>
+        <p>帖子和译文只通过当前登录的 X 会话读取；不申请 Cookie 权限，也不发送到插件自己的服务器。</p>
+      </section>
+      <footer id="status">已开启</footer>
+    </main>
+    <script src="../vendor/phosphor/icons.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
