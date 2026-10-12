@@ -2,8 +2,9 @@
 // content script as an isolated-world auto-inject (same mechanism as round 2),
 // and expose helpers. The payload appended after this file may use:
 //   task, page, REG_POC()  (call once per invocation before goto/reload),
-//   NET_SNAPSHOT() — read-only performance-resource census of /i/api/ calls
-//   (URL + timing only; never headers, never bodies, no fetch wrapping).
+//   DETAIL_PROBE(statusId) — read-only main-world probe of the reading state.
+// Network request census lives in network-census.mjs (CDP Network events;
+// performance.getEntriesByType is unusable on X — X clears the buffer).
 import { readFile } from "node:fs/promises";
 
 const task = await taskSpace(14);
@@ -23,29 +24,6 @@ async function REG_POC() {
     runImmediately: true,
   });
   _registered = true;
-}
-
-// Read-only request census via the Performance API (no monkey-patching).
-async function NET_SNAPSHOT() {
-  const res = await page.cdp("Runtime.evaluate", {
-    expression: `(() => {
-      const out = [];
-      for (const e of performance.getEntriesByType("resource")) {
-        if (!e.name.includes("/i/api/")) continue;
-        const gql = e.name.match(/graphql\\/([a-zA-Z0-9]+)\\/([A-Za-z]+)/);
-        if (gql) out.push({ kind: "graphql", op: gql[2], t: Math.round(e.startTime) });
-        else {
-          const path = e.name.replace(/^https?:\\/\\/[^/]+/, "").split("?")[0];
-          out.push({ kind: "rest", op: path.length > 70 ? path.slice(0, 70) : path, t: Math.round(e.startTime) });
-        }
-      }
-      const byOp = {};
-      for (const x of out) byOp[x.kind + ":" + x.op] = (byOp[x.kind + ":" + x.op] || 0) + 1;
-      return { total: out.length, byOp, first: out[0] ? out[0].t : null, last: out.length ? out[out.length - 1].t : null };
-    })()`,
-    returnByValue: true,
-  });
-  return res.result.value;
 }
 
 // Probe a detail page's native DOM state in the main world (read-only).
