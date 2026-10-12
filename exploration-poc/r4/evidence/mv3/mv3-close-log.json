@@ -1,0 +1,71 @@
+[
+ {
+  "item": 6,
+  "step": "via-✕",
+  "opened": true,
+  "closed": true,
+  "preScroll": 0,
+  "postScroll": 249,
+  "path": "/gefei55",
+  "anchorKept": true
+ },
+ {
+  "item": 7,
+  "step": "via-✕",
+  "opened": true,
+  "closed": true,
+  "staysOnDetail": false,
+  "path": "/gefei55"
+ },
+ {
+  "item": 10,
+  "step": "via-✕",
+  "residue": {
+   "pane": false,
+   "htmlAttr": null,
+   "paneCount": 0
+  }
+ },
+ {
+  "item": 14,
+  "step": "via-✕",
+  "openedA": true,
+  "onB": "/China_bilibili/status/2109238249432469817",
+  "backOnA": "/XiaoJi0403/status/2109146979972403349",
+  "closedStaysOnA": false,
+  "neverLeftX": true
+ },
+ {
+  "item": 15,
+  "step": "via-✕",
+  "cycles": [
+   {
+    "cycle": 1,
+    "openMs": 57,
+    "opened": true,
+    "closed": true,
+    "pathAfter": "/gefei55"
+   },
+   {
+    "cycle": 2,
+    "openMs": 123,
+    "opened": true,
+    "closed": true,
+    "pathAfter": "/gefei55"
+   },
+   {
+    "cycle": 3,
+    "error": "cell not found"
+   },
+   {
+    "cycle": 4,
+    "error": "cell not found"
+   },
+   {
+    "cycle": 5,
+    "error": "cell not found"
+   }
+  ],
+  "allOk": false
+ }
+]
