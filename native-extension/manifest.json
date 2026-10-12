@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Peek Native (M1)",
+  "version": "0.9.0",
+  "description": "Peek 原生承载模式（M1 工程底座）：在 X 详情页左侧提供由 DOM 提取的阅读栏，评论与互动由 X 原生承载。零私有接口桥接、零构造请求、零代点击。",
+  "content_scripts": [
+    {
+      "matches": ["https://x.com/*", "https://twitter.com/*"],
+      "js": ["vendor/brand/icon.js", "content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
