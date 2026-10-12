@@ -628,6 +628,9 @@
     // G0-A: only follow the session history when the previous entry is known
     // to be a same-site X page; direct/external/refreshed entries are dismissed
     // in place instead of gambling on an unknown history target.
+    if (window.__PEEK_POC_TEST__) {
+      try { document.documentElement.setAttribute(`data-peek-close-decision`, JSON.stringify(safeBackTarget())); } catch { /* probe only */ }
+    }
     if (safeBackTarget().back) {
       history.back(); // previous entry is X's own view (list or previous post)
     } else {
@@ -637,12 +640,20 @@
 
   // Esc closes the reader like the ✕ button. Guarded: when the user is typing
   // in the native composer or any editable target, Esc belongs to X.
+  // CAPTURE phase: X's own global shortcut manager handles/stops Escape on the
+  // page — a bubble-phase listener never sees those events. Capture on window
+  // runs before page handlers can swallow the key.
   window.addEventListener("keydown", (event) => {
     if (event.key !== "Escape" || !document.getElementById(PANE_ID)) return;
     const t = event.target;
     if (t && (t.isContentEditable || t.closest?.('[data-testid^="tweetTextarea"], [contenteditable="true"]'))) return;
+    // we own this Escape: stop it so X's own shortcut manager cannot ALSO
+    // navigate back (a real extension's capture listener preempts page
+    // handlers — without this, one Esc would traverse two history entries)
+    event.preventDefault();
+    event.stopImmediatePropagation();
     closeReader();
-  });
+  }, true);
 
   // ---------- build / teardown ----------
 
