@@ -136,6 +136,26 @@ export function renderPane(data, { brandIconUrl, onAction, onClose, actionNote }
   return pane;
 }
 
+export function mountStyle() {
+  // Layout rules are injected here (not via the manifest CSS) because they are
+  // gated on the html attribute: the reader shifts X's own columns only while
+  // the enhancement is mounted, and teardown must fully restore the page.
+  if (document.getElementById(STYLE_ID)) return;
+  const style = document.createElement("style");
+  style.id = STYLE_ID;
+  style.textContent = `
+      /* one reference container: both panes use vw while reading.
+         The native focal cell stays visible: it renders as the first cell of
+         the right column with its full native action bar, media and composer. */
+      html[data-${NS}] [data-testid="sidebarColumn"] { display: none !important; }
+      html[data-${NS}] header[role="banner"]:not(#${PANE_ID} header) { display: none !important; }
+      html[data-${NS}] [data-testid="primaryColumn"] { width: 100vw !important; max-width: 100vw !important; }
+      html[data-${NS}] [data-testid="cellInnerDiv"] { margin-left: 52vw !important; width: 48vw !important; }
+    `;
+  document.head.appendChild(style);
+  document.documentElement.setAttribute(`data-${NS}`, "on");
+}
+
 export function removePaneAndStyle() {
   document.getElementById(PANE_ID)?.remove();
   document.getElementById(STYLE_ID)?.remove();
