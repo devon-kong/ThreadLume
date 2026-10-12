@@ -62,7 +62,7 @@ for (const sample of SAMPLES) {
     };
   }
   // verdicts per metric
-  for (const [metric, base, abs] of [["T1 原帖首显", "t1", 50], ["T2 评论首读", "t2", 100], ["T4 关闭到信息流", "t4", 80]]) {
+  for (const [label, metric, abs] of [["T1 原帖首显", "t1", 50], ["T2 评论首读", "t2", 100], ["T4 关闭到信息流", "t4", 80]]) {
     const o = table[sample].orig[metric].filter((x) => x != null);
     const r = table[sample].r1[metric].filter((x) => x != null);
     const om = median(o);

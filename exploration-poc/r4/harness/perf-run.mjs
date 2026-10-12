@@ -281,11 +281,10 @@ async function quietThenDrain(p) {
   await p.events(); // last drain regardless
 }
 
-async function findAndClickSample(p, cond, sample) {
-  // scroll the profile until the sample's timestamp link sits in the viewport,
-  // then trusted-click at its center. X virtualizes the timeline (cells are
-  // unmounted once far off-screen), so the scroll step must stay small enough
-  // to catch the link inside the mounted band.
+async function findSampleCell(p, cond, sample) {
+  // scroll the profile until the sample's timestamp link sits in the viewport.
+  // X virtualizes the timeline (cells are unmounted once far off-screen), so
+  // the scroll step must stay small enough to catch the link inside the band.
   for (let step = 0; step < FIND_MAX_STEPS; step++) {
     const tgt = await evalMain(p, `(() => {
       const id = ${JSON.stringify(sample.id)};
@@ -298,19 +297,27 @@ async function findAndClickSample(p, cond, sample) {
       }
       return null;
     })()`);
-    if (tgt.result.value) {
-      const { x, y } = tgt.result.value;
-      await p.cdp("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
-      await p.cdp("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });
-      await p.cdp("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", clickCount: 1 });
-      return true;
-    }
+    if (tgt.result.value) return tgt.result.value;
     await evalMain(p, `scrollBy(0, 400)`);
     await page_wait(p, 650);
   }
   const diag = await evalMain(p, `({ scrollY, cells: document.querySelectorAll('[data-testid="cellInnerDiv"]').length, path: location.pathname })()`);
   console.log(`find-diag ${cond}: ${JSON.stringify(diag.result.value)}`);
-  return false;
+  return null;
+}
+
+async function clickCoords(p, { x, y }) {
+  await p.cdp("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
+  await p.cdp("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });
+  await p.cdp("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", clickCount: 1 });
+}
+
+async function surfaceOpened(p, cond) {
+  const v = await evalMain(p, `({ overlay: Boolean(document.getElementById('tuzai-x-popover-root')), pane: Boolean(document.getElementById('peek-poc-pane')), path: location.pathname })()`);
+  const r = v.result.value;
+  if (cond === "orig") return r.overlay;
+  if (cond === "r1") return r.pane || r.path.includes("/status/");
+  return r.path.includes("/status/");
 }
 
 async function scriptedWheelScroll(p) {
@@ -410,7 +417,8 @@ async function runWindow(cond, sampleKey, round) {
   const clickAt = rec?.clicks?.[0]?.t ?? null;
   const escAt = rec?.escapes?.find((t) => clickAt !== null && t > clickAt) ?? null;
   const out = {
-    meta: { cond, sample: sampleKey, round, scenario: "spa", url: detailUrl.replace("https://x.com", "x.com"), viewport: VIEWPORT },
+    meta: { cond, sample: sampleKey, round, scenario: "spa", url: detailUrl.replace("https://x.com", "x.com"), viewport: VIEWPORT, clickRetried: retried },
+    clicks: rec?.clicks || [],
     clickAt, escAt,
     t1: rec?.t1 != null && clickAt != null ? Math.round(rec.t1 - clickAt) : null,
     paint: clickAt != null ? { overlayFirstAt: rec?.overlayFirstAt != null ? Math.round(rec.overlayFirstAt - clickAt) : null, paneFirstAt: rec?.paneFirstAt != null ? Math.round(rec.paneFirstAt - clickAt) : null, bodyFirstAt: rec?.bodyFirstAt != null ? Math.round(rec.bodyFirstAt - clickAt) : null, snapText: cond === 'orig' ? (rec?.overlayFirstText || null) : undefined } : null,
