@@ -137,9 +137,9 @@
   "paneStatusId": null,
   "paneTextHead": null,
   "overlayHead": "Peek|正在加载原帖||正在通过当前登录的 X 会话读取帖子数据||正在加载评论||正在通过当前登录的 X 会话读取帖",
-  "cellCount": 9,
-  "focalText": "为什么露丝现在被越来越多的人讨厌？\n\n​这件事放到现在就是：\n​订婚了、彩礼收了",
-  "scrollY": 6800
+  "cellCount": 10,
+  "focalText": "搞不懂现在的车为啥特别容易“崴脚”？\n过去都没见过这个名词。",
+  "scrollY": 7200
  },
  {
   "scenario": "E5",
@@ -150,33 +150,8 @@
  {
   "scenario": "E7",
   "cond": "orig",
-  "step": "deep-scrolled",
-  "path": "/XiaoJi0403",
-  "historyLen": 2,
-  "overlayOpen": true,
-  "paneOpen": false,
-  "paneStatusId": null,
-  "paneTextHead": null,
-  "overlayHead": "Peek|老季|✓|@XiaoJi0403|送外卖+会英语+能翻墙，会发生什么样的化学反应？|一外卖老哥在TikTok每",
-  "cellCount": 9,
-  "focalText": "为什么露丝现在被越来越多的人讨厌？\n\n​这件事放到现在就是：\n​订婚了、彩礼收了",
-  "scrollY": 7200,
-  "beforeCells": 10
- },
- {
-  "scenario": "E7",
-  "cond": "orig",
-  "step": "deep-close",
-  "path": "/XiaoJi0403",
-  "historyLen": 2,
-  "overlayOpen": false,
-  "paneOpen": false,
-  "paneStatusId": null,
-  "paneTextHead": null,
-  "overlayHead": null,
-  "cellCount": 9,
-  "focalText": "为什么露丝现在被越来越多的人讨厌？\n\n​这件事放到现在就是：\n​订婚了、彩礼收了",
-  "scrollY": 7200
+  "step": "skip",
+  "reason": "post did not open"
  },
  {
   "scenario": "E9",
@@ -269,35 +244,29 @@
   "scenario": "E3",
   "cond": "r1",
   "step": "back-from-B",
-  "path": "/gefei55/status/2109578739646644721",
+  "path": "/gefei55",
   "historyLen": 3,
   "overlayOpen": false,
-  "paneOpen": true,
-  "paneStatusId": "2109578739646644721",
-  "paneTextHead": "充分证明了，很多事情并不需要做好充足准备再上马，更建议是立即开始，边做边学边完善",
+  "paneOpen": false,
+  "paneStatusId": null,
+  "paneTextHead": null,
   "overlayHead": null,
-  "cellCount": 5,
-  "focalText": "充分证明了，很多事情并不需要做好充足准备再上马，更建议是立即开始，边做边学边完善",
-  "scrollY": 0
- },
- {
-  "scenario": "E3",
-  "cond": "r1",
-  "step": "back-from-B-anomaly",
-  "note": "pane persisted after Esc — previous history entry is a detail page (逐级后退 semantics, see report)"
+  "cellCount": 14,
+  "focalText": "哥飞公众号写了225篇教程了，其中220篇都是公开免费可看全文的。\n除了友情转载",
+  "scrollY": 896
  },
  {
   "scenario": "E3",
   "cond": "r1",
   "step": "open-C",
   "path": "/gefei55/status/2109553678143389747",
-  "historyLen": 4,
+  "historyLen": 3,
   "overlayOpen": false,
   "paneOpen": true,
   "paneStatusId": "2109553678143389747",
   "paneTextHead": "某热点关键词，谷歌美国搜索第一页 10 个结果里，我的2个网站占了其中3个结果，",
   "overlayHead": null,
-  "cellCount": 1,
+  "cellCount": 2,
   "focalText": "某热点关键词，谷歌美国搜索第一页 10 个结果里，我的2个网站占了其中3个结果，",
   "scrollY": 0
  },
@@ -305,22 +274,16 @@
   "scenario": "E3",
   "cond": "r1",
   "step": "back-from-C",
-  "path": "/gefei55/status/2109553678143389747",
-  "historyLen": 4,
+  "path": "/gefei55",
+  "historyLen": 3,
   "overlayOpen": false,
-  "paneOpen": true,
-  "paneStatusId": "2109553678143389747",
-  "paneTextHead": "某热点关键词，谷歌美国搜索第一页 10 个结果里，我的2个网站占了其中3个结果，",
+  "paneOpen": false,
+  "paneStatusId": null,
+  "paneTextHead": null,
   "overlayHead": null,
-  "cellCount": 21,
-  "focalText": "某热点关键词，谷歌美国搜索第一页 10 个结果里，我的2个网站占了其中3个结果，",
-  "scrollY": 0
- },
- {
-  "scenario": "E3",
-  "cond": "r1",
-  "step": "back-from-C-anomaly",
-  "note": "pane persisted after Esc — previous history entry is a detail page (逐级后退 semantics, see report)"
+  "cellCount": 14,
+  "focalText": "哥飞公众号写了225篇教程了，其中220篇都是公开免费可看全文的。\n除了友情转载",
+  "scrollY": 1144
  },
  {
   "scenario": "E4",
@@ -352,14 +315,78 @@
  {
   "scenario": "E5",
   "cond": "r1",
-  "step": "skip",
-  "reason": "post did not open"
+  "step": "open-highreply",
+  "path": "/XiaoJi0403/status/2109146979972403349",
+  "historyLen": 3,
+  "overlayOpen": false,
+  "paneOpen": true,
+  "paneStatusId": "2109146979972403349",
+  "paneTextHead": "送外卖+会英语+能翻墙，会发生什么样的化学反应？\n一外卖老哥在TikTok每天介",
+  "overlayHead": null,
+  "cellCount": 0,
+  "focalText": "",
+  "scrollY": 0
+ },
+ {
+  "scenario": "E5",
+  "cond": "r1",
+  "step": "reply-opened",
+  "path": "/China_bilibili/status/2109238249432469817",
+  "historyLen": 4,
+  "overlayOpen": false,
+  "paneOpen": true,
+  "paneStatusId": "2109238249432469817",
+  "paneTextHead": "后面有团队运作的，哪有那么简单",
+  "overlayHead": null,
+  "cellCount": 15,
+  "focalText": "送外卖+会英语+能翻墙，会发生什么样的化学反应？\n一外卖老哥在TikTok每天介",
+  "scrollY": 657
+ },
+ {
+  "scenario": "E5",
+  "cond": "r1",
+  "step": "reply-back",
+  "path": "/XiaoJi0403/status/2109146979972403349",
+  "historyLen": 4,
+  "overlayOpen": false,
+  "paneOpen": true,
+  "paneStatusId": "2109146979972403349",
+  "paneTextHead": "送外卖+会英语+能翻墙，会发生什么样的化学反应？\n一外卖老哥在TikTok每天介",
+  "overlayHead": null,
+  "cellCount": 31,
+  "focalText": "送外卖+会英语+能翻墙，会发生什么样的化学反应？\n一外卖老哥在TikTok每天介",
+  "scrollY": 227
  },
  {
   "scenario": "E7",
   "cond": "r1",
-  "step": "skip",
-  "reason": "post did not open"
+  "step": "deep-scrolled",
+  "path": "/XiaoJi0403/status/2109146979972403349",
+  "historyLen": 3,
+  "overlayOpen": false,
+  "paneOpen": true,
+  "paneStatusId": "2109146979972403349",
+  "paneTextHead": "送外卖+会英语+能翻墙，会发生什么样的化学反应？\n一外卖老哥在TikTok每天介",
+  "overlayHead": null,
+  "cellCount": 65,
+  "focalText": "Starlink offers fast, reliable internet ",
+  "scrollY": 3827,
+  "beforeCells": 0
+ },
+ {
+  "scenario": "E7",
+  "cond": "r1",
+  "step": "deep-close",
+  "path": "/XiaoJi0403",
+  "historyLen": 3,
+  "overlayOpen": false,
+  "paneOpen": false,
+  "paneStatusId": null,
+  "paneTextHead": null,
+  "overlayHead": null,
+  "cellCount": 10,
+  "focalText": "中国社保的七大罪：\n\n1.  饕餮之罪：高缴存吞噬\n单位+个人养老保险就吃掉工资",
+  "scrollY": 7048
  },
  {
   "scenario": "E9",
@@ -374,25 +401,31 @@
   "cond": "r1",
   "step": "cycle2",
   "openSurface": true,
-  "closedSurface": true,
-  "pathAfter": "/gefei55/status/1760839985715204230"
+  "closedSurface": false,
+  "pathAfter": "/gefei55"
  },
  {
   "scenario": "E9",
   "cond": "r1",
   "step": "cycle3",
-  "error": "cell not found"
+  "openSurface": true,
+  "closedSurface": false,
+  "pathAfter": "/gefei55"
  },
  {
   "scenario": "E9",
   "cond": "r1",
   "step": "cycle4",
-  "error": "cell not found"
+  "openSurface": true,
+  "closedSurface": false,
+  "pathAfter": "/gefei55"
  },
  {
   "scenario": "E9",
   "cond": "r1",
   "step": "cycle5",
-  "error": "cell not found"
+  "openSurface": true,
+  "closedSurface": false,
+  "pathAfter": "/gefei55"
  }
 ]

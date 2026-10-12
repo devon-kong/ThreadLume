@@ -552,7 +552,7 @@
     pane.innerHTML = `
       <header class="${NS}-bar">
         <button class="${NS}-close" title="关闭">✕</button>
-        <span class="${NS}-brand">Peek PoC · 原生承载 v4</span>
+        <span class="${NS}-brand">Peek PoC · 原生承载 v5</span>
         <a class="${NS}-open" target="_blank" rel="noopener" href="https://x.com${ESCAPED(location.pathname)}">在 X 打开</a>
       </header>
       <div class="${NS}-body">
