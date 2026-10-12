@@ -13,21 +13,21 @@
  },
  "clicks": [
   {
-   "t": 16694.600000023842,
+   "t": 16693.899999976158,
    "x": 578,
    "y": 752
   }
  ],
- "clickAt": 16694.600000023842,
- "escAt": 34116.39999997616,
- "t1": 885,
+ "clickAt": 16693.899999976158,
+ "escAt": 34118.799999952316,
+ "t1": 914,
  "paint": {
-  "overlayFirstAt": 80,
+  "overlayFirstAt": 79,
   "paneFirstAt": null,
-  "bodyFirstAt": 80,
+  "bodyFirstAt": 79,
   "snapText": "Peek\n正在加载原帖\n\n正在通过当前登录的 X 会话读取帖子数据\n\n正在加载评论\n\n正在通过当前登录的 X 会话读取帖子数据"
  },
- "t2": 885,
+ "t2": 914,
  "t3": {
   "origTools": true,
   "origComposer": false,
@@ -37,18 +37,16 @@
   "paneOpen": false
  },
  "t4": {
-  "closedAt": 62,
-  "feedAt": 130,
+  "closedAt": 60,
+  "feedAt": 129,
   "preScrollY": 2800,
   "restoredScrollY": 2800,
   "anchorDelta": 0,
   "restored": true
  },
  "t5": {
-  "longtasks": [
-   65
-  ],
-  "longtaskTotal": 65,
+  "longtasks": [],
+  "longtaskTotal": 0,
   "videoPlayingAt": null
  },
  "routeDetect": null,
@@ -65,55 +63,55 @@
     "cat": "graphql",
     "op": "TweetDetail",
     "method": "GET",
-    "rel": 79
+    "rel": 78
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 875
+    "rel": 906
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 876
+    "rel": 906
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 876
+    "rel": 906
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 876
+    "rel": 906
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 876
+    "rel": 906
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 876
+    "rel": 906
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 876
+    "rel": 906
    },
    {
     "cat": "graphql",
     "op": "ViewerBadgeCounts",
     "method": "GET",
-    "rel": 13458
+    "rel": 13481
    }
   ]
  }

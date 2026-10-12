@@ -221,13 +221,14 @@ async function e4(p, rec) {
   await waitFor(readyWithContent(cond === "orig" ? "orig" : "r1"), p);
   rec("open-quote-source", await probe(p));
   // click the quote card (capture-phase: orig intercepts, r1 lets X navigate)
+  const scopeSel = cond === "orig" ? "'#tuzai-x-popover-root'" : "'[data-testid=\"primaryColumn\"]'";
   const q = await evalMain(p, `(() => {
-    const art = document.querySelector(cond === 'orig' ? '#tuzai-x-popover-root' : '[data-testid="primaryColumn"]');
+    const art = document.querySelector(${scopeSel});
     const card = [...(art || document).querySelectorAll('div[role="link"]')].find(n => n.querySelector('[data-testid="tweetText"]'));
     if (!card) return null;
     const r = card.getBoundingClientRect();
     return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + Math.min(r.height, 300) / 2) };
-  })()`.replace("cond === 'orig' ? '#tuzai-x-popover-root' : '[data-testid=\"primaryColumn\"]'", cond === "orig" ? "'#tuzai-x-popover-root'" : "'[data-testid=\"primaryColumn\"]'"));
+  })()`);
   if (!q.result.value) { rec("skip", { reason: "no quote card in surface" }); return; }
   await trustClick(p, q.result.value);
   await p.waitForTimeout(3500);

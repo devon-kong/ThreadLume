@@ -13,21 +13,21 @@
  },
  "clicks": [
   {
-   "t": 20423.199999928474,
+   "t": 19169.5,
    "x": 615,
-   "y": 687
+   "y": 667
   }
  ],
- "clickAt": 20423.199999928474,
- "escAt": 36641.799999952316,
- "t1": 1026,
+ "clickAt": 19169.5,
+ "escAt": 36233.90000009537,
+ "t1": 1178,
  "paint": {
-  "overlayFirstAt": 82,
+  "overlayFirstAt": 34,
   "paneFirstAt": null,
-  "bodyFirstAt": 82,
+  "bodyFirstAt": 34,
   "snapText": "Peek\n正在加载原帖\n\n正在通过当前登录的 X 会话读取帖子数据\n\n正在加载评论\n\n正在通过当前登录的 X 会话读取帖子数据"
  },
- "t2": 1026,
+ "t2": 1178,
  "t3": {
   "origTools": true,
   "origComposer": false,
@@ -37,8 +37,8 @@
   "paneOpen": false
  },
  "t4": {
-  "closedAt": 66,
-  "feedAt": 133,
+  "closedAt": 64,
+  "feedAt": 139,
   "preScrollY": 6400,
   "restoredScrollY": 6400,
   "anchorDelta": 0,
@@ -51,53 +51,269 @@
  },
  "routeDetect": null,
  "network": {
-  "requestCount": 106,
+  "requestCount": 105,
   "requests": [
-   {
-    "cat": "rest",
-    "op": "/i/api/1.1/flow/timeline.json",
-    "method": "POST",
-    "rel": 0
-   },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 155
+    "rel": 0
    },
    {
     "cat": "graphql",
     "op": "TweetDetail",
     "method": "GET",
-    "rel": 236
+    "rel": 32
    },
    {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 407
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 407
+    "cat": "x-page",
+    "op": "/1.1/live_pipeline/update_subscriptions",
+    "method": "POST",
+    "rel": 33
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 763
+    "rel": 887
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1155
+    "rel": 1145
    },
    {
     "cat": "other",
     "op": "data",
+    "method": "GET",
+    "rel": 1148
+   },
+   {
+    "cat": "other",
+    "op": "data",
+    "method": "GET",
+    "rel": 1148
+   },
+   {
+    "cat": "other",
+    "op": "data",
+    "method": "GET",
+    "rel": 1148
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1156
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1156
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1156
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1156
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1156
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1156
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1156
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1156
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1156
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1156
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1156
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1156
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1156
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1156
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1156
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1156
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1156
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1156
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1157
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1157
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1157
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1157
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1157
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1157
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1157
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1157
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1157
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1157
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1157
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1157
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1157
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1157
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1157
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1157
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1157
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
     "method": "GET",
     "rel": 1157
    },
@@ -105,589 +321,367 @@
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 1157
+    "rel": 1174
    },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 1157
+    "rel": 1174
    },
    {
     "cat": "media",
-    "op": "profile_images",
+    "op": "amplify_video",
     "method": "GET",
-    "rel": 1163
+    "rel": 1176
    },
    {
     "cat": "media",
-    "op": "profile_images",
+    "op": "amplify_video",
     "method": "GET",
-    "rel": 1163
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1163
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1163
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1163
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1163
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1163
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1163
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1163
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1163
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "sticky",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1164
+    "rel": 1176
    },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 1178
-   },
-   {
-    "cat": "other",
-    "op": "data",
-    "method": "GET",
-    "rel": 1178
+    "rel": 1196
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1180
+    "rel": 1277
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1180
+    "rel": 1277
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1182
+    "rel": 1277
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1182
+    "rel": 1277
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1183
+    "rel": 1379
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1183
+    "rel": 1380
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1284
+    "rel": 1384
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1284
+    "rel": 1384
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1287
+    "rel": 1391
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1287
+    "rel": 1391
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1291
+    "rel": 1395
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1293
+    "rel": 1395
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1298
+    "rel": 1404
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1298
+    "rel": 1404
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1303
+    "rel": 1406
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1303
+    "rel": 1407
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1311
+    "rel": 1408
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1311
+    "rel": 1408
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1315
+    "rel": 1411
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1315
+    "rel": 1411
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1323
+    "rel": 1414
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1324
+    "rel": 1414
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1327
+    "rel": 1418
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1327
+    "rel": 1418
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1331
+    "rel": 1421
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1331
+    "rel": 1421
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1336
+    "rel": 1424
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1337
+    "rel": 1424
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1341
+    "rel": 1428
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1341
+    "rel": 1428
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1347
+    "rel": 1429
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1347
+    "rel": 1430
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1352
+    "rel": 1431
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1352
+    "rel": 1611
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1356
+    "rel": 1612
    },
    {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1356
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1359
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 3482
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/graphql/viewer_context.json",
     "method": "POST",
-    "rel": 1406
-   },
-   {
-    "cat": "other",
-    "op": "data",
-    "method": "GET",
-    "rel": 2163
+    "rel": 4093
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 3406
+    "rel": 4512
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 3406
+    "rel": 4611
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 7611
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 7612
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 3766
-   },
-   {
-    "cat": "rest",
-    "op": "/i/api/1.1/flow/timeline.json",
-    "method": "POST",
-    "rel": 6297
+    "rel": 8482
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 6408
+    "rel": 10612
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 6408
-   },
-   {
-    "cat": "rest",
-    "op": "/i/api/1.1/flow/timeline.json",
-    "method": "POST",
-    "rel": 9300
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 9406
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 9406
+    "rel": 10612
    },
    {
     "cat": "graphql",
     "op": "ViewerBadgeCounts",
     "method": "GET",
-    "rel": 9899
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 12406
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 12406
+    "rel": 11009
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 12460
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 15406
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 15406
+    "rel": 11483
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 16296
+    "rel": 13481
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 18407
+    "rel": 13610
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 18408
+    "rel": 13611
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 19299
+    "rel": 16483
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 16612
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 16613
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 18392
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 19512
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 19612
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 21395
    }
   ]
  }

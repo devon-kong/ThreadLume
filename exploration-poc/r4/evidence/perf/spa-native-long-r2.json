@@ -13,20 +13,20 @@
  },
  "clicks": [
   {
-   "t": 20858.600000023842,
+   "t": 20964.100000023842,
    "x": 665,
-   "y": 797
+   "y": 375
   }
  ],
- "clickAt": 20858.600000023842,
- "escAt": 32484.899999976158,
- "t1": 382,
+ "clickAt": 20964.100000023842,
+ "escAt": 32089.5,
+ "t1": 376,
  "paint": {
   "overlayFirstAt": null,
   "paneFirstAt": null,
-  "bodyFirstAt": 382
+  "bodyFirstAt": 376
  },
- "t2": 1554,
+ "t2": 1046,
  "t3": {
   "origTools": false,
   "origComposer": false,
@@ -36,24 +36,24 @@
   "paneOpen": false
  },
  "t4": {
-  "closedAt": 64,
-  "feedAt": 477,
-  "preScrollY": 5600,
+  "closedAt": 56,
+  "feedAt": 452,
+  "preScrollY": 6000,
   "restoredScrollY": 663.5,
   "anchorDelta": 153,
   "restored": false
  },
  "t5": {
   "longtasks": [
-   75,
+   80,
    57
   ],
-  "longtaskTotal": 132,
+  "longtaskTotal": 137,
   "videoPlayingAt": null
  },
  "routeDetect": null,
  "network": {
-  "requestCount": 25,
+  "requestCount": 23,
   "requests": [
    {
     "cat": "rest",
@@ -65,145 +65,133 @@
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 397
+    "rel": 51
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 746
+    "rel": 388
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 746
+    "rel": 388
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 746
+    "rel": 389
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 746
+    "rel": 389
    },
    {
     "cat": "graphql",
     "op": "TweetDetail",
     "method": "GET",
-    "rel": 749
+    "rel": 395
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/fleetline",
     "method": "GET",
-    "rel": 749
+    "rel": 395
    },
    {
     "cat": "graphql",
     "op": "getAltTextPromptPreference",
     "method": "GET",
-    "rel": 773
+    "rel": 419
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/graphql/viewer_context.json",
     "method": "POST",
-    "rel": 1083
+    "rel": 1013
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 1409
-   },
-   {
-    "cat": "x-page",
-    "op": "/1.1/live_pipeline/update_subscriptions",
-    "method": "POST",
-    "rel": 2938
+    "rel": 1089
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 3396
+    "rel": 3056
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 6464
+    "rel": 6121
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 9470
-   },
-   {
-    "cat": "rest",
-    "op": "/i/api/1.1/graphql/viewer_context.json",
-    "method": "POST",
-    "rel": 9670
+    "rel": 9122
    },
    {
     "cat": "graphql",
     "op": "ViewerBadgeCounts",
     "method": "GET",
-    "rel": 9699
+    "rel": 9268
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/avatar_content",
     "method": "GET",
-    "rel": 12415
+    "rel": 11561
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/fleetline",
     "method": "GET",
-    "rel": 12416
+    "rel": 11561
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 12416
+    "rel": 11561
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 13396
+    "rel": 12533
    },
    {
     "cat": "graphql",
     "op": "UserOriginalsTimeline",
     "method": "GET",
-    "rel": 13723
+    "rel": 12899
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 14797
+    "rel": 13899
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 15388
+    "rel": 14527
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 15821
+    "rel": 14997
    }
   ]
  }

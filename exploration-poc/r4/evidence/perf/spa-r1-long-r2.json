@@ -13,25 +13,20 @@
  },
  "clicks": [
   {
-   "t": 20033.100000023842,
+   "t": 21649.300000071526,
    "x": 665,
    "y": 755
-  },
-  {
-   "t": 20034.300000071526,
-   "x": 0,
-   "y": 0
   }
  ],
- "clickAt": 20033.100000023842,
- "escAt": 31675.600000023842,
- "t1": 1232,
+ "clickAt": 21649.300000071526,
+ "escAt": 33268.800000071526,
+ "t1": 78,
  "paint": {
   "overlayFirstAt": null,
-  "paneFirstAt": 1232,
-  "bodyFirstAt": 382
+  "paneFirstAt": 78,
+  "bodyFirstAt": 78
  },
- "t2": 1232,
+ "t2": 1327,
  "t3": {
   "origTools": false,
   "origComposer": false,
@@ -41,8 +36,8 @@
   "paneOpen": true
  },
  "t4": {
-  "closedAt": 143,
-  "feedAt": 210,
+  "closedAt": 145,
+  "feedAt": 208,
   "preScrollY": 5600,
   "restoredScrollY": 663.5,
   "anchorDelta": 153,
@@ -51,9 +46,9 @@
  "t5": {
   "longtasks": [
    84,
-   59
+   56
   ],
-  "longtaskTotal": 143,
+  "longtaskTotal": 140,
   "videoPlayingAt": null
  },
  "routeDetect": {
@@ -61,7 +56,7 @@
   "detectMs": 1
  },
  "network": {
-  "requestCount": 24,
+  "requestCount": 26,
   "requests": [
    {
     "cat": "media",
@@ -73,139 +68,151 @@
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 15
+    "rel": 95
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 346
+    "rel": 336
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 346
+    "rel": 336
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 346
+    "rel": 336
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 346
+    "rel": 336
    },
    {
     "cat": "graphql",
     "op": "TweetDetail",
     "method": "GET",
-    "rel": 348
+    "rel": 338
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/fleetline",
     "method": "GET",
-    "rel": 348
+    "rel": 338
    },
    {
     "cat": "graphql",
     "op": "getAltTextPromptPreference",
     "method": "GET",
-    "rel": 371
-   },
-   {
-    "cat": "x-page",
-    "op": "/1.1/live_pipeline/update_subscriptions",
-    "method": "POST",
-    "rel": 1017
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1993
+    "rel": 359
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/graphql/viewer_context.json",
     "method": "POST",
-    "rel": 2156
+    "rel": 959
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 997
+   },
+   {
+    "cat": "x-page",
+    "op": "/1.1/live_pipeline/update_subscriptions",
+    "method": "POST",
+    "rel": 1012
+   },
+   {
+    "cat": "x-page",
+    "op": "/1.1/live_pipeline/update_subscriptions",
+    "method": "POST",
+    "rel": 2323
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 2995
+    "rel": 3324
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 6073
+    "rel": 6057
    },
    {
     "cat": "rest",
-    "op": "/i/api/1.1/flow/timeline.json",
+    "op": "/i/api/1.1/graphql/viewer_context.json",
     "method": "POST",
-    "rel": 9075
+    "rel": 8485
    },
    {
     "cat": "graphql",
     "op": "ViewerBadgeCounts",
     "method": "GET",
-    "rel": 10136
+    "rel": 8509
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 9060
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/avatar_content",
     "method": "GET",
-    "rel": 11722
+    "rel": 11704
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/fleetline",
     "method": "GET",
-    "rel": 11722
+    "rel": 11704
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 11722
+    "rel": 11704
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 12696
+    "rel": 12675
    },
    {
     "cat": "graphql",
     "op": "UserOriginalsTimeline",
     "method": "GET",
-    "rel": 13341
+    "rel": 13299
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 14412
+    "rel": 14354
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 14685
+    "rel": 14674
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 15440
+    "rel": 15398
    }
   ]
  }

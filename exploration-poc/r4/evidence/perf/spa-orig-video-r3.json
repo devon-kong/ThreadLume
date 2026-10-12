@@ -13,21 +13,21 @@
  },
  "clicks": [
   {
-   "t": 14153,
+   "t": 14668.299999952316,
    "x": 666,
    "y": 792
   }
  ],
- "clickAt": 14153,
- "escAt": 32104.100000023842,
- "t1": 1023,
+ "clickAt": 14668.299999952316,
+ "escAt": 32592.100000023842,
+ "t1": 1484,
  "paint": {
-  "overlayFirstAt": 79,
+  "overlayFirstAt": 82,
   "paneFirstAt": null,
-  "bodyFirstAt": 79,
+  "bodyFirstAt": 82,
   "snapText": "Peek\n正在加载原帖\n\n正在通过当前登录的 X 会话读取帖子数据\n\n正在加载评论\n\n正在通过当前登录的 X 会话读取帖子数据"
  },
- "t2": 1023,
+ "t2": 1484,
  "t3": {
   "origTools": true,
   "origComposer": false,
@@ -38,7 +38,7 @@
  },
  "t4": {
   "closedAt": 65,
-  "feedAt": 126,
+  "feedAt": 129,
   "preScrollY": 1600,
   "restoredScrollY": 1600,
   "anchorDelta": 0,
@@ -51,7 +51,7 @@
  },
  "routeDetect": null,
  "network": {
-  "requestCount": 54,
+  "requestCount": 56,
   "requests": [
    {
     "cat": "other",
@@ -63,319 +63,331 @@
     "cat": "graphql",
     "op": "TweetDetail",
     "method": "GET",
-    "rel": 78
+    "rel": 81
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1005
+    "rel": 1455
    },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 1006
+    "rel": 1457
    },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 1006
+    "rel": 1457
    },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 1006
+    "rel": 1457
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1010
+    "rel": 1465
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1010
+    "rel": 1465
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1010
+    "rel": 1465
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1010
+    "rel": 1465
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1010
+    "rel": 1466
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1010
+    "rel": 1466
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1010
+    "rel": 1466
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1010
+    "rel": 1466
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1010
+    "rel": 1466
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1010
+    "rel": 1466
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1011
+    "rel": 1466
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1011
+    "rel": 1466
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1011
+    "rel": 1466
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1011
+    "rel": 1466
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1011
+    "rel": 1466
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1481
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1481
    },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 1020
+    "rel": 1483
    },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 1020
+    "rel": 1483
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1021
+    "rel": 1583
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1021
+    "rel": 1583
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1024
+    "rel": 1584
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1024
+    "rel": 1584
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1024
+    "rel": 1592
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1024
+    "rel": 1592
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1029
+    "rel": 1595
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1029
+    "rel": 1595
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1030
+    "rel": 1595
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1030
+    "rel": 1595
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1032
+    "rel": 1599
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1033
+    "rel": 1600
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1036
+    "rel": 1603
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1036
+    "rel": 1603
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1039
+    "rel": 1606
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1039
+    "rel": 1606
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1041
+    "rel": 1609
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1041
+    "rel": 1609
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1043
+    "rel": 1611
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1043
+    "rel": 1611
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1045
+    "rel": 1613
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1045
+    "rel": 1613
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1046
+    "rel": 1615
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1047
+    "rel": 1615
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1048
+    "rel": 1617
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1048
+    "rel": 1617
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1050
+    "rel": 1619
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 1050
+    "rel": 1619
    },
    {
     "cat": "media",
     "op": "media-img",
     "method": "GET",
-    "rel": 1992
+    "rel": 1987
    },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 1993
+    "rel": 1989
    },
    {
     "cat": "graphql",
     "op": "ViewerBadgeCounts",
     "method": "GET",
-    "rel": 16039
+    "rel": 15627
    }
   ]
  }

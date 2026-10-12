@@ -13,20 +13,20 @@
  },
  "clicks": [
   {
-   "t": 16697.299999952316,
+   "t": 13439.799999952316,
    "x": 578,
    "y": 752
   }
  ],
- "clickAt": 16697.299999952316,
- "escAt": 32986.199999928474,
- "t1": 556,
+ "clickAt": 13439.799999952316,
+ "escAt": 30409.600000023842,
+ "t1": 76,
  "paint": {
   "overlayFirstAt": null,
-  "paneFirstAt": 556,
-  "bodyFirstAt": 382
+  "paneFirstAt": 76,
+  "bodyFirstAt": 76
  },
- "t2": 2044,
+ "t2": 1306,
  "t3": {
   "origTools": false,
   "origComposer": false,
@@ -36,8 +36,8 @@
   "paneOpen": true
  },
  "t4": {
-  "closedAt": 135,
-  "feedAt": 212,
+  "closedAt": 146,
+  "feedAt": 208,
   "preScrollY": 2800,
   "restoredScrollY": 647.5,
   "anchorDelta": 151,
@@ -45,9 +45,10 @@
  },
  "t5": {
   "longtasks": [
-   77
+   51,
+   82
   ],
-  "longtaskTotal": 77,
+  "longtaskTotal": 133,
   "videoPlayingAt": null
  },
  "routeDetect": {
@@ -55,577 +56,319 @@
   "detectMs": 1
  },
  "network": {
-  "requestCount": 95,
+  "requestCount": 52,
   "requests": [
+   {
+    "cat": "x-page",
+    "op": "/1.1/live_pipeline/update_subscriptions",
+    "method": "POST",
+    "rel": 0
+   },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 0
+    "rel": 31
    },
    {
-    "cat": "rest",
-    "op": "/i/api/1.1/flow/timeline.json",
-    "method": "POST",
-    "rel": 14
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
+    "rel": 378
+   },
+   {
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
+    "rel": 378
+   },
+   {
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
+    "rel": 378
+   },
+   {
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
+    "rel": 378
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 333
-   },
-   {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 346
-   },
-   {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 346
-   },
-   {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 346
-   },
-   {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 346
+    "rel": 380
    },
    {
     "cat": "graphql",
     "op": "TweetDetail",
     "method": "GET",
-    "rel": 349
+    "rel": 381
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/fleetline",
     "method": "GET",
-    "rel": 349
+    "rel": 381
    },
    {
     "cat": "graphql",
     "op": "getAltTextPromptPreference",
     "method": "GET",
-    "rel": 374
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1004
-   },
-   {
-    "cat": "x-page",
-    "op": "/1.1/live_pipeline/update_subscriptions",
-    "method": "POST",
-    "rel": 1010
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2035
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2036
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2036
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2036
-   },
-   {
-    "cat": "rest",
-    "op": "/i/api/fleets/v1/avatar_content",
-    "method": "GET",
-    "rel": 2036
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2047
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2048
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2062
-   },
-   {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 2351
-   },
-   {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 2351
-   },
-   {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 2351
-   },
-   {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 2351
-   },
-   {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 2351
-   },
-   {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 2352
-   },
-   {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 2352
-   },
-   {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 2352
-   },
-   {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 2377
-   },
-   {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 2377
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2379
-   },
-   {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 2379
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2380
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2380
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2380
-   },
-   {
-    "cat": "media",
-    "op": "video-thumb",
-    "method": "GET",
-    "rel": 2674
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2676
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2679
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2679
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2682
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2682
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2683
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2782
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2782
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2785
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2786
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2787
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2787
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2883
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2888
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2888
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2923
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2968
+    "rel": 406
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 3004
+    "rel": 977
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1042
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 3026
+    "rel": 1049
    },
    {
     "cat": "media",
-    "op": "media-img",
+    "op": "profile_images",
     "method": "GET",
-    "rel": 3210
+    "rel": 1332
    },
    {
     "cat": "media",
-    "op": "media-img",
+    "op": "profile_images",
     "method": "GET",
-    "rel": 3210
+    "rel": 1333
    },
    {
     "cat": "media",
-    "op": "media-img",
+    "op": "profile_images",
     "method": "GET",
-    "rel": 3210
+    "rel": 1333
    },
    {
     "cat": "media",
-    "op": "media-img",
+    "op": "profile_images",
     "method": "GET",
-    "rel": 3210
+    "rel": 1333
    },
    {
     "cat": "media",
-    "op": "media-img",
+    "op": "profile_images",
     "method": "GET",
-    "rel": 3210
+    "rel": 1333
    },
    {
     "cat": "media",
-    "op": "media-img",
+    "op": "profile_images",
     "method": "GET",
-    "rel": 3210
+    "rel": 1333
    },
    {
     "cat": "media",
-    "op": "media-img",
+    "op": "profile_images",
     "method": "GET",
-    "rel": 3210
+    "rel": 1333
    },
    {
     "cat": "media",
-    "op": "media-img",
+    "op": "profile_images",
     "method": "GET",
-    "rel": 3210
+    "rel": 1333
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1333
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1333
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1333
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1333
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1333
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/avatar_content",
     "method": "GET",
-    "rel": 3531
+    "rel": 1333
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 1362
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 1362
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 4208
+    "rel": 2335
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/fleets/v1/avatar_content",
+    "method": "GET",
+    "rel": 2837
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 4053
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 6218
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 6389
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 6389
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/fleets/v1/avatar_content",
+    "method": "GET",
+    "rel": 6389
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 7210
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 7210
+   },
+   {
+    "cat": "x-page",
+    "op": "/1.1/live_pipeline/update_subscriptions",
+    "method": "POST",
+    "rel": 7392
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/graphql/viewer_context.json",
     "method": "POST",
-    "rel": 5373
+    "rel": 9181
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 6399
+    "rel": 9230
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 8409
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 8814
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 8880
-   },
-   {
-    "cat": "rest",
-    "op": "/i/api/fleets/v1/avatar_content",
-    "method": "GET",
-    "rel": 9357
+    "rel": 12565
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 10354
+    "rel": 13728
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 11409
+    "rel": 15567
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 13073
+    "rel": 15833
    },
    {
     "cat": "graphql",
     "op": "ViewerBadgeCounts",
     "method": "GET",
-    "rel": 13447
-   },
-   {
-    "cat": "rest",
-    "op": "/i/api/1.1/flow/timeline.json",
-    "method": "POST",
-    "rel": 14812
-   },
-   {
-    "cat": "x-page",
-    "op": "/1.1/live_pipeline/update_subscriptions",
-    "method": "POST",
-    "rel": 15127
+    "rel": 16732
    },
    {
     "cat": "graphql",
     "op": "UserByScreenName",
     "method": "GET",
-    "rel": 16363
-   },
-   {
-    "cat": "rest",
-    "op": "/i/api/fleets/v1/avatar_content",
-    "method": "GET",
-    "rel": 16363
+    "rel": 17082
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/fleetline",
     "method": "GET",
-    "rel": 16363
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 16981
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 16981
-   },
-   {
-    "cat": "media",
-    "op": "media-img",
-    "method": "GET",
-    "rel": 16981
-   },
-   {
-    "cat": "media",
-    "op": "media-img",
-    "method": "GET",
-    "rel": 16981
-   },
-   {
-    "cat": "media",
-    "op": "media-img",
-    "method": "GET",
-    "rel": 17006
+    "rel": 17082
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 17335
+    "rel": 18053
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 17976
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 19052
-   },
-   {
-    "cat": "media",
-    "op": "media-img",
-    "method": "GET",
-    "rel": 19052
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 19052
-   },
-   {
-    "cat": "media",
-    "op": "media-img",
-    "method": "GET",
-    "rel": 19078
-   },
-   {
-    "cat": "media",
-    "op": "media-img",
-    "method": "GET",
-    "rel": 19078
-   },
-   {
-    "cat": "media",
-    "op": "media-img",
-    "method": "GET",
-    "rel": 19078
+    "rel": 18568
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 20051
+    "rel": 20729
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 20978
+    "rel": 21679
    }
   ]
  }

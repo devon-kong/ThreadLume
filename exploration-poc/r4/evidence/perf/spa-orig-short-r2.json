@@ -13,21 +13,21 @@
  },
  "clicks": [
   {
-   "t": 16703.899999976158,
+   "t": 16715.099999904633,
    "x": 578,
    "y": 752
   }
  ],
- "clickAt": 16703.899999976158,
- "escAt": 34125,
- "t1": 1028,
+ "clickAt": 16715.099999904633,
+ "escAt": 34149.59999990463,
+ "t1": 931,
  "paint": {
-  "overlayFirstAt": 80,
+  "overlayFirstAt": 79,
   "paneFirstAt": null,
-  "bodyFirstAt": 80,
+  "bodyFirstAt": 79,
   "snapText": "Peek\n正在加载原帖\n\n正在通过当前登录的 X 会话读取帖子数据\n\n正在加载评论\n\n正在通过当前登录的 X 会话读取帖子数据"
  },
- "t2": 1028,
+ "t2": 931,
  "t3": {
   "origTools": true,
   "origComposer": false,
@@ -37,8 +37,8 @@
   "paneOpen": false
  },
  "t4": {
-  "closedAt": 58,
-  "feedAt": 132,
+  "closedAt": 62,
+  "feedAt": 119,
   "preScrollY": 2800,
   "restoredScrollY": 2800,
   "anchorDelta": 0,
@@ -63,55 +63,55 @@
     "cat": "graphql",
     "op": "TweetDetail",
     "method": "GET",
-    "rel": 79
+    "rel": 78
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1008
+    "rel": 919
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1008
+    "rel": 919
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1008
+    "rel": 919
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1008
+    "rel": 919
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1008
+    "rel": 919
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1008
+    "rel": 919
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1008
+    "rel": 919
    },
    {
     "cat": "graphql",
     "op": "ViewerBadgeCounts",
     "method": "GET",
-    "rel": 13480
+    "rel": 13494
    }
   ]
  }

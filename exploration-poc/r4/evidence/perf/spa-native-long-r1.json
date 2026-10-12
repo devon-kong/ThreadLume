@@ -13,20 +13,20 @@
  },
  "clicks": [
   {
-   "t": 20106.299999952316,
+   "t": 20068.300000071526,
    "x": 665,
    "y": 755
   }
  ],
- "clickAt": 20106.299999952316,
- "escAt": 31727.899999976158,
- "t1": 382,
+ "clickAt": 20068.300000071526,
+ "escAt": 31683,
+ "t1": 391,
  "paint": {
   "overlayFirstAt": null,
   "paneFirstAt": null,
-  "bodyFirstAt": 382
+  "bodyFirstAt": 391
  },
- "t2": 997,
+ "t2": 1014,
  "t3": {
   "origTools": false,
   "origComposer": false,
@@ -37,7 +37,7 @@
  },
  "t4": {
   "closedAt": 55,
-  "feedAt": 456,
+  "feedAt": 462,
   "preScrollY": 5600,
   "restoredScrollY": 663.5,
   "anchorDelta": 153,
@@ -45,15 +45,15 @@
  },
  "t5": {
   "longtasks": [
-   80,
-   59
+   81,
+   60
   ],
-  "longtaskTotal": 139,
+  "longtaskTotal": 141,
   "videoPlayingAt": null
  },
  "routeDetect": null,
  "network": {
-  "requestCount": 23,
+  "requestCount": 22,
   "requests": [
    {
     "cat": "media",
@@ -62,136 +62,130 @@
     "rel": 0
    },
    {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 347
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 16
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 347
+    "rel": 356
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 347
+    "rel": 356
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 347
+    "rel": 356
+   },
+   {
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
+    "rel": 356
    },
    {
     "cat": "graphql",
     "op": "TweetDetail",
     "method": "GET",
-    "rel": 349
+    "rel": 359
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/fleetline",
     "method": "GET",
-    "rel": 349
+    "rel": 359
    },
    {
     "cat": "graphql",
     "op": "getAltTextPromptPreference",
     "method": "GET",
-    "rel": 375
-   },
-   {
-    "cat": "rest",
-    "op": "/i/api/1.1/flow/timeline.json",
-    "method": "POST",
-    "rel": 680
+    "rel": 383
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 1022
+    "rel": 1020
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 3005
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/graphql/viewer_context.json",
     "method": "POST",
-    "rel": 1721
+    "rel": 4584
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 3898
+    "rel": 6054
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 6056
-   },
-   {
-    "cat": "rest",
-    "op": "/i/api/1.1/flow/timeline.json",
-    "method": "POST",
-    "rel": 9059
+    "rel": 9054
    },
    {
     "cat": "graphql",
     "op": "ViewerBadgeCounts",
     "method": "GET",
-    "rel": 10098
-   },
-   {
-    "cat": "rest",
-    "op": "/i/api/fleets/v1/avatar_content",
-    "method": "GET",
-    "rel": 12008
+    "rel": 10110
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/fleetline",
     "method": "GET",
-    "rel": 12008
+    "rel": 11999
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 12008
+    "rel": 11999
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 12981
+    "rel": 12973
    },
    {
     "cat": "graphql",
     "op": "UserOriginalsTimeline",
     "method": "GET",
-    "rel": 13345
+    "rel": 13328
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 14418
+    "rel": 14397
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 14975
+    "rel": 14972
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 15444
+    "rel": 15426
    }
   ]
  }

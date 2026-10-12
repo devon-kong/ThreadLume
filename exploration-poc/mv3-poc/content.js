@@ -332,9 +332,13 @@
   }
 
   function focalCellByStatusId(focalId) {
+    // The matching timestamp link must NOT sit inside a quote card
+    // (div[role="link"]): a timeline cell that merely QUOTES the focal post
+    // would otherwise match and feed the pane the quoter's content. The
+    // post's own cell (timeline or detail) nests its time link directly.
     return [...document.querySelectorAll('[data-testid="cellInnerDiv"]')]
       .find((cell) => [...cell.querySelectorAll(`a[href*="/status/${focalId}"]`)]
-        .some((a) => a.querySelector("time")));
+        .some((a) => a.querySelector("time") && !a.closest('div[role="link"]')));
   }
 
   // Photo URLs inside `scope`, skipping any img contained in one of the
@@ -495,6 +499,44 @@
     return c.value.toLocaleString("en-US");
   }
 
+  function quoteHtml(q) {
+    return `<div class="${NS}-quote-author">${ESCAPED(q.author ?? "未知作者")}</div>
+        <div>${ESCAPED(q.text || "（引用正文未识别）")}</div>
+        ${q.photos.map((u) => `<img class="${NS}-photo" src="${ESCAPED(u)}" referrerpolicy="no-referrer" alt="">`).join("")}`;
+  }
+
+  // In-place field refresh for the two decoupled upgrades (detail hydration,
+  // show-more expansion): swap text/photos/counts/time/quote without
+  // remounting the pane — no flicker, scroll position preserved.
+  function updatePaneInPlace(pane, data) {
+    const textEl = pane.querySelector(`.${NS}-text`);
+    if (textEl && data.textKnown) {
+      textEl.textContent = data.text;
+      textEl.classList.remove(`${NS}-unknown`);
+    }
+    const photosEl = pane.querySelector(`.${NS}-photos`);
+    if (photosEl) photosEl.innerHTML = data.photos.map((u) => `<img class="${NS}-photo" src="${ESCAPED(u)}" referrerpolicy="no-referrer" alt="">`).join("");
+    const countsEl = pane.querySelector(`.${NS}-counts`);
+    if (countsEl) countsEl.textContent = `回复 ${fmtCount(data.reply)} · 转推 ${fmtCount(data.retweet)} · 喜欢 ${fmtCount(data.like)} · 书签 ${fmtCount(data.bookmark)}${data.timeText ? ` · ${ESCAPED(data.timeText)}` : ""}`;
+    const quoteEl = pane.querySelector(`.${NS}-quote`);
+    if (data.quote && quoteEl) quoteEl.innerHTML = quoteHtml(data.quote);
+    else if (!data.quote && quoteEl) quoteEl.remove();
+    else if (data.quote && !quoteEl) {
+      const note = pane.querySelector(`.${NS}-rich-note`);
+      const div = document.createElement("div");
+      div.className = `${NS}-quote`;
+      div.innerHTML = quoteHtml(data.quote);
+      (note || pane.querySelector(`.${NS}-counts`))?.before(div);
+    }
+    if (!pane.querySelector(`.${NS}-rich-note`) && (data.rich.video || data.rich.poll || data.rich.card || data.rich.article)) {
+      const labels = [data.rich.video && "视频/GIF", data.rich.poll && "投票", data.rich.card && "网站卡片", data.rich.article && "X Article"].filter(Boolean);
+      const note = document.createElement("div");
+      note.className = `${NS}-rich-note`;
+      note.textContent = `此帖含${labels.join("、")}——右侧栏顶部原生格完整承载媒体与互动，可滚动到该处直接操作。`;
+      pane.querySelector(`.${NS}-counts`)?.before(note);
+    }
+  }
+
   function renderPane(data) {
     const pane = document.createElement("div");
     pane.id = PANE_ID;
@@ -520,11 +562,7 @@
         </div>
         ${data.textKnown ? `<div class="${NS}-text">${ESCAPED(data.text)}</div>` : `<div class="${NS}-text ${NS}-unknown">正文未识别</div>`}
         <div class="${NS}-photos">${data.photos.map((u) => `<img class="${NS}-photo" src="${ESCAPED(u)}" referrerpolicy="no-referrer" alt="">`).join("")}</div>
-        ${q ? `<div class="${NS}-quote">
-            <div class="${NS}-quote-author">${ESCAPED(q.author ?? "未知作者")}</div>
-            <div>${ESCAPED(q.text || "（引用正文未识别）")}</div>
-            ${q.photos.map((u) => `<img class="${NS}-photo" src="${ESCAPED(u)}" referrerpolicy="no-referrer" alt="">`).join("")}
-          </div>` : ""}
+        ${q ? `<div class="${NS}-quote">${quoteHtml(q)}</div>` : ""}
         ${richLabels.length ? `<div class="${NS}-rich-note">此帖含${richLabels.join("、")}——右侧栏顶部原生格完整承载媒体与互动，可滚动到该处直接操作。</div>` : ""}
         <div class="${NS}-counts">回复 ${fmtCount(data.reply)} · 转推 ${fmtCount(data.retweet)} · 喜欢 ${fmtCount(data.like)} · 书签 ${fmtCount(data.bookmark)}${data.timeText ? ` · ${ESCAPED(data.timeText)}` : ""}</div>
         <div class="${NS}-actions" role="toolbar" aria-label="定位原生互动控件">
@@ -638,24 +676,34 @@
       richScanUntil = performance.now() + 20_000; // bounded late-hydration rescan
       recoveryArmed = false;
       recoveryLeft = 0;
-      // Decoupled show-more upgrade (G2): the first paint never waits for the
-      // Premium expansion. Expand (one display click, like a reader), then
-      // update the pane's text/photos in place — no remount, no flicker.
+      // Decoupled upgrades (G2). The first paint may come from the timeline's
+      // own cell (instant, accurate for that render); two bounded, gen-guarded
+      // refreshes then correct the pane in place — no remount, no flicker:
+      //  (a) detail hydration: once the detail page's own focal cell replaces
+      //      the timeline cell, refresh absolute time / exact counts / media;
+      //  (b) show-more: expand once (like a reader) and swap in the full body.
+      void (async () => {
+        for (let i = 0; i < 12 && myGen === gen; i++) {
+          await sleep(250);
+          if (myGen !== gen || statusIdFromPath() !== focalId) return;
+          const cell = focalCellByStatusId(focalId);
+          if (cell && cell !== data.nativeCell && cell.isConnected) {
+            const art = cell.querySelector("article[data-testid='tweet']") || cell.querySelector("article");
+            if (art) {
+              const fresh = extractFromArticle(art, focalId);
+              const pane = document.getElementById(PANE_ID);
+              if (pane && pane.dataset.statusId === focalId) updatePaneInPlace(pane, fresh);
+            }
+            return;
+          }
+        }
+      })();
       if (data.showMorePending) {
         void (async () => {
           const full = await extractFocal(focalId, myGen); // expands + guards gen/route
           if (!full || myGen !== gen || statusIdFromPath() !== focalId) return;
           const pane = document.getElementById(PANE_ID);
-          if (!pane || pane.dataset.statusId !== focalId) return;
-          const textEl = pane.querySelector(`.${NS}-text`);
-          if (textEl && full.textKnown) {
-            textEl.textContent = full.text;
-            textEl.classList.remove(`${NS}-unknown`);
-          }
-          const photosEl = pane.querySelector(`.${NS}-photos`);
-          if (photosEl && full.photos.length !== (data.photos?.length || 0)) {
-            photosEl.innerHTML = full.photos.map((u) => `<img class="${NS}-photo" src="${ESCAPED(u)}" referrerpolicy="no-referrer" alt="">`).join("");
-          }
+          if (pane && pane.dataset.statusId === focalId) updatePaneInPlace(pane, full);
         })();
       }
     } finally {

@@ -356,3 +356,31 @@ test("G0-Esc Esc 关闭阅读器（跟随关闭语义），输入中不关闭", 
   await env.navigate("/home");
   assert.equal(env.panes(), 0);
 });
+
+test("G2 匹配收紧：引用卡内的时间链接不充当焦点格（防串帖提取）", async () => {
+  const env = makeEnv();
+  env.boot();
+  const idA = makeStatusId();
+  await env.pushNavigate(`/somebody/status/${idA}`);
+  // a timeline cell that only QUOTES post A: its quote card nests a time link
+  // to /status/idA — it must NOT be selected as the focal cell
+  const { cell } = buildCell({ statusId: makeStatusId(), articleChildren: [buildAuthor(), buildTweetText("引用者的正文")] });
+  const quoteCard = env.document.createElement("div");
+  quoteCard.setAttribute("role", "link");
+  const quoteLink = env.document.createElement("a");
+  quoteLink.setAttribute("href", `/somebody/status/${idA}`);
+  const qt = env.document.createElement("time");
+  qt.setAttribute("datetime", "2026-10-12T10:00:00.000Z");
+  quoteLink.appendChild(qt);
+  quoteCard.appendChild(quoteLink);
+  cell.appendChild(quoteCard);
+  env.document.body.appendChild(cell);
+  await env.timers.advance(1_500);
+  assert.equal(env.panes(), 0, "a quoting cell never feeds the pane the quoter's content");
+  // when the REAL detail cell hydrates, the pane builds from it
+  mountCell(env, { statusId: idA, articleChildren: [buildAuthor(), buildTweetText("真正的焦点正文"), buildActionBar()] });
+  await env.timers.advance(1_500);
+  const pane = env.pane();
+  assert.ok(pane, "real focal cell builds the pane");
+  assert.match(pane.textContent, /真正的焦点正文/, "content comes from the post itself");
+});

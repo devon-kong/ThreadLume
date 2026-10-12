@@ -4,124 +4,123 @@
    "sample": "highReply",
    "metric": "t1",
    "verdict": "PASS",
-   "om": 1049,
-   "rm": 554,
-   "tol": 105,
-   "delta": -495,
-   "oSpread": 134
+   "om": 1178,
+   "rm": 78,
+   "tol": 118,
+   "delta": -1100,
+   "oSpread": 1038
   },
   {
    "sample": "highReply",
    "metric": "t2",
-   "verdict": "FAIL",
-   "om": 1049,
-   "rm": 2023,
-   "tol": 105,
-   "delta": 974,
-   "oSpread": 134
+   "verdict": "INCONCLUSIVE",
+   "om": 1178,
+   "rm": 2038,
+   "tol": 118,
+   "oSpread": 1038
   },
   {
    "sample": "highReply",
    "metric": "t4",
    "verdict": "PASS",
-   "om": 133,
-   "rm": 206,
+   "om": 137,
+   "rm": 179,
    "tol": 80,
-   "delta": 73,
-   "oSpread": 9
+   "delta": 42,
+   "oSpread": 2
   },
   {
    "sample": "long",
    "metric": "t1",
-   "verdict": "FAIL",
-   "om": 581,
-   "rm": 1234,
-   "tol": 58,
-   "delta": 653,
-   "oSpread": 40
+   "verdict": "PASS",
+   "om": 710,
+   "rm": 89,
+   "tol": 71,
+   "delta": -621,
+   "oSpread": 148
   },
   {
    "sample": "long",
    "metric": "t2",
    "verdict": "MISSING",
    "om": null,
-   "rm": 1234
+   "rm": 1327
   },
   {
    "sample": "long",
    "metric": "t4",
-   "verdict": "FAIL",
-   "om": 127,
-   "rm": 216,
+   "verdict": "PASS",
+   "om": 134,
+   "rm": 208,
    "tol": 80,
-   "delta": 89,
+   "delta": 74,
    "oSpread": 11
   },
   {
    "sample": "short",
    "metric": "t1",
    "verdict": "PASS",
-   "om": 885,
-   "rm": 556,
-   "tol": 89,
-   "delta": -329,
-   "oSpread": 304
+   "om": 931,
+   "rm": 76,
+   "tol": 93,
+   "delta": -855,
+   "oSpread": 93
   },
   {
    "sample": "short",
    "metric": "t2",
    "verdict": "FAIL",
-   "om": 885,
-   "rm": 2041,
+   "om": 931,
+   "rm": 1306,
    "tol": 100,
-   "delta": 1156,
-   "oSpread": 304
+   "delta": 375,
+   "oSpread": 93
   },
   {
    "sample": "short",
    "metric": "t4",
-   "verdict": "FAIL",
-   "om": 130,
-   "rm": 212,
+   "verdict": "PASS",
+   "om": 129,
+   "rm": 208,
    "tol": 80,
-   "delta": 82,
-   "oSpread": 7
+   "delta": 79,
+   "oSpread": 18
   },
   {
    "sample": "video",
    "metric": "t1",
    "verdict": "PASS",
-   "om": 1023,
-   "rm": 554,
-   "tol": 102,
-   "delta": -469,
-   "oSpread": 329
+   "om": 1328,
+   "rm": 79,
+   "tol": 133,
+   "delta": -1249,
+   "oSpread": 410
   },
   {
    "sample": "video",
    "metric": "t2",
    "verdict": "FAIL",
-   "om": 1023,
-   "rm": 2011,
-   "tol": 102,
-   "delta": 988,
-   "oSpread": 329
+   "om": 1328,
+   "rm": 2001,
+   "tol": 133,
+   "delta": 673,
+   "oSpread": 410
   },
   {
    "sample": "video",
    "metric": "t4",
    "verdict": "PASS",
-   "om": 141,
-   "rm": 200,
+   "om": 129,
+   "rm": 205,
    "tol": 80,
-   "delta": 59,
-   "oSpread": 19
+   "delta": 76,
+   "oSpread": 3
   }
  ],
  "detectSummary": {
   "n": 12,
   "median": 1,
-  "max": 1
+  "max": 2
  },
- "anyInconclusive": false
+ "anyInconclusive": true
 }

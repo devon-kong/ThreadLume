@@ -13,21 +13,21 @@
  },
  "clicks": [
   {
-   "t": 11442.800000071526,
+   "t": 14508.299999952316,
    "x": 666,
    "y": 792
   }
  ],
- "clickAt": 11442.800000071526,
- "escAt": 29005,
- "t1": 907,
+ "clickAt": 14508.299999952316,
+ "escAt": 32484.299999952316,
+ "t1": 1074,
  "paint": {
-  "overlayFirstAt": 37,
+  "overlayFirstAt": 82,
   "paneFirstAt": null,
-  "bodyFirstAt": 38,
+  "bodyFirstAt": 82,
   "snapText": "Peek\n正在加载原帖\n\n正在通过当前登录的 X 会话读取帖子数据\n\n正在加载评论\n\n正在通过当前登录的 X 会话读取帖子数据"
  },
- "t2": 907,
+ "t2": 1074,
  "t3": {
   "origTools": true,
   "origComposer": false,
@@ -37,8 +37,8 @@
   "paneOpen": false
  },
  "t4": {
-  "closedAt": 67,
-  "feedAt": 141,
+  "closedAt": 66,
+  "feedAt": 127,
   "preScrollY": 1600,
   "restoredScrollY": 1600,
   "anchorDelta": 0,
@@ -51,343 +51,349 @@
  },
  "routeDetect": null,
  "network": {
-  "requestCount": 56,
+  "requestCount": 57,
   "requests": [
-   {
-    "cat": "rest",
-    "op": "/i/api/1.1/flow/timeline.json",
-    "method": "POST",
-    "rel": 0
-   },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 122
+    "rel": 0
    },
    {
     "cat": "graphql",
     "op": "TweetDetail",
     "method": "GET",
-    "rel": 158
+    "rel": 81
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 997
+    "rel": 1052
    },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 999
+    "rel": 1054
    },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 1000
+    "rel": 1054
    },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 1000
+    "rel": 1054
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1005
+    "rel": 1060
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1005
+    "rel": 1060
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1005
+    "rel": 1060
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1006
+    "rel": 1060
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1006
+    "rel": 1060
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1006
+    "rel": 1060
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1006
+    "rel": 1060
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1006
+    "rel": 1060
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1006
+    "rel": 1060
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1006
+    "rel": 1060
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1006
+    "rel": 1060
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1006
+    "rel": 1060
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1006
+    "rel": 1060
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1006
+    "rel": 1060
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1006
+    "rel": 1060
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1060
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1072
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1072
+   },
+   {
+    "cat": "other",
+    "op": "data",
+    "method": "GET",
+    "rel": 1072
+   },
+   {
+    "cat": "other",
+    "op": "data",
+    "method": "GET",
+    "rel": 1072
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1076
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1076
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1177
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1178
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1281
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1282
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1288
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1288
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1289
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1289
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1297
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1299
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1303
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1303
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1306
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1306
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1308
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1309
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1311
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1311
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1314
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1314
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1317
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1317
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1320
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1320
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1321
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1322
    },
    {
     "cat": "media",
     "op": "media-img",
     "method": "GET",
-    "rel": 1022
+    "rel": 2000
    },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 1025
-   },
-   {
-    "cat": "other",
-    "op": "data",
-    "method": "GET",
-    "rel": 1025
-   },
-   {
-    "cat": "other",
-    "op": "data",
-    "method": "GET",
-    "rel": 1026
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1027
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1027
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1128
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1128
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1128
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1128
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1230
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1231
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1232
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1233
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1236
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1236
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1238
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1239
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1242
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1242
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1244
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1245
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1246
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1246
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1249
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1249
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1250
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1251
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1253
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1253
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1261
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 1262
-   },
-   {
-    "cat": "rest",
-    "op": "/i/api/1.1/flow/timeline.json",
-    "method": "POST",
-    "rel": 3164
+    "rel": 2001
    },
    {
     "cat": "graphql",
     "op": "ViewerBadgeCounts",
     "method": "GET",
-    "rel": 18878
+    "rel": 15703
    }
   ]
  }
