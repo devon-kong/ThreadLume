@@ -1,25 +1,31 @@
-// Peek Native Carrier PoC v2 — second-round fixes (review: devon-kong/peek-exploration).
+// Peek Native Carrier PoC v3 — third-round functional fixes (R3 S5).
 // ISOLATED content script, detail pages only. Zero permissions, zero internal-API calls.
 //
-// Round-2 P0 fixes applied here:
-//  P0-2 routing: no history.pushState/replaceState wrapping (an ISOLATED-world wrapper
-//    cannot observe the main world's SPA calls). Route observation = popstate + hashchange
-//    + Navigation API (when exposed to this world) + a bounded 500ms pathname poll as the
-//    correctness net. Status-id changes rebuild; non-detail routes tear down.
-//  P0-2 close: history-aware close. history.back() only when this document actually
-//    observed an in-session X route change; a directly-opened (external) detail page just
-//    dismisses the enhancement instead of leaving X.
-//  P0-3 focal: focal cell located by URL status id (never "first article" — reply detail
-//    pages start with ancestor cells). Full quote text (no 160-char cut). Photo URLs kept
-//    verbatim (query params preserved). K/M-suffix counts parsed numerically; missing
-//    values render as 未知, never 0. Rich-media focal posts (video/GIF/poll/card) keep the
-//    native cell visible — the left pane never pretends to carry what it cannot.
-//  P0-1 layout: left pane and right cells share one reference container (vw), X's right
-//    rail and left nav are removed from layout while reading, and the pane follows X's
-//    light/dark theme via computed colors.
-//  Interaction mirror: the pane's action bar mirrors native counts/states and delegates
-//    clicks to the native buttons (isTrusted=false, class-3 automation per task book 8.3).
-//    NO write is executed by this PoC or its verification; writes remain NOT_TESTED.
+// v3 changes over round-2 v2 (all driven by R3 measured evidence):
+//  1. The native focal cell is NO LONGER hidden. R3 measured four defects caused by
+//     hiding it: (a) rich-media detection races hydration, so video/poll/card cells
+//     were hidden with no note; (b) the poll-cycle re-tag re-hid cells even when rich
+//     was detected at build time; (c) the hidden cell reserved its full height, leaving
+//     a large blank region at the top of the replies column; (d) the focal post's own
+//     native action bar / hover card / composer became unreachable, so interactions had
+//     to rely on synthetic delegation. Keeping the cell visible removes all four and
+//     makes every interaction a real user click on a real X control (class-A). The left
+//     pane stays as the 52vw reading copy; the right column top is the interactive
+//     original. Duplication is the documented trade-off.
+//  2. Pane action buttons no longer delegate via synthetic .click(). They scroll the
+//     native focal cell into view and pulse-highlight the corresponding native button;
+//     the user performs the write themselves. Reply scrolls to and focuses the native
+//     composer. Copy-link keeps using the clipboard API (no X request involved).
+//  3. X Articles get a dedicated extraction path: twitter-article-title +
+//     twitterArticleRichTextView + inline tweetPhoto images. The logged-out-style
+//     fallback (which leaked engagement-count lines into the text) is now only used
+//     when no dedicated node exists, and filters count-only lines.
+//  4. Premium ultra-long focal posts: if X collapsed the text behind a "show more"
+//     link, the PoC clicks it once at build time (a display expansion, like a user
+//     reading — not an account write) and extracts the expanded text.
+//  5. Handle rendering: href-derived handles render as "@name" without the leading
+//     slash.
+//  6. Quote text: drop a leading author-name line that duplicates the quote author.
 
 (() => {
   "use strict";
@@ -31,7 +37,6 @@
   const PANE_ID = `${NS}-pane`;
   const STYLE_ID = `${NS}-style`;
   const ROUTE_POLL_MS = 500;
-  const THEMES = ["auto", "light", "dark"];
   const ESCAPED = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
   let activeStatusId = null;
@@ -57,18 +62,30 @@
         removeReader();
       }
     } else if (id && document.getElementById(PANE_ID)) {
-      // React may remount the focal cell and drop the tag; re-tag while reading.
-      // Also re-apply theme on the bounded poll: cheap and robust against any
-      // theme-change mutation the observers might miss.
-      ensureFocalTag(id);
+      // Bounded maintenance while reading: keep the theme in sync with any
+      // theme-change mutation the observers might miss, and surface a rich-media
+      // note if the video player/poll/card hydrated after the pane was built
+      // (extraction runs once; hydration can land later).
       applyTheme();
+      syncRichNote();
     }
   }
 
-  function ensureFocalTag(id) {
-    if (document.querySelector(`[data-testid="cellInnerDiv"].${NS}-focal-cell`)) return;
-    if (document.documentElement.getAttribute(`data-${NS}`) !== "on") return;
-    focalCellByStatusId(id)?.classList.add(`${NS}-focal-cell`);
+  // The pane's rich-note is rendered at build time. If the native cell's media
+  // hydrates later (video race measured in R3), append the note then — once.
+  function syncRichNote() {
+    const pane = document.getElementById(PANE_ID);
+    if (!pane || pane.querySelector(`.${NS}-rich-note`)) return;
+    const cell = focalCellByStatusId(activeStatusId);
+    if (!cell) return;
+    const video = Boolean(cell.querySelector('[data-testid="videoPlayer"], video'));
+    const poll = Boolean(cell.querySelector('[data-testid="poll"], [role="group"] [data-testid="vote"]'));
+    const card = Boolean(cell.querySelector('[data-testid="card.wrapper"]'));
+    if (!video && !poll && !card) return;
+    const note = document.createElement("div");
+    note.className = `${NS}-rich-note`;
+    note.textContent = `此帖含${[video && "视频/GIF", poll && "投票", card && "网站卡片"].filter(Boolean).join("、")}——右侧栏顶部原生格完整承载媒体与互动，可滚动到该处直接操作。`;
+    pane.querySelector(`.${NS}-counts`)?.before(note);
   }
 
   window.addEventListener("popstate", () => queueMicrotask(checkRoute));
@@ -142,26 +159,49 @@
         .some((a) => a.querySelector("time")));
   }
 
-  function extractFocal() {
+  function photoUrlsIn(scope) {
+    return [...new Set([...scope.querySelectorAll('[data-testid="tweetPhoto"] img, img[src*="pbs.twimg.com/media"]')].map((i) => i.src))];
+  }
+
+  // X Articles render title/body in dedicated containers (not tweetText).
+  function extractArticle(art) {
+    const title = art.querySelector('[data-testid="twitter-article-title"]')?.innerText?.trim() || null;
+    const body = art.querySelector('[data-testid="twitterArticleRichTextView"]');
+    if (!body) return null;
+    return { title, text: body.innerText || "", photos: photoUrlsIn(body) };
+  }
+
+  // Logged-out / no-testid fallback. Filters UI lines AND count-only lines so the
+  // engagement row ("3\n3\n11\n3,578") never leaks into article/post text.
+  function fallbackText(art) {
+    const UI_LINE = /^(show translation|显示翻译|translate post)$/i;
+    const COUNT_ONLY = /^[\d.,]+\s*[KMkM]?$/;
+    const lines = (art.innerText || "").split("\n").map((l) => l.trim()).filter(Boolean)
+      .filter((l) => !UI_LINE.test(l) && !COUNT_ONLY.test(l));
+    const handleIdx = lines.slice(0, 3).findIndex((l) => l.startsWith("@") && l.length <= 20);
+    if (handleIdx >= 0) lines.splice(0, handleIdx + 1);
+    return lines.join("\n");
+  }
+
+  async function expandShowMore(art) {
+    // Premium long posts collapse the body behind a show-more link. One display
+    // expansion, bounded to the focal article, mirrors what a reading user does.
+    const more = [...art.querySelectorAll('[data-testid="tweet-text-show-more-link"], a[href*="show-more"], [role="button"]')]
+      .find((el) => /^(显示更多|Show more)$/i.test((el.innerText || "").trim()));
+    if (more) {
+      more.click();
+      await new Promise((r) => setTimeout(r, 700));
+    }
+  }
+
+  async function extractFocal() {
     const focalId = statusIdFromPath();
     if (!focalId) return null;
-    // Logged-in path: focal cell located by its own timestamp permalink.
     const cell = focalCellByStatusId(focalId);
     const art = cell && (cell.querySelector("article[data-testid='tweet']") || cell.querySelector("article"));
-    if (art) return { ...extractFromArticle(art, focalId), nativeCell: cell };
-    // Logged-out fallback: server-rendered conversation (#urt:conversation:<id>).
-    // These pages have no <time> elements at all; ancestors (if any) render above
-    // the focal post and may carry "view thread" links, so take the LAST article
-    // whose canonical permalink (/<handle>/status/<focalId>) matches exactly.
-    const convRoot = document.querySelector(`[id^="urt:conversation"][id*="${focalId}"]`);
-    if (!convRoot) return null; // no first-article fallback: reply pages start with ancestors
-    const canonical = new RegExp(`^/[^/]+/status/${focalId}$`);
-    const matches = [...convRoot.querySelectorAll('article')]
-      .filter((a) => [...a.querySelectorAll(`a[href*="/status/${focalId}"]`)]
-        .some((l) => canonical.test(l.getAttribute("href") || "")));
-    const focal = matches[matches.length - 1];
-    if (!focal) return null;
-    return { ...extractFromArticle(focal, focalId), nativeCell: null };
+    if (!art) return null;
+    await expandShowMore(art);
+    return { ...extractFromArticle(art, focalId), nativeCell: cell };
   }
 
   function extractFromArticle(art, focalId) {
@@ -169,30 +209,32 @@
       .map((a) => a.getAttribute("href"))
       .find((h) => /^\/[^/]+$/.test(h));
     const nameNode = art.querySelector('[data-testid="User-Name"]');
-    // rich media the left pane cannot carry — native cell stays visible for these
+    // rich media the pane mirrors but never hides — the native cell stays visible
     const video = Boolean(art.querySelector('[data-testid="videoPlayer"]')) || Boolean(art.querySelector("video"));
     const poll = Boolean(art.querySelector('[data-testid="poll"], [role="group"] [data-testid="vote"]'));
     const card = Boolean(art.querySelector('[data-testid="card.wrapper"]'));
     const quoteNode = art.querySelector('div[role="link"]');
-    const quoteAuthor = quoteNode?.querySelector('[data-testid="User-Name"]')?.innerText.split("\n")[0] || null;
-    const photoNodes = [...art.querySelectorAll('[data-testid="tweetPhoto"] img, img[src*="pbs.twimg.com/media"]')];
-    const photos = [...new Set(photoNodes.map((i) => i.src))]; // URL kept verbatim: query params control format/size
-    const textNode = art.querySelector('[data-testid="tweetText"]');
-    let text = textNode ? textNode.innerText : "";
-    let textSource = "tweetText";
-    if (!textNode) {
-      // logged-out server rendering has no testids; take the article's own text and
-      // label the source so the UI can show it is approximate, not silently wrong
-      const UI_LINE = /^(show translation|显示翻译|translate post)$/i;
-      const lines = (art.innerText || "").split("\n").map((l) => l.trim()).filter(Boolean)
-        .filter((l) => !UI_LINE.test(l));
-      // drop the leading author block: display name and @handle lines. Logged-out
-      // pages have no User-Name node, so locate the handle line within the first 3.
-      const handleIdx = lines.slice(0, 3).findIndex((l) => l.startsWith("@") && l.length <= 20);
-      if (handleIdx >= 0) lines.splice(0, handleIdx + 1);
-      text = lines.join("\n");
-      textSource = "fallback-logged-out";
+    const quoteAuthorNode = quoteNode?.querySelector('[data-testid="User-Name"]');
+    const quoteAuthor = quoteAuthorNode?.innerText.split("\n")[0] || null;
+    let quoteText = quoteNode?.querySelector('[data-testid="tweetText"]')?.innerText || "";
+    if (quoteAuthor && quoteText.trim().startsWith(quoteAuthor.trim())) {
+      quoteText = quoteText.trim().slice(quoteAuthor.trim().length).replace(/^\s+/, "");
     }
+    const article = extractArticle(art);
+    let text, textSource;
+    if (article) {
+      text = article.title ? `${article.title}\n\n${article.text}` : article.text;
+      textSource = "article";
+    } else {
+      const textNode = art.querySelector('[data-testid="tweetText"]');
+      text = textNode ? textNode.innerText : "";
+      textSource = "tweetText";
+      if (!textNode) {
+        text = fallbackText(art);
+        textSource = "fallback";
+      }
+    }
+    const photos = article ? [...new Set([...photoUrlsIn(art.querySelector('[data-testid="twitterArticleReadView"]') || art), ...photoUrlsIn(art)])] : photoUrlsIn(art);
     return {
       statusId: focalId,
       name: nameNode ? nameNode.innerText.split("\n")[0] : (handle ? handle.slice(1) : "未知作者"),
@@ -206,10 +248,10 @@
       photos,
       quote: quoteNode ? {
         author: quoteAuthor,
-        text: quoteNode.querySelector('[data-testid="tweetText"]')?.innerText || "",
+        text: quoteText,
         photos: [...quoteNode.querySelectorAll('[data-testid="tweetPhoto"] img')].map((i) => i.src)
       } : null,
-      rich: { video, poll, card },
+      rich: { video, poll, card, article: Boolean(article) },
       reply: countOf(art, "reply"),
       retweet: countOf(art, "retweet"),
       like: countOf(art, "like"),
@@ -229,16 +271,23 @@
     const pane = document.createElement("div");
     pane.id = PANE_ID;
     const q = data.quote;
+    const handleAt = data.handle ? "@" + data.handle.replace(/^\//, "") : "";
+    const richLabels = [
+      data.rich.video && "视频/GIF",
+      data.rich.poll && "投票",
+      data.rich.card && "网站卡片",
+      data.rich.article && "X Article"
+    ].filter(Boolean);
     pane.innerHTML = `
       <header class="${NS}-bar">
         <button class="${NS}-close" title="关闭">✕</button>
-        <span class="${NS}-brand">Peek PoC · 原生承载 v2</span>
+        <span class="${NS}-brand">Peek PoC · 原生承载 v3</span>
         <a class="${NS}-open" target="_blank" rel="noopener" href="https://x.com${ESCAPED(location.pathname)}">在 X 打开</a>
       </header>
       <div class="${NS}-body">
         <div class="${NS}-author">
           <img src="${ESCAPED(data.avatar)}" referrerpolicy="no-referrer" alt="">
-          <div><b>${ESCAPED(data.name)}</b><span>${ESCAPED(data.handle)}</span></div>
+          <div><b>${ESCAPED(data.name)}</b><span>${ESCAPED(handleAt)}</span></div>
         </div>
         ${data.textKnown ? `<div class="${NS}-text">${ESCAPED(data.text)}</div>` : `<div class="${NS}-text ${NS}-unknown">正文未识别</div>`}
         ${data.photos.map((u) => `<img class="${NS}-photo" src="${ESCAPED(u)}" referrerpolicy="no-referrer" alt="">`).join("")}
@@ -247,50 +296,53 @@
             <div>${ESCAPED(q.text || "（引用正文未识别）")}</div>
             ${q.photos.map((u) => `<img class="${NS}-photo" src="${ESCAPED(u)}" referrerpolicy="no-referrer" alt="">`).join("")}
           </div>` : ""}
-        ${data.rich.video || data.rich.poll || data.rich.card ? `<div class="${NS}-rich-note">此帖含${[data.rich.video && "视频/GIF", data.rich.poll && "投票", data.rich.card && "网站卡片"].filter(Boolean).join("、")}，由右侧原生区域完整承载（本栏仅镜像文字与互动）。</div>` : ""}
+        ${richLabels.length ? `<div class="${NS}-rich-note">此帖含${richLabels.join("、")}——右侧栏顶部原生格完整承载媒体与互动，可滚动到该处直接操作。</div>` : ""}
         <div class="${NS}-counts">回复 ${fmtCount(data.reply)} · 转推 ${fmtCount(data.retweet)} · 喜欢 ${fmtCount(data.like)} · 书签 ${fmtCount(data.bookmark)}${data.timeText ? ` · ${ESCAPED(data.timeText)}` : ""}</div>
-        <div class="${NS}-actions" role="toolbar" aria-label="原帖操作（镜像原生状态）">
+        <div class="${NS}-actions" role="toolbar" aria-label="定位原生互动控件">
           <button class="${NS}-act" data-act="reply">回复</button>
-          <button class="${NS}-act ${data.retweet.active ? "is-active" : ""}" data-act="retweet">转推${data.retweet.active ? "·已转" : ""}</button>
-          <button class="${NS}-act ${data.like.active ? "is-active" : ""}" data-act="like">${data.like.active ? "已赞" : "点赞"}</button>
-          <button class="${NS}-act ${data.bookmark.active ? "is-active" : ""}" data-act="bookmark">${data.bookmark.active ? "已收藏" : "收藏"}</button>
+          <button class="${NS}-act" data-act="retweet">转推</button>
+          <button class="${NS}-act" data-act="like">点赞</button>
+          <button class="${NS}-act" data-act="bookmark">收藏</button>
           <button class="${NS}-act" data-act="share">复制链接</button>
         </div>
-        <div class="${NS}-note">左栏由 Peek 从原生 DOM 提取绘制；互动按钮镜像原生状态并委托给原生控件（写入未验收）。${data.rich.video || data.rich.poll || data.rich.card ? "" : "右栏为原生评论流（独立滚动）。"}</div>
+        <div class="${NS}-note">左栏为 Peek 阅读副本（DOM 提取）；互动一律由你在右侧原生控件上亲自完成——点上方按钮会定位并高亮对应原生控件，不会代替你点击。${richLabels.length ? "" : "右栏顶部即原帖，下方为原生评论流。"}</div>
       </div>`;
     pane.querySelector(`.${NS}-close`).addEventListener("click", closeReader);
     pane.querySelector(`.${NS}-actions`).addEventListener("click", onAction);
     document.body.appendChild(pane);
   }
 
-  function nativeActionButton(root, name) {
-    return root?.querySelector(`[data-testid="${name}"], [data-testid="un${name}"]`);
+  function pulse(native) {
+    if (!native) return;
+    native.scrollIntoView({ block: "center", behavior: "smooth" });
+    const prev = native.style.outline;
+    native.style.outline = "2px solid var(--peek-accent, #1d9bf0)";
+    native.style.outlineOffset = "3px";
+    setTimeout(() => { native.style.outline = prev; }, 1600);
   }
 
   function onAction(event) {
     const btn = event.target.closest(`.${NS}-act`);
     if (!btn) return;
-    const cell = [...document.querySelectorAll('[data-testid="cellInnerDiv"]')]
-      .find((c) => c.classList.contains(`${NS}-focal-cell`)) || focalCellByStatusId(statusIdFromPath());
+    const cell = focalCellByStatusId(statusIdFromPath());
     const act = btn.dataset.act;
     if (act === "share") {
       navigator.clipboard?.writeText(`https://x.com${location.pathname}`).catch(() => {});
       return;
     }
+    if (!cell) return;
     if (act === "reply") {
-      // reveal the native cell and focus its composer (read-only UI action)
-      cell?.classList.remove(`${NS}-focal-cell`);
-      cell?.scrollIntoView({ block: "center" });
-      cell?.querySelector('[data-testid="tweetTextarea_0"], [data-testid="tweetButtonInline"]')?.focus?.();
+      // reveal the native composer for the focal post (user types and submits themselves)
+      cell.scrollIntoView({ block: "start", behavior: "smooth" });
+      setTimeout(() => {
+        cell?.querySelector('[data-testid="tweetTextarea_0"], [data-testid="tweetButtonInline"]')?.focus?.();
+      }, 450);
       return;
     }
-    if (act === "like" || act === "retweet" || act === "bookmark") {
-      // class-3 delegation: synthetic click on the NATIVE button; X owns the whole
-      // write path and state machine. Never called during verification (NOT_TESTED).
-      const native = nativeActionButton(cell, act);
-      native?.click();
-      return;
-    }
+    // locate-and-highlight: the user performs the write on the native control
+    const name = act === "like" ? "like" : act === "retweet" ? "retweet" : "bookmark";
+    const native = cell.querySelector(`[data-testid="${name}"], [data-testid="un${name}"]`);
+    pulse(native);
   }
 
   function closeReader() {
@@ -309,7 +361,7 @@
     const token = ++buildToken;
     let data = null;
     for (let i = 0; i < 30 && token === buildToken; i++) {
-      data = extractFocal();
+      data = await extractFocal();
       if (data && data.statusId === focalId) break;
       data = null;
       await new Promise((r) => setTimeout(r, 500));
@@ -320,20 +372,17 @@
     const style = document.createElement("style");
     style.id = STYLE_ID;
     style.textContent = `
-      /* one reference container: both panes use vw while reading */
+      /* one reference container: both panes use vw while reading.
+         The native focal cell stays visible (v3): it renders as the first cell of
+         the right column with its full native action bar, media and composer. */
       html[data-${NS}] [data-testid="sidebarColumn"] { display: none !important; }
       html[data-${NS}] header[role="banner"]:not(#${PANE_ID} header) { display: none !important; }
       html[data-${NS}] [data-testid="primaryColumn"] { width: 100vw !important; max-width: 100vw !important; }
-      html[data-${NS}] [data-testid="cellInnerDiv"].${NS}-focal-cell { visibility: hidden !important; }
-      html[data-${NS}] [data-testid="cellInnerDiv"]:not(.${NS}-focal-cell) { margin-left: 52vw !important; width: 48vw !important; }
+      html[data-${NS}] [data-testid="cellInnerDiv"] { margin-left: 52vw !important; width: 48vw !important; }
     `;
     document.head.appendChild(style);
     document.documentElement.setAttribute(`data-${NS}`, "on");
 
-    if (!data.rich.video && !data.rich.poll && !data.rich.card) {
-      // text/photo/quote focal: full left-pane parity, native cell hidden
-      data.nativeCell?.classList.add(`${NS}-focal-cell`);
-    }
     renderPane(data);
     watchTheme();
   }
@@ -342,7 +391,6 @@
     document.getElementById(PANE_ID)?.remove();
     document.getElementById(STYLE_ID)?.remove();
     document.documentElement.removeAttribute(`data-${NS}`);
-    document.querySelector(`.${NS}-focal-cell`)?.classList.remove(`${NS}-focal-cell`);
     themeObserver?.disconnect();
     themeObserver = null;
   }
@@ -354,6 +402,6 @@
 
   // test hook: lets the verification harness unit-test the real helpers through CDP
   if (window.__PEEK_POC_TEST__) {
-    window.__peekPocTest = { parseCount, readTheme, statusIdFromPath };
+    window.__peekPocTest = { parseCount, readTheme, statusIdFromPath, fallbackText };
   }
 })();

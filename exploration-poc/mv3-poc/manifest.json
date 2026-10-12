@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Peek Native Carrier PoC",
-  "version": "0.1.0",
-  "description": "Exploration PoC: native detail page as reader. Peek-drawn left pane from DOM extraction + native replies right. No internal-API bridge.",
+  "version": "0.3.0",
+  "description": "Exploration PoC: native detail page as reader. Peek-drawn left reading pane from DOM extraction; native focal cell and replies stay visible and interactive on the right. No internal-API bridge, no synthetic writes.",
   "content_scripts": [
     {
       "matches": ["https://x.com/*", "https://twitter.com/*"],
