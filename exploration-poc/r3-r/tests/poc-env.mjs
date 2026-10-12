@@ -107,17 +107,37 @@ export function makeEnv({ url = "/home", html = "<!doctype html><html><body></bo
     return window.__peekPocTest;
   };
 
-  // Simulate an X SPA route change: X pushes history state (no popstate for
-  // pushState — in the PoC the popstate listener + the route poll both call
-  // checkRoute, so dispatching popstate models "route changed, observers run").
+  // Simulate a browser TRAVERSE (back/forward): popstate fires after the URL
+  // already changed. href and pathname must move together — the production
+  // close-decision trail reads location.href.
   const navigate = async (pathname) => {
     location.pathname = pathname;
+    location.href = "https://x.com" + pathname;
     window.dispatchEvent(new window.Event("popstate"));
     await timers.flushMicrotasks();
   };
+  // Simulate X's pushState route change: the URL changes with NO popstate.
+  // With the Navigation API unavailable (jsdom), detection falls to the
+  // capture-phase click cascade (if a link click was seen) or the poll.
+  const pushNavigate = async (pathname, { viaClick = true } = {}) => {
+    if (viaClick) clickLink(pathname);
+    location.pathname = pathname;
+    location.href = "https://x.com" + pathname;
+    await timers.advance(600); // runs out the 350ms click cascade and one poll step
+  };
+  // A user click on a same-origin link (capture-phase listeners observe it;
+  // jsdom performs no actual navigation on synthetic anchor clicks).
+  const clickLink = (href) => {
+    const a = window.document.createElement("a");
+    a.setAttribute("href", href);
+    a.textContent = "x";
+    window.document.body.appendChild(a);
+    a.dispatchEvent(new window.MouseEvent("click", { bubbles: true, cancelable: true }));
+    a.remove();
+  };
 
   const api = {
-    dom, window, document: window.document, location, history, timers, clock, boot, navigate,
+    dom, window, document: window.document, location, history, timers, clock, boot, navigate, pushNavigate, clickLink,
     get poc() { return window.__peekPocTest; },
     pane: () => window.document.getElementById("peek-poc-pane"),
     style: () => window.document.getElementById("peek-poc-style"),

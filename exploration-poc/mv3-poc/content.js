@@ -1,34 +1,27 @@
-// Peek Native Carrier PoC v4 — R3-R correctness fixes (races + extraction).
+// Peek Native Carrier PoC v5 — R4 G0 fixes (close navigation, route latency).
 // ISOLATED content script, detail pages only. Zero permissions, zero internal-API calls.
 //
-// v4 changes over round-3 v3 (all driven by the R3-R acceptance findings):
-//  1. Generation-based cancellation. removeReader() now bumps the generation
-//     counter, so a buildReader() still awaiting the focal DOM (or an expand-
-//     show-more wait) dies immediately instead of mounting a stale pane after
-//     teardown. buildReader() re-verifies the URL against its focal id before
-//     every attempt and again right before rendering; the pane carries
-//     data-status-id and checkRoute removes/rebuilds it if the ids diverge.
-//  2. Bounded recovery. A build that times out (React hydration slower than
-//     the wait budget) schedules at most RECOVERY_MAX_ROUNDS retries spaced
-//     RECOVERY_DELAY_MS apart, driven by the existing route tick. No unbounded
-//     background loop; a fully failed route stays dormant until navigation.
-//  3. Clear resource ownership. Every setTimeout that later touches the DOM
-//     (pulse highlight, reply focus) is registered in ownedTimers and cleared
-//     by removeReader(). The fixed setInterval route poll became a single
-//     exception-safe self-rescheduling timer: 500ms while a detail page or
-//     pane is live, 2000ms otherwise (SPA navigation is still detected
-//     instantly via popstate + Navigation API; the poll is the safety net).
-//  4. Extraction correctness. Quote cards are found structurally (role=link
-//     divs minus card.wrapper, preferring the nested tweetText/User-Name
-//     shape), main-post photos exclude the quote and website-card subtrees,
-//     and fallbackText drops only count-shaped lines that provably come from
-//     the action-bar group subtree — a body line like "2026" survives.
+// v5 changes over round-3-r v4 (driven by the R4 G0 gate gaps):
+//  1. Close navigation (G0-A). The old close used one session-wide boolean —
+//     after "external → A → quote B → back to A" it still called history.back()
+//     and could land off-site. Close now consults the real session history:
+//     primary is Navigation API entries() (cross-origin entries are URL-redacted
+//     by the browser itself, so "previous entry is same-site X" is exact);
+//     fallback is an in-document trail of observed navigations — back from an
+//     entry this document visited always stays in this document, while the
+//     document's initial entry has an unknown (possibly off-site) predecessor.
+//     history.back() is never called unconditionally.
+//  2. Route detection (G0-B). Detection is now event-driven: the Navigation API
+//     "navigate" event (instant, covers keyboard/other-world navigation) when
+//     exposed to the isolated world, otherwise a capture-phase click cascade on
+//     same-origin links plus a <title> mutation observer. The pathname poll
+//     remains only as a bounded safety net. Detection latency is measurable via
+//     the test hook (lastRouteChangeAt).
+//  3. Esc closes the reader (same semantics as the ✕ button), guarded so Esc
+//     inside the native composer or any editable target still belongs to X.
 //
-// v3 changes (kept): native focal cell stays visible; pane action buttons
-// locate/highlight native controls instead of synthetic writes; dedicated
-// X Article extraction; one display expansion for Premium show-more; href-
-// derived handles render without the leading slash; quote text drops a
-// duplicated leading author line.
+// v4 changes (kept): generation-based cancellation; bounded recovery; owned
+// timers; structural quote/photo extraction; positional fallbackText.
 
 (() => {
   "use strict";
@@ -55,21 +48,115 @@
   let recoveryLeft = 0;
   let nextRecoveryAt = 0;
   let themeObserver = null;
+  let titleObserver = null;
   let routeTimer = 0;
+  let richScanUntil = 0; // bounded window for late media-hydration rescan
+  let lastRouteChangeAt = -1; // perf probe: performance.now() of the latest detected route change
   const ownedTimers = new Set();
-  let sessionNavigated = false; // this document saw an in-session X route change
+
+  // ---------- G0-A: in-session navigation trail ----------
+  // Trail semantics (fallback path): entries this DOCUMENT visited. Going back
+  // from a visited entry stays inside this document (an X page); the initial
+  // entry's own predecessor is unknown and may be off-site, so trail index 0
+  // means "no safe back target". When the Navigation API exposes entries(),
+  // that exact session history is used instead (cross-origin entries arrive
+  // URL-redacted by the browser, making the same-site check trustworthy).
+  let navTrail = [];     // [href] in visit order
+  let navTrailIdx = -1;  // current position in navTrail
+  let pendingTraverse = false; // set by popstate before the observers run
+
+  // The baseline is the document's INITIAL URL, recorded at install time —
+  // before any route observer or poll runs (the first checkRoute can be
+  // seconds away, and the URL may have changed by then).
+  try {
+    navTrail = [location.href];
+    navTrailIdx = 0;
+  } catch { /* exotic location — syncTrailFromLocation re-baselines lazily */ }
+
+  const NAV_API = (() => {
+    try {
+      if (window.__peekNoNavApi) return false; // offline/live test hook: force the fallback path
+      return typeof window.navigation?.addEventListener === "function";
+    } catch { return false; }
+  })();
+
+  function sameSiteX(url) {
+    try {
+      const h = new URL(url).hostname;
+      return h === "x.com" || h.endsWith(".x.com") || h === "twitter.com" || h.endsWith(".twitter.com");
+    } catch { return false; }
+  }
+
+  function recordNav(type, destUrl) {
+    if (!destUrl || navTrail[navTrailIdx] === destUrl) return;
+    if (type === "replace") {
+      if (navTrailIdx >= 0) navTrail[navTrailIdx] = destUrl;
+      else { navTrail = [destUrl]; navTrailIdx = 0; }
+    } else if (type === "traverse") {
+      const at = navTrail.lastIndexOf(destUrl);
+      if (at >= 0) navTrailIdx = at;
+      else { navTrail = navTrail.slice(0, navTrailIdx + 1); navTrail.push(destUrl); navTrailIdx = navTrail.length - 1; }
+    } else if (type === "reload") {
+      // same entry: index unchanged
+    } else if (type === "push" || type === "auto_toplevel") {
+      navTrail = navTrail.slice(0, navTrailIdx + 1);
+      navTrail.push(destUrl);
+      navTrailIdx = navTrail.length - 1;
+    }
+  }
+
+  // Fallback bookkeeping: deduce push/traverse from the (already-committed) URL
+  // when Navigation events are unavailable. Popstate implies traverse; a URL
+  // change observed without popstate implies push (X pushes statuses).
+  function syncTrailFromLocation(viaTraverse) {
+    const href = location.href;
+    if (navTrail.length === 0) { navTrail = [href]; navTrailIdx = 0; return; }
+    if (navTrail[navTrailIdx] === href) return;
+    if (viaTraverse) {
+      const at = navTrail.lastIndexOf(href);
+      if (at >= 0) { navTrailIdx = at; return; }
+    }
+    navTrail = navTrail.slice(0, navTrailIdx + 1);
+    navTrail.push(href);
+    navTrailIdx = navTrail.length - 1;
+  }
+
+  // The close decision: may history.back() land on a same-site X page?
+  function safeBackTarget() {
+    try {
+      const nav = NAV_API ? window.navigation : null;
+      if (nav && typeof nav.entries === "function" && nav.currentEntry) {
+        const idx = nav.currentEntry.index;
+        if (!(idx > 0)) return { back: false, why: "navapi-initial-entry" };
+        const prev = nav.entries()[idx - 1];
+        if (prev?.url && sameSiteX(prev.url)) return { back: true, why: "navapi-same-site-entry" };
+        return { back: false, why: "navapi-previous-entry-not-x" };
+      }
+    } catch { /* entries() unavailable in this world — use the trail */ }
+    if (navTrailIdx > 0) return { back: true, why: "trail-visited-entry" };
+    return { back: false, why: navTrail.length === 0 ? "trail-empty" : "trail-initial-entry" };
+  }
 
   const statusIdFromPath = () => (location.pathname.match(/\/status\/(\d+)/) || [])[1] || null;
   const isDetailPath = () => Boolean(statusIdFromPath());
 
-  // ---------- route observation (no history wrapping) ----------
+  // ---------- route observation (G0-B: event-driven, poll is the safety net) ----------
+
+  function onPossibleRouteChange(viaTraverse) {
+    if (viaTraverse) pendingTraverse = true;
+    queueMicrotask(checkRoute);
+  }
 
   function checkRoute() {
+    if (!NAV_API) {
+      syncTrailFromLocation(pendingTraverse);
+      pendingTraverse = false;
+    }
+    lastRouteChangeAt = performance.now();
     const id = statusIdFromPath();
     if (id !== activeStatusId) {
       const previous = activeStatusId;
       activeStatusId = id;
-      if (previous !== null || id !== null) sessionNavigated = true;
       if (id) {
         removeReader(); // also invalidates any in-flight build for the old post
         buildReader();
@@ -113,9 +200,13 @@
 
   // The pane's rich-note is rendered at build time. If the native cell's media
   // hydrates later (video race measured in R3), append the note then — once.
+  // The rescan is bounded to a window after mount (media hydration lands in the
+  // first seconds in practice); afterwards the tick stops scanning the focal
+  // cell every 500ms.
   function syncRichNote() {
     const pane = document.getElementById(PANE_ID);
     if (!pane || pane.querySelector(`.${NS}-rich-note`)) return;
+    if (performance.now() > richScanUntil) return;
     const cell = focalCellByStatusId(activeStatusId);
     if (!cell) return;
     const video = Boolean(cell.querySelector('[data-testid="videoPlayer"], video'));
@@ -128,18 +219,57 @@
     pane.querySelector(`.${NS}-counts`)?.before(note);
   }
 
-  // The route poll is the lifecycle owner's safety net; popstate / hashchange /
-  // Navigation API cover real SPA navigation instantly (X navigates via
-  // history.pushState, which does not fire popstate — hence the poll).
-  window.addEventListener("popstate", () => queueMicrotask(checkRoute));
-  window.addEventListener("hashchange", () => queueMicrotask(checkRoute));
-  if (typeof window.navigation?.addEventListener === "function") {
-    // Fires for same-document navigations initiated by any world that shares this
-    // session history; guarded because isolated-world exposure may vary by version.
+  // The route poll is the lifecycle owner's safety net; event sources cover
+  // real SPA navigation instantly:
+  //  - Navigation API "navigate": instant for every same-document navigation
+  //    (pushState included — no popstate fires for those), any initiating
+  //    world, keyboard included. Also feeds the G0-A trail with exact types.
+  //  - (fallback only) capture-phase click cascade: X navigations originate
+  //    from a link click; re-check immediately and on a short bounded cascade
+  //    in case the router defers pushState to a later task.
+  //  - (fallback only) <title> mutation observer: X rewrites the title per
+  //    route; covers keyboard navigation that no click saw.
+  //  - popstate: browser back/forward (traverse) — also marks the trail.
+  window.addEventListener("popstate", () => onPossibleRouteChange(true));
+  window.addEventListener("hashchange", () => onPossibleRouteChange(false));
+  if (NAV_API) {
     try {
-      window.navigation.addEventListener("navigate", () => queueMicrotask(checkRoute));
-    } catch { /* fall back to poll + popstate */ }
+      window.navigation.addEventListener("navigate", (event) => {
+        recordNav(event.navigationType, event.destination?.url);
+        onPossibleRouteChange(event.navigationType === "traverse");
+      });
+    } catch { /* poll + popstate remain */ }
+  } else {
+    // capture-phase, never preventDefault: this observes clicks, it does not
+    // intercept them (X's own router still owns the navigation)
+    document.addEventListener("click", (event) => {
+      const a = event.target?.closest?.("a[href]");
+      if (!a) return;
+      const href = a.getAttribute("href") || "";
+      if (href.startsWith("/") || href.startsWith(`${location.origin}/`)) armClickCascade();
+    }, true);
+    watchTitle();
   }
+
+  let clickCascadeTimers = [];
+  function armClickCascade() {
+    for (const h of clickCascadeTimers) clearTimeout(h);
+    clickCascadeTimers = [0, 60, 150, 350].map((ms) =>
+      setTimeout(() => { try { checkRoute(); } catch { /* next cascade step retries */ } }, ms));
+  }
+
+  function watchTitle() {
+    if (titleObserver) return;
+    titleObserver = new MutationObserver(() => onPossibleRouteChange(false));
+    const bind = () => {
+      const t = document.querySelector("head > title");
+      if (t) { titleObserver.disconnect(); titleObserver.observe(t, { childList: true, characterData: true, subtree: true }); }
+    };
+    bind();
+    // X can replace the title element wholesale; keep the observer bound to it
+    titleObserver.observe(document.head, { childList: true });
+  }
+
   scheduleRouteTick();
 
   // ---------- theme ----------
@@ -445,12 +575,24 @@
   }
 
   function closeReader() {
-    if (sessionNavigated) {
-      history.back(); // in-session: the previous entry is X's own list view
+    // G0-A: only follow the session history when the previous entry is known
+    // to be a same-site X page; direct/external/refreshed entries are dismissed
+    // in place instead of gambling on an unknown history target.
+    if (safeBackTarget().back) {
+      history.back(); // previous entry is X's own view (list or previous post)
     } else {
-      removeReader(); // direct/external entry: dismiss the enhancement, stay on X
+      removeReader(); // dismiss the enhancement, stay on X
     }
   }
+
+  // Esc closes the reader like the ✕ button. Guarded: when the user is typing
+  // in the native composer or any editable target, Esc belongs to X.
+  window.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || !document.getElementById(PANE_ID)) return;
+    const t = event.target;
+    if (t && (t.isContentEditable || t.closest?.('[data-testid^="tweetTextarea"], [contenteditable="true"]'))) return;
+    closeReader();
+  });
 
   // ---------- build / teardown ----------
 
@@ -478,6 +620,7 @@
       mountStyle();
       renderPane(data);
       watchTheme();
+      richScanUntil = performance.now() + 20_000; // bounded late-hydration rescan
       recoveryArmed = false;
       recoveryLeft = 0;
     } finally {
@@ -548,7 +691,13 @@
       parseCount, readTheme, statusIdFromPath, fallbackText,
       countOf, photoUrlsIn, findQuoteNode, extractArticle, extractFromArticle,
       extractFocal, checkRoute, buildReader, removeReader, syncRichNote,
-      currentGen: () => gen
+      currentGen: () => gen,
+      // G0-A/G0-B observability (read-only)
+      safeBackTarget, navTrailState: () => ({ trail: [...navTrail], idx: navTrailIdx }),
+      navApi: () => NAV_API,
+      lastRouteChangeAt: () => lastRouteChangeAt,
+      syncTrailFromLocation,
+      recordNav,
     };
   }
 })();
