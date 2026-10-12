@@ -13,21 +13,21 @@
  },
  "clicks": [
   {
-   "t": 16693.899999976158,
-   "x": 578,
+   "t": 16670.899999976158,
+   "x": 582,
    "y": 752
   }
  ],
- "clickAt": 16693.899999976158,
- "escAt": 34118.799999952316,
- "t1": 914,
+ "clickAt": 16670.899999976158,
+ "escAt": 34130.199999928474,
+ "t1": 761,
  "paint": {
   "overlayFirstAt": 79,
   "paneFirstAt": null,
   "bodyFirstAt": 79,
   "snapText": "Peek\n正在加载原帖\n\n正在通过当前登录的 X 会话读取帖子数据\n\n正在加载评论\n\n正在通过当前登录的 X 会话读取帖子数据"
  },
- "t2": 914,
+ "t2": 761,
  "t3": {
   "origTools": true,
   "origComposer": false,
@@ -37,8 +37,8 @@
   "paneOpen": false
  },
  "t4": {
-  "closedAt": 60,
-  "feedAt": 129,
+  "closedAt": 62,
+  "feedAt": 119,
   "preScrollY": 2800,
   "restoredScrollY": 2800,
   "anchorDelta": 0,
@@ -69,49 +69,49 @@
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 906
+    "rel": 752
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 906
+    "rel": 752
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 906
+    "rel": 752
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 906
+    "rel": 752
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 906
+    "rel": 752
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 906
+    "rel": 752
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 906
+    "rel": 752
    },
    {
     "cat": "graphql",
     "op": "ViewerBadgeCounts",
     "method": "GET",
-    "rel": 13481
+    "rel": 13475
    }
   ]
  }

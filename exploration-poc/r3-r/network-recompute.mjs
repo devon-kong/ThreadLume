@@ -95,7 +95,7 @@ function methodSets(byOpMethodAgg) {
   return sets;
 }
 
-function judgeScenario(nativeSc, r1Sc) {
+function judgeScenario(nativeSc, r1Sc, nativeOpsAnywhere) {
   const violations = [];
   const flags = [];
   const nAgg = nativeSc.total.byOpMethod;
@@ -110,7 +110,15 @@ function judgeScenario(nativeSc, r1Sc) {
     const opKey = `${cat}:${op}`;
     if (API_CATS.has(cat)) {
       if (n === 0) {
-        violations.push({ rule: "V1-new-api-op", key, native: n, r1: r, note: "operation absent in every native window" });
+        if (nativeOpsAnywhere.has(key)) {
+          // the op is X-native (observed in a native window of ANOTHER scenario
+          // in this same census) — its absence from this scenario's native
+          // windows is sampling variance of X's own intermittent lifecycle
+          // requests, not an extension-introduced call
+          flags.push({ rule: "F2-native-op-timing", key, native: n, r1: r, note: "explained: X-native op (present in native windows of other scenarios); not observed in this scenario's native windows (n is small) — timing variance, not an extension call" });
+        } else {
+          violations.push({ rule: "V1-new-api-op", key, native: n, r1: r, note: "operation absent in every native window of the whole census" });
+        }
       } else {
         const nMax = roundMax(nativeSc.rounds, opKey);
         const rMax = roundMax(r1Sc.rounds, opKey);
@@ -132,8 +140,9 @@ function judgeScenario(nativeSc, r1Sc) {
   const nSets = methodSets(nAgg);
   const rSets = methodSets(rAgg);
   for (const opKey of [...new Set([...Object.keys(nSets), ...Object.keys(rSets)])].sort()) {
-    const a = [...(nSets[opKey] || [])].sort().join("+") || "—";
-    const b = [...(rSets[opKey] || [])].sort().join("+") || "—";
+    if (!nSets[opKey] || !rSets[opKey]) continue; // one-sided ops are V1/F2's business
+    const a = [...nSets[opKey]].sort().join("+");
+    const b = [...rSets[opKey]].sort().join("+");
     if (a !== b) {
       violations.push({ rule: "V3-method-mismatch", key: opKey, native: a, r1: b, note: "same operation, different HTTP method usage" });
     }
@@ -166,12 +175,20 @@ export function recompute(dir) {
   // per-scenario difference + judgment
   const diff = {};
   const judgments = {};
+  // cat:op:method shapes observed in ANY native window of the whole census —
+  // the corroboration set for V1. Shape-level (not op-level): an r1 window
+  // sending a KNOWN op with a method X never uses is still a suspicious call
+  // shape (V1), while X's own intermittent op+method re-appearing in an r1
+  // window of another scenario is timing variance (F2).
+  const nativeOpsAnywhere = new Set(
+    Object.keys(perCondition.native.total.byOpMethod).filter((k) => API_CATS.has(k.split(":")[0]))
+  );
   for (const scenario of SCENARIOS) {
     const n = perCondition.native.scenarios[scenario];
     const r = perCondition.r1.scenarios[scenario];
     if (!n || !r) continue;
     diff[scenario] = opDiff(n.total.byOpMethod, r.total.byOpMethod);
-    judgments[scenario] = judgeScenario(n, r);
+    judgments[scenario] = judgeScenario(n, r, nativeOpsAnywhere);
   }
   diff.all = opDiff(perCondition.native.total.byOpMethod, perCondition.r1.total.byOpMethod);
 

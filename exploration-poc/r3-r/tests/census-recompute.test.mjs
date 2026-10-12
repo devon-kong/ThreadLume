@@ -190,3 +190,36 @@ test("G0-C 分场景独立判断：一个场景违规即整体 FAIL，其余场�
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("G0-C 跨场景佐证：X 原生操作在其它场景出现过 → r1 窗口再现是时间差噪声不是违规", () => {
+  const dir = mkdtempSync(join(tmpdir(), "r3r-recompute-"));
+  try {
+    // viewer_context-style op: native uses it heavily in first-nav, not in spa;
+    // an r1 spa window catches one — natural variance, not an extension call
+    writeEvidence(dir, "native", "first-nav", 1, [GQL("TweetDetail"), { cat: "rest", op: "/i/api/1.1/graphql/viewer_context.json", method: "POST", rel: 10 }]);
+    writeEvidence(dir, "r1", "first-nav", 1, [GQL("TweetDetail"), { cat: "rest", op: "/i/api/1.1/graphql/viewer_context.json", method: "POST", rel: 10 }]);
+    writeEvidence(dir, "native", "spa", 1, [GQL("TweetDetail")]);
+    writeEvidence(dir, "r1", "spa", 1, [GQL("TweetDetail"), { cat: "rest", op: "/i/api/1.1/graphql/viewer_context.json", method: "POST", rel: 5700 }]);
+    const result = recompute(dir);
+    assert.equal(result.verdict.pass, true, "an X-native op seen in other native windows is timing variance");
+    assert.equal(result.verdict.violations.length, 0);
+    assert.ok(result.verdict.flags.some((f) => f.rule === "F2-native-op-timing"), "reported as an explained flag");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("G0-C 跨场景佐证不豁免真正的新增操作：全普查原生从未出现 → 仍 FAIL", () => {
+  const dir = mkdtempSync(join(tmpdir(), "r3r-recompute-"));
+  try {
+    writeEvidence(dir, "native", "first-nav", 1, [GQL("TweetDetail")]);
+    writeEvidence(dir, "r1", "first-nav", 1, [GQL("TweetDetail")]);
+    writeEvidence(dir, "native", "spa", 1, [GQL("TweetDetail")]);
+    writeEvidence(dir, "r1", "spa", 1, [GQL("TweetDetail"), GQL("UserTweets")]);
+    const result = recompute(dir);
+    assert.equal(result.verdict.pass, false, "an op never seen natively anywhere stays a V1 violation");
+    assert.ok(result.verdict.violations.some((v) => v.rule === "V1-new-api-op"));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});

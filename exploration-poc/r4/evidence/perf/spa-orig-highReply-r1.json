@@ -13,21 +13,21 @@
  },
  "clicks": [
   {
-   "t": 21915.700000047684,
+   "t": 21413.300000071526,
    "x": 615,
-   "y": 707
+   "y": 812
   }
  ],
- "clickAt": 21915.700000047684,
- "escAt": 38282.200000047684,
- "t1": 2181,
+ "clickAt": 21413.300000071526,
+ "escAt": 37153.700000047684,
+ "t1": 1225,
  "paint": {
   "overlayFirstAt": 83,
   "paneFirstAt": null,
   "bodyFirstAt": 83,
   "snapText": "Peek\n正在加载原帖\n\n正在通过当前登录的 X 会话读取帖子数据\n\n正在加载评论\n\n正在通过当前登录的 X 会话读取帖子数据"
  },
- "t2": 2181,
+ "t2": 1225,
  "t3": {
   "origTools": true,
   "origComposer": false,
@@ -37,7 +37,7 @@
   "paneOpen": false
  },
  "t4": {
-  "closedAt": 68,
+  "closedAt": 65,
   "feedAt": 137,
   "preScrollY": 6400,
   "restoredScrollY": 6400,
@@ -45,13 +45,15 @@
   "restored": true
  },
  "t5": {
-  "longtasks": [],
-  "longtaskTotal": 0,
+  "longtasks": [
+   57
+  ],
+  "longtaskTotal": 57,
   "videoPlayingAt": null
  },
  "routeDetect": null,
  "network": {
-  "requestCount": 87,
+  "requestCount": 86,
   "requests": [
    {
     "cat": "other",
@@ -66,514 +68,508 @@
     "rel": 82
    },
    {
-    "cat": "rest",
-    "op": "/i/api/1.1/graphql/viewer_context.json",
-    "method": "POST",
-    "rel": 143
-   },
-   {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 2158
+    "rel": 1188
    },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 2160
+    "rel": 1192
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2163
+    "rel": 1200
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2163
+    "rel": 1200
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2163
+    "rel": 1200
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2163
+    "rel": 1200
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2163
+    "rel": 1200
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2163
+    "rel": 1200
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2163
+    "rel": 1200
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2163
+    "rel": 1200
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2163
+    "rel": 1200
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2163
+    "rel": 1200
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2163
+    "rel": 1201
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2163
+    "rel": 1201
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2163
+    "rel": 1201
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2163
+    "rel": 1201
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2163
+    "rel": 1201
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2163
+    "rel": 1201
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2163
+    "rel": 1201
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2163
+    "rel": 1201
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2163
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2163
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2163
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2164
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2164
+    "rel": 1201
    },
    {
     "cat": "media",
     "op": "sticky",
     "method": "GET",
-    "rel": 2164
+    "rel": 1201
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2164
+    "rel": 1201
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2164
+    "rel": 1201
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2164
+    "rel": 1201
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2164
+    "rel": 1201
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2164
+    "rel": 1201
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1201
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1201
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1201
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1201
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1201
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1201
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1201
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1201
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1201
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1201
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1201
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 2178
+    "rel": 1221
    },
    {
     "cat": "media",
     "op": "amplify_video",
     "method": "GET",
-    "rel": 2178
+    "rel": 1221
    },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 2179
+    "rel": 1222
    },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 2179
+    "rel": 1222
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1327
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1328
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1328
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1328
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1431
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1434
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1434
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1438
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1438
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1439
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1439
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1446
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1447
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1456
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1456
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1461
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1461
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1466
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1466
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1470
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1470
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1477
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1478
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1482
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1482
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1486
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1486
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1491
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1491
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1496
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1496
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1502
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1503
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1508
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1509
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1513
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1513
+   },
+   {
+    "cat": "media",
+    "op": "amplify_video",
+    "method": "GET",
+    "rel": 1516
    },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 2211
+    "rel": 1992
    },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 2211
+    "rel": 1993
    },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 2211
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2300
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2300
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2300
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2300
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2381
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2382
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2382
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2384
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2384
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2384
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2384
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2388
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2388
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2392
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2392
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2400
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2400
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2403
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2403
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2405
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2405
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2406
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2406
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2409
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2409
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2411
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2412
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2414
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2414
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2417
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2417
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2420
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2420
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2423
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2423
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2425
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2425
-   },
-   {
-    "cat": "media",
-    "op": "amplify_video",
-    "method": "GET",
-    "rel": 2426
+    "rel": 1993
    },
    {
     "cat": "graphql",
     "op": "ViewerBadgeCounts",
     "method": "GET",
-    "rel": 8257
+    "rel": 8730
    }
   ]
  }

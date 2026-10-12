@@ -13,21 +13,21 @@
  },
  "clicks": [
   {
-   "t": 16715.099999904633,
-   "x": 578,
+   "t": 14673.5,
+   "x": 582,
    "y": 752
   }
  ],
- "clickAt": 16715.099999904633,
- "escAt": 34149.59999990463,
- "t1": 931,
+ "clickAt": 14673.5,
+ "escAt": 32079.800000071526,
+ "t1": 732,
  "paint": {
-  "overlayFirstAt": 79,
+  "overlayFirstAt": 78,
   "paneFirstAt": null,
-  "bodyFirstAt": 79,
+  "bodyFirstAt": 78,
   "snapText": "Peek\n正在加载原帖\n\n正在通过当前登录的 X 会话读取帖子数据\n\n正在加载评论\n\n正在通过当前登录的 X 会话读取帖子数据"
  },
- "t2": 931,
+ "t2": 732,
  "t3": {
   "origTools": true,
   "origComposer": false,
@@ -37,8 +37,8 @@
   "paneOpen": false
  },
  "t4": {
-  "closedAt": 62,
-  "feedAt": 119,
+  "closedAt": 59,
+  "feedAt": 121,
   "preScrollY": 2800,
   "restoredScrollY": 2800,
   "anchorDelta": 0,
@@ -51,67 +51,73 @@
  },
  "routeDetect": null,
  "network": {
-  "requestCount": 10,
+  "requestCount": 11,
   "requests": [
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 0
+   },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 0
+    "rel": 25
    },
    {
     "cat": "graphql",
     "op": "TweetDetail",
     "method": "GET",
-    "rel": 78
+    "rel": 101
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 919
+    "rel": 741
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 919
+    "rel": 741
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 919
+    "rel": 741
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 919
+    "rel": 741
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 919
+    "rel": 741
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 919
+    "rel": 741
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 919
+    "rel": 741
    },
    {
     "cat": "graphql",
     "op": "ViewerBadgeCounts",
     "method": "GET",
-    "rel": 13494
+    "rel": 15539
    }
   ]
  }

@@ -13,18 +13,18 @@
  },
  "clicks": [
   {
-   "t": 22931.699999928474,
+   "t": 21027.200000047684,
    "x": 665,
    "y": 755
   }
  ],
- "clickAt": 22931.699999928474,
- "escAt": 40347.799999952316,
- "t1": 732,
+ "clickAt": 21027.200000047684,
+ "escAt": 38427,
+ "t1": 584,
  "paint": {
-  "overlayFirstAt": 85,
+  "overlayFirstAt": 76,
   "paneFirstAt": null,
-  "bodyFirstAt": 85,
+  "bodyFirstAt": 76,
   "snapText": "Peek\n正在加载原帖\n\n正在通过当前登录的 X 会话读取帖子数据\n\n正在加载评论\n\n正在通过当前登录的 X 会话读取帖子数据"
  },
  "t2": null,
@@ -37,18 +37,16 @@
   "paneOpen": false
  },
  "t4": {
-  "closedAt": 66,
-  "feedAt": 138,
+  "closedAt": 61,
+  "feedAt": 129,
   "preScrollY": 5600,
   "restoredScrollY": 5600,
   "anchorDelta": 0,
   "restored": true
  },
  "t5": {
-  "longtasks": [
-   51
-  ],
-  "longtaskTotal": 51,
+  "longtasks": [],
+  "longtaskTotal": 0,
   "videoPlayingAt": null
  },
  "routeDetect": null,
@@ -65,31 +63,31 @@
     "cat": "graphql",
     "op": "TweetDetail",
     "method": "GET",
-    "rel": 84
-   },
-   {
-    "cat": "rest",
-    "op": "/i/api/1.1/graphql/viewer_context.json",
-    "method": "POST",
-    "rel": 594
+    "rel": 75
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/strato/column/None/tweetId=2107948362414866685,destinationLanguage=No",
     "method": "GET",
-    "rel": 714
+    "rel": 577
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/graphql/viewer_context.json",
+    "method": "POST",
+    "rel": 765
    },
    {
     "cat": "graphql",
     "op": "TweetDetail",
     "method": "GET",
-    "rel": 1032
+    "rel": 1053
    },
    {
     "cat": "graphql",
     "op": "ViewerBadgeCounts",
     "method": "GET",
-    "rel": 7241
+    "rel": 9134
    }
   ]
  }

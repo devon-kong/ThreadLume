@@ -13,31 +13,31 @@
  },
  "clicks": [
   {
-   "t": 15749.100000023842,
-   "x": 578,
-   "y": 688
+   "t": 17854.600000023842,
+   "x": 582,
+   "y": 752
   }
  ],
- "clickAt": 15749.100000023842,
- "escAt": 31541.5,
- "t1": 36,
+ "clickAt": 17854.600000023842,
+ "escAt": 34140.700000047684,
+ "t1": 84,
  "paint": {
   "overlayFirstAt": null,
-  "paneFirstAt": 36,
-  "bodyFirstAt": 36
+  "paneFirstAt": 84,
+  "bodyFirstAt": 84
  },
- "t2": 1245,
+ "t2": 2046,
  "t3": {
   "origTools": false,
   "origComposer": false,
   "paneActions": true,
-  "nativeComposer": true,
+  "nativeComposer": false,
   "overlayOpen": false,
   "paneOpen": true
  },
  "t4": {
-  "closedAt": 153,
-  "feedAt": 211,
+  "closedAt": 154,
+  "feedAt": 215,
   "preScrollY": 2800,
   "restoredScrollY": 647.5,
   "anchorDelta": 151,
@@ -45,9 +45,9 @@
  },
  "t5": {
   "longtasks": [
-   88
+   93
   ],
-  "longtaskTotal": 88,
+  "longtaskTotal": 93,
   "videoPlayingAt": null
  },
  "routeDetect": {
@@ -55,283 +55,277 @@
   "detectMs": 1
  },
  "network": {
-  "requestCount": 46,
+  "requestCount": 45,
   "requests": [
+   {
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
+    "rel": 0
+   },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 0
+    "rel": 14
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 95
+    "rel": 344
+   },
+   {
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
+    "rel": 344
+   },
+   {
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
+    "rel": 344
+   },
+   {
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
+    "rel": 344
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 124
-   },
-   {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 432
-   },
-   {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 433
-   },
-   {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 433
-   },
-   {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 433
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 439
+    "rel": 345
    },
    {
     "cat": "graphql",
     "op": "TweetDetail",
     "method": "GET",
-    "rel": 439
+    "rel": 345
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/fleetline",
     "method": "GET",
-    "rel": 439
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 753
+    "rel": 345
    },
    {
     "cat": "graphql",
     "op": "getAltTextPromptPreference",
     "method": "GET",
-    "rel": 754
+    "rel": 660
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1007
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 1119
+    "rel": 1011
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1331
+    "rel": 2037
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1331
+    "rel": 2037
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1331
+    "rel": 2037
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1331
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1331
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1331
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1331
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1331
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1331
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1331
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1331
+    "rel": 2037
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/avatar_content",
     "method": "GET",
-    "rel": 1332
+    "rel": 2038
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1353
+    "rel": 2053
    },
    {
     "cat": "media",
-    "op": "media-img",
+    "op": "profile_images",
     "method": "GET",
-    "rel": 1355
+    "rel": 2053
    },
    {
     "cat": "media",
-    "op": "media-img",
+    "op": "profile_images",
     "method": "GET",
-    "rel": 1355
+    "rel": 2067
    },
    {
     "cat": "media",
-    "op": "media-img",
+    "op": "profile_images",
     "method": "GET",
-    "rel": 1355
+    "rel": 2388
    },
    {
     "cat": "media",
-    "op": "media-img",
+    "op": "profile_images",
     "method": "GET",
-    "rel": 1355
+    "rel": 2388
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 2388
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 2388
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 2388
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 2388
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 2388
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 3006
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 2357
+    "rel": 3031
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 3207
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/avatar_content",
     "method": "GET",
-    "rel": 2829
-   },
-   {
-    "cat": "rest",
-    "op": "/i/api/1.1/flow/timeline.json",
-    "method": "POST",
-    "rel": 3102
-   },
-   {
-    "cat": "rest",
-    "op": "/i/api/1.1/flow/timeline.json",
-    "method": "POST",
-    "rel": 6268
+    "rel": 3533
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/graphql/viewer_context.json",
     "method": "POST",
-    "rel": 6848
+    "rel": 4032
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 9269
+    "rel": 6398
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 12271
+    "rel": 9400
    },
    {
     "cat": "graphql",
     "op": "ViewerBadgeCounts",
     "method": "GET",
-    "rel": 14527
+    "rel": 12321
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 15550
+    "rel": 12592
+   },
+   {
+    "cat": "x-page",
+    "op": "/1.1/live_pipeline/update_subscriptions",
+    "method": "POST",
+    "rel": 13858
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 15596
    },
    {
     "cat": "graphql",
     "op": "UserByScreenName",
     "method": "GET",
-    "rel": 15974
+    "rel": 16378
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/avatar_content",
     "method": "GET",
-    "rel": 15974
+    "rel": 16378
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/fleetline",
     "method": "GET",
-    "rel": 15974
+    "rel": 16378
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 15974
+    "rel": 16378
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 16945
+    "rel": 17346
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 18823
+    "rel": 18998
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 18946
+    "rel": 19333
    }
   ]
  }

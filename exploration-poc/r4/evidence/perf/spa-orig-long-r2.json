@@ -13,14 +13,14 @@
  },
  "clicks": [
   {
-   "t": 21017.700000047684,
+   "t": 20187.899999976158,
    "x": 665,
-   "y": 775
+   "y": 795
   }
  ],
- "clickAt": 21017.700000047684,
- "escAt": 38437.300000071526,
- "t1": 710,
+ "clickAt": 20187.899999976158,
+ "escAt": 37611.199999928474,
+ "t1": 603,
  "paint": {
   "overlayFirstAt": 82,
   "paneFirstAt": null,
@@ -37,8 +37,8 @@
   "paneOpen": false
  },
  "t4": {
-  "closedAt": 64,
-  "feedAt": 134,
+  "closedAt": 57,
+  "feedAt": 130,
   "preScrollY": 5600,
   "restoredScrollY": 5600,
   "anchorDelta": 0,
@@ -51,49 +51,55 @@
  },
  "routeDetect": null,
  "network": {
-  "requestCount": 7,
+  "requestCount": 8,
   "requests": [
-   {
-    "cat": "rest",
-    "op": "/i/api/1.1/flow/timeline.json",
-    "method": "POST",
-    "rel": 0
-   },
    {
     "cat": "other",
     "op": "data",
     "method": "GET",
-    "rel": 62
+    "rel": 0
    },
    {
     "cat": "graphql",
     "op": "TweetDetail",
     "method": "GET",
-    "rel": 143
+    "rel": 80
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/strato/column/None/tweetId=2107948362414866685,destinationLanguage=No",
     "method": "GET",
-    "rel": 765
+    "rel": 596
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 917
    },
    {
     "cat": "graphql",
     "op": "TweetDetail",
     "method": "GET",
-    "rel": 1098
+    "rel": 1036
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 1263
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/graphql/viewer_context.json",
     "method": "POST",
-    "rel": 1616
+    "rel": 2032
    },
    {
     "cat": "graphql",
     "op": "ViewerBadgeCounts",
     "method": "GET",
-    "rel": 9212
+    "rel": 9975
    }
   ]
  }

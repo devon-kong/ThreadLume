@@ -13,31 +13,31 @@
  },
  "clicks": [
   {
-   "t": 13468,
-   "x": 578,
+   "t": 13468.899999976158,
+   "x": 582,
    "y": 752
   }
  ],
- "clickAt": 13468,
- "escAt": 25859.100000023842,
- "t1": 374,
+ "clickAt": 13468.899999976158,
+ "escAt": 28172.700000047684,
+ "t1": 372,
  "paint": {
   "overlayFirstAt": null,
   "paneFirstAt": null,
-  "bodyFirstAt": 374
+  "bodyFirstAt": 372
  },
- "t2": 2023,
+ "t2": 2013,
  "t3": {
   "origTools": false,
   "origComposer": false,
   "paneActions": false,
-  "nativeComposer": false,
+  "nativeComposer": true,
   "overlayOpen": false,
   "paneOpen": false
  },
  "t4": {
-  "closedAt": 56,
-  "feedAt": 462,
+  "closedAt": 54,
+  "feedAt": 449,
   "preScrollY": 2800,
   "restoredScrollY": 647.5,
   "anchorDelta": 151,
@@ -45,14 +45,15 @@
  },
  "t5": {
   "longtasks": [
-   84
+   50,
+   79
   ],
-  "longtaskTotal": 84,
+  "longtaskTotal": 129,
   "videoPlayingAt": null
  },
  "routeDetect": null,
  "network": {
-  "requestCount": 59,
+  "requestCount": 54,
   "requests": [
    {
     "cat": "x-page",
@@ -64,349 +65,319 @@
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 71
+    "rel": 83
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 400
+    "rel": 407
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 410
+    "rel": 420
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 410
+    "rel": 420
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 410
+    "rel": 420
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 411
+    "rel": 420
    },
    {
     "cat": "graphql",
     "op": "TweetDetail",
     "method": "GET",
-    "rel": 412
+    "rel": 422
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/fleetline",
     "method": "GET",
-    "rel": 412
+    "rel": 422
    },
    {
     "cat": "graphql",
     "op": "getAltTextPromptPreference",
     "method": "GET",
-    "rel": 436
+    "rel": 450
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 1018
+    "rel": 1017
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 1091
+    "rel": 1092
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2085
+    "rel": 2091
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2086
+    "rel": 2091
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2086
+    "rel": 2091
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/avatar_content",
     "method": "GET",
-    "rel": 2086
+    "rel": 2091
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2108
+    "rel": 2120
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2108
+    "rel": 2120
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2129
+    "rel": 2158
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2154
+    "rel": 2173
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2239
+    "rel": 2286
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2240
+    "rel": 2286
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2240
+    "rel": 2286
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 2240
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2240
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 2240
+    "rel": 2286
    },
    {
     "cat": "media",
     "op": "media-img",
     "method": "GET",
-    "rel": 2273
+    "rel": 2330
    },
    {
     "cat": "media",
     "op": "media-img",
     "method": "GET",
-    "rel": 2273
+    "rel": 2330
    },
    {
     "cat": "media",
     "op": "media-img",
     "method": "GET",
-    "rel": 2273
+    "rel": 2330
    },
    {
     "cat": "media",
     "op": "media-img",
     "method": "GET",
-    "rel": 2273
+    "rel": 2330
    },
    {
     "cat": "media",
     "op": "media-img",
     "method": "GET",
-    "rel": 2273
-   },
-   {
-    "cat": "media",
-    "op": "media-img",
-    "method": "GET",
-    "rel": 2273
+    "rel": 2330
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 3092
+    "rel": 3095
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/avatar_content",
     "method": "GET",
-    "rel": 3595
+    "rel": 3596
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 4318
+    "rel": 4163
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 6633
-   },
-   {
-    "cat": "x-page",
-    "op": "/1.1/live_pipeline/update_subscriptions",
-    "method": "POST",
-    "rel": 8954
+    "rel": 8683
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/graphql/viewer_context.json",
     "method": "POST",
-    "rel": 9105
+    "rel": 9240
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 9641
-   },
-   {
-    "cat": "x-page",
-    "op": "/1.1/live_pipeline/update_subscriptions",
-    "method": "POST",
-    "rel": 12116
+    "rel": 11685
    },
    {
     "cat": "graphql",
     "op": "UserByScreenName",
     "method": "GET",
-    "rel": 12847
+    "rel": 15169
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/fleetline",
     "method": "GET",
-    "rel": 12847
+    "rel": 15169
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 12847
+    "rel": 15169
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 13189
+    "rel": 15460
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 13189
+    "rel": 15460
    },
    {
     "cat": "media",
     "op": "media-img",
     "method": "GET",
-    "rel": 13189
+    "rel": 15460
    },
    {
     "cat": "media",
     "op": "media-img",
     "method": "GET",
-    "rel": 13189
+    "rel": 15460
    },
    {
     "cat": "media",
     "op": "media-img",
     "method": "GET",
-    "rel": 13212
+    "rel": 15484
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 13818
+    "rel": 16145
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 15262
+    "rel": 16663
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 15263
-   },
-   {
-    "cat": "media",
-    "op": "media-img",
-    "method": "GET",
-    "rel": 15286
-   },
-   {
-    "cat": "media",
-    "op": "media-img",
-    "method": "GET",
-    "rel": 15286
-   },
-   {
-    "cat": "media",
-    "op": "media-img",
-    "method": "GET",
-    "rel": 15286
-   },
-   {
-    "cat": "media",
-    "op": "media-img",
-    "method": "GET",
-    "rel": 15286
-   },
-   {
-    "cat": "rest",
-    "op": "/i/api/1.1/flow/timeline.json",
-    "method": "POST",
-    "rel": 15818
-   },
-   {
-    "cat": "x-page",
-    "op": "/1.1/live_pipeline/update_subscriptions",
-    "method": "POST",
-    "rel": 16267
+    "rel": 16663
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/graphql/viewer_context.json",
     "method": "POST",
-    "rel": 16717
+    "rel": 16732
    },
    {
     "cat": "graphql",
     "op": "ViewerBadgeCounts",
     "method": "GET",
-    "rel": 16743
+    "rel": 16757
+   },
+   {
+    "cat": "x-page",
+    "op": "/1.1/live_pipeline/update_subscriptions",
+    "method": "POST",
+    "rel": 17671
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 17688
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 17688
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 17688
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 17689
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 18132
    }
   ]
  }

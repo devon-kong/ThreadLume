@@ -13,31 +13,31 @@
  },
  "clicks": [
   {
-   "t": 13439.799999952316,
-   "x": 578,
+   "t": 16679.099999904633,
+   "x": 582,
    "y": 752
   }
  ],
- "clickAt": 13439.799999952316,
- "escAt": 30409.600000023842,
- "t1": 76,
+ "clickAt": 16679.099999904633,
+ "escAt": 30014.5,
+ "t1": 77,
  "paint": {
   "overlayFirstAt": null,
-  "paneFirstAt": 76,
-  "bodyFirstAt": 76
+  "paneFirstAt": 77,
+  "bodyFirstAt": 77
  },
- "t2": 1306,
+ "t2": 2029,
  "t3": {
   "origTools": false,
   "origComposer": false,
   "paneActions": true,
-  "nativeComposer": false,
+  "nativeComposer": true,
   "overlayOpen": false,
   "paneOpen": true
  },
  "t4": {
-  "closedAt": 146,
-  "feedAt": 208,
+  "closedAt": 142,
+  "feedAt": 217,
   "preScrollY": 2800,
   "restoredScrollY": 647.5,
   "anchorDelta": 151,
@@ -45,330 +45,365 @@
  },
  "t5": {
   "longtasks": [
-   51,
-   82
+   84
   ],
-  "longtaskTotal": 133,
+  "longtaskTotal": 84,
   "videoPlayingAt": null
  },
  "routeDetect": {
   "pane": true,
-  "detectMs": 1
+  "detectMs": 2
  },
  "network": {
-  "requestCount": 52,
+  "requestCount": 58,
   "requests": [
    {
-    "cat": "x-page",
-    "op": "/1.1/live_pipeline/update_subscriptions",
-    "method": "POST",
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
     "rel": 0
    },
    {
-    "cat": "media",
-    "op": "responsive-web",
-    "method": "GET",
-    "rel": 31
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 14
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 378
+    "rel": 345
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 378
+    "rel": 345
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 378
+    "rel": 345
    },
    {
     "cat": "media",
     "op": "responsive-web",
     "method": "GET",
-    "rel": 378
+    "rel": 345
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 380
+    "rel": 346
    },
    {
     "cat": "graphql",
     "op": "TweetDetail",
     "method": "GET",
-    "rel": 381
+    "rel": 347
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/fleetline",
     "method": "GET",
-    "rel": 381
+    "rel": 347
    },
    {
     "cat": "graphql",
     "op": "getAltTextPromptPreference",
     "method": "GET",
-    "rel": 406
-   },
-   {
-    "cat": "rest",
-    "op": "/i/api/1.1/flow/timeline.json",
-    "method": "POST",
-    "rel": 977
+    "rel": 373
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1042
+    "rel": 1004
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 1049
+    "rel": 1018
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1332
+    "rel": 2019
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1333
+    "rel": 2020
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1333
+    "rel": 2020
    },
    {
     "cat": "media",
     "op": "profile_images",
     "method": "GET",
-    "rel": 1333
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1333
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1333
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1333
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1333
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1333
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1333
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1333
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1333
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 1333
+    "rel": 2020
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/avatar_content",
     "method": "GET",
-    "rel": 1333
+    "rel": 2020
    },
    {
     "cat": "media",
-    "op": "media-img",
+    "op": "profile_images",
     "method": "GET",
-    "rel": 1362
+    "rel": 2044
    },
    {
     "cat": "media",
-    "op": "media-img",
+    "op": "profile_images",
     "method": "GET",
-    "rel": 1362
+    "rel": 2044
    },
    {
-    "cat": "x-page",
-    "op": "/1.1/live_pipeline/update_subscriptions",
-    "method": "POST",
-    "rel": 2335
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 2074
    },
    {
-    "cat": "rest",
-    "op": "/i/api/fleets/v1/avatar_content",
+    "cat": "media",
+    "op": "profile_images",
     "method": "GET",
-    "rel": 2837
+    "rel": 2384
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 2384
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 2384
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 2384
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 2384
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 2384
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 2384
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 4053
-   },
-   {
-    "cat": "rest",
-    "op": "/i/api/1.1/flow/timeline.json",
-    "method": "POST",
-    "rel": 6218
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 6389
-   },
-   {
-    "cat": "media",
-    "op": "profile_images",
-    "method": "GET",
-    "rel": 6389
-   },
-   {
-    "cat": "rest",
-    "op": "/i/api/fleets/v1/avatar_content",
-    "method": "GET",
-    "rel": 6389
-   },
-   {
-    "cat": "media",
-    "op": "media-img",
-    "method": "GET",
-    "rel": 7210
-   },
-   {
-    "cat": "media",
-    "op": "media-img",
-    "method": "GET",
-    "rel": 7210
+    "rel": 3005
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 7392
+    "rel": 3021
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 3231
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 3231
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 3231
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 3232
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 3232
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/fleets/v1/avatar_content",
+    "method": "GET",
+    "rel": 3523
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/graphql/viewer_context.json",
     "method": "POST",
-    "rel": 9181
+    "rel": 5370
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 9230
+    "rel": 6233
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 12565
-   },
-   {
-    "cat": "x-page",
-    "op": "/1.1/live_pipeline/update_subscriptions",
-    "method": "POST",
-    "rel": 13728
+    "rel": 6409
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 15567
-   },
-   {
-    "cat": "x-page",
-    "op": "/1.1/live_pipeline/update_subscriptions",
-    "method": "POST",
-    "rel": 15833
-   },
-   {
-    "cat": "graphql",
-    "op": "ViewerBadgeCounts",
-    "method": "GET",
-    "rel": 16732
+    "rel": 9412
    },
    {
     "cat": "graphql",
     "op": "UserByScreenName",
     "method": "GET",
-    "rel": 17082
+    "rel": 13415
    },
    {
     "cat": "rest",
     "op": "/i/api/fleets/v1/fleetline",
     "method": "GET",
-    "rel": 17082
-   },
-   {
-    "cat": "x-page",
-    "op": "/1.1/live_pipeline/update_subscriptions",
-    "method": "POST",
-    "rel": 18053
+    "rel": 13415
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 18568
+    "rel": 13415
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/graphql/viewer_context.json",
+    "method": "POST",
+    "rel": 13471
+   },
+   {
+    "cat": "graphql",
+    "op": "ViewerBadgeCounts",
+    "method": "GET",
+    "rel": 13478
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 14011
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 14011
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 14011
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 14011
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 14036
    },
    {
     "cat": "x-page",
     "op": "/1.1/live_pipeline/update_subscriptions",
     "method": "POST",
-    "rel": 20729
+    "rel": 14396
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 16085
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 16085
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 16085
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 16119
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 16119
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 16119
    },
    {
     "cat": "rest",
     "op": "/i/api/1.1/flow/timeline.json",
     "method": "POST",
-    "rel": 21679
+    "rel": 16375
+   },
+   {
+    "cat": "x-page",
+    "op": "/1.1/live_pipeline/update_subscriptions",
+    "method": "POST",
+    "rel": 17085
    }
   ]
  }
