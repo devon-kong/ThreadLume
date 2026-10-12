@@ -4,10 +4,14 @@
 # The payload executes AFTER registration in the same invocation and may use
 # `task`, `page`, REG_POC(), NET_SNAPSHOT(), DETAIL_PROBE(id). Usage:
 #   exploration-poc/r3/run.sh payload.js
+# Repo root is derived from this script's location (E1: no absolute paths),
+# so the harness works from any checkout or worktree.
 set -e
-PAYLOAD="$1"
-ROOT="/Users/devon/claude/peek-main"
+PAYLOAD="$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+# ego-browser's Node runtime does not inherit shell env vars, so the repo root
+# is injected by substituting the __PEEK_REPO_ROOT__ placeholder at concat time.
 OUT="/tmp/r3-harness-$$.mjs"
-cat "${ROOT}/exploration-poc/r3/_prelude.js" "${PAYLOAD}" > "${OUT}"
+sed "s|__PEEK_REPO_ROOT__|${ROOT}|g" "${ROOT}/exploration-poc/r3/_prelude.js" "${PAYLOAD}" > "${OUT}"
 ego-browser nodejs < "${OUT}"
 rm -f "${OUT}"

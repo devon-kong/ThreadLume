@@ -1,0 +1,177 @@
+{
+  "meta": {
+    "tool": "exploration-poc/r3/network-census.mjs (R3-R fixed classifier)",
+    "recordedAt": "2026-10-12T07:07:35.812Z",
+    "session": "ego-browser logged-in shared session (task space 14)",
+    "sample": "x.com/gefei55/status/2109304575786393643 (public post)",
+    "scenario": "spa",
+    "round": 1,
+    "condition": "r1",
+    "sanitized": "no URLs, no query strings, no headers, no bodies, no credentials",
+    "clickedPath": "/gefei55/status/1760839985715204230",
+    "spaNavigated": true,
+    "paneBuilt": true
+  },
+  "summary": {
+    "apiTotal": 8,
+    "graphqlTotal": 2,
+    "restTotal": 6,
+    "categories": {
+      "media": 12,
+      "rest": 6,
+      "graphql": 2,
+      "x-page": 3
+    },
+    "byOp": {
+      "media:responsive-web": 6,
+      "media:profile_images": 5,
+      "rest:/i/api/1.1/flow/timeline.json": 4,
+      "x-page:/1.1/live_pipeline/update_subscriptions": 3,
+      "graphql:getAltTextPromptPreference": 1,
+      "graphql:TweetDetail": 1,
+      "media:media-img": 1,
+      "rest:/i/api/fleets/v1/avatar_content": 1,
+      "rest:/i/api/fleets/v1/fleetline": 1
+    }
+  },
+  "requests": [
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 0
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/1.1/flow/timeline.json",
+      "method": "POST",
+      "rel": 11
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 343
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 343
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 343
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 343
+    },
+    {
+      "cat": "graphql",
+      "op": "TweetDetail",
+      "method": "GET",
+      "rel": 345
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/fleets/v1/fleetline",
+      "method": "GET",
+      "rel": 346
+    },
+    {
+      "cat": "graphql",
+      "op": "getAltTextPromptPreference",
+      "method": "GET",
+      "rel": 375
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 1037
+    },
+    {
+      "cat": "x-page",
+      "op": "/1.1/live_pipeline/update_subscriptions",
+      "method": "POST",
+      "rel": 1041
+    },
+    {
+      "cat": "media",
+      "op": "profile_images",
+      "method": "GET",
+      "rel": 1345
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/1.1/flow/timeline.json",
+      "method": "POST",
+      "rel": 1348
+    },
+    {
+      "cat": "media",
+      "op": "profile_images",
+      "method": "GET",
+      "rel": 2476
+    },
+    {
+      "cat": "media",
+      "op": "profile_images",
+      "method": "GET",
+      "rel": 2476
+    },
+    {
+      "cat": "media",
+      "op": "profile_images",
+      "method": "GET",
+      "rel": 2476
+    },
+    {
+      "cat": "media",
+      "op": "media-img",
+      "method": "GET",
+      "rel": 2495
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/1.1/flow/timeline.json",
+      "method": "POST",
+      "rel": 2993
+    },
+    {
+      "cat": "media",
+      "op": "profile_images",
+      "method": "GET",
+      "rel": 3471
+    },
+    {
+      "cat": "x-page",
+      "op": "/1.1/live_pipeline/update_subscriptions",
+      "method": "POST",
+      "rel": 3471
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/fleets/v1/avatar_content",
+      "method": "GET",
+      "rel": 3975
+    },
+    {
+      "cat": "x-page",
+      "op": "/1.1/live_pipeline/update_subscriptions",
+      "method": "POST",
+      "rel": 4479
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/1.1/flow/timeline.json",
+      "method": "POST",
+      "rel": 5993
+    }
+  ]
+}

@@ -1,0 +1,1077 @@
+{
+  "meta": {
+    "tool": "exploration-poc/r3/network-census.mjs (R3-R fixed classifier)",
+    "recordedAt": "2026-10-12T07:07:01.887Z",
+    "session": "ego-browser logged-in shared session (task space 14)",
+    "sample": "x.com/gefei55/status/2109304575786393643 (public post)",
+    "scenario": "revisit",
+    "round": 1,
+    "condition": "native",
+    "sanitized": "no URLs, no query strings, no headers, no bodies, no credentials"
+  },
+  "summary": {
+    "apiTotal": 24,
+    "graphqlTotal": 7,
+    "restTotal": 17,
+    "categories": {
+      "rest": 17,
+      "x-page": 8,
+      "media": 132,
+      "other": 6,
+      "graphql": 7
+    },
+    "byOp": {
+      "media:responsive-web": 117,
+      "media:profile_images": 12,
+      "rest:/i/api/1.1/flow/timeline.json": 7,
+      "rest:/i/api/1.1/graphql/viewer_context.json": 4,
+      "other:blob": 3,
+      "other:data": 2,
+      "rest:/i/api/fleets/v1/avatar_content": 2,
+      "rest:/i/api/fleets/v1/fleetline": 2,
+      "graphql:CreatorStudioTabBarItemQuery": 1,
+      "graphql:DataSaverMode": 1,
+      "graphql:ExploreSidebar": 1,
+      "graphql:getAltTextPromptPreference": 1,
+      "graphql:TweetDetail": 1,
+      "graphql:TweetResultByRestId": 1,
+      "graphql:ViewerBadgeCounts": 1,
+      "media:favicons": 1,
+      "media:media-img": 1,
+      "media:sticky": 1,
+      "other:chrome-extension": 1,
+      "rest:/i/api/1.1/hashflags.json": 1,
+      "rest:/i/api/1.1/promoted_content/log.json": 1,
+      "x-page:/1.1/account/settings.json": 1,
+      "x-page:/1.1/live_pipeline/update_subscriptions": 1,
+      "x-page:/cdn-cgi/challenge-platform/h/g/jsd/oneshot/4df4a60fa397/0.3": 1,
+      "x-page:/cdn-cgi/challenge-platform/scripts/jsd/api.js": 1,
+      "x-page:/cdn-cgi/challenge-platform/scripts/jsd/main.js": 1,
+      "x-page:/gefei55/status/2109304575786393643": 1,
+      "x-page:/live_pipeline/events": 1,
+      "x-page:/manifest.json": 1
+    }
+  },
+  "requests": [
+    {
+      "cat": "rest",
+      "op": "/i/api/1.1/flow/timeline.json",
+      "method": "POST",
+      "rel": 0
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/1.1/flow/timeline.json",
+      "method": "POST",
+      "rel": 4780
+    },
+    {
+      "cat": "x-page",
+      "op": "/gefei55/status/2109304575786393643",
+      "method": "GET",
+      "rel": 4795
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/1.1/flow/timeline.json",
+      "method": "POST",
+      "rel": 4794
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/1.1/flow/timeline.json",
+      "method": "POST",
+      "rel": 4794
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4813
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4813
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4813
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4813
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4813
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4813
+    },
+    {
+      "cat": "x-page",
+      "op": "/cdn-cgi/challenge-platform/scripts/jsd/api.js",
+      "method": "GET",
+      "rel": 4813
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4835
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4835
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4835
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4835
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4846
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4852
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4852
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4853
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4854
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4856
+    },
+    {
+      "cat": "other",
+      "op": "chrome-extension",
+      "method": "GET",
+      "rel": 4856
+    },
+    {
+      "cat": "x-page",
+      "op": "/manifest.json",
+      "method": "GET",
+      "rel": 4859
+    },
+    {
+      "cat": "x-page",
+      "op": "/cdn-cgi/challenge-platform/scripts/jsd/main.js",
+      "method": "GET",
+      "rel": 4863
+    },
+    {
+      "cat": "x-page",
+      "op": "/cdn-cgi/challenge-platform/h/g/jsd/oneshot/4df4a60fa397/0.3",
+      "method": "POST",
+      "rel": 4882
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4892
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4893
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4893
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4893
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4897
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4913
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4913
+    },
+    {
+      "cat": "media",
+      "op": "favicons",
+      "method": "GET",
+      "rel": 4913
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4914
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4922
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4922
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4922
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4923
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4923
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4923
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4927
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4927
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4927
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4932
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4935
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4953
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4954
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4954
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4954
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/1.1/graphql/viewer_context.json",
+      "method": "POST",
+      "rel": 4960
+    },
+    {
+      "cat": "graphql",
+      "op": "DataSaverMode",
+      "method": "GET",
+      "rel": 4960
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/1.1/hashflags.json",
+      "method": "GET",
+      "rel": 4960
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/1.1/flow/timeline.json",
+      "method": "POST",
+      "rel": 4960
+    },
+    {
+      "cat": "x-page",
+      "op": "/1.1/account/settings.json",
+      "method": "GET",
+      "rel": 4960
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/1.1/graphql/viewer_context.json",
+      "method": "POST",
+      "rel": 4960
+    },
+    {
+      "cat": "graphql",
+      "op": "CreatorStudioTabBarItemQuery",
+      "method": "GET",
+      "rel": 4960
+    },
+    {
+      "cat": "graphql",
+      "op": "TweetDetail",
+      "method": "GET",
+      "rel": 4980
+    },
+    {
+      "cat": "graphql",
+      "op": "TweetResultByRestId",
+      "method": "GET",
+      "rel": 4980
+    },
+    {
+      "cat": "media",
+      "op": "profile_images",
+      "method": "GET",
+      "rel": 4982
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 4999
+    },
+    {
+      "cat": "graphql",
+      "op": "ViewerBadgeCounts",
+      "method": "GET",
+      "rel": 5002
+    },
+    {
+      "cat": "other",
+      "op": "blob",
+      "method": "GET",
+      "rel": 5049
+    },
+    {
+      "cat": "other",
+      "op": "blob",
+      "method": "GET",
+      "rel": 5050
+    },
+    {
+      "cat": "other",
+      "op": "data",
+      "method": "GET",
+      "rel": 5052
+    },
+    {
+      "cat": "other",
+      "op": "blob",
+      "method": "GET",
+      "rel": 5089
+    },
+    {
+      "cat": "other",
+      "op": "data",
+      "method": "GET",
+      "rel": 5087
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5289
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5290
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5290
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5290
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5290
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5290
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5290
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5290
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5291
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5317
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5317
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5321
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5321
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5321
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5321
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/fleets/v1/fleetline",
+      "method": "GET",
+      "rel": 5339
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5419
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5547
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5547
+    },
+    {
+      "cat": "x-page",
+      "op": "/live_pipeline/events",
+      "method": "GET",
+      "rel": 5549
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5553
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5555
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5555
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5555
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5559
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5559
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5559
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5559
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5559
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5562
+    },
+    {
+      "cat": "media",
+      "op": "sticky",
+      "method": "GET",
+      "rel": 5562
+    },
+    {
+      "cat": "graphql",
+      "op": "ExploreSidebar",
+      "method": "GET",
+      "rel": 5563
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/1.1/graphql/viewer_context.json",
+      "method": "POST",
+      "rel": 5563
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/fleets/v1/avatar_content",
+      "method": "GET",
+      "rel": 5585
+    },
+    {
+      "cat": "media",
+      "op": "profile_images",
+      "method": "GET",
+      "rel": 5586
+    },
+    {
+      "cat": "media",
+      "op": "media-img",
+      "method": "GET",
+      "rel": 5586
+    },
+    {
+      "cat": "graphql",
+      "op": "getAltTextPromptPreference",
+      "method": "GET",
+      "rel": 5617
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/1.1/graphql/viewer_context.json",
+      "method": "POST",
+      "rel": 5617
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/fleets/v1/fleetline",
+      "method": "GET",
+      "rel": 5619
+    },
+    {
+      "cat": "media",
+      "op": "profile_images",
+      "method": "GET",
+      "rel": 5623
+    },
+    {
+      "cat": "media",
+      "op": "profile_images",
+      "method": "GET",
+      "rel": 5660
+    },
+    {
+      "cat": "media",
+      "op": "profile_images",
+      "method": "GET",
+      "rel": 5660
+    },
+    {
+      "cat": "media",
+      "op": "profile_images",
+      "method": "GET",
+      "rel": 5660
+    },
+    {
+      "cat": "media",
+      "op": "profile_images",
+      "method": "GET",
+      "rel": 5660
+    },
+    {
+      "cat": "media",
+      "op": "profile_images",
+      "method": "GET",
+      "rel": 5660
+    },
+    {
+      "cat": "media",
+      "op": "profile_images",
+      "method": "GET",
+      "rel": 5661
+    },
+    {
+      "cat": "media",
+      "op": "profile_images",
+      "method": "GET",
+      "rel": 5703
+    },
+    {
+      "cat": "media",
+      "op": "profile_images",
+      "method": "GET",
+      "rel": 5716
+    },
+    {
+      "cat": "media",
+      "op": "profile_images",
+      "method": "GET",
+      "rel": 5716
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5980
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5980
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 5981
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/1.1/promoted_content/log.json",
+      "method": "POST",
+      "rel": 6101
+    },
+    {
+      "cat": "x-page",
+      "op": "/1.1/live_pipeline/update_subscriptions",
+      "method": "POST",
+      "rel": 6552
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/fleets/v1/avatar_content",
+      "method": "GET",
+      "rel": 7088
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/1.1/flow/timeline.json",
+      "method": "POST",
+      "rel": 7934
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 9935
+    },
+    {
+      "cat": "media",
+      "op": "responsive-web",
+      "method": "GET",
+      "rel": 9940
+    },
+    {
+      "cat": "rest",
+      "op": "/i/api/1.1/flow/timeline.json",
+      "method": "POST",
+      "rel": 11081
+    }
+  ]
+}

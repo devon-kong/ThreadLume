@@ -1,31 +1,34 @@
-// Peek Native Carrier PoC v3 — third-round functional fixes (R3 S5).
+// Peek Native Carrier PoC v4 — R3-R correctness fixes (races + extraction).
 // ISOLATED content script, detail pages only. Zero permissions, zero internal-API calls.
 //
-// v3 changes over round-2 v2 (all driven by R3 measured evidence):
-//  1. The native focal cell is NO LONGER hidden. R3 measured four defects caused by
-//     hiding it: (a) rich-media detection races hydration, so video/poll/card cells
-//     were hidden with no note; (b) the poll-cycle re-tag re-hid cells even when rich
-//     was detected at build time; (c) the hidden cell reserved its full height, leaving
-//     a large blank region at the top of the replies column; (d) the focal post's own
-//     native action bar / hover card / composer became unreachable, so interactions had
-//     to rely on synthetic delegation. Keeping the cell visible removes all four and
-//     makes every interaction a real user click on a real X control (class-A). The left
-//     pane stays as the 52vw reading copy; the right column top is the interactive
-//     original. Duplication is the documented trade-off.
-//  2. Pane action buttons no longer delegate via synthetic .click(). They scroll the
-//     native focal cell into view and pulse-highlight the corresponding native button;
-//     the user performs the write themselves. Reply scrolls to and focuses the native
-//     composer. Copy-link keeps using the clipboard API (no X request involved).
-//  3. X Articles get a dedicated extraction path: twitter-article-title +
-//     twitterArticleRichTextView + inline tweetPhoto images. The logged-out-style
-//     fallback (which leaked engagement-count lines into the text) is now only used
-//     when no dedicated node exists, and filters count-only lines.
-//  4. Premium ultra-long focal posts: if X collapsed the text behind a "show more"
-//     link, the PoC clicks it once at build time (a display expansion, like a user
-//     reading — not an account write) and extracts the expanded text.
-//  5. Handle rendering: href-derived handles render as "@name" without the leading
-//     slash.
-//  6. Quote text: drop a leading author-name line that duplicates the quote author.
+// v4 changes over round-3 v3 (all driven by the R3-R acceptance findings):
+//  1. Generation-based cancellation. removeReader() now bumps the generation
+//     counter, so a buildReader() still awaiting the focal DOM (or an expand-
+//     show-more wait) dies immediately instead of mounting a stale pane after
+//     teardown. buildReader() re-verifies the URL against its focal id before
+//     every attempt and again right before rendering; the pane carries
+//     data-status-id and checkRoute removes/rebuilds it if the ids diverge.
+//  2. Bounded recovery. A build that times out (React hydration slower than
+//     the wait budget) schedules at most RECOVERY_MAX_ROUNDS retries spaced
+//     RECOVERY_DELAY_MS apart, driven by the existing route tick. No unbounded
+//     background loop; a fully failed route stays dormant until navigation.
+//  3. Clear resource ownership. Every setTimeout that later touches the DOM
+//     (pulse highlight, reply focus) is registered in ownedTimers and cleared
+//     by removeReader(). The fixed setInterval route poll became a single
+//     exception-safe self-rescheduling timer: 500ms while a detail page or
+//     pane is live, 2000ms otherwise (SPA navigation is still detected
+//     instantly via popstate + Navigation API; the poll is the safety net).
+//  4. Extraction correctness. Quote cards are found structurally (role=link
+//     divs minus card.wrapper, preferring the nested tweetText/User-Name
+//     shape), main-post photos exclude the quote and website-card subtrees,
+//     and fallbackText drops only count-shaped lines that provably come from
+//     the action-bar group subtree — a body line like "2026" survives.
+//
+// v3 changes (kept): native focal cell stays visible; pane action buttons
+// locate/highlight native controls instead of synthetic writes; dedicated
+// X Article extraction; one display expansion for Premium show-more; href-
+// derived handles render without the leading slash; quote text drops a
+// duplicated leading author line.
 
 (() => {
   "use strict";
@@ -36,12 +39,24 @@
   const NS = "peek-poc";
   const PANE_ID = `${NS}-pane`;
   const STYLE_ID = `${NS}-style`;
-  const ROUTE_POLL_MS = 500;
+  const ROUTE_POLL_ACTIVE_MS = 500;  // detail page open or pane mounted
+  const ROUTE_POLL_IDLE_MS = 2000;   // plain X pages, enhancement dormant
+  const BUILD_POLL_MS = 500;         // per DOM-wait attempt
+  const BUILD_MAX_ATTEMPTS = 30;     // 15s budget per build round
+  const RECOVERY_MAX_ROUNDS = 3;     // bounded retries after a failed build
+  const RECOVERY_DELAY_MS = 3000;    // spacing between recovery rounds
   const ESCAPED = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
   let activeStatusId = null;
-  let buildToken = 0;
+  let gen = 0;          // generation: bumped on every build start and every teardown
+  let liveGen = 0;      // generation of the build loop currently awaiting the DOM (0 = none)
+  let recoveryArmed = false;
+  let recoveryLeft = 0;
+  let nextRecoveryAt = 0;
   let themeObserver = null;
+  let routeTimer = 0;
+  const ownedTimers = new Set();
   let sessionNavigated = false; // this document saw an in-session X route change
 
   const statusIdFromPath = () => (location.pathname.match(/\/status\/(\d+)/) || [])[1] || null;
@@ -56,19 +71,44 @@
       activeStatusId = id;
       if (previous !== null || id !== null) sessionNavigated = true;
       if (id) {
-        removeReader();
+        removeReader(); // also invalidates any in-flight build for the old post
         buildReader();
       } else {
         removeReader();
       }
-    } else if (id && document.getElementById(PANE_ID)) {
-      // Bounded maintenance while reading: keep the theme in sync with any
-      // theme-change mutation the observers might miss, and surface a rich-media
-      // note if the video player/poll/card hydrated after the pane was built
-      // (extraction runs once; hydration can land later).
-      applyTheme();
-      syncRichNote();
+    } else if (id) {
+      const pane = document.getElementById(PANE_ID);
+      if (pane) {
+        if (pane.dataset.statusId !== id) {
+          // stale pane (should not happen — every mount re-verifies the URL —
+          // but the invariant "left pane shows the URL's post" is enforced here)
+          removeReader();
+          buildReader();
+        } else {
+          // Bounded maintenance while reading: keep the theme in sync with any
+          // theme-change mutation the observers might miss, and surface a
+          // rich-media note if the video player/poll/card hydrated after the
+          // pane was built (extraction runs once; hydration can land later).
+          applyTheme();
+          syncRichNote();
+        }
+      } else {
+        maybeRecover();
+      }
     }
+  }
+
+  function routeTick() {
+    try {
+      checkRoute();
+    } catch {
+      // the route watch must survive unexpected DOM shapes; next tick retries
+    }
+    scheduleRouteTick();
+  }
+
+  function scheduleRouteTick() {
+    routeTimer = setTimeout(routeTick, isDetailPath() || document.getElementById(PANE_ID) ? ROUTE_POLL_ACTIVE_MS : ROUTE_POLL_IDLE_MS);
   }
 
   // The pane's rich-note is rendered at build time. If the native cell's media
@@ -88,6 +128,9 @@
     pane.querySelector(`.${NS}-counts`)?.before(note);
   }
 
+  // The route poll is the lifecycle owner's safety net; popstate / hashchange /
+  // Navigation API cover real SPA navigation instantly (X navigates via
+  // history.pushState, which does not fire popstate — hence the poll).
   window.addEventListener("popstate", () => queueMicrotask(checkRoute));
   window.addEventListener("hashchange", () => queueMicrotask(checkRoute));
   if (typeof window.navigation?.addEventListener === "function") {
@@ -97,7 +140,7 @@
       window.navigation.addEventListener("navigate", () => queueMicrotask(checkRoute));
     } catch { /* fall back to poll + popstate */ }
   }
-  setInterval(checkRoute, ROUTE_POLL_MS); // bounded correctness net; no X internals
+  scheduleRouteTick();
 
   // ---------- theme ----------
 
@@ -159,8 +202,29 @@
         .some((a) => a.querySelector("time")));
   }
 
-  function photoUrlsIn(scope) {
-    return [...new Set([...scope.querySelectorAll('[data-testid="tweetPhoto"] img, img[src*="pbs.twimg.com/media"]')].map((i) => i.src))];
+  // Photo URLs inside `scope`, skipping any img contained in one of the
+  // `excludes` subtrees. Video posters (ext_tw_video_thumb) and card thumbnails
+  // (card_img) do not match the selector, so they are never attributed as post
+  // photos; quote/card media are excluded structurally by the callers.
+  function photoUrlsIn(scope, ...excludes) {
+    const urls = [];
+    for (const img of scope.querySelectorAll('[data-testid="tweetPhoto"] img, img[src*="pbs.twimg.com/media"]')) {
+      if (excludes.some((ex) => ex && ex.contains(img))) continue;
+      if (!img.src) continue; // half-hydrated media: skip rather than render ""
+      urls.push(img.src);
+    }
+    return [...new Set(urls)];
+  }
+
+  // Quote cards are div[role="link"]; so are website cards. A quote card nests
+  // the quoted author or text (or is the last role=link after media/cards —
+  // X renders quotes at the bottom), and never contains card.wrapper.
+  function findQuoteNode(art) {
+    const isCard = (n) => n.getAttribute("data-testid") === "card.wrapper" || Boolean(n.querySelector('[data-testid="card.wrapper"]'));
+    const candidates = [...art.querySelectorAll('div[role="link"]')].filter((n) => !isCard(n));
+    return candidates.find((n) => n.querySelector('[data-testid="tweetText"], [data-testid="User-Name"]'))
+      || candidates[candidates.length - 1]
+      || null;
   }
 
   // X Articles render title/body in dedicated containers (not tweetText).
@@ -171,13 +235,27 @@
     return { title, text: body.innerText || "", photos: photoUrlsIn(body) };
   }
 
-  // Logged-out / no-testid fallback. Filters UI lines AND count-only lines so the
-  // engagement row ("3\n3\n11\n3,578") never leaks into article/post text.
+  // Logged-out / no-testid fallback. Non-body chrome is skipped POSITIONALLY
+  // (the action-bar group / count nodes, the timestamp, the quote card, cards,
+  // the player are never descended into), so a body line like "2026" or "42"
+  // survives even when it textually equals an engagement count; unknown stays
+  // unknown. No text-equality matching is involved.
   function fallbackText(art) {
-    const UI_LINE = /^(show translation|显示翻译|translate post)$/i;
-    const COUNT_ONLY = /^[\d.,]+\s*[KMkM]?$/;
-    const lines = (art.innerText || "").split("\n").map((l) => l.trim()).filter(Boolean)
-      .filter((l) => !UI_LINE.test(l) && !COUNT_ONLY.test(l));
+    const UI_LINE = /^(show translation|显示翻译|translate post|show more|显示更多)$/i;
+    const SKIP_SEL = '[role="group"], [data-testid="like"], [data-testid="retweet"], [data-testid="reply"], [data-testid="bookmark"], time, div[role="link"], [data-testid="card.wrapper"], [data-testid="videoPlayer"]';
+    const blocks = [];
+    const collect = (node) => {
+      if (node.matches?.(SKIP_SEL)) return; // positionally excluded subtree
+      if (!node.querySelector(SKIP_SEL)) {
+        const text = String(node.innerText || "").trim();
+        if (text) blocks.push(text);
+        return;
+      }
+      for (const child of node.children) collect(child);
+    };
+    collect(art);
+    const lines = blocks.join("\n").split("\n").map((l) => l.trim()).filter(Boolean)
+      .filter((l) => !UI_LINE.test(l));
     const handleIdx = lines.slice(0, 3).findIndex((l) => l.startsWith("@") && l.length <= 20);
     if (handleIdx >= 0) lines.splice(0, handleIdx + 1);
     return lines.join("\n");
@@ -185,22 +263,28 @@
 
   async function expandShowMore(art) {
     // Premium long posts collapse the body behind a show-more link. One display
-    // expansion, bounded to the focal article, mirrors what a reading user does.
+    // expansion, bounded to the focal article (never inside the quote card),
+    // mirrors what a reading user does.
+    const quote = findQuoteNode(art);
     const more = [...art.querySelectorAll('[data-testid="tweet-text-show-more-link"], a[href*="show-more"], [role="button"]')]
+      .filter((el) => !(quote && quote.contains(el)))
       .find((el) => /^(显示更多|Show more)$/i.test((el.innerText || "").trim()));
     if (more) {
       more.click();
-      await new Promise((r) => setTimeout(r, 700));
+      await sleep(700);
     }
   }
 
-  async function extractFocal() {
-    const focalId = statusIdFromPath();
-    if (!focalId) return null;
+  async function extractFocal(focalId, myGen) {
+    if (statusIdFromPath() !== focalId) return null;
     const cell = focalCellByStatusId(focalId);
     const art = cell && (cell.querySelector("article[data-testid='tweet']") || cell.querySelector("article"));
     if (!art) return null;
     await expandShowMore(art);
+    // the show-more wait is an async gap: the route may have moved, or React
+    // virtualization may have recycled the cell — never extract a stale node
+    if (myGen !== gen || statusIdFromPath() !== focalId) return null;
+    if (!cell.isConnected || !art.isConnected) return null;
     return { ...extractFromArticle(art, focalId), nativeCell: cell };
   }
 
@@ -212,8 +296,8 @@
     // rich media the pane mirrors but never hides — the native cell stays visible
     const video = Boolean(art.querySelector('[data-testid="videoPlayer"]')) || Boolean(art.querySelector("video"));
     const poll = Boolean(art.querySelector('[data-testid="poll"], [role="group"] [data-testid="vote"]'));
-    const card = Boolean(art.querySelector('[data-testid="card.wrapper"]'));
-    const quoteNode = art.querySelector('div[role="link"]');
+    const cardNode = art.querySelector('[data-testid="card.wrapper"]');
+    const quoteNode = findQuoteNode(art);
     const quoteAuthorNode = quoteNode?.querySelector('[data-testid="User-Name"]');
     const quoteAuthor = quoteAuthorNode?.innerText.split("\n")[0] || null;
     let quoteText = quoteNode?.querySelector('[data-testid="tweetText"]')?.innerText || "";
@@ -234,7 +318,9 @@
         textSource = "fallback";
       }
     }
-    const photos = article ? [...new Set([...photoUrlsIn(art.querySelector('[data-testid="twitterArticleReadView"]') || art), ...photoUrlsIn(art)])] : photoUrlsIn(art);
+    // main-post photos: everything photo-shaped in the article minus the quote
+    // and website-card subtrees (article body images + article cover included)
+    const photos = photoUrlsIn(art, quoteNode, cardNode);
     return {
       statusId: focalId,
       name: nameNode ? nameNode.innerText.split("\n")[0] : (handle ? handle.slice(1) : "未知作者"),
@@ -249,9 +335,9 @@
       quote: quoteNode ? {
         author: quoteAuthor,
         text: quoteText,
-        photos: [...quoteNode.querySelectorAll('[data-testid="tweetPhoto"] img')].map((i) => i.src)
+        photos: photoUrlsIn(quoteNode)
       } : null,
-      rich: { video, poll, card, article: Boolean(article) },
+      rich: { video, poll, card: Boolean(cardNode), article: Boolean(article) },
       reply: countOf(art, "reply"),
       retweet: countOf(art, "retweet"),
       like: countOf(art, "like"),
@@ -270,6 +356,7 @@
   function renderPane(data) {
     const pane = document.createElement("div");
     pane.id = PANE_ID;
+    pane.dataset.statusId = data.statusId; // invariant: pane shows the URL's post
     const q = data.quote;
     const handleAt = data.handle ? "@" + data.handle.replace(/^\//, "") : "";
     const richLabels = [
@@ -281,7 +368,7 @@
     pane.innerHTML = `
       <header class="${NS}-bar">
         <button class="${NS}-close" title="关闭">✕</button>
-        <span class="${NS}-brand">Peek PoC · 原生承载 v3</span>
+        <span class="${NS}-brand">Peek PoC · 原生承载 v4</span>
         <a class="${NS}-open" target="_blank" rel="noopener" href="https://x.com${ESCAPED(location.pathname)}">在 X 打开</a>
       </header>
       <div class="${NS}-body">
@@ -312,13 +399,24 @@
     document.body.appendChild(pane);
   }
 
+  function ownedTimeout(fn, ms) {
+    const h = setTimeout(() => {
+      ownedTimers.delete(h);
+      fn();
+    }, ms);
+    ownedTimers.add(h);
+    return h;
+  }
+
   function pulse(native) {
     if (!native) return;
     native.scrollIntoView({ block: "center", behavior: "smooth" });
     const prev = native.style.outline;
     native.style.outline = "2px solid var(--peek-accent, #1d9bf0)";
     native.style.outlineOffset = "3px";
-    setTimeout(() => { native.style.outline = prev; }, 1600);
+    ownedTimeout(() => {
+      if (native.isConnected) native.style.outline = prev;
+    }, 1600);
   }
 
   function onAction(event) {
@@ -334,8 +432,9 @@
     if (act === "reply") {
       // reveal the native composer for the focal post (user types and submits themselves)
       cell.scrollIntoView({ block: "start", behavior: "smooth" });
-      setTimeout(() => {
-        cell?.querySelector('[data-testid="tweetTextarea_0"], [data-testid="tweetButtonInline"]')?.focus?.();
+      ownedTimeout(() => {
+        if (!cell.isConnected) return;
+        cell.querySelector('[data-testid="tweetTextarea_0"], [data-testid="tweetButtonInline"]')?.focus?.();
       }, 450);
       return;
     }
@@ -358,17 +457,55 @@
   async function buildReader() {
     const focalId = statusIdFromPath();
     if (!focalId) return;
-    const token = ++buildToken;
-    let data = null;
-    for (let i = 0; i < 30 && token === buildToken; i++) {
-      data = await extractFocal();
-      if (data && data.statusId === focalId) break;
-      data = null;
-      await new Promise((r) => setTimeout(r, 500));
+    const myGen = ++gen;
+    liveGen = myGen;
+    try {
+      let data = null;
+      for (let attempt = 0; attempt < BUILD_MAX_ATTEMPTS && myGen === gen; attempt++) {
+        if (statusIdFromPath() !== focalId) return; // route moved on — die now
+        data = await extractFocal(focalId, myGen);
+        if (data && data.statusId === focalId) break;
+        data = null;
+        await sleep(BUILD_POLL_MS);
+      }
+      if (myGen !== gen) return;             // superseded or torn down
+      if (!data) {                            // same route, DOM never appeared
+        armRecovery();
+        return;
+      }
+      if (statusIdFromPath() !== focalId) return;     // re-verify before render
+      if (document.getElementById(PANE_ID)) return;   // never double-mount
+      mountStyle();
+      renderPane(data);
+      watchTheme();
+      recoveryArmed = false;
+      recoveryLeft = 0;
+    } finally {
+      if (liveGen === myGen) liveGen = 0; // a newer build owns the flag otherwise
     }
-    if (token !== buildToken || !data) return;
-    if (document.getElementById(PANE_ID)) return;
+  }
 
+  // Bounded retry after a timed-out build, driven by the existing route tick.
+  // The budget is armed ONCE per route entry: recovery rounds that fail again
+  // do not re-arm it, so a dead route eventually goes fully dormant until the
+  // next navigation.
+  function armRecovery() {
+    if (recoveryArmed) return;
+    recoveryArmed = true;
+    recoveryLeft = RECOVERY_MAX_ROUNDS;
+    nextRecoveryAt = Date.now() + RECOVERY_DELAY_MS;
+  }
+
+  function maybeRecover() {
+    const id = statusIdFromPath();
+    if (!id || liveGen || document.getElementById(PANE_ID)) return;
+    if (recoveryLeft <= 0 || Date.now() < nextRecoveryAt) return;
+    recoveryLeft--;
+    buildReader();
+  }
+
+  function mountStyle() {
+    if (document.getElementById(STYLE_ID)) return;
     const style = document.createElement("style");
     style.id = STYLE_ID;
     style.textContent = `
@@ -382,17 +519,21 @@
     `;
     document.head.appendChild(style);
     document.documentElement.setAttribute(`data-${NS}`, "on");
-
-    renderPane(data);
-    watchTheme();
   }
 
   function removeReader() {
+    ++gen;        // invalidate any in-flight build task immediately
+    liveGen = 0;
+    recoveryArmed = false;
+    recoveryLeft = 0;
+    nextRecoveryAt = 0;
     document.getElementById(PANE_ID)?.remove();
     document.getElementById(STYLE_ID)?.remove();
     document.documentElement.removeAttribute(`data-${NS}`);
     themeObserver?.disconnect();
     themeObserver = null;
+    for (const h of ownedTimers) clearTimeout(h);
+    ownedTimers.clear();
   }
 
   if (isDetailPath()) {
@@ -400,8 +541,14 @@
     buildReader();
   }
 
-  // test hook: lets the verification harness unit-test the real helpers through CDP
+  // test hook: lets the verification harness unit-test the real helpers through
+  // CDP or the offline jsdom harness; never armed in production
   if (window.__PEEK_POC_TEST__) {
-    window.__peekPocTest = { parseCount, readTheme, statusIdFromPath, fallbackText };
+    window.__peekPocTest = {
+      parseCount, readTheme, statusIdFromPath, fallbackText,
+      countOf, photoUrlsIn, findQuoteNode, extractArticle, extractFromArticle,
+      extractFocal, checkRoute, buildReader, removeReader, syncRichNote,
+      currentGen: () => gen
+    };
   }
 })();

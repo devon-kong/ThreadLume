@@ -7,13 +7,19 @@
 // performance.getEntriesByType is unusable on X — X clears the buffer).
 import { readFile } from "node:fs/promises";
 
-const task = await taskSpace(14);
+let task;
+try {
+  task = await taskSpace(14); // persistent R3 space when it still exists
+} catch {
+  task = await taskSpace("peek r3 harness"); // fresh space after cleanup
+}
 const page = task.page("p1");
 
 let _registered = false;
 async function REG_POC() {
   if (_registered) return;
-  const root = "/Users/devon/claude/peek-main";
+  // run.sh substitutes the placeholder with this checkout's root (E1)
+  const root = "__PEEK_REPO_ROOT__";
   const css = await readFile(`${root}/exploration-poc/mv3-poc/content.css`, "utf8");
   const js = await readFile(`${root}/exploration-poc/mv3-poc/content.js`, "utf8");
   const cssJson = JSON.stringify(css);
