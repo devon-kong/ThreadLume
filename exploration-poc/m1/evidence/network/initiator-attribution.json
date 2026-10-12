@@ -1,0 +1,35 @@
+{
+ "meta": {
+  "probe": "initiator attribution for promoted_content/log.json (sanitized: host only)",
+  "date": "2026-10-13",
+  "roundsPerCondition": 3
+ },
+ "native": [
+  {
+   "initiatorType": "script",
+   "scriptHost": "abs.twimg.com"
+  },
+  {
+   "initiatorType": "script",
+   "scriptHost": "abs.twimg.com"
+  },
+  {
+   "initiatorType": "script",
+   "scriptHost": "abs.twimg.com"
+  }
+ ],
+ "r1": [
+  {
+   "initiatorType": "script",
+   "scriptHost": "abs.twimg.com"
+  },
+  {
+   "initiatorType": "script",
+   "scriptHost": "abs.twimg.com"
+  },
+  {
+   "initiatorType": "script",
+   "scriptHost": "abs.twimg.com"
+  }
+ ]
+}

@@ -8,7 +8,7 @@ Native 扩展，同时完整保留 Legacy 原版作为对照与回退方案。
 
 | | Legacy（原版，保持不动） | Native（M1 新增） |
 |---|---|---|
-| 源码 | `extension/`（本分支零改动，`git diff b496c54 -- extension/` 为空） | `native-extension/src/*.js`（10 个 ES 模块） |
+| 源码 | `extension/`（本分支零改动，`git diff b496c54 -- extension/` 为空） | `native-extension/src/*.js`（11 个 ES 模块源文件） |
 | 构建入口 | `npm run build:extension` → `scripts/build-extension.mjs` | `npm run build:native` → `scripts/build-extension-native.mjs` |
 | 构建产物 | `dist-extension/`（gitignore，不覆盖 Native） | `dist-extension-native/`（gitignore，不覆盖 Legacy） |
 | manifest | MAIN world `page-bridge.js`（document_start）+ isolated UI | 仅 isolated world `content.js`（document_idle），无任何权限 |

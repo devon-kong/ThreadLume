@@ -7,7 +7,7 @@
 
 | 交付 | 位置 | 状态 |
 |---|---|---|
-| Native 工程源码（10 个 ES 模块） | `native-extension/src/` | 完成，73 项离线测试全绿 |
+| Native 工程源码（11 个 ES 模块源文件） | `native-extension/src/` | 完成，73 项离线测试全绿 |
 | Native 构建脚本（含隔离门禁） | `scripts/build-extension-native.mjs` | 完成；产物 `dist-extension-native/` |
 | Legacy 原版 | `extension/`、`scripts/build-extension.mjs` | **零改动**（`git diff b496c54 -- extension/ scripts/build-extension.mjs` 为空） |
 | Native 测试套件 | `tests/native/`（6 文件） | 73 项，执行**真实构建产物** |

@@ -40,12 +40,12 @@ r1 条件完全同机制）；真实可信点击为计时起点；页面内 25ms
 
 | 样本 | M1 closedAt 中位 | M1 feedAt 中位 | R4 feedAt 中位 | 锚点：X 瞬态 → B3 终态 |
 |---|---|---|---|---|
-| short | 143 | 201 | 215 | 152px → **1px** |
-| highReply | 135 | 188 | 178 | 152px → **1px** |
-| long | 138 | 198 | 196 | 153px → **0px** |
-| video | 128 | 193 | 205 | 151px → **2px** |
+| short | 143.1 | 201 | 215 | 152px → **1px** |
+| highReply | 126.8 | 188 | 178 | 152px → **1px** |
+| long | 137.0 | 198 | 196 | 153px → **0px** |
+| video | 126.5 | 193 | 205 | 151px → **2px** |
 
-- 关闭语义不变（12/12 窗口 Esc 一次到达即关闭，`escRetries=0`）。
+- 关闭语义不变（12/12 窗口 Esc 一次到达即关闭，`escRetries=0`）。closedAt（面板拆除）逐样本中位见上表（126.5–143.1ms），比 R4 录制值（~70ms）偏高属会话历史更长导致 traverse 稍慢，无判定依赖该列；用户可感的 feedAt（信息流可用）与 R4 相当。
 - feedAt（信息流可继续滚动/点击）与 R4 相当（Δ −12~+10ms，采样量化内）。
 - **B3 锚点（M1 新能力）**：R4 记录 X 自身重锚使被点击帖偏移 151–153px（=裸 X 行为，
   原版浮层为 0px 因从未离开）。M1 的单次有界微调在 12/12 窗口把终态偏移收敛到
@@ -74,12 +74,17 @@ r1 条件完全同机制）；真实可信点击为计时起点；页面内 25ms
 - **API 总量**：裸 X 212 次（graphql 64 + rest 148）vs M1 206 次（graphql 65 + rest
   141）——**M1 比裸 X 少 6 次**（不存在无法解释的显著增加）。
 - **媒体类差异（F1 说明项）**：阅读面板 `<img>` 加载帖子/头像图，原生格可能走缓存
-  ——预期差异，非 API 调用。
+  ——预期差异，非 API 调用。另有 `other:chrome-extension:GET` 两条件对称各 1 次
+  （chrome-extension:// 静态资源对称伪影，非 /i/api、非违规；下轮普查归类为
+  F1 说明项）。
 - **V2 letter-FAIL（如实报告）**：first-nav 场景 `rest:/i/api/1.1/promoted_content/
   log.json:POST`（X 自身广告遥测）M1 某轮 2 次 vs 原生轮次上限 1 次（各轮分布
   M1 [2,1,1,1] vs 原生 [1,1,1,1]）。**归因探针**（`exploration-poc/m1/harness` 附带
   流程）：该操作在两条件下的发起者均为 X 自有脚本（`abs.twimg.com`，initiator
   type=script）；M1 产物静态零 fetch/XHR（隔离扫描），扩展**不可能**构造该请求。
+  归因证据归档：`exploration-poc/m1/evidence/network/initiator-attribution.json`
+  （两条件各 3 次命中，initiatorType=script、scriptHost=abs.twimg.com——X 自有
+  静态资源域；普查 JSON 本身按脱敏约定不含 initiator 字段，故以独立探针归档）。
   判定：X 侧广告调度时序波动，非扩展引入行为；判定器按字面如实记 FAIL，不修改
   工具口径。
 - **revisit: PASS / spa: PASS**；总体按判定器字面 FAIL（仅上述一项 V2），无扩展
