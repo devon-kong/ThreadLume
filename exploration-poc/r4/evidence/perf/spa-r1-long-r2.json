@@ -1,0 +1,212 @@
+{
+ "meta": {
+  "cond": "r1",
+  "sample": "long",
+  "round": 2,
+  "scenario": "spa",
+  "url": "x.com/z35001116/status/2107948362414866685",
+  "viewport": {
+   "width": 1440,
+   "height": 900
+  },
+  "clickRetried": false
+ },
+ "clicks": [
+  {
+   "t": 20033.100000023842,
+   "x": 665,
+   "y": 755
+  },
+  {
+   "t": 20034.300000071526,
+   "x": 0,
+   "y": 0
+  }
+ ],
+ "clickAt": 20033.100000023842,
+ "escAt": 31675.600000023842,
+ "t1": 1232,
+ "paint": {
+  "overlayFirstAt": null,
+  "paneFirstAt": 1232,
+  "bodyFirstAt": 382
+ },
+ "t2": 1232,
+ "t3": {
+  "origTools": false,
+  "origComposer": false,
+  "paneActions": true,
+  "nativeComposer": true,
+  "overlayOpen": false,
+  "paneOpen": true
+ },
+ "t4": {
+  "closedAt": 143,
+  "feedAt": 210,
+  "preScrollY": 5600,
+  "restoredScrollY": 663.5,
+  "anchorDelta": 153,
+  "restored": false
+ },
+ "t5": {
+  "longtasks": [
+   84,
+   59
+  ],
+  "longtaskTotal": 143,
+  "videoPlayingAt": null
+ },
+ "routeDetect": {
+  "pane": true,
+  "detectMs": 1
+ },
+ "network": {
+  "requestCount": 24,
+  "requests": [
+   {
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
+    "rel": 0
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 15
+   },
+   {
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
+    "rel": 346
+   },
+   {
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
+    "rel": 346
+   },
+   {
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
+    "rel": 346
+   },
+   {
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
+    "rel": 346
+   },
+   {
+    "cat": "graphql",
+    "op": "TweetDetail",
+    "method": "GET",
+    "rel": 348
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/fleets/v1/fleetline",
+    "method": "GET",
+    "rel": 348
+   },
+   {
+    "cat": "graphql",
+    "op": "getAltTextPromptPreference",
+    "method": "GET",
+    "rel": 371
+   },
+   {
+    "cat": "x-page",
+    "op": "/1.1/live_pipeline/update_subscriptions",
+    "method": "POST",
+    "rel": 1017
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 1993
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/graphql/viewer_context.json",
+    "method": "POST",
+    "rel": 2156
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 2995
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 6073
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 9075
+   },
+   {
+    "cat": "graphql",
+    "op": "ViewerBadgeCounts",
+    "method": "GET",
+    "rel": 10136
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/fleets/v1/avatar_content",
+    "method": "GET",
+    "rel": 11722
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/fleets/v1/fleetline",
+    "method": "GET",
+    "rel": 11722
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 11722
+   },
+   {
+    "cat": "x-page",
+    "op": "/1.1/live_pipeline/update_subscriptions",
+    "method": "POST",
+    "rel": 12696
+   },
+   {
+    "cat": "graphql",
+    "op": "UserOriginalsTimeline",
+    "method": "GET",
+    "rel": 13341
+   },
+   {
+    "cat": "x-page",
+    "op": "/1.1/live_pipeline/update_subscriptions",
+    "method": "POST",
+    "rel": 14412
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 14685
+   },
+   {
+    "cat": "x-page",
+    "op": "/1.1/live_pipeline/update_subscriptions",
+    "method": "POST",
+    "rel": 15440
+   }
+  ]
+ }
+}

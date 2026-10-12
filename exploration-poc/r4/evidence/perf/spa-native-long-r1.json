@@ -1,0 +1,198 @@
+{
+ "meta": {
+  "cond": "native",
+  "sample": "long",
+  "round": 1,
+  "scenario": "spa",
+  "url": "x.com/z35001116/status/2107948362414866685",
+  "viewport": {
+   "width": 1440,
+   "height": 900
+  },
+  "clickRetried": false
+ },
+ "clicks": [
+  {
+   "t": 20106.299999952316,
+   "x": 665,
+   "y": 755
+  }
+ ],
+ "clickAt": 20106.299999952316,
+ "escAt": 31727.899999976158,
+ "t1": 382,
+ "paint": {
+  "overlayFirstAt": null,
+  "paneFirstAt": null,
+  "bodyFirstAt": 382
+ },
+ "t2": 997,
+ "t3": {
+  "origTools": false,
+  "origComposer": false,
+  "paneActions": false,
+  "nativeComposer": true,
+  "overlayOpen": false,
+  "paneOpen": false
+ },
+ "t4": {
+  "closedAt": 55,
+  "feedAt": 456,
+  "preScrollY": 5600,
+  "restoredScrollY": 663.5,
+  "anchorDelta": 153,
+  "restored": false
+ },
+ "t5": {
+  "longtasks": [
+   80,
+   59
+  ],
+  "longtaskTotal": 139,
+  "videoPlayingAt": null
+ },
+ "routeDetect": null,
+ "network": {
+  "requestCount": 23,
+  "requests": [
+   {
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
+    "rel": 0
+   },
+   {
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
+    "rel": 347
+   },
+   {
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
+    "rel": 347
+   },
+   {
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
+    "rel": 347
+   },
+   {
+    "cat": "media",
+    "op": "responsive-web",
+    "method": "GET",
+    "rel": 347
+   },
+   {
+    "cat": "graphql",
+    "op": "TweetDetail",
+    "method": "GET",
+    "rel": 349
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/fleets/v1/fleetline",
+    "method": "GET",
+    "rel": 349
+   },
+   {
+    "cat": "graphql",
+    "op": "getAltTextPromptPreference",
+    "method": "GET",
+    "rel": 375
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 680
+   },
+   {
+    "cat": "x-page",
+    "op": "/1.1/live_pipeline/update_subscriptions",
+    "method": "POST",
+    "rel": 1022
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/graphql/viewer_context.json",
+    "method": "POST",
+    "rel": 1721
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 3898
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 6056
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 9059
+   },
+   {
+    "cat": "graphql",
+    "op": "ViewerBadgeCounts",
+    "method": "GET",
+    "rel": 10098
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/fleets/v1/avatar_content",
+    "method": "GET",
+    "rel": 12008
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/fleets/v1/fleetline",
+    "method": "GET",
+    "rel": 12008
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 12008
+   },
+   {
+    "cat": "x-page",
+    "op": "/1.1/live_pipeline/update_subscriptions",
+    "method": "POST",
+    "rel": 12981
+   },
+   {
+    "cat": "graphql",
+    "op": "UserOriginalsTimeline",
+    "method": "GET",
+    "rel": 13345
+   },
+   {
+    "cat": "x-page",
+    "op": "/1.1/live_pipeline/update_subscriptions",
+    "method": "POST",
+    "rel": 14418
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 14975
+   },
+   {
+    "cat": "x-page",
+    "op": "/1.1/live_pipeline/update_subscriptions",
+    "method": "POST",
+    "rel": 15444
+   }
+  ]
+ }
+}

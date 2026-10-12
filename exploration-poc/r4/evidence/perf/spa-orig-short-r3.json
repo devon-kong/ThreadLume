@@ -1,0 +1,120 @@
+{
+ "meta": {
+  "cond": "orig",
+  "sample": "short",
+  "round": 3,
+  "scenario": "spa",
+  "url": "x.com/gefei55/status/2109450990575611958",
+  "viewport": {
+   "width": 1440,
+   "height": 900
+  },
+  "clickRetried": false
+ },
+ "clicks": [
+  {
+   "t": 16694.600000023842,
+   "x": 578,
+   "y": 752
+  }
+ ],
+ "clickAt": 16694.600000023842,
+ "escAt": 34116.39999997616,
+ "t1": 885,
+ "paint": {
+  "overlayFirstAt": 80,
+  "paneFirstAt": null,
+  "bodyFirstAt": 80,
+  "snapText": "Peek\n正在加载原帖\n\n正在通过当前登录的 X 会话读取帖子数据\n\n正在加载评论\n\n正在通过当前登录的 X 会话读取帖子数据"
+ },
+ "t2": 885,
+ "t3": {
+  "origTools": true,
+  "origComposer": false,
+  "paneActions": false,
+  "nativeComposer": false,
+  "overlayOpen": true,
+  "paneOpen": false
+ },
+ "t4": {
+  "closedAt": 62,
+  "feedAt": 130,
+  "preScrollY": 2800,
+  "restoredScrollY": 2800,
+  "anchorDelta": 0,
+  "restored": true
+ },
+ "t5": {
+  "longtasks": [
+   65
+  ],
+  "longtaskTotal": 65,
+  "videoPlayingAt": null
+ },
+ "routeDetect": null,
+ "network": {
+  "requestCount": 10,
+  "requests": [
+   {
+    "cat": "other",
+    "op": "data",
+    "method": "GET",
+    "rel": 0
+   },
+   {
+    "cat": "graphql",
+    "op": "TweetDetail",
+    "method": "GET",
+    "rel": 79
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 875
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 876
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 876
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 876
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 876
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 876
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 876
+   },
+   {
+    "cat": "graphql",
+    "op": "ViewerBadgeCounts",
+    "method": "GET",
+    "rel": 13458
+   }
+  ]
+ }
+}

@@ -75,7 +75,7 @@ test("E3 URL 已改变 / 代际过期：两种守卫分别可辨，过期提取�
   assert.ok(await env.poc.extractFocal(idA, env.poc.currentGen()), "a live generation extracts normally on the same DOM");
 });
 
-test("E3 评论 DOM 被虚拟化回收：等待期间格被移除 → 结果作废、重试有界", async () => {
+test("E3 评论 DOM 被虚拟化回收：快速首显后格子回收 → 升级任务作废、无二次挂载（G2 语义）", async () => {
   const env = makeEnv();
   env.boot();
   const id = makeStatusId();
@@ -88,11 +88,15 @@ test("E3 评论 DOM 被虚拟化回收：等待期间格被移除 → 结果作�
   const more = env.document.createElement("button");
   more.setAttribute("role", "button");
   more.textContent = "显示更多";
+  let moreClicks = 0;
+  more.addEventListener("click", () => { moreClicks++; });
   art.appendChild(more);
-  await env.timers.advance(700);       // attempt clicks show-more, waits 700ms
-  cell.remove();                        // React virtualization recycles the cell mid-wait
-  await env.timers.advance(100_000);   // wake → stale cell discarded → bounded retries
-  assert.equal(env.panes(), 0, "stale recycled cell never renders");
+  await env.timers.advance(700);       // fast path mounts the pane without the expansion wait (G2)
+  assert.equal(env.panes(), 1, "first paint no longer waits for the expansion");
+  cell.remove();                        // React virtualization recycles the cell after mount
+  await env.timers.advance(100_000);   // the decoupled upgrade wakes on a detached cell → dies silently
+  assert.equal(env.panes(), 1, "no double mount and no stale re-render after the recycle");
+  assert.equal(moreClicks <= 1, true, "the upgrade never clicks a detached show-more twice");
 });
 
 test("E3 半水合媒体：空 src 不渲染为破图", async () => {

@@ -1,0 +1,127 @@
+{
+ "verdictRows": [
+  {
+   "sample": "highReply",
+   "metric": "t1",
+   "verdict": "PASS",
+   "om": 1049,
+   "rm": 554,
+   "tol": 105,
+   "delta": -495,
+   "oSpread": 134
+  },
+  {
+   "sample": "highReply",
+   "metric": "t2",
+   "verdict": "FAIL",
+   "om": 1049,
+   "rm": 2023,
+   "tol": 105,
+   "delta": 974,
+   "oSpread": 134
+  },
+  {
+   "sample": "highReply",
+   "metric": "t4",
+   "verdict": "PASS",
+   "om": 133,
+   "rm": 206,
+   "tol": 80,
+   "delta": 73,
+   "oSpread": 9
+  },
+  {
+   "sample": "long",
+   "metric": "t1",
+   "verdict": "FAIL",
+   "om": 581,
+   "rm": 1234,
+   "tol": 58,
+   "delta": 653,
+   "oSpread": 40
+  },
+  {
+   "sample": "long",
+   "metric": "t2",
+   "verdict": "MISSING",
+   "om": null,
+   "rm": 1234
+  },
+  {
+   "sample": "long",
+   "metric": "t4",
+   "verdict": "FAIL",
+   "om": 127,
+   "rm": 216,
+   "tol": 80,
+   "delta": 89,
+   "oSpread": 11
+  },
+  {
+   "sample": "short",
+   "metric": "t1",
+   "verdict": "PASS",
+   "om": 885,
+   "rm": 556,
+   "tol": 89,
+   "delta": -329,
+   "oSpread": 304
+  },
+  {
+   "sample": "short",
+   "metric": "t2",
+   "verdict": "FAIL",
+   "om": 885,
+   "rm": 2041,
+   "tol": 100,
+   "delta": 1156,
+   "oSpread": 304
+  },
+  {
+   "sample": "short",
+   "metric": "t4",
+   "verdict": "FAIL",
+   "om": 130,
+   "rm": 212,
+   "tol": 80,
+   "delta": 82,
+   "oSpread": 7
+  },
+  {
+   "sample": "video",
+   "metric": "t1",
+   "verdict": "PASS",
+   "om": 1023,
+   "rm": 554,
+   "tol": 102,
+   "delta": -469,
+   "oSpread": 329
+  },
+  {
+   "sample": "video",
+   "metric": "t2",
+   "verdict": "FAIL",
+   "om": 1023,
+   "rm": 2011,
+   "tol": 102,
+   "delta": 988,
+   "oSpread": 329
+  },
+  {
+   "sample": "video",
+   "metric": "t4",
+   "verdict": "PASS",
+   "om": 141,
+   "rm": 200,
+   "tol": 80,
+   "delta": 59,
+   "oSpread": 19
+  }
+ ],
+ "detectSummary": {
+  "n": 12,
+  "median": 1,
+  "max": 1
+ },
+ "anyInconclusive": false
+}

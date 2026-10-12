@@ -313,7 +313,7 @@ async function clickCoords(p, { x, y }) {
 }
 
 async function surfaceOpened(p, cond) {
-  const v = await evalMain(p, `({ overlay: Boolean(document.getElementById('tuzai-x-popover-root')), pane: Boolean(document.getElementById('peek-poc-pane')), path: location.pathname })()`);
+  const v = await evalMain(p, `(() => ({ overlay: Boolean(document.getElementById('tuzai-x-popover-root')), pane: Boolean(document.getElementById('peek-poc-pane')), path: location.pathname }))()`);
   const r = v.result.value;
   if (cond === "orig") return r.overlay;
   if (cond === "r1") return r.pane || r.path.includes("/status/");
@@ -363,13 +363,30 @@ async function runWindow(cond, sampleKey, round) {
   await p.cdp("Page.bringToFront"); // foreground: no timer throttling during measurement
   await p.goto(sample.profile);
   await page_wait(p, SETTLE_PROFILE_MS);
-  await quietThenDrain(p);
   await evalMain(p, `window.__r4arm(${JSON.stringify({ cond, id: sample.id, handle: "/" + sample.author, authorName: sample.name, wantVideo: sampleKey === "video" })})`);
   await evalMain(p, `window.__r4reset()`);
-  const clicked = await findAndClickSample(p, cond, sample);
-  if (!clicked) {
+  // find FIRST (scrolling may trigger X pagination), then drain to quiet, THEN
+  // click — every recorded network request is genuinely post-click
+  const coords = await findSampleCell(p, cond, sample);
+  if (!coords) {
     await p.events();
-    console.log(`SKIP   r: sample cell not found on profile`); return { meta: { cond, sample: sampleKey, round, scenario: "spa" }, skipped: "sample cell not found on profile" };
+    console.log(`SKIP ${cond} ${sampleKey} r${round}: sample cell not found on profile`);
+    return { meta: { cond, sample: sampleKey, round, scenario: "spa" }, skipped: "sample cell not found on profile" };
+  }
+  await quietThenDrain(p);
+  await clickCoords(p, coords);
+  let opened = await surfaceOpened(p, cond);
+  let retried = false;
+  if (!opened) {
+    // rare race: the timeline shifted between find and dispatch — re-find and retry once
+    retried = true;
+    const c2 = await findSampleCell(p, cond, sample);
+    if (c2) { await clickCoords(p, c2); opened = await surfaceOpened(p, cond); }
+  }
+  if (!opened) {
+    console.log(`SKIP ${cond} ${sampleKey} r${round}: surface did not open after click (retry exhausted)`);
+    await p.events();
+    return { meta: { cond, sample: sampleKey, round, scenario: "spa" }, skipped: "surface did not open after click" };
   }
   await page_wait(p, SETTLE_READ_MS);
 

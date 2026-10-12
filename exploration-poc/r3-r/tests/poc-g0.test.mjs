@@ -4,7 +4,7 @@
 // never an unconditional history.back(), never a permanent boolean.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { makeEnv, makeStatusId, mountCell, buildAuthor, buildTweetText, buildActionBar } from "./poc-env.mjs";
+import { makeEnv, makeStatusId, mountCell, buildCell, buildAuthor, buildTweetText, buildActionBar } from "./poc-env.mjs";
 
 const waitMs = 20_000;
 
@@ -277,7 +277,63 @@ test("G0-B-4 快速连点 A→B：最终只挂载 B（事件路径不引入新�
   assert.equal(env.pane().dataset.statusId, idB, "B wins; A's late DOM never remounts");
 });
 
-// ---------- Esc close ----------
+// ---------- G2: decoupled show-more upgrade ----------
+
+test("G2 长帖快速首显：折叠文本先上屏，展开后原地升级（不重挂、不闪烁）", async () => {
+  const env = makeEnv();
+  env.boot();
+  const idA = makeStatusId();
+  const { cell, art } = buildCell({
+    statusId: idA,
+    articleChildren: [buildAuthor(), buildTweetText("折叠的首段文本"), buildActionBar()],
+  });
+  env.document.body.appendChild(cell);
+  const more = env.document.createElement("button");
+  more.setAttribute("role", "button");
+  more.textContent = "显示更多";
+  let clicks = 0;
+  more.addEventListener("click", () => { clicks++; });
+  art.appendChild(more);
+  // hydrate the full text only after the show-more click (like X does)
+  more.addEventListener("click", () => {
+    const t = art.querySelector('[data-testid="tweetText"]');
+    t.textContent = "折叠的首段文本\n展开后的完整正文第二段";
+  });
+
+  await env.pushNavigate(`/somebody/status/${idA}`);
+  env.document.body.appendChild(cell); // mount ONCE, after the route change
+  await env.timers.advance(1_200); // fast path + one expansion round (700ms wait)
+  const pane = env.pane();
+  assert.ok(pane, "pane mounts from the collapsed text");
+  assert.match(pane.textContent, /折叠的首段文本/, "collapsed body readable at first paint");
+  assert.match(pane.textContent, /展开后的完整正文第二段/, "upgrade replaced the text in place");
+  assert.equal(env.panes(), 1, "no remount during the upgrade");
+  assert.equal(clicks, 1, "exactly one display expansion");
+});
+
+test("G2 升级途中关闭：展开只点击一次，死亡任务不更新任何内容", async () => {
+  const env = makeEnv();
+  env.boot();
+  const idA = makeStatusId();
+  const { cell, art } = buildCell({
+    statusId: idA,
+    articleChildren: [buildAuthor(), buildTweetText("长帖"), buildActionBar()],
+  });
+  const more = env.document.createElement("button");
+  more.setAttribute("role", "button");
+  more.textContent = "显示更多";
+  let clicks = 0;
+  more.addEventListener("click", () => { clicks++; });
+  art.appendChild(more);
+  await env.pushNavigate(`/somebody/status/${idA}`);
+  env.document.body.appendChild(cell); // mount ONCE, after the route change
+  await env.timers.advance(1_200); // fast mount; upgrade clicks show-more, waits 700ms
+  await env.navigate("/home");     // close while the upgrade wait is pending
+  await env.timers.advance(60_000);
+  assert.equal(env.panes(), 0, "no stale pane after close");
+  assert.equal(clicks, 1, "the dead upgrade never clicks again");
+});
+
 
 test("G0-Esc Esc 关闭阅读器（跟随关闭语义），输入中不关闭", async () => {
   const env = makeEnv();

@@ -396,30 +396,36 @@
     return lines.join("\n");
   }
 
-  async function expandShowMore(art) {
-    // Premium long posts collapse the body behind a show-more link. One display
-    // expansion, bounded to the focal article (never inside the quote card),
-    // mirrors what a reading user does.
+  function findShowMore(art) {
+    // Premium long posts collapse the body behind a show-more link.
     const quote = findQuoteNode(art);
-    const more = [...art.querySelectorAll('[data-testid="tweet-text-show-more-link"], a[href*="show-more"], [role="button"]')]
+    return [...art.querySelectorAll('[data-testid="tweet-text-show-more-link"], a[href*="show-more"], [role="button"]')]
       .filter((el) => !(quote && quote.contains(el)))
-      .find((el) => /^(显示更多|Show more)$/i.test((el.innerText || "").trim()));
+      .find((el) => /^(显示更多|Show more)$/i.test((el.innerText || "").trim())) || null;
+  }
+
+  async function expandShowMore(art) {
+    // One display expansion, bounded to the focal article (never inside the
+    // quote card), mirrors what a reading user does.
+    const more = findShowMore(art);
     if (more) {
       more.click();
       await sleep(700);
     }
   }
 
-  async function extractFocal(focalId, myGen) {
+  async function extractFocal(focalId, myGen, { expand = true } = {}) {
     if (statusIdFromPath() !== focalId) return null;
     const cell = focalCellByStatusId(focalId);
     const art = cell && (cell.querySelector("article[data-testid='tweet']") || cell.querySelector("article"));
     if (!art) return null;
-    await expandShowMore(art);
-    // the show-more wait is an async gap: the route may have moved, or React
-    // virtualization may have recycled the cell — never extract a stale node
-    if (myGen !== gen || statusIdFromPath() !== focalId) return null;
-    if (!cell.isConnected || !art.isConnected) return null;
+    if (expand) {
+      await expandShowMore(art);
+      // the show-more wait is an async gap: the route may have moved, or React
+      // virtualization may have recycled the cell — never extract a stale node
+      if (myGen !== gen || statusIdFromPath() !== focalId) return null;
+      if (!cell.isConnected || !art.isConnected) return null;
+    }
     return { ...extractFromArticle(art, focalId), nativeCell: cell };
   }
 
@@ -467,6 +473,7 @@
       textKnown: text.trim().length > 0, // absent text node = unknown, not empty
       textSource,
       photos,
+      showMorePending: Boolean(findShowMore(art)), // collapsed body: first paint shows it, upgrade follows
       quote: quoteNode ? {
         author: quoteAuthor,
         text: quoteText,
@@ -512,7 +519,7 @@
           <div><b>${ESCAPED(data.name)}</b><span>${ESCAPED(handleAt)}</span></div>
         </div>
         ${data.textKnown ? `<div class="${NS}-text">${ESCAPED(data.text)}</div>` : `<div class="${NS}-text ${NS}-unknown">正文未识别</div>`}
-        ${data.photos.map((u) => `<img class="${NS}-photo" src="${ESCAPED(u)}" referrerpolicy="no-referrer" alt="">`).join("")}
+        <div class="${NS}-photos">${data.photos.map((u) => `<img class="${NS}-photo" src="${ESCAPED(u)}" referrerpolicy="no-referrer" alt="">`).join("")}</div>
         ${q ? `<div class="${NS}-quote">
             <div class="${NS}-quote-author">${ESCAPED(q.author ?? "未知作者")}</div>
             <div>${ESCAPED(q.text || "（引用正文未识别）")}</div>
@@ -610,7 +617,10 @@
       let data = null;
       for (let attempt = 0; attempt < BUILD_MAX_ATTEMPTS && myGen === gen; attempt++) {
         if (statusIdFromPath() !== focalId) return; // route moved on — die now
-        data = await extractFocal(focalId, myGen);
+        // G2 fast path: extract WITHOUT the show-more expansion so the first
+        // paint carries the (accurate, collapsed) body X itself shows; the
+        // full text upgrade follows decoupled below.
+        data = await extractFocal(focalId, myGen, { expand: false });
         if (data && data.statusId === focalId) break;
         data = null;
         await sleep(BUILD_POLL_MS);
@@ -628,6 +638,26 @@
       richScanUntil = performance.now() + 20_000; // bounded late-hydration rescan
       recoveryArmed = false;
       recoveryLeft = 0;
+      // Decoupled show-more upgrade (G2): the first paint never waits for the
+      // Premium expansion. Expand (one display click, like a reader), then
+      // update the pane's text/photos in place — no remount, no flicker.
+      if (data.showMorePending) {
+        void (async () => {
+          const full = await extractFocal(focalId, myGen); // expands + guards gen/route
+          if (!full || myGen !== gen || statusIdFromPath() !== focalId) return;
+          const pane = document.getElementById(PANE_ID);
+          if (!pane || pane.dataset.statusId !== focalId) return;
+          const textEl = pane.querySelector(`.${NS}-text`);
+          if (textEl && full.textKnown) {
+            textEl.textContent = full.text;
+            textEl.classList.remove(`${NS}-unknown`);
+          }
+          const photosEl = pane.querySelector(`.${NS}-photos`);
+          if (photosEl && full.photos.length !== (data.photos?.length || 0)) {
+            photosEl.innerHTML = full.photos.map((u) => `<img class="${NS}-photo" src="${ESCAPED(u)}" referrerpolicy="no-referrer" alt="">`).join("");
+          }
+        })();
+      }
     } finally {
       if (liveGen === myGen) liveGen = 0; // a newer build owns the flag otherwise
     }
