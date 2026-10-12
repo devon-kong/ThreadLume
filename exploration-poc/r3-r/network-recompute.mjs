@@ -262,7 +262,12 @@ export function renderMarkdown(result) {
   for (const [scenario, j] of Object.entries(result.judgments)) {
     const status = j.violations.length === 0 ? "PASS" : "FAIL";
     lines.push(`- **${scenario}: ${status}**（V1 新增 API 操作 / V2 超原生轮次上限的 API 调用 / V3 方法不一致 = 0 项违规）`);
-    for (const f of j.flags) lines.push(`  - 说明项 ${f.rule}: ${f.key}（原生轮次上限 ${f.nativeRoundMax}，R1 ${f.r1RoundMax}）—— ${f.note}`);
+    for (const f of j.flags) {
+      const counts = f.rule === "F2-native-op-timing"
+        ? `（本场景原生 ${f.native}，R1 ${f.r1}）`
+        : `（原生轮次上限 ${f.nativeRoundMax}，R1 ${f.r1RoundMax}）`;
+      lines.push(`  - 说明项 ${f.rule}: ${f.key}${counts} —— ${f.note}`);
+    }
     for (const vio of j.violations) lines.push(`  - 违规 ${vio.rule}: ${vio.key}（原生 ${vio.native}，R1 ${vio.r1}）—— ${vio.note}`);
   }
   lines.push("");

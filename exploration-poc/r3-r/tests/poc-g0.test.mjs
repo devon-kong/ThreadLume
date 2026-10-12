@@ -384,3 +384,55 @@ test("G2 匹配收紧：引用卡内的时间链接不充当焦点格（防串�
   assert.ok(pane, "real focal cell builds the pane");
   assert.match(pane.textContent, /真正的焦点正文/, "content comes from the post itself");
 });
+
+test("G2-review-P2-1 文本单调性：展开升级完成后，水合刷新不得把全文回退为折叠文本", async () => {
+  const env = makeEnv();
+  env.boot();
+  const idA = makeStatusId();
+  const { cell, art } = buildCell({
+    statusId: idA,
+    articleChildren: [buildAuthor(), buildTweetText("折叠的首段文本"), buildActionBar()],
+  });
+  env.document.body.appendChild(cell);
+  const more = env.document.createElement("button");
+  more.setAttribute("role", "button");
+  more.textContent = "显示更多";
+  more.addEventListener("click", () => {
+    const t = art.querySelector('[data-testid="tweetText"]');
+    t.textContent = "折叠的首段文本\n展开后的完整正文第二段";
+  });
+  art.appendChild(more);
+  await env.pushNavigate(`/somebody/status/${idA}`);
+  env.document.body.appendChild(cell);
+  await env.timers.advance(1_200); // fast paint + expansion upgrade (full text + flag)
+  const pane = env.pane();
+  assert.match(pane.querySelector(".peek-poc-text").textContent, /展开后的完整正文第二段/, "full body in place");
+  assert.equal(pane.querySelector(".peek-poc-text").dataset.peekFullText, "1", "full-text flag set");
+
+  // a late hydration refresh whose source cell still renders the COLLAPSED
+  // body must not regress the text (counts/time may still refresh)
+  const fullBefore = pane.querySelector(".peek-poc-text").textContent;
+  // drive the production updatePaneInPlace (test hook) with the same collapsed
+  // extraction a late hydration refresh would carry
+  env.poc.updatePaneInPlace(pane, env.poc.extractFromArticle(art, idA));
+  assert.equal(pane.querySelector(".peek-poc-text").textContent, fullBefore, "collapsed refresh never regresses the full body");
+});
+
+test("G2-review-P2-2 X 自有浮层打开时 Esc 归 X（面板不关闭）", async () => {
+  const env = makeEnv();
+  env.boot();
+  const idA = makeStatusId();
+  await env.pushNavigate(`/somebody/status/${idA}`);
+  mountCell(env, { statusId: idA, articleChildren: [buildAuthor(), buildTweetText("正文"), buildActionBar()] });
+  await env.timers.advance(1_500);
+  const lightbox = env.document.createElement("div");
+  lightbox.setAttribute("data-testid", "lightbox");
+  env.document.body.appendChild(lightbox);
+  env.document.body.dispatchEvent(new env.window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  await env.timers.flushMicrotasks();
+  assert.ok(env.pane(), "Esc with an X lightbox open leaves the reader untouched");
+  lightbox.remove();
+  env.document.body.dispatchEvent(new env.window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  await env.timers.flushMicrotasks();
+  assert.equal(env.history._backCalls, 1, "Esc without the lightbox closes the reader as usual");
+});

@@ -122,3 +122,9 @@ R3-R 的 `network-recompute.mjs` verdict 只检查 **R1 独有的操作名**（n
 ### 回归
 
 `census-recompute.test.mjs` 4 项原有 + 6 项新增 = 10 项；`npm run test:r3-r` 68 项全绿。
+
+### 附注（独立 Reviewer P3-4，留档）
+
+Esc 捕获先于 X 快捷键管理层的前提是"X 当前把全局快捷键监听放在 document 级"这一经验
+事实（2026-10-12 实测）。若 X 未来改为 window 捕获级先注册，捕获监听将失效——与 PoC
+整体同样属于对 X 当前实现的依赖；MV3 人工检查单第 6/7 项可在验收时发现此类变化。

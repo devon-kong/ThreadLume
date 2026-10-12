@@ -508,9 +508,13 @@
   // In-place field refresh for the two decoupled upgrades (detail hydration,
   // show-more expansion): swap text/photos/counts/time/quote without
   // remounting the pane — no flicker, scroll position preserved.
+  // Text monotonicity (R4 review P2-1): once the show-more upgrade has written
+  // the FULL body (`data-peek-full-text`), a later hydration refresh carrying
+  // the collapsed detail body must never regress the pane back to truncated
+  // text — it still refreshes counts/time/photos/quote.
   function updatePaneInPlace(pane, data) {
     const textEl = pane.querySelector(`.${NS}-text`);
-    if (textEl && data.textKnown) {
+    if (textEl && data.textKnown && textEl.dataset.peekFullText !== "1") {
       textEl.textContent = data.text;
       textEl.classList.remove(`${NS}-unknown`);
     }
@@ -645,6 +649,9 @@
   // runs before page handlers can swallow the key.
   window.addEventListener("keydown", (event) => {
     if (event.key !== "Escape" || !document.getElementById(PANE_ID)) return;
+    // an X-owned modal (photo lightbox, sheet dialog, native menus) has first
+    // claim on Escape — closing the reader under it would also steal the key
+    if (document.querySelector('[data-testid="lightbox"], [data-testid="sheetDialog"], [data-testid="HoverCard"], [role="dialog"][aria-modal="true"]')) return;
     const t = event.target;
     if (t && (t.isContentEditable || t.closest?.('[data-testid^="tweetTextarea"], [contenteditable="true"]'))) return;
     // we own this Escape: stop it so X's own shortcut manager cannot ALSO
@@ -714,7 +721,13 @@
           const full = await extractFocal(focalId, myGen); // expands + guards gen/route
           if (!full || myGen !== gen || statusIdFromPath() !== focalId) return;
           const pane = document.getElementById(PANE_ID);
-          if (pane && pane.dataset.statusId === focalId) updatePaneInPlace(pane, full);
+          if (pane && pane.dataset.statusId === focalId) {
+            updatePaneInPlace(pane, full);
+            // mark the body complete so a later hydration refresh carrying the
+            // collapsed detail body cannot regress the pane (P2-1)
+            const textEl = pane.querySelector(`.${NS}-text`);
+            if (textEl) textEl.dataset.peekFullText = "1";
+          }
         })();
       }
     } finally {
@@ -784,7 +797,7 @@
     window.__peekPocTest = {
       parseCount, readTheme, statusIdFromPath, fallbackText,
       countOf, photoUrlsIn, findQuoteNode, extractArticle, extractFromArticle,
-      extractFocal, checkRoute, buildReader, removeReader, syncRichNote,
+      extractFocal, checkRoute, buildReader, removeReader, syncRichNote, updatePaneInPlace,
       currentGen: () => gen,
       // G0-A/G0-B observability (read-only)
       safeBackTarget, navTrailState: () => ({ trail: [...navTrail], idx: navTrailIdx }),
