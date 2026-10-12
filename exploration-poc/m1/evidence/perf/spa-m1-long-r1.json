@@ -1,0 +1,71 @@
+{
+ "meta": {
+  "cond": "m1",
+  "sample": "long",
+  "round": 1,
+  "scenario": "spa",
+  "url": "x.com/z35001116/status/2107948362414866685",
+  "viewport": {
+   "width": 1440,
+   "height": 900
+  },
+  "clickRetried": false,
+  "escRetries": 0
+ },
+ "clicks": [
+  {
+   "t": 20996.399999976158,
+   "x": 665,
+   "y": 574
+  }
+ ],
+ "clickAt": 20996.399999976158,
+ "escAt": 32585.799999952316,
+ "t1": 21072.399999976158,
+ "t2": 21996.799999952316,
+ "t1Rel": 76,
+ "t2Rel": 1000.3999999761581,
+ "paint": {
+  "paneFirstAt": 21072.399999976158,
+  "bodyFirstAt": 21072.399999976158
+ },
+ "t3": {
+  "paneActions": true,
+  "nativeComposer": true,
+  "paneOpen": true
+ },
+ "t4": {
+  "closedAt": 139.89999997615814,
+  "feedAt": 213,
+  "preScrollY": 6000,
+  "restoredScrollY": 663.5,
+  "anchorDelta": 153,
+  "anchorTop": 552.171875,
+  "restored": true
+ },
+ "t5": {
+  "longtasks": [
+   81
+  ],
+  "longtaskTotal": 81,
+  "videoPlayingAt": null,
+  "videoScrollAt": null
+ },
+ "routeDetect": 1.2000000476837158,
+ "anchorB3": {
+  "finalTops": [
+   552,
+   552,
+   552,
+   552,
+   552,
+   552,
+   552,
+   552,
+   552,
+   552
+  ],
+  "finalDelta": -0.171875,
+  "targetMaxPx": 60
+ }
+}

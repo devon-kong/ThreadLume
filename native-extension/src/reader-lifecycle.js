@@ -16,7 +16,7 @@ import {
 } from "./constants.js";
 import { safeBackTarget } from "./navigation-session.js";
 import { extractFocal, extractFromArticle, focalCellByStatusId } from "./focal-extractor.js";
-import { renderPane, updatePaneInPlace, setRichScanWindow, removePaneAndStyle } from "./reader-view.js";
+import { renderPane, updatePaneInPlace, setRichScanWindow, mountStyle, removePaneAndStyle } from "./reader-view.js";
 import { watchTheme, unwatchTheme } from "./theme-adapter.js";
 import { cancelRestore } from "./anchor-restore.js";
 import { onAction, clearOwnedTimeouts } from "./native-interaction.js";
@@ -65,6 +65,7 @@ export async function buildReader() {
     }
     if (statusIdFromPath() !== focalId) return;     // re-verify before render
     if (document.getElementById(PANE_ID)) return;   // never double-mount
+    mountStyle();
     renderPane(data, {
       brandIconUrl: BRAND_ICON_URL(),
       onAction,

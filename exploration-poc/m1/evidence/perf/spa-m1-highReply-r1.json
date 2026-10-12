@@ -1,0 +1,71 @@
+{
+ "meta": {
+  "cond": "m1",
+  "sample": "highReply",
+  "round": 1,
+  "scenario": "spa",
+  "url": "x.com/XiaoJi0403/status/2109146979972403349",
+  "viewport": {
+   "width": 1440,
+   "height": 900
+  },
+  "clickRetried": false,
+  "escRetries": 0
+ },
+ "clicks": [
+  {
+   "t": 25946.200000047684,
+   "x": 615,
+   "y": 568
+  }
+ ],
+ "clickAt": 25946.200000047684,
+ "escAt": 43485.39999997616,
+ "t1": 26022.100000023842,
+ "t2": 27945.100000023842,
+ "t1Rel": 75.89999997615814,
+ "t2Rel": 1998.8999999761581,
+ "paint": {
+  "paneFirstAt": 26022.100000023842,
+  "bodyFirstAt": 26022.100000023842
+ },
+ "t3": {
+  "paneActions": true,
+  "nativeComposer": true,
+  "paneOpen": true
+ },
+ "t4": {
+  "closedAt": 126.80000007152557,
+  "feedAt": 188.30000007152557,
+  "preScrollY": 8400,
+  "restoredScrollY": 626.5,
+  "anchorDelta": 152,
+  "anchorTop": 546.171875,
+  "restored": true
+ },
+ "t5": {
+  "longtasks": [
+   69
+  ],
+  "longtaskTotal": 69,
+  "videoPlayingAt": null,
+  "videoScrollAt": null
+ },
+ "routeDetect": 1.399999976158142,
+ "anchorB3": {
+  "finalTops": [
+   547,
+   547,
+   547,
+   547,
+   547,
+   547,
+   547,
+   547,
+   547,
+   547
+  ],
+  "finalDelta": 0.828125,
+  "targetMaxPx": 60
+ }
+}

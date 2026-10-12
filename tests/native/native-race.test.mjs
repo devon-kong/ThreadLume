@@ -36,6 +36,21 @@ test("B4-1 进入 A 后立即返回首页：旧构建任务立即失效，永不
   assert.equal(env.panes(), 0);
 });
 
+test("B4-1b 阅读时挂载布局样式与 html 属性（右栏让位），关闭后完全还原", async () => {
+  const env = makeEnv();
+  env.boot();
+  const idA = makeStatusId();
+  const pane = await openAndWait(env, idA);
+  assert.ok(env.style(), "layout style element mounted");
+  assert.equal(env.document.documentElement.getAttribute("data-peek-native"), "on", "layout gate attribute set");
+  assert.match(env.style().textContent, /margin-left: 52vw/, "52/48 column shift present");
+  assert.match(env.style().textContent, /sidebarColumn/, "sidebar hidden while reading");
+  await env.navigate("/home");
+  await env.timers.advance(100);
+  assert.equal(env.style(), null, "layout style removed on close");
+  assert.equal(env.document.documentElement.getAttribute("data-peek-native"), null, "attribute cleared on close");
+});
+
 test("B4-2 A 的 DOM 延迟出现：水合后面板建立一次且数据正确", async () => {
   const env = makeEnv();
   env.boot();

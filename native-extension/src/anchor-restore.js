@@ -42,6 +42,19 @@ export function computeAnchorAdjustment({ preTop, cellTop, threshold = ADJUST_TH
   return Math.abs(delta) > threshold ? delta : null;
 }
 
+// Test-hook DOM mirror: the offline/CDP harness cannot reach into this
+// isolated world's JS, so the anchor state is mirrored onto <html> when armed
+// (same pattern as the route-change timestamp). Never armed in production.
+function mirrorAnchor() {
+  try {
+    if (!window.__PEEK_NATIVE_TEST__) return;
+    document.documentElement.setAttribute("data-peek-anchor", JSON.stringify({
+      preOpen: preOpen,
+      active: active,
+    }));
+  } catch { /* mirror only */ }
+}
+
 // Called only on list → detail transitions (the route observer decides): with
 // the Navigation API this runs pre-commit (the list DOM is still mounted —
 // exact capture); the fallback runs it post-commit (best effort). A failed
@@ -54,10 +67,12 @@ export function capturePreOpen(statusId) {
     const cell = focalCellByStatusId(statusId);
     if (cell) {
       preOpen = { statusId, top: cell.getBoundingClientRect().top };
+      mirrorAnchor();
       return preOpen;
     }
   } catch { /* best effort */ }
   if (preOpen?.statusId !== statusId) preOpen = null;
+  mirrorAnchor();
   return preOpen;
 }
 
@@ -70,6 +85,7 @@ function finish(reason) {
   if (stopActivity) { stopActivity(); stopActivity = null; }
   for (const t of timers) clearTimeout(t);
   timers = [];
+  mirrorAnchor();
   return reason;
 }
 
@@ -83,6 +99,7 @@ export function cancelRestore(reason = "cancelled") {
 export function onReturnToList(fromStatusId) {
   if (active || !preOpen || preOpen.statusId !== fromStatusId) return false;
   active = true;
+  mirrorAnchor();
   stopActivity = watchUserInput(() => finish("user-input"));
   const deadline = Date.now() + RESTORE_WINDOW_MS;
   let lastScrollY = null;

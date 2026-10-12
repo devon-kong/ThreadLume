@@ -1,0 +1,72 @@
+{
+ "meta": {
+  "cond": "m1",
+  "sample": "short",
+  "round": 2,
+  "scenario": "spa",
+  "url": "x.com/gefei55/status/2109450990575611958",
+  "viewport": {
+   "width": 1440,
+   "height": 900
+  },
+  "clickRetried": false,
+  "escRetries": 0
+ },
+ "clicks": [
+  {
+   "t": 16802,
+   "x": 581,
+   "y": 695
+  }
+ ],
+ "clickAt": 16802,
+ "escAt": 34203.700000047684,
+ "t1": 16877.200000047684,
+ "t2": 17819.5,
+ "t1Rel": 75.20000004768372,
+ "t2Rel": 1017.5,
+ "paint": {
+  "paneFirstAt": 16877.200000047684,
+  "bodyFirstAt": 16877.200000047684
+ },
+ "t3": {
+  "paneActions": true,
+  "nativeComposer": false,
+  "paneOpen": true
+ },
+ "t4": {
+  "closedAt": 143.09999990463257,
+  "feedAt": 201.29999995231628,
+  "preScrollY": 3600,
+  "restoredScrollY": 647.5,
+  "anchorDelta": 152,
+  "anchorTop": 673.171875,
+  "restored": true
+ },
+ "t5": {
+  "longtasks": [
+   52,
+   85
+  ],
+  "longtaskTotal": 137,
+  "videoPlayingAt": null,
+  "videoScrollAt": null
+ },
+ "routeDetect": 1.2999999523162842,
+ "anchorB3": {
+  "finalTops": [
+   674,
+   674,
+   674,
+   674,
+   674,
+   674,
+   674,
+   674,
+   674,
+   674
+  ],
+  "finalDelta": 0.828125,
+  "targetMaxPx": 60
+ }
+}

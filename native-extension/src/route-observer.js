@@ -105,16 +105,44 @@ function scheduleRouteTick() {
   routeTimer = setTimeout(routeTick, isDetailPath() || paneMounted() ? ROUTE_POLL_ACTIVE_MS : ROUTE_POLL_IDLE_MS);
 }
 
+// Capture-phase click handling, registered in EVERY configuration:
+//  1. B3 pre-commit anchor capture — a click on a status link is the last
+//     moment the source list DOM is guaranteed mounted. This must NOT depend
+//     on the Navigation API: observed live (M1) that Chromium does NOT deliver
+//     "navigate" events to the isolated world (the listener registers, the
+//     event never fires), so the navigate handler below cannot be the capture
+//     path in a real extension. The document capture listener runs before
+//     X's router reacts (React attaches at the root container, deeper than
+//     document capture).
+//  2. Route-check cascade — an immediate + bounded re-check safety net that
+//     covers router-deferred pushState in every configuration.
+function onCaptureClick(event) {
+  try {
+    const a = event.target?.closest?.("a[href]");
+    if (a) {
+      const href = a.getAttribute("href") || "";
+      if (href.startsWith("/")) {
+        const id = (href.match(/\/status\/(\d+)/) || [])[1] || null;
+        // only list → detail opens capture; detail → detail keeps the anchor
+        if (id && !statusIdFromPath()) capturePreOpen(id);
+      }
+    }
+  } catch { /* anchor capture is best-effort */ }
+  armClickCascade();
+}
+
 export function startRouteObservation() {
   window.addEventListener("popstate", () => onPossibleRouteChange(true));
   window.addEventListener("hashchange", () => onPossibleRouteChange(false));
+  document.addEventListener("click", onCaptureClick, true);
   if (NAV_API) {
     try {
       window.navigation.addEventListener("navigate", (event) => {
         recordNav(event.navigationType, event.destination?.url);
-        // B3: capture the reading anchor BEFORE the navigation commits, while
-        // the source list DOM (and the focal cell) is still mounted. Only for
-        // list → detail opens; detail → detail keeps the original anchor.
+        // B3 belt-and-braces: if this world DOES receive navigate events
+        // (future Chromium), capture pre-commit here as well; the click
+        // capture already stored the same position and this re-captures the
+        // identical DOM state.
         try {
           if (event.destination?.url && event.navigationType === "push" && !statusIdFromPath()) {
             const destPath = new URL(event.destination.url).pathname;
@@ -124,14 +152,8 @@ export function startRouteObservation() {
         } catch { /* anchor capture is best-effort */ }
         onPossibleRouteChange(event.navigationType === "traverse");
       });
-    } catch { /* poll + popstate remain */ }
+    } catch { /* poll + popstate + click cascade remain */ }
   } else {
-    document.addEventListener("click", (event) => {
-      const a = event.target?.closest?.("a[href]");
-      if (!a) return;
-      const href = a.getAttribute("href") || "";
-      if (href.startsWith("/") || href.startsWith(`${location.origin}/`)) armClickCascade();
-    }, true);
     watchTitle();
   }
   scheduleRouteTick();
