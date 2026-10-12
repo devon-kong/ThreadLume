@@ -1,0 +1,182 @@
+{
+ "meta": {
+  "cond": "orig",
+  "sample": "short",
+  "round": 1,
+  "scenario": "spa",
+  "url": "x.com/gefei55/status/2109450990575611958",
+  "viewport": {
+   "width": 1440,
+   "height": 900
+  }
+ },
+ "clickAt": 13624.299999952316,
+ "escAt": 31047.700000047684,
+ "t1": 706,
+ "paint": {
+  "overlayFirstAt": 80,
+  "paneFirstAt": null,
+  "bodyFirstAt": 80,
+  "snapText": "Peek\n正在加载原帖\n\n正在通过当前登录的 X 会话读取帖子数据\n\n正在加载评论\n\n正在通过当前登录的 X 会话读取帖子数据"
+ },
+ "t2": 706,
+ "t3": {
+  "origTools": true,
+  "origComposer": false,
+  "paneActions": false,
+  "nativeComposer": false,
+  "overlayOpen": true,
+  "paneOpen": false
+ },
+ "t4": {
+  "closedAt": 64,
+  "feedAt": 130,
+  "preScrollY": 2000,
+  "restoredScrollY": 2000,
+  "anchorDelta": 0,
+  "restored": true
+ },
+ "t5": {
+  "longtasks": [],
+  "longtaskTotal": 0,
+  "videoPlayingAt": null
+ },
+ "routeDetect": null,
+ "network": {
+  "requestCount": 22,
+  "requests": [
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 0
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 3
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 296
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 1068
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 1068
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 1068
+   },
+   {
+    "cat": "x-page",
+    "op": "/1.1/live_pipeline/update_subscriptions",
+    "method": "POST",
+    "rel": 1301
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 3001
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 3132
+   },
+   {
+    "cat": "other",
+    "op": "data",
+    "method": "GET",
+    "rel": 3148
+   },
+   {
+    "cat": "graphql",
+    "op": "TweetDetail",
+    "method": "GET",
+    "rel": 3224
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 3844
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 3844
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 3844
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 3844
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 3844
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 3844
+   },
+   {
+    "cat": "media",
+    "op": "profile_images",
+    "method": "GET",
+    "rel": 3845
+   },
+   {
+    "cat": "x-page",
+    "op": "/1.1/live_pipeline/update_subscriptions",
+    "method": "POST",
+    "rel": 4163
+   },
+   {
+    "cat": "media",
+    "op": "media-img",
+    "method": "GET",
+    "rel": 4164
+   },
+   {
+    "cat": "rest",
+    "op": "/i/api/1.1/flow/timeline.json",
+    "method": "POST",
+    "rel": 6134
+   },
+   {
+    "cat": "graphql",
+    "op": "ViewerBadgeCounts",
+    "method": "GET",
+    "rel": 19752
+   }
+  ]
+ }
+}

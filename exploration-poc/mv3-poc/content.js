@@ -152,9 +152,14 @@
       syncTrailFromLocation(pendingTraverse);
       pendingTraverse = false;
     }
-    lastRouteChangeAt = performance.now();
     const id = statusIdFromPath();
     if (id !== activeStatusId) {
+      lastRouteChangeAt = performance.now(); // perf probe: when the route change was OBSERVED
+      // the offline/CDP harness cannot reach into this isolated world's JS, but
+      // the DOM is shared — mirror the probe timestamp onto <html> when armed
+      if (window.__PEEK_POC_TEST__) {
+        try { document.documentElement.setAttribute(`data-${NS}-route-change-at`, String(lastRouteChangeAt)); } catch { /* probe only */ }
+      }
       const previous = activeStatusId;
       activeStatusId = id;
       if (id) {
