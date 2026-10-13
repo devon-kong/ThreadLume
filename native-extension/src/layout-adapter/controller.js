@@ -224,13 +224,27 @@ function handleAutonomous(m) {
   // Session correlation (P0-A): the notification must name the session this
   // controller currently holds — same focus identity and same install
   // generation. Anything else is cross-talk from an older page state.
+  // Correlation is bookkeeping, not authentication (same-origin scripts can
+  // fake any message; the harm is bounded to the page they already own).
   const ours = s && m.focusUrlId === s.focusUrlId &&
     typeof m.gen === "number" && m.gen === s.gen;
-  if (!ours) {
+  // Gen continuation: an internal re-install is the SAME installation session
+  // continuing on a new virtualizer instance. MAIN reports it as
+  // HEALTH_ACTIVE carrying a newer generation — accept it while we are active
+  // for the same focus and adopt the new gen, so the continued session's later
+  // notifications (HEALTH_ERROR included) are never orphaned. Belt and braces
+  // for the gen-continuity invariant on the MAIN side.
+  const continuation = !ours && s && s.phase === "active" && s.everActive &&
+    m.type === LAD_HEALTH_ACTIVE && m.focusUrlId === s.focusUrlId &&
+    typeof m.gen === "number" && m.gen > s.gen;
+  if (continuation) { s.gen = m.gen; }
+  if (!ours && !continuation) {
     // A wrap whose session we no longer hold must be released — but never by
     // clobbering a live ACTIVE session (its own health tick owns it). The
-    // UNINSTALL names its focus so MAIN can refuse a mismatched release.
-    if (!s || s.phase !== "active") {
+    // UNINSTALL names its focus so MAIN can refuse a mismatched release; the
+    // focus must be a real string (a spoofed notification without one must
+    // not turn into an unqualified release command).
+    if ((!s || s.phase !== "active") && typeof m.focusUrlId === "string" && m.focusUrlId) {
       sendToMain({ type: LAD_UNINSTALL, nonce: ++nonceSeq, reason: "stale-health-event", focusUrlId: m.focusUrlId });
     }
     return;

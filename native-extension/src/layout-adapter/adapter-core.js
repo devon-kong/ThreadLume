@@ -242,6 +242,13 @@ export function install({ focusUrlId, reqNonce = null, internalReinstall = false
   // the bounded re-install budget is consumed by successful internal
   // re-installs of ONE focus session; a route-driven install resets it
   const budget = internalReinstall ? Math.max(0, S.reinstallLeft - 1) : LAD_REINSTALL_BUDGET;
+  // gen continuity: an internal re-install CONTINUES the same installation
+  // session (same focus, same controller session) — only a genuinely new
+  // install mints a generation. Breaking this strands the controller on the
+  // old gen: every later autonomous notification of the continued session
+  // (HEALTH_ERROR included) is dropped as "foreign" and the split CSS leaks.
+  const continuesSession = internalReinstall && S.phase === "active";
+  const prevGen = S.gen;
   if (S.phase === "active") {
     // same-focus idempotency applies to ROUTE-driven installs only; an
     // internal re-install means the instance was replaced underneath us
@@ -257,7 +264,7 @@ export function install({ focusUrlId, reqNonce = null, internalReinstall = false
   S = freshState();
   S.stats = stats;              // aggregate counters survive re-installs (S5)
   S.reinstallLeft = budget;
-  S.gen = ++genSeq;             // P0-A: every installation session gets a generation
+  S.gen = continuesSession ? prevGen : ++genSeq; // P1(R): session-continuing reinstall keeps the generation
   S.reqNonce = reqNonce;
   S.focusUrlId = focusUrlId;
 

@@ -295,6 +295,72 @@ test("A9 路由离开：包装、观察器、自有 CSS 全部清零", async () 
   assert.equal(un.focusUrlId, focusId, "release command names its focus");
 });
 
+test("A10 [Review 补证] 内部重装成功 → 同路由自主退出：gen 连续、HEALTH_ERROR 必达、CSS 必移除", async () => {
+  const { env, poc, focusId, fixture, lad } = makeLabEnv({});
+  await env.pushNavigate(`/somebody/status/${focusId}`);
+  await realSleep(5);
+  const gen0 = poc.layoutAdapter.sessionSnapshot().gen;
+  assert.equal(typeof gen0, "number");
+  assert.equal(lad.query().gen, gen0, "controller mirrors MAIN gen");
+  // X replaces the virtualizer instance underneath the adapter
+  fixture.cell.remove();
+  const v2 = makeVirtualizer();
+  v2.setList([{ id: focusId }, ...Array.from({ length: 10 }, (_, i) => ({ id: `r-${i}` }))]);
+  const { cell: cell2 } = mountFocalCell(env, { focusId, virtualizer: v2 });
+  v2.showAll();
+  void cell2;
+  lad.healthTick(); // internal re-install on the new instance
+  await realSleep(5);
+  assert.equal(lad.query().phase, "active", "reinstall landed");
+  const gen1 = lad.query().gen;
+  assert.equal(gen1, gen0, "internal re-install CONTINUES the session generation (no drift)");
+  assert.equal(poc.layoutAdapter.sessionSnapshot().gen, gen1, "controller gen synced via HEALTH_ACTIVE");
+  // same-route structural drift on the NEW instance
+  const xsNewest = function () { return []; };
+  v2.instance[LAD_KEY] = xsNewest;
+  lad.healthTick();
+  await realSleep(5);
+  assert.equal(ladStyle(env), false, "split CSS removed after reinstall-then-self-exit (P0 symptom must not recur)");
+  assert.equal(htmlAttr(env), null);
+  assert.equal(stateAttr(env), "failed");
+  assert.equal(lad.query().phase, "error");
+  assert.equal(v2.instance[LAD_KEY], xsNewest, "X's newer method untouched (already-replaced path never clobbers)");
+});
+
+test("A11 [防御纵深] 同焦点更高 gen 的 HEALTH_ACTIVE：控制器收养新代次并继续采信该会话", async () => {
+  const { env, poc, sent, focusId, fixture, lad } = makeLabEnv({});
+  await env.pushNavigate(`/somebody/status/${focusId}`);
+  await realSleep(5);
+  const gen = poc.layoutAdapter.sessionSnapshot().gen;
+  env.window.postMessage({ ns: "peek-lad", from: "main", type: "HEALTH_ACTIVE", gen: gen + 1, reqNonce: null, focusUrlId: focusId, note: "reinstalled" }, ORIGIN);
+  await realSleep(5);
+  assert.equal(stateAttr(env), "active");
+  assert.equal(poc.layoutAdapter.sessionSnapshot().gen, gen + 1, "controller adopted the continuation generation");
+  // the continued session's later notifications must now be honored
+  env.window.postMessage({ ns: "peek-lad", from: "main", type: "HEALTH_ERROR", gen: gen + 1, reqNonce: null, focusUrlId: focusId, reason: "continued-session-exit" }, ORIGIN);
+  await realSleep(5);
+  assert.equal(stateAttr(env), "failed", "continued-session HEALTH_ERROR accepted");
+  assert.equal(ladStyle(env), false);
+});
+
+test("A12 [加固] 无焦点字段的伪造事件：绝不发出无限定释放命令", async () => {
+  const { env, poc, sent, focusId, fixture, lad } = makeLabEnv({});
+  await env.pushNavigate(`/somebody/status/${focusId}`);
+  await realSleep(5);
+  // drive the session into a failed state so the stale-release branch is armed
+  fixture.virtualizer.instance[LAD_KEY] = function () { return []; };
+  lad.healthTick();
+  await realSleep(5);
+  assert.equal(stateAttr(env), "failed");
+  const uninstallCount = sent.filter((m) => m.type === "UNINSTALL").length;
+  // spoofed autonomous event WITHOUT focusUrlId
+  env.window.postMessage({ ns: "peek-lad", from: "main", type: "HEALTH_ERROR", gen: 999, reqNonce: null, reason: "spoofed" }, ORIGIN);
+  await realSleep(5);
+  assert.equal(sent.filter((m) => m.type === "UNINSTALL").length, uninstallCount,
+    "no unqualified UNINSTALL may be synthesized from a focus-less spoofed event");
+  void poc;
+});
+
 // ============================================================
 // B. P1-A — residue lock
 // ============================================================
