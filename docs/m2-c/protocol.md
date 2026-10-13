@@ -11,3 +11,9 @@ Fixed samples: thinkszyg/2109309251533570509 (video); wlzh/2109433207318081885 (
 ## Delivery state
 
 Research and independent review finished; browser probes cleaned and original Peek restored. Two signed commit attempts failed with `1Password: agent returned an error`. Signing remains enabled. New files are staged locally, not committed or pushed. Remote branch codex/peek-native-m2c-dual-page was created at the unchanged B0 commit27ad2b1; it does not yet contain this research. No C PR created. Resume by resolving the local signing-agent availability, then commit and push this staged research; do not disable signing silently. Product/Legacy source unchanged.
+
+## C1 交付更新（2026-10-13）
+
+此前签名阻塞已解除：C1代码与研究提交 `e22f84d` 已推送至 `codex/peek-native-m2c-dual-page`，Draft PR #4：https://github.com/devon-kong/peek-exploration/pull/4 。保留签名配置，没有关闭签名。详细验证见 `c1-verification.md`。
+
+浏览器TaskSpace21中的临时注入已清理；原有 Peek Native (M1) 扩展已恢复启用，1Password未改变。已点击扩展管理页Load unpacked并handOff给用户；当前空间保留p1公开视频样本、p2扩展管理页，等待用户在原生目录选择器选择 `dist-extension-native-dual/`。未调用finish，因为等待用户操作；下轮经用户确认后resume同一space21，先确认C1安装再暂停M1做实际MV3验收。不要把当前handOff状态写成已安装。
