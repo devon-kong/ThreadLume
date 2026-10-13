@@ -36,4 +36,6 @@ Reviewer 为独立 Agent，直接阅读源码与测试（未采信执行方总�
 
 ## 最终结论
 
-条件 (a)(b)(c) 全部完成并通过复核（见下方 Reviewer 二次确认）。判定：**GO**——两个 P0 修复成立、G1–G13 全 PASS、性能同表面口径无回归、隔离完整、零新增主动私有 API。建议进入 M2-B2 产品化第一包；M1-R 字面 T1 门槛差异属既定架构取舍（Native 模式放弃阅读副本换取原生保真），已在 performance-report.md 与 mv3-acceptance.md 如实记录。
+条件 (a)(b)(c) 全部完成并通过 Reviewer 二次复核（其独立重建双产物、以自写脚本重放原始缺陷场景确认不复现、重跑全部套件 168/119/75 与声称一致、逐值核对更正后的报告数字与原始 JSON）。Reviewer 最终判定：**GO**。判定依据：两个 P0 修复成立、P1×4 修复成立、G1–G13 全 PASS、性能同表面口径无回归、隔离完整、零新增主动私有 API。建议进入 M2-B2 产品化第一包；M1-R 字面 T1 门槛差异属既定架构取舍（Native 模式放弃阅读副本换取原生保真），已在 performance-report.md 与 mv3-acceptance.md 如实记录。
+
+Reviewer 非阻塞备注（记入 M2-B2 待办）：会话延续收养路径的页面级伪造面——详见 message-lifecycle.md"诚实边界"的更新表述；可选收紧 `m.gen === s.gen + 1`。

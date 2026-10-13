@@ -62,4 +62,4 @@
 ## 无法证明的边界（如实披露）
 
 - 真实跨 world 传输（浏览器 postMessage 管线）在离线 jsdom 测试中以合成 MessageEvent 替代（`event.source/origin` 由测试填充）；真实管线行为由真实 MV3 装载验证（`world: "MAIN"` 注册 + 结构失配实机回退 `mv3r-checks.json mismatch` 佐证了双 world 全链路）。
-- 同源页面脚本可以伪造 `HEALTH_ERROR` 迫使布局降级为原生单栏——这是无害方向的伪造（fail-closed），且伪造者本就拥有整个页面。
+- 同源页面脚本可以伪造 `HEALTH_ERROR` 迫使布局降级为原生单栏——这通常是无害方向的伪造（fail-closed），且伪造者本就拥有整个页面。一处已知的例外（Reviewer 二次复核备注，M2-B2 跟进）：会话延续收养路径接受"同焦点更高 gen 的 HEALTH_ACTIVE"并回写 `s.gen`，伪造它可使后续真实 `HEALTH_ERROR` 被当异代次拒绝、延迟 CSS 清理——危害仍限于页面自身布局（伪造者亦可直接伪造 HEALTH_ERROR 达成同样效果），但并非严格的 fail-closed 方向。MAIN 侧 gen 连续性是主修复，收养仅为纵深；M2-B2 可将收养收紧为 `m.gen === s.gen + 1`。
