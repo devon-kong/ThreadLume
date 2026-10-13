@@ -186,27 +186,52 @@ function armClickCascade() {
 function watchTitle() {
   if (titleObserver) return;
   titleObserver = new MutationObserver(() => {
-    // X can replace the title element wholesale; every head childList change
-    // re-binds the watcher to the CURRENT title element before the route
-    // check, so a replaced element never leaves us blind (A1).
+    // X can replace the title element wholesale; every root/level childList
+    // change re-arms the roots and re-binds the watcher to the CURRENT title
+    // element before the route check, so a replaced element never leaves us
+    // blind (A1).
+    observeTitleRoot();
     bindTitleElement();
     onPossibleRouteChange(false);
     // same bounded cascade as the click path: covers a router that touches
     // the title a beat before committing pushState (or vice versa)
     armClickCascade();
   });
+  observeTitleRoot();
   bindTitleElement();
-  titleObserver.observe(document.head, { childList: true });
+}
+
+// Two observation roots, one observer (A1 robustness):
+//  - documentElement: catches <head> CREATION — scripts injected at
+//    document_start (the offline/CDP harness, future early-run
+//    configurations) run before the parser creates head; body subtree
+//    changes never bubble to documentElement, so steady-state cost is nil.
+//  - head: catches the title element being REPLACED inside head (a head-
+//    internal mutation does not bubble to documentElement).
+let observedRoots = [];
+function observeTitleRoot() {
+  // prune replaced heads so the observer never accumulates detached nodes
+  observedRoots = observedRoots.filter((root) => {
+    if (root.isConnected) return true;
+    try { titleObserver.unobserve(root); } catch { /* already gone */ }
+    return false;
+  });
+  for (const root of [document.documentElement, document.head]) {
+    if (root && !observedRoots.includes(root)) {
+      try { titleObserver.observe(root, { childList: true }); observedRoots.push(root); }
+      catch { /* detached — the next mutation retries */ }
+    }
+  }
 }
 
 function bindTitleElement() {
-  // No <title> yet (exotic/early document): the head childList observation
-  // re-runs this when head changes, so the watcher self-heals.
+  // No <title> yet (exotic/early document): the root childList observations
+  // re-run this when head changes, so the watcher self-heals.
   const t = document.querySelector("head > title");
   if (t && t !== titleElement) {
     titleElement = t;
     try { titleObserver.observe(t, { childList: true, characterData: true, subtree: true }); }
-    catch { /* detached title — the next head mutation rebinds */ }
+    catch { /* detached title — the next root mutation rebinds */ }
   }
 }
 

@@ -240,3 +240,24 @@ test("A1 无 Navigation API 的环境（旧路径不回归）：title watcher �
   assertInstantNoClock(env, before);
   assert.ok(poc.navTrailState().idx > 0, "trail still records the push");
 });
+
+test("A1 document_start 注入（head 尚未解析）：安装不抛错，head 出现后 title 检测自愈", async () => {
+  // the offline/CDP harness injects at document_start, where document.head is
+  // still null — the title watcher must observe documentElement until head
+  // exists, then re-bind the title element (regression found in live M2-A B0)
+  const env = makeEnv({ html: "<!doctype html><html><body></body></html>" });
+  env.window.document.head.remove(); // simulate pre-parser document_start
+  const poc = env.boot(); // must not throw
+  assert.equal(poc.navApi(), false);
+  // document fully parsed later: head + title appear
+  const head = env.document.createElement("head");
+  const title = env.document.createElement("title");
+  title.textContent = "Home / X";
+  head.appendChild(title);
+  env.document.documentElement.insertBefore(head, env.document.body);
+  await env.timers.flushMicrotasks();
+  const idA = makeStatusId();
+  const before = observedCount(env);
+  await env.programmaticNavigate(`/somebody/status/${idA}`, { title: "某帖 / X" });
+  assertInstantNoClock(env, before);
+});
