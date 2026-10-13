@@ -131,7 +131,7 @@ test("C-7 回复一直不出现：有界窗口安静放弃（零滚动）", asyn
   const poc = env.boot();
   const idA = makeStatusId();
   await openSimplePost(env, idA, { height: 560 });
-  await env.timers.advance(4_000);
+  await env.timers.advance(7_000); // past the 6s bounded window
   assert.equal(env.scroll.y, 0);
   assert.equal(poc.diag().commentsFirst.why, "no-reply-in-window");
   assert.equal(poc.commentsFirstArmed(), false, "arming released");

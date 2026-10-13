@@ -32,7 +32,7 @@ import { focalCellByStatusId } from "./focal-extractor.js";
 import * as diagnostics from "./diagnostics.js";
 
 export const CF_POLL_MS = 200;          // bounded wait for the first reply cell
-export const CF_WAIT_MAX_MS = 3000;
+export const CF_WAIT_MAX_MS = 6000;     // full page loads hydrate replies slower than SPA nav
 export const CF_MAX_FOCAL_SHARE = 0.6;  // only bother when the focal is tall...
 export const CF_MIN_REPLY_SHARE = 0.5;  // ...and replies get under half the viewport
 export const CF_HEADER_PX = 53;         // X's sticky in-column title bar
@@ -43,6 +43,21 @@ let stopInput = null;
 let armed = null; // { statusId, rich, genAlive }
 
 export const commentsFirstArmed = () => Boolean(armed);
+
+// Test-hook DOM mirror (same pattern as the anchor mirror): the offline/CDP
+// harness cannot reach into this isolated world's JS, so the decision is
+// mirrored onto <html> when armed. Never written in production.
+function mirrorDecision(record) {
+  try {
+    if (!window.__PEEK_NATIVE_TEST__) return;
+    document.documentElement.setAttribute("data-peek-cf", JSON.stringify(record));
+  } catch { /* mirror only */ }
+}
+
+function decide(record) {
+  diagnostics.recordCommentsFirst(record);
+  mirrorDecision(record);
+}
 
 function clearTimers() {
   for (const t of timers) clearTimeout(t);
@@ -68,12 +83,12 @@ export function armCommentsFirst(statusId, rich, genAlive) {
   if (!statusId || !genAlive) return false;
   // Option C gate: only posts the left pane fully duplicates go comments-first.
   if (rich?.video || rich?.poll || rich?.card || rich?.article) {
-    diagnostics.recordCommentsFirst({ statusId, applied: false, why: "rich-native-kept" });
+    decide({ statusId, applied: false, why: "rich-native-kept" });
     return false;
   }
   armed = { statusId, rich, genAlive };
   stopInput = watchUserInput(() => {
-    diagnostics.recordCommentsFirst({ statusId, applied: false, why: "user-input" });
+    decide({ statusId, applied: false, why: "user-input" });
     cancelCommentsFirst("user-input");
   });
   const deadline = Date.now() + CF_WAIT_MAX_MS;
@@ -84,12 +99,12 @@ export function armCommentsFirst(statusId, rich, genAlive) {
       return;
     }
     if (Date.now() > deadline) {
-      diagnostics.recordCommentsFirst({ statusId: armed.statusId, applied: false, why: "no-reply-in-window" });
+      decide({ statusId: armed.statusId, applied: false, why: "no-reply-in-window" });
       cancelCommentsFirst("window-expired");
       return;
     }
     if (userScrolled()) {
-      diagnostics.recordCommentsFirst({ statusId: armed.statusId, applied: false, why: "user-scrolled" });
+      decide({ statusId: armed.statusId, applied: false, why: "user-scrolled" });
       cancelCommentsFirst("user-scrolled");
       return;
     }
@@ -104,13 +119,13 @@ export function armCommentsFirst(statusId, rich, genAlive) {
     if (!vh || focalH < vh * CF_MAX_FOCAL_SHARE || replyShare >= CF_MIN_REPLY_SHARE) {
       // duplication is minor (short focal) or replies already own the screen —
       // keep native layout
-      diagnostics.recordCommentsFirst({ statusId: armed.statusId, applied: false, why: "focal-small" });
+      decide({ statusId: armed.statusId, applied: false, why: "focal-small" });
       cancelCommentsFirst("focal-small");
       return;
     }
     const target = Math.max(0, Math.round(replyTop - CF_HEADER_PX + window.scrollY));
     try { window.scrollTo(0, target); } catch { /* keep native behavior */ }
-    diagnostics.recordCommentsFirst({ statusId: armed.statusId, applied: true, target, focalH, vh });
+    decide({ statusId: armed.statusId, applied: true, target, focalH, vh });
     cancelCommentsFirst("applied");
   };
   timers.push(setTimeout(step, CF_POLL_MS));
