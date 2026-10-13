@@ -1,23 +1,10 @@
 // Peek Native — M2-A comments-first positioning (design option C, hybrid).
 //
-// Problem measured on live X (M2-A B0/B1): with the reader open, the native
-// focal cell duplicates what the left pane already carries, and its height
-// pushes the replies far below the fold — a plain text post leaves only ~21%
-// of the viewport for comments, photo posts ~0%.
-//
-// Design options evaluated (docs/m2-a):
-//   A  CSS-compact the native focal cell  — REJECTED on evidence: clamping the
-//      article bought only +4% comment visibility (the cell's composer and
-//      action bar still occupy the fold); meaningful gains require clamping
-//      the whole cell, which makes native controls nominally present but
-//      inoperable — an explicit constraint violation. Also needs fragile
-//      high-specificity overrides on X internals.
-//   B  comments-first for every post     — works, but hides a playing video,
-//      poll or article at open, which the left pane cannot carry.
-//   C  hybrid (CHOSEN): comments-first ONLY for posts whose native focal cell
-//      duplicates the left pane (text / photos / quote), native focal stays in
-//      view for rich posts (video / poll / card / article) that need their
-//      native carrier for function.
+// The right column can repeat the left reading copy before its replies.
+// Option C keeps rich native carriers in view and only positions a readable
+// adjacent candidate for simple posts (see docs/m2-a for evidence limits).
+// CSS clamping risks cutting off native controls; unconditional positioning
+// would scroll away media that the left pane cannot fully carry.
 //
 // Mechanism (option B's, gated): after the pane mounts, wait bounded for the
 // first reply cell, then apply AT MOST ONE window scroll that brings the
@@ -89,6 +76,7 @@ function richInCell(cell) {
     cell.querySelector('[data-testid="videoPlayer"], video')
     || cell.querySelector('[data-testid="poll"], [role="group"] [data-testid="vote"]')
     || cell.querySelector('[data-testid="card.wrapper"]')
+    || cell.querySelector('[data-testid="twitter-article-title"], [data-testid="twitterArticleRichTextView"]')
   );
 }
 
@@ -160,15 +148,19 @@ export function armCommentsFirst(statusId, rich, genAlive) {
 // measured in R3) while the user has not moved, one bounded return scroll
 // puts the native carrier back in view. Any user scroll cancels the watch.
 function watchLateMedia(statusId, appliedTarget, genAlive) {
+  // A click or keypress need not move window.scrollY. Once the user takes
+  // control, never reclaim it just because a later sample has the same Y.
+  stopInput = watchUserInput(() => cancelCommentsFirst("late-user-input"));
   const deadline = Date.now() + CF_LATE_WATCH_MS;
   const step = () => {
-    if (!genAlive() || statusIdFromPath() !== statusId) return; // route moved on
-    if (Date.now() > deadline) return;
-    if (Math.abs(window.scrollY - appliedTarget) > 4) return; // user owns the viewport
+    if (!genAlive() || statusIdFromPath() !== statusId) { cancelCommentsFirst("route-moved"); return; }
+    if (Date.now() > deadline) { cancelCommentsFirst("watch-expired"); return; }
+    if (Math.abs(window.scrollY - appliedTarget) > 4) { cancelCommentsFirst("user-scrolled"); return; }
     const focal = focalCellByStatusId(statusId);
     if (focal && richInCell(focal)) {
       try { window.scrollTo(0, 0); } catch { /* keep native behavior */ }
       decide({ statusId, applied: false, why: "late-media-return", returnedTo: 0 });
+      cancelCommentsFirst("media-returned");
       return;
     }
     timers.push(setTimeout(step, CF_LATE_POLL_MS));
@@ -177,9 +169,37 @@ function watchLateMedia(statusId, appliedTarget, genAlive) {
 }
 
 function nextCellAfter(focal) {
-  const cells = document.querySelectorAll('[data-testid="cellInnerDiv"]');
-  const idx = [...cells].indexOf(focal);
-  return idx >= 0 ? cells[idx + 1] || null : null;
+  // Inspect only the adjacent cell in this virtual list. Do not cross a
+  // composer, loading placeholder, recommendation heading or another list
+  // to manufacture a reply target. Only empty zero-height separators (seen
+  // on live X between tweets) can be skipped; unknown structures stop us.
+  if (!focal.closest('[data-testid="primaryColumn"]')) return null;
+  // URL commit and Peek's fast first paint can precede X replacing the old
+  // profile/timeline cells. A detail-only native composer marker proves we
+  // are no longer looking at that old list. No marker => no auto-positioning.
+  if (!focal.querySelector('[data-testid="inline_reply_offscreen"], [data-testid="tweetButtonInline"], [data-testid="tweetTextarea_0"]')) return null;
+  const cells = [...(focal.parentElement?.children || [])];
+  const idx = cells.indexOf(focal);
+  let next = idx + 1;
+  while (idx >= 0 && next < cells.length) {
+    const candidate = cells[next];
+    if (!candidate.matches('[data-testid="cellInnerDiv"]')
+      || candidate.textContent?.trim() || candidate.getBoundingClientRect().height !== 0
+      || candidate.querySelector('article, [role], [data-testid], a, button, input, img, video, svg, h1, h2, h3')) break;
+    next++;
+  }
+  const cell = idx >= 0 ? cells[next] : null;
+  if (!cell?.matches('[data-testid="cellInnerDiv"]') || cell.querySelector('[role="heading"], h1, h2, h3, [data-testid="placementTracking"], [data-testid="promotedIndicator"]')) return null;
+  const article = cell.querySelector('article[data-testid="tweet"]');
+  if (!article) return null;
+  const ownLink = [...article.querySelectorAll('a[href]')].find((a) =>
+    a.querySelector('time') && !a.closest('div[role="link"]')
+    && /^\/[\w]+\/status\/\d+\/?$/.test(a.getAttribute('href') || '')
+  );
+  if (!ownLink || ownLink.getAttribute('href').match(/\/status\/(\d+)/)?.[1] === statusIdFromPath()) return null;
+  const body = article.querySelector('[data-testid="tweetText"]');
+  const media = article.querySelector('[data-testid="tweetPhoto"], [data-testid="videoPlayer"], [data-testid="card.wrapper"], [data-testid="poll"]');
+  return body?.textContent?.trim() || media ? cell : null;
 }
 
 // One-shot user-input guard over the arming window (same semantics as the

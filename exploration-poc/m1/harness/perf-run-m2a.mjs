@@ -1,3 +1,6 @@
+// ARCHIVAL METHOD: cells[1] can be a spacer, T2 can include unrelated tweets,
+// and visibility is sampled after manual scrolling. Do not use this harness
+// for acceptance; use perf-run-m2a-paired.mjs. Historical JSON is unchanged.
 // M2-A performance harness — comments-first build vs the archived M1 baseline.
 // Same method as R4 G1 (trusted CDP click = clock start, in-page 25ms recorder,
 // foreground measurement, click-aligned windows, zero writes), single condition
