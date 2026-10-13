@@ -1,0 +1,17 @@
+{
+ "render": {
+  "adapterState": "active",
+  "focalMarked": true,
+  "photos": 2,
+  "actionsInFocal": true
+ },
+ "lightbox": {
+  "open": false,
+  "imagesInLightbox": 0
+ },
+ "lightboxClosed": {
+  "open": false,
+  "focalStillConnected": true,
+  "adapterState": "active"
+ }
+}

@@ -1,0 +1,17 @@
+{
+ "seek": {
+  "bars": [],
+  "error": "no wide rail"
+ },
+ "fullscreenExit": {
+  "entered": true,
+  "exitedViaExitFullscreen": true
+ },
+ "integrity": {
+  "videoCountInFocal": 1,
+  "focalCellCount": 1,
+  "adapterState": "active",
+  "videoSame": true,
+  "videoPlaying": true
+ }
+}

@@ -1,0 +1,21 @@
+{
+ "hoverCard": {
+  "present": true,
+  "hasFollow": true,
+  "hasStats": true
+ },
+ "hoverCardGone": false,
+ "menu": {
+  "open": true,
+  "items": 10
+ },
+ "menuClosed": true,
+ "samples": {
+  "poll": null,
+  "card": null,
+  "quote": "https://x.com/wangray/status/2109869791431508001",
+  "article": null,
+  "video": null,
+  "photos": "https://x.com/op7418/status/2109839549706969259"
+ }
+}

@@ -1,0 +1,79 @@
+{
+ "t0": {
+  "same": true,
+  "time": 6.48,
+  "paused": false,
+  "muted": true,
+  "volume": 1,
+  "readyState": 4
+ },
+ "afterPause": {
+  "same": true,
+  "time": 7.68,
+  "paused": true,
+  "muted": true,
+  "volume": 1,
+  "readyState": 4
+ },
+ "pausedStill": {
+  "same": true,
+  "time": 7.68,
+  "paused": true,
+  "muted": true,
+  "volume": 1,
+  "readyState": 4
+ },
+ "afterResume": {
+  "same": true,
+  "time": 8.75,
+  "paused": false,
+  "muted": false,
+  "volume": 1,
+  "readyState": 4
+ },
+ "seek": {
+  "clicked": true,
+  "at": {
+   "x": 208.4734375,
+   "y": 667.3125,
+   "w": 32
+  },
+  "state": {
+   "same": true,
+   "time": 10.04,
+   "paused": false,
+   "muted": false,
+   "volume": 1,
+   "readyState": 4
+  }
+ },
+ "afterMuteToggle": {
+  "same": true,
+  "time": 12.78,
+  "paused": false,
+  "muted": true,
+  "volume": 1,
+  "readyState": 4
+ },
+ "fullscreen": {
+  "fullscreenElement": "DIV",
+  "videoRect": {
+   "w": 1348,
+   "h": 808
+  },
+  "focalStillConnected": true
+ },
+ "fullscreenExit": {
+  "fullscreenElement": "DIV",
+  "focalStillConnected": true,
+  "adapterStillActive": "active"
+ },
+ "afterTabSwitch": {
+  "same": true,
+  "time": 28.08,
+  "paused": false,
+  "muted": true,
+  "volume": 1,
+  "readyState": 4
+ }
+}
