@@ -1,0 +1,140 @@
+{
+  "reason": "Original absolute steps returned into the long Article; this bounded correction uses offsets below focal bottom",
+  "base": 8676.796875,
+  "rows": [
+    {
+      "delta": 0,
+      "viewport": [
+        1329,
+        792
+      ],
+      "visibility": "visible",
+      "focus": true,
+      "y": 8677,
+      "docHeight": 19183,
+      "sameFocal": true,
+      "focalConnected": true,
+      "sameParent": true,
+      "focalRect": [
+        308,
+        -8624,
+        598,
+        8677.796875
+      ],
+      "focalVideos": 0,
+      "pageVideos": 0,
+      "liveArticles": 15,
+      "seenArticles": 12,
+      "articleChars": 4662,
+      "video": null,
+      "extensionPanes": 0
+    },
+    {
+      "delta": 800,
+      "viewport": [
+        1329,
+        792
+      ],
+      "visibility": "visible",
+      "focus": true,
+      "y": 9477,
+      "docHeight": 18881,
+      "sameFocal": true,
+      "focalConnected": true,
+      "sameParent": true,
+      "focalRect": [
+        308,
+        -9424,
+        598,
+        8677.796875
+      ],
+      "focalVideos": 0,
+      "pageVideos": 0,
+      "liveArticles": 17,
+      "seenArticles": 14,
+      "articleChars": 4662,
+      "video": null,
+      "extensionPanes": 0
+    },
+    {
+      "delta": 2400,
+      "viewport": [
+        1329,
+        792
+      ],
+      "visibility": "visible",
+      "focus": true,
+      "y": 11077,
+      "docHeight": 17858,
+      "sameFocal": false,
+      "focalConnected": false,
+      "sameParent": true,
+      "focalRect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "focalVideos": 0,
+      "pageVideos": 0,
+      "liveArticles": 27,
+      "seenArticles": 25,
+      "articleChars": 4662,
+      "video": null,
+      "extensionPanes": 0
+    },
+    {
+      "delta": 4800,
+      "viewport": [
+        1329,
+        792
+      ],
+      "visibility": "visible",
+      "focus": true,
+      "y": 13477,
+      "docHeight": 17585,
+      "sameFocal": false,
+      "focalConnected": false,
+      "sameParent": true,
+      "focalRect": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "focalVideos": 0,
+      "pageVideos": 2,
+      "liveArticles": 26,
+      "seenArticles": 34,
+      "articleChars": 4662,
+      "video": null,
+      "extensionPanes": 0
+    }
+  ],
+  "leftAfter": {
+    "viewport": [
+      1329,
+      792
+    ],
+    "visibility": "visible",
+    "focus": true,
+    "y": 10,
+    "docHeight": 19405,
+    "sameFocal": true,
+    "focalConnected": true,
+    "sameParent": true,
+    "focalRect": [
+      308,
+      43,
+      598,
+      8677.796875
+    ],
+    "focalVideos": 0,
+    "pageVideos": 0,
+    "liveArticles": 2,
+    "seenArticles": 1,
+    "articleChars": 4662,
+    "video": null,
+    "extensionPanes": 0
+  }
+}

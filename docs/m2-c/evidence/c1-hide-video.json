@@ -1,0 +1,147 @@
+{
+  "kind": "DOM CSS injection, NOT installed MV3",
+  "records": [
+    {
+      "stage": "baseline",
+      "y": 10,
+      "articleConnected": true,
+      "article": {
+        "top": 43,
+        "height": 919
+      },
+      "cell": {
+        "top": 43,
+        "height": 1004
+      },
+      "composerConnected": true,
+      "composer": {
+        "top": 984,
+        "height": 28
+      },
+      "hidden": "flex",
+      "videoConnected": true,
+      "videoPaused": false,
+      "videoReady": 4,
+      "nativeArticles": 10,
+      "seenPermalinks": 9,
+      "viewport": [
+        1077,
+        804
+      ]
+    },
+    {
+      "stage": "hidden",
+      "y": 10,
+      "articleConnected": true,
+      "article": {
+        "top": 0,
+        "height": 0
+      },
+      "cell": {
+        "top": 43,
+        "height": 85
+      },
+      "composerConnected": true,
+      "composer": {
+        "top": 65,
+        "height": 28
+      },
+      "hidden": "none",
+      "videoConnected": true,
+      "videoPaused": true,
+      "videoReady": 4,
+      "nativeArticles": 16,
+      "seenPermalinks": 14,
+      "viewport": [
+        1077,
+        804
+      ]
+    },
+    {
+      "stage": "deep",
+      "y": 1200,
+      "articleConnected": true,
+      "article": {
+        "top": 0,
+        "height": 0
+      },
+      "cell": {
+        "top": -1147,
+        "height": 85
+      },
+      "composerConnected": true,
+      "composer": {
+        "top": -1125,
+        "height": 28
+      },
+      "hidden": "none",
+      "videoConnected": true,
+      "videoPaused": true,
+      "videoReady": 4,
+      "nativeArticles": 16,
+      "seenPermalinks": 14,
+      "viewport": [
+        1077,
+        804
+      ]
+    },
+    {
+      "stage": "deep",
+      "y": 3200,
+      "articleConnected": false,
+      "article": null,
+      "cell": null,
+      "composerConnected": false,
+      "composer": null,
+      "hidden": "",
+      "videoConnected": false,
+      "videoPaused": true,
+      "videoReady": 0,
+      "nativeArticles": 16,
+      "seenPermalinks": 22,
+      "viewport": [
+        1077,
+        804
+      ]
+    },
+    {
+      "stage": "deep",
+      "y": 6400,
+      "articleConnected": false,
+      "article": null,
+      "cell": null,
+      "composerConnected": false,
+      "composer": null,
+      "hidden": "",
+      "videoConnected": false,
+      "videoPaused": true,
+      "videoReady": 0,
+      "nativeArticles": 9,
+      "seenPermalinks": 30,
+      "viewport": [
+        1077,
+        804
+      ]
+    },
+    {
+      "stage": "restored",
+      "y": 0,
+      "articleConnected": false,
+      "article": null,
+      "cell": null,
+      "composerConnected": false,
+      "composer": null,
+      "hidden": "",
+      "videoConnected": false,
+      "videoPaused": true,
+      "videoReady": 0,
+      "nativeArticles": 7,
+      "seenPermalinks": 30,
+      "viewport": [
+        1077,
+        804
+      ],
+      "currentFocal": true
+    }
+  ]
+}

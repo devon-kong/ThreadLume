@@ -1,0 +1,13 @@
+// Disposable DOM-only observer. No requests, React internals or node mutations.
+export function observePairPage(){
+ const id=location.pathname.match(/\/status\/(\d+)/)?.[1];
+ const find=()=>[...document.querySelectorAll('[data-testid="primaryColumn"] article')].find(a=>[...a.querySelectorAll('a:has(time)')].some(l=>l.pathname.match(/\/status\/(\d+)/)?.[1]===id&&!l.closest('div[role="link"]')));
+ const focal=find();if(!focal)throw Error('Focal unavailable');const video=focal.querySelector('video'),parent=focal.parentNode;const seen=new Set();
+ const sample=()=>{for(const c of document.querySelectorAll('[data-testid="primaryColumn"] article')){const a=c.querySelector('a:has(time)');if(a)seen.add(a.pathname);}const r=focal.getBoundingClientRect();return {viewport:[innerWidth,innerHeight],visibility:document.visibilityState,focus:document.hasFocus(),y:scrollY,docHeight:document.documentElement.scrollHeight,sameFocal:find()===focal,focalConnected:focal.isConnected,sameParent:focal.parentNode===parent,focalRect:[r.x,r.y,r.width,r.height],focalVideos:focal.querySelectorAll('video').length,pageVideos:document.querySelectorAll('video').length,liveArticles:document.querySelectorAll('[data-testid="primaryColumn"] article').length,seenArticles:seen.size,articleChars:focal.querySelector('[data-testid="twitterArticleRichTextView"]')?.textContent.length||0,video:video?{connected:video.isConnected,same:focal.querySelector('video')===video,paused:video.paused,ready:video.readyState,time:video.currentTime,duration:video.duration,muted:video.muted,width:video.videoWidth,height:video.videoHeight}:null,extensionPanes:document.querySelectorAll('#peek-native-pane').length};};
+ window.__m2c={sample,focal,video};return sample();
+}
+export function resourceSummary(){
+ const counts={graphql:0,rest:0,media:0,image:0,script:0,other:0};const ops={};let transfer=0,zeroTransfer=0;
+ for(const e of performance.getEntriesByType('resource')){const u=new URL(e.name);let k='other';if(u.hostname==='x.com'&&u.pathname.includes('/graphql/')){k='graphql';const op=u.pathname.split('/').at(-1);ops[op]=(ops[op]||0)+1;}else if(u.hostname==='x.com'&&u.pathname.startsWith('/i/api/'))k='rest';else if(u.hostname==='video.twimg.com')k='media';else if(u.hostname==='pbs.twimg.com')k='image';else if(e.initiatorType==='script')k='script';counts[k]++;transfer+=e.transferSize;zeroTransfer+=e.transferSize===0;}
+ return{counts,operations:ops,observableTransferBytes:transfer,zeroTransferEntries:zeroTransfer,visibility:document.visibilityState,heap:performance.memory?{used:performance.memory.usedJSHeapSize,total:performance.memory.totalJSHeapSize}:null};
+}

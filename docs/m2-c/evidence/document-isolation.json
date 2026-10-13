@@ -1,0 +1,861 @@
+[
+  {
+    "sample": "video",
+    "l0": {
+      "viewport": [
+        1329,
+        792
+      ],
+      "visibility": "visible",
+      "focus": true,
+      "y": 10,
+      "docHeight": 10167,
+      "sameFocal": true,
+      "focalConnected": true,
+      "sameParent": true,
+      "focalRect": [
+        308,
+        43,
+        598,
+        918.5
+      ],
+      "focalVideos": 1,
+      "pageVideos": 1,
+      "liveArticles": 8,
+      "seenArticles": 7,
+      "articleChars": 0,
+      "video": {
+        "connected": true,
+        "same": true,
+        "paused": true,
+        "ready": 0,
+        "time": 0,
+        "duration": 31.983,
+        "muted": true,
+        "width": 0,
+        "height": 0
+      },
+      "extensionPanes": 0
+    },
+    "r0": {
+      "viewport": [
+        1329,
+        792
+      ],
+      "visibility": "visible",
+      "focus": true,
+      "y": 10,
+      "docHeight": 9866,
+      "sameFocal": true,
+      "focalConnected": true,
+      "sameParent": true,
+      "focalRect": [
+        308,
+        43,
+        598,
+        918.5
+      ],
+      "focalVideos": 1,
+      "pageVideos": 1,
+      "liveArticles": 12,
+      "seenArticles": 11,
+      "articleChars": 0,
+      "video": {
+        "connected": true,
+        "same": true,
+        "paused": true,
+        "ready": 0,
+        "time": 0,
+        "duration": 31.983,
+        "muted": false,
+        "width": 0,
+        "height": 0
+      },
+      "extensionPanes": 0
+    },
+    "positioned": {
+      "viewport": [
+        1329,
+        792
+      ],
+      "visibility": "visible",
+      "focus": true,
+      "y": 917.5,
+      "docHeight": 9866,
+      "sameFocal": true,
+      "focalConnected": true,
+      "sameParent": true,
+      "focalRect": [
+        308,
+        -864.5,
+        598,
+        918.5
+      ],
+      "focalVideos": 1,
+      "pageVideos": 1,
+      "liveArticles": 12,
+      "seenArticles": 11,
+      "articleChars": 0,
+      "video": {
+        "connected": true,
+        "same": true,
+        "paused": true,
+        "ready": 0,
+        "time": 0,
+        "duration": 31.983,
+        "muted": false,
+        "width": 0,
+        "height": 0
+      },
+      "extensionPanes": 0
+    },
+    "stages": [
+      {
+        "requested": 800,
+        "viewport": [
+          1329,
+          792
+        ],
+        "visibility": "visible",
+        "focus": true,
+        "y": 800,
+        "docHeight": 9903,
+        "sameFocal": true,
+        "focalConnected": true,
+        "sameParent": true,
+        "focalRect": [
+          308,
+          -747,
+          598,
+          918.5
+        ],
+        "focalVideos": 1,
+        "pageVideos": 1,
+        "liveArticles": 15,
+        "seenArticles": 14,
+        "articleChars": 0,
+        "video": {
+          "connected": true,
+          "same": true,
+          "paused": true,
+          "ready": 4,
+          "time": 0,
+          "duration": 31.983,
+          "muted": false,
+          "width": 1472,
+          "height": 1472
+        },
+        "extensionPanes": 0
+      },
+      {
+        "requested": 1600,
+        "viewport": [
+          1329,
+          792
+        ],
+        "visibility": "visible",
+        "focus": true,
+        "y": 1600,
+        "docHeight": 9595,
+        "sameFocal": true,
+        "focalConnected": true,
+        "sameParent": true,
+        "focalRect": [
+          308,
+          -1547,
+          598,
+          918.5
+        ],
+        "focalVideos": 1,
+        "pageVideos": 1,
+        "liveArticles": 19,
+        "seenArticles": 17,
+        "articleChars": 0,
+        "video": {
+          "connected": true,
+          "same": true,
+          "paused": true,
+          "ready": 4,
+          "time": 0,
+          "duration": 31.983,
+          "muted": false,
+          "width": 1472,
+          "height": 1472
+        },
+        "extensionPanes": 0
+      },
+      {
+        "requested": 2800,
+        "viewport": [
+          1329,
+          792
+        ],
+        "visibility": "visible",
+        "focus": true,
+        "y": 2800,
+        "docHeight": 8738,
+        "sameFocal": true,
+        "focalConnected": true,
+        "sameParent": true,
+        "focalRect": [
+          308,
+          -2747,
+          598,
+          918.5
+        ],
+        "focalVideos": 1,
+        "pageVideos": 1,
+        "liveArticles": 29,
+        "seenArticles": 26,
+        "articleChars": 0,
+        "video": {
+          "connected": true,
+          "same": true,
+          "paused": true,
+          "ready": 4,
+          "time": 0,
+          "duration": 31.983,
+          "muted": false,
+          "width": 1472,
+          "height": 1472
+        },
+        "extensionPanes": 0
+      },
+      {
+        "requested": 4200,
+        "viewport": [
+          1329,
+          792
+        ],
+        "visibility": "visible",
+        "focus": true,
+        "y": 4200,
+        "docHeight": 7567,
+        "sameFocal": false,
+        "focalConnected": false,
+        "sameParent": true,
+        "focalRect": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "focalVideos": 0,
+        "pageVideos": 0,
+        "liveArticles": 32,
+        "seenArticles": 34,
+        "articleChars": 0,
+        "video": {
+          "connected": false,
+          "same": false,
+          "paused": true,
+          "ready": 0,
+          "time": 0,
+          "duration": null,
+          "muted": false,
+          "width": 0,
+          "height": 0
+        },
+        "extensionPanes": 0
+      },
+      {
+        "requested": 5800,
+        "viewport": [
+          1329,
+          792
+        ],
+        "visibility": "visible",
+        "focus": true,
+        "y": 5800,
+        "docHeight": 16918,
+        "sameFocal": false,
+        "focalConnected": false,
+        "sameParent": true,
+        "focalRect": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "focalVideos": 0,
+        "pageVideos": 0,
+        "liveArticles": 29,
+        "seenArticles": 40,
+        "articleChars": 0,
+        "video": {
+          "connected": false,
+          "same": false,
+          "paused": true,
+          "ready": 0,
+          "time": 0,
+          "duration": null,
+          "muted": false,
+          "width": 0,
+          "height": 0
+        },
+        "extensionPanes": 0
+      },
+      {
+        "requested": 8000,
+        "viewport": [
+          1329,
+          792
+        ],
+        "visibility": "visible",
+        "focus": true,
+        "y": 8000,
+        "docHeight": 15031,
+        "sameFocal": false,
+        "focalConnected": false,
+        "sameParent": true,
+        "focalRect": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "focalVideos": 0,
+        "pageVideos": 0,
+        "liveArticles": 30,
+        "seenArticles": 55,
+        "articleChars": 0,
+        "video": {
+          "connected": false,
+          "same": false,
+          "paused": true,
+          "ready": 0,
+          "time": 0,
+          "duration": null,
+          "muted": false,
+          "width": 0,
+          "height": 0
+        },
+        "extensionPanes": 0
+      }
+    ],
+    "lEnd": {
+      "state": {
+        "viewport": [
+          1329,
+          792
+        ],
+        "visibility": "visible",
+        "focus": true,
+        "y": 162,
+        "docHeight": 10167,
+        "sameFocal": true,
+        "focalConnected": true,
+        "sameParent": true,
+        "focalRect": [
+          308,
+          -109,
+          598,
+          918.5
+        ],
+        "focalVideos": 1,
+        "pageVideos": 1,
+        "liveArticles": 9,
+        "seenArticles": 8,
+        "articleChars": 0,
+        "video": {
+          "connected": true,
+          "same": true,
+          "paused": false,
+          "ready": 4,
+          "time": 0.096172,
+          "duration": 31.983,
+          "muted": true,
+          "width": 1472,
+          "height": 1472
+        },
+        "extensionPanes": 0
+      },
+      "timeline": [
+        {
+          "dt": 1.3999998569488525,
+          "visibility": "visible",
+          "y": 162,
+          "connected": true,
+          "video": {
+            "connected": true,
+            "same": true,
+            "paused": false,
+            "ready": 4,
+            "time": 0.020992,
+            "duration": 31.983,
+            "muted": true,
+            "width": 1472,
+            "height": 1472
+          }
+        },
+        {
+          "dt": 802.5,
+          "visibility": "hidden",
+          "y": 162,
+          "connected": true,
+          "video": {
+            "connected": true,
+            "same": true,
+            "paused": true,
+            "ready": 4,
+            "time": 0.02468,
+            "duration": 31.983,
+            "muted": true,
+            "width": 1472,
+            "height": 1472
+          }
+        },
+        {
+          "dt": 1800.3999998569489,
+          "visibility": "hidden",
+          "y": 162,
+          "connected": true,
+          "video": {
+            "connected": true,
+            "same": true,
+            "paused": true,
+            "ready": 4,
+            "time": 0.02468,
+            "duration": 31.983,
+            "muted": true,
+            "width": 1472,
+            "height": 1472
+          }
+        },
+        {
+          "dt": 2798.0999999046326,
+          "visibility": "hidden",
+          "y": 162,
+          "connected": true,
+          "video": {
+            "connected": true,
+            "same": true,
+            "paused": true,
+            "ready": 4,
+            "time": 0.02468,
+            "duration": 31.983,
+            "muted": true,
+            "width": 1472,
+            "height": 1472
+          }
+        },
+        {
+          "dt": 3800.2000000476837,
+          "visibility": "hidden",
+          "y": 162,
+          "connected": true,
+          "video": {
+            "connected": true,
+            "same": true,
+            "paused": true,
+            "ready": 4,
+            "time": 0.02468,
+            "duration": 31.983,
+            "muted": true,
+            "width": 1472,
+            "height": 1472
+          }
+        },
+        {
+          "dt": 4799.299999952316,
+          "visibility": "hidden",
+          "y": 162,
+          "connected": true,
+          "video": {
+            "connected": true,
+            "same": true,
+            "paused": true,
+            "ready": 4,
+            "time": 0.02468,
+            "duration": 31.983,
+            "muted": true,
+            "width": 1472,
+            "height": 1472
+          }
+        }
+      ]
+    },
+    "resourceLeft": {
+      "counts": {
+        "graphql": 0,
+        "rest": 0,
+        "media": 0,
+        "image": 0,
+        "script": 0,
+        "other": 0
+      },
+      "operations": {},
+      "observableTransferBytes": 0,
+      "zeroTransferEntries": 0,
+      "visibility": "visible",
+      "heap": {
+        "used": 86386600,
+        "total": 122594476
+      }
+    },
+    "resourceRight": {
+      "counts": {
+        "graphql": 0,
+        "rest": 0,
+        "media": 0,
+        "image": 5,
+        "script": 0,
+        "other": 0
+      },
+      "operations": {},
+      "observableTransferBytes": 0,
+      "zeroTransferEntries": 5,
+      "visibility": "visible",
+      "heap": {
+        "used": 269825490,
+        "total": 314252846
+      }
+    }
+  },
+  {
+    "sample": "article",
+    "l0": {
+      "viewport": [
+        1329,
+        792
+      ],
+      "visibility": "visible",
+      "focus": true,
+      "y": 10,
+      "docHeight": 19405,
+      "sameFocal": true,
+      "focalConnected": true,
+      "sameParent": true,
+      "focalRect": [
+        308,
+        43,
+        598,
+        8677.796875
+      ],
+      "focalVideos": 0,
+      "pageVideos": 0,
+      "liveArticles": 2,
+      "seenArticles": 1,
+      "articleChars": 4662,
+      "video": null,
+      "extensionPanes": 0
+    },
+    "r0": {
+      "viewport": [
+        1329,
+        792
+      ],
+      "visibility": "visible",
+      "focus": true,
+      "y": 10,
+      "docHeight": 19405,
+      "sameFocal": true,
+      "focalConnected": true,
+      "sameParent": true,
+      "focalRect": [
+        308,
+        43,
+        598,
+        8677.796875
+      ],
+      "focalVideos": 0,
+      "pageVideos": 0,
+      "liveArticles": 2,
+      "seenArticles": 1,
+      "articleChars": 4662,
+      "video": null,
+      "extensionPanes": 0
+    },
+    "positioned": {
+      "viewport": [
+        1329,
+        792
+      ],
+      "visibility": "visible",
+      "focus": true,
+      "y": 8677,
+      "docHeight": 19405,
+      "sameFocal": true,
+      "focalConnected": true,
+      "sameParent": true,
+      "focalRect": [
+        308,
+        -8624,
+        598,
+        8677.796875
+      ],
+      "focalVideos": 0,
+      "pageVideos": 0,
+      "liveArticles": 2,
+      "seenArticles": 1,
+      "articleChars": 4662,
+      "video": null,
+      "extensionPanes": 0
+    },
+    "stages": [
+      {
+        "requested": 800,
+        "viewport": [
+          1329,
+          792
+        ],
+        "visibility": "visible",
+        "focus": true,
+        "y": 800,
+        "docHeight": 19398,
+        "sameFocal": true,
+        "focalConnected": true,
+        "sameParent": true,
+        "focalRect": [
+          308,
+          -747,
+          598,
+          8677.796875
+        ],
+        "focalVideos": 0,
+        "pageVideos": 0,
+        "liveArticles": 2,
+        "seenArticles": 1,
+        "articleChars": 4662,
+        "video": null,
+        "extensionPanes": 0
+      },
+      {
+        "requested": 1600,
+        "viewport": [
+          1329,
+          792
+        ],
+        "visibility": "visible",
+        "focus": true,
+        "y": 1600,
+        "docHeight": 19398,
+        "sameFocal": true,
+        "focalConnected": true,
+        "sameParent": true,
+        "focalRect": [
+          308,
+          -1547,
+          598,
+          8677.796875
+        ],
+        "focalVideos": 0,
+        "pageVideos": 0,
+        "liveArticles": 2,
+        "seenArticles": 1,
+        "articleChars": 4662,
+        "video": null,
+        "extensionPanes": 0
+      },
+      {
+        "requested": 2800,
+        "viewport": [
+          1329,
+          792
+        ],
+        "visibility": "visible",
+        "focus": true,
+        "y": 2800,
+        "docHeight": 19398,
+        "sameFocal": true,
+        "focalConnected": true,
+        "sameParent": true,
+        "focalRect": [
+          308,
+          -2747,
+          598,
+          8677.796875
+        ],
+        "focalVideos": 0,
+        "pageVideos": 0,
+        "liveArticles": 2,
+        "seenArticles": 1,
+        "articleChars": 4662,
+        "video": null,
+        "extensionPanes": 0
+      },
+      {
+        "requested": 4200,
+        "viewport": [
+          1329,
+          792
+        ],
+        "visibility": "visible",
+        "focus": true,
+        "y": 4200,
+        "docHeight": 19398,
+        "sameFocal": true,
+        "focalConnected": true,
+        "sameParent": true,
+        "focalRect": [
+          308,
+          -4147,
+          598,
+          8677.796875
+        ],
+        "focalVideos": 0,
+        "pageVideos": 0,
+        "liveArticles": 2,
+        "seenArticles": 1,
+        "articleChars": 4662,
+        "video": null,
+        "extensionPanes": 0
+      },
+      {
+        "requested": 5800,
+        "viewport": [
+          1329,
+          792
+        ],
+        "visibility": "visible",
+        "focus": true,
+        "y": 5800,
+        "docHeight": 19398,
+        "sameFocal": true,
+        "focalConnected": true,
+        "sameParent": true,
+        "focalRect": [
+          308,
+          -5747,
+          598,
+          8677.796875
+        ],
+        "focalVideos": 0,
+        "pageVideos": 0,
+        "liveArticles": 2,
+        "seenArticles": 1,
+        "articleChars": 4662,
+        "video": null,
+        "extensionPanes": 0
+      },
+      {
+        "requested": 8000,
+        "viewport": [
+          1329,
+          792
+        ],
+        "visibility": "visible",
+        "focus": true,
+        "y": 8000,
+        "docHeight": 19413,
+        "sameFocal": true,
+        "focalConnected": true,
+        "sameParent": true,
+        "focalRect": [
+          308,
+          -7947,
+          598,
+          8677.796875
+        ],
+        "focalVideos": 0,
+        "pageVideos": 0,
+        "liveArticles": 9,
+        "seenArticles": 7,
+        "articleChars": 4662,
+        "video": null,
+        "extensionPanes": 0
+      }
+    ],
+    "lEnd": {
+      "state": {
+        "viewport": [
+          1329,
+          792
+        ],
+        "visibility": "visible",
+        "focus": true,
+        "y": 10,
+        "docHeight": 19405,
+        "sameFocal": true,
+        "focalConnected": true,
+        "sameParent": true,
+        "focalRect": [
+          308,
+          43,
+          598,
+          8677.796875
+        ],
+        "focalVideos": 0,
+        "pageVideos": 0,
+        "liveArticles": 2,
+        "seenArticles": 1,
+        "articleChars": 4662,
+        "video": null,
+        "extensionPanes": 0
+      },
+      "timeline": [
+        {
+          "dt": 0.20000004768371582,
+          "visibility": "visible",
+          "y": 10,
+          "connected": true,
+          "video": null
+        },
+        {
+          "dt": 1477.6000001430511,
+          "visibility": "hidden",
+          "y": 10,
+          "connected": true,
+          "video": null
+        },
+        {
+          "dt": 2472.600000143051,
+          "visibility": "hidden",
+          "y": 10,
+          "connected": true,
+          "video": null
+        },
+        {
+          "dt": 3473.100000143051,
+          "visibility": "hidden",
+          "y": 10,
+          "connected": true,
+          "video": null
+        },
+        {
+          "dt": 4472.200000047684,
+          "visibility": "hidden",
+          "y": 10,
+          "connected": true,
+          "video": null
+        }
+      ]
+    },
+    "resourceLeft": {
+      "counts": {
+        "graphql": 0,
+        "rest": 0,
+        "media": 0,
+        "image": 0,
+        "script": 0,
+        "other": 0
+      },
+      "operations": {},
+      "observableTransferBytes": 0,
+      "zeroTransferEntries": 0,
+      "visibility": "visible",
+      "heap": {
+        "used": 142173435,
+        "total": 200754423
+      }
+    },
+    "resourceRight": {
+      "counts": {
+        "graphql": 0,
+        "rest": 0,
+        "media": 0,
+        "image": 3,
+        "script": 2,
+        "other": 0
+      },
+      "operations": {},
+      "observableTransferBytes": 0,
+      "zeroTransferEntries": 5,
+      "visibility": "visible",
+      "heap": {
+        "used": 115749496,
+        "total": 199436528
+      }
+    }
+  }
+]

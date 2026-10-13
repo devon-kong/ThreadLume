@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-13",
+  "space": 20,
+  "userAgentChromeMajor": 152,
+  "versionSource": "navigator.userAgent, not extension runtime API feature detection",
+  "peekInitiallyEnabled": true,
+  "peekRestoredEnabled": true,
+  "cleanup": {
+    "probeGlobal": false,
+    "peekPanes": 1
+  },
+  "simultaneousSplitEstablished": false,
+  "windowIdsEqualAfterMenuAttempt": true,
+  "newWindowToolAttempt": {
+    "method": "Target.createTarget",
+    "result": "not allowed",
+    "bypassed": false
+  },
+  "accountWrites": 0,
+  "privateApiConstruction": 0
+}
