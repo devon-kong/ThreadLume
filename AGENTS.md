@@ -52,3 +52,5 @@ Build app UI in `src/`. Keep `.openai/hosting.json`, `worker/index.js`, `scripts
 - The unpacked extension output is `dist-extension/`; the demo remains Sites-compatible and builds to `dist/client/`.
 
 - 2026-09-25 用户明确要求：Peek 收藏分类必须联动 X 原生收藏夹，不建立本地替代分类。点击收藏提供原生文件夹选择、仅保存所有书签、已收藏帖重新分类及显式取消收藏。缺权限/接口不可用时仍可普通收藏。新建和管理文件夹跳转 X 原生页面；不得把模拟测试等同真实账号联动验收。
+
+- 2026-10-13 Native 模式体验目标：原帖仅展示一次，左栏承载完整原生正文、图片、视频和原生点赞/收藏等操作；右栏保留回复编辑器、评论等后续信息。用户允许为此探索对原生 DOM 的布局调整。先验证 React 生命周期、虚拟列表回收和原生交互，再决定正式实现；不能把复制正文加自动滚评论当作此目标已完成。Native 探索继续遵守零主动私有 API、零认证桥接。此条是 Native 探索范围的例外，Legacy 路线原有 DOM 约束不变。

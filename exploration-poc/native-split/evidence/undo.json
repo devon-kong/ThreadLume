@@ -1,0 +1,28 @@
+{
+  "before": {
+    "id": "2109309251533570509",
+    "connected": true,
+    "sameParent": true,
+    "scrollY": 0,
+    "articleScroll": 105.5,
+    "articleRect": {
+      "x": 0,
+      "y": 54,
+      "width": 560.0390625,
+      "height": 750
+    },
+    "articleHeight": 856,
+    "cellHeight": 85,
+    "cells": 27,
+    "video": {
+      "time": 31.735744,
+      "paused": false
+    }
+  },
+  "after": {
+    "stylePresent": false,
+    "markedArticles": 0,
+    "paneDisplay": "block",
+    "nativeArticleInOriginalCell": true
+  }
+}

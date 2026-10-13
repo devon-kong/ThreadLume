@@ -1,0 +1,42 @@
+{
+  "paused": {
+    "id": "2109309251533570509",
+    "connected": true,
+    "sameParent": true,
+    "scrollY": 5800,
+    "articleScroll": 0,
+    "articleRect": {
+      "x": 0,
+      "y": 54,
+      "width": 560.0390625,
+      "height": 750
+    },
+    "articleHeight": 856,
+    "cellHeight": 85,
+    "cells": 52,
+    "video": {
+      "time": 21.776426,
+      "paused": true
+    }
+  },
+  "resumed": {
+    "id": "2109309251533570509",
+    "connected": true,
+    "sameParent": true,
+    "scrollY": 5800,
+    "articleScroll": 0,
+    "articleRect": {
+      "x": 0,
+      "y": 54,
+      "width": 560.0390625,
+      "height": 750
+    },
+    "articleHeight": 856,
+    "cellHeight": 85,
+    "cells": 52,
+    "video": {
+      "time": 21.84995,
+      "paused": false
+    }
+  }
+}

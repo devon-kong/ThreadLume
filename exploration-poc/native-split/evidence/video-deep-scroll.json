@@ -1,0 +1,24 @@
+{
+  "state": {
+    "id": "2109309251533570509",
+    "connected": true,
+    "sameParent": true,
+    "scrollY": 5686,
+    "articleScroll": 0,
+    "articleRect": {
+      "x": 0,
+      "y": 54,
+      "width": 560.0390625,
+      "height": 750
+    },
+    "articleHeight": 856,
+    "cellHeight": 85,
+    "cells": 28,
+    "video": {
+      "time": 16.895432,
+      "paused": false
+    }
+  },
+  "sameVideo": true,
+  "visibleReplyCount": 3
+}
