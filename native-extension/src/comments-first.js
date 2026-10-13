@@ -37,6 +37,8 @@ export const CF_MAX_FOCAL_SHARE = 0.6;  // only bother when the focal is tall...
 export const CF_MIN_REPLY_SHARE = 0.5;  // ...and replies get under half the viewport
 export const CF_HEADER_PX = 53;         // X's sticky in-column title bar
 export const CF_SCROLL_GUARD_PX = 40;   // skip if the user already scrolled
+export const CF_LATE_WATCH_MS = 15000;  // bounded watch for late media hydration
+export const CF_LATE_POLL_MS = 1000;
 
 let timers = [];
 let stopInput = null;
@@ -76,6 +78,20 @@ function userScrolled() {
   return window.scrollY > CF_SCROLL_GUARD_PX;
 }
 
+// Late-media defense (found live in M2-A verification): on full page loads X
+// renders video posts as a poster placeholder first and swaps in the player
+// later — the extraction-time rich flags can be false at build time even for
+// a video post. The authoritative check runs at SCROLL time on every poll
+// tick; if rich media appears after the scroll already applied and the user
+// has not moved, ONE bounded return scroll restores the native cell to view.
+function richInCell(cell) {
+  return Boolean(
+    cell.querySelector('[data-testid="videoPlayer"], video')
+    || cell.querySelector('[data-testid="poll"], [role="group"] [data-testid="vote"]')
+    || cell.querySelector('[data-testid="card.wrapper"]')
+  );
+}
+
 // rich: the extraction-time rich flags of the focal post ({video, poll, card, article}).
 // genAlive: liveness probe from the reader lifecycle (generation + route check).
 export function armCommentsFirst(statusId, rich, genAlive) {
@@ -110,6 +126,12 @@ export function armCommentsFirst(statusId, rich, genAlive) {
     }
     const focal = focalCellByStatusId(armed.statusId);
     if (!focal) { timers.push(setTimeout(step, CF_POLL_MS)); return; }
+    // authoritative rich check at scroll time (late player hydration)
+    if (richInCell(focal)) {
+      decide({ statusId: armed.statusId, applied: false, why: "rich-native-kept-late" });
+      cancelCommentsFirst("rich-late");
+      return;
+    }
     const reply = nextCellAfter(focal);
     if (!reply) { timers.push(setTimeout(step, CF_POLL_MS)); return; }
     const vh = window.innerHeight || 0;
@@ -126,10 +148,32 @@ export function armCommentsFirst(statusId, rich, genAlive) {
     const target = Math.max(0, Math.round(replyTop - CF_HEADER_PX + window.scrollY));
     try { window.scrollTo(0, target); } catch { /* keep native behavior */ }
     decide({ statusId: armed.statusId, applied: true, target, focalH, vh });
+    const appliedStatusId = armed.statusId;
     cancelCommentsFirst("applied");
+    watchLateMedia(appliedStatusId, target, genAlive);
   };
   timers.push(setTimeout(step, CF_POLL_MS));
   return true;
+}
+
+// After the scroll applied: if rich media hydrates LATE (video player swap
+// measured in R3) while the user has not moved, one bounded return scroll
+// puts the native carrier back in view. Any user scroll cancels the watch.
+function watchLateMedia(statusId, appliedTarget, genAlive) {
+  const deadline = Date.now() + CF_LATE_WATCH_MS;
+  const step = () => {
+    if (!genAlive() || statusIdFromPath() !== statusId) return; // route moved on
+    if (Date.now() > deadline) return;
+    if (Math.abs(window.scrollY - appliedTarget) > 4) return; // user owns the viewport
+    const focal = focalCellByStatusId(statusId);
+    if (focal && richInCell(focal)) {
+      try { window.scrollTo(0, 0); } catch { /* keep native behavior */ }
+      decide({ statusId, applied: false, why: "late-media-return", returnedTo: 0 });
+      return;
+    }
+    timers.push(setTimeout(step, CF_LATE_POLL_MS));
+  };
+  timers.push(setTimeout(step, CF_LATE_POLL_MS));
 }
 
 function nextCellAfter(focal) {

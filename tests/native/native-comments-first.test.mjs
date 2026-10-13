@@ -185,3 +185,66 @@ test("C-9 buildReader 全链路（提取 rich 标记）：视频帖不滚动、�
     assert.equal(env.poc.diag().commentsFirst.applied, true);
   }
 });
+
+test("C-10 迟到媒体水合（滚动前）：海报占位换成播放器 → 滚动被取消，原生格保持在视野", async () => {
+  // full page loads render video posts as a poster first (found live);
+  // the scroll-time rich check is the authoritative gate
+  const env = makeEnv();
+  const poc = env.boot();
+  const idA = makeStatusId();
+  const { cell, replyCell } = tallFocal(idA, { height: 1_100 });
+  env.document.body.appendChild(cell);
+  await env.pushNavigate(`/somebody/status/${idA}`);
+  await env.timers.advance(1_200);
+  assert.equal(env.scroll.y, 0);
+  // the video player hydrates before any reply cell exists
+  const player = env.document.createElement("div");
+  player.setAttribute("data-testid", "videoPlayer");
+  cell.querySelector("article").appendChild(player);
+  env.document.body.appendChild(replyCell);
+  await env.timers.advance(1_000);
+  assert.equal(env.scroll.y, 0, "late-hydrated player cancels the scroll");
+  assert.equal(poc.diag().commentsFirst.why, "rich-native-kept-late");
+});
+
+test("C-11 迟到媒体水合（滚动后，用户未动）：一次有界回滚把原生格带回视野", async () => {
+  const env = makeEnv();
+  const poc = env.boot();
+  const idA = makeStatusId();
+  const { cell, replyCell } = tallFocal(idA, { height: 560 });
+  env.document.body.appendChild(cell);
+  env.document.body.appendChild(replyCell);
+  await env.pushNavigate(`/somebody/status/${idA}`);
+  await env.timers.advance(1_200);
+  await env.timers.advance(600);
+  assert.equal(env.scroll.y, 560, "comments-first applied (no media yet)");
+  // the video player hydrates after the scroll, the user has not moved
+  const player = env.document.createElement("div");
+  player.setAttribute("data-testid", "videoPlayer");
+  cell.querySelector("article").appendChild(player);
+  await env.timers.advance(1_500); // one late-watch poll tick
+  assert.equal(env.scroll.y, 0, "one bounded return to the native cell");
+  assert.equal(poc.diag().commentsFirst.why, "late-media-return");
+  // and it never loops
+  await env.timers.advance(20_000);
+  assert.equal(env.scroll.y, 0);
+});
+
+test("C-11b 迟到媒体水合（滚动后，用户已滚动）：绝不与用户竞争视口", async () => {
+  const env = makeEnv();
+  const poc = env.boot();
+  const idA = makeStatusId();
+  const { cell, replyCell } = tallFocal(idA, { height: 560 });
+  env.document.body.appendChild(cell);
+  env.document.body.appendChild(replyCell);
+  await env.pushNavigate(`/somebody/status/${idA}`);
+  await env.timers.advance(1_200);
+  await env.timers.advance(600);
+  assert.equal(env.scroll.y, 560);
+  env.scroll.y = 1_400; // the user read on; then the player hydrates
+  const player = env.document.createElement("div");
+  player.setAttribute("data-testid", "videoPlayer");
+  cell.querySelector("article").appendChild(player);
+  await env.timers.advance(20_000);
+  assert.equal(env.scroll.y, 1_400, "the user's position is never overridden");
+});
