@@ -20,6 +20,9 @@ import { renderPane, updatePaneInPlace, setRichScanWindow, mountStyle, removePan
 import { watchTheme, unwatchTheme } from "./theme-adapter.js";
 import { cancelRestore } from "./anchor-restore.js";
 import { onAction, clearOwnedTimeouts } from "./native-interaction.js";
+// M2-B1 experimental layout adapter (inert unless the build flag is on):
+// detail routes are handed to the native split instead of the reading copy.
+import { adapterEnabled, onDetailRoute, offRoute } from "./layout-adapter/controller.js";
 import * as diagnostics from "./diagnostics.js";
 
 const BRAND_ICON_URL = () => {
@@ -43,6 +46,12 @@ export const currentGen = () => gen;
 export async function buildReader() {
   const focalId = statusIdFromPath();
   if (!focalId) return;
+  // M2-B1 experimental mode: no reading copy — the native split is the reader.
+  // A failed adapter falls back to X's native single column, never to this pane.
+  if (adapterEnabled()) {
+    onDetailRoute(focalId);
+    return;
+  }
   const myGen = ++gen;
   liveGen = myGen;
   const buildStartedAt = performance.now();
@@ -165,6 +174,7 @@ export function closeReader() {
 }
 
 export function removeReader() {
+  if (adapterEnabled()) offRoute(); // M2-B1: release the split layout on every route exit
   ++gen;        // invalidate any in-flight build task immediately
   liveGen = 0;
   resetRecovery();
