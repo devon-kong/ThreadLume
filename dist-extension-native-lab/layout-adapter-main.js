@@ -225,6 +225,8 @@
       return { type: "ERROR", reason: "residue-locked", focusUrlId };
     }
     const budget = internalReinstall ? Math.max(0, S.reinstallLeft - 1) : LAD_REINSTALL_BUDGET;
+    const continuesSession = internalReinstall && S.phase === "active";
+    const prevGen = S.gen;
     if (S.phase === "active") {
       if (S.focusUrlId === focusUrlId && !internalReinstall) return activeResult("already-active");
       const down = doUninstall(internalReinstall ? "instance-replaced" : "reinstall");
@@ -236,7 +238,7 @@
     S = freshState();
     S.stats = stats;
     S.reinstallLeft = budget;
-    S.gen = ++genSeq;
+    S.gen = continuesSession ? prevGen : ++genSeq;
     S.reqNonce = reqNonce;
     S.focusUrlId = focusUrlId;
     const cell = focalCellByStatusId(focusUrlId);

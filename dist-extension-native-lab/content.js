@@ -837,8 +837,12 @@ ${article.text}` : article.text;
   function handleAutonomous(m) {
     const s = session;
     const ours = s && m.focusUrlId === s.focusUrlId && typeof m.gen === "number" && m.gen === s.gen;
-    if (!ours) {
-      if (!s || s.phase !== "active") {
+    const continuation = !ours && s && s.phase === "active" && s.everActive && m.type === LAD_HEALTH_ACTIVE && m.focusUrlId === s.focusUrlId && typeof m.gen === "number" && m.gen > s.gen;
+    if (continuation) {
+      s.gen = m.gen;
+    }
+    if (!ours && !continuation) {
+      if ((!s || s.phase !== "active") && typeof m.focusUrlId === "string" && m.focusUrlId) {
         sendToMain({ type: LAD_UNINSTALL, nonce: ++nonceSeq, reason: "stale-health-event", focusUrlId: m.focusUrlId });
       }
       return;
