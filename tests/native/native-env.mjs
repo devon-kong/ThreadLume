@@ -98,7 +98,8 @@ export function makeTimers(clock) {
 //     Chromium extension isolated world. entries()/currentEntry are absent so
 //     the close decision exercises its trail fallback, same as live.
 //   - "live": same object; tests may dispatchNavigate() to deliver events.
-export function makeEnv({ url = "/home", html, navApi = "absent" } = {}) {
+// viewportHeight simulates window.innerHeight (M2-A comments-first reads it).
+export function makeEnv({ url = "/home", html, navApi = "absent", viewportHeight = 800 } = {}) {
   if (!html) html = '<!doctype html><html><head><title>Home / X</title></head><body></body></html>';
   const dom = new JSDOM(html, { url: "https://x.com" + url });
   const { window } = dom;
@@ -107,8 +108,9 @@ export function makeEnv({ url = "/home", html, navApi = "absent" } = {}) {
   window.HTMLElement.prototype.scrollIntoView = function () { this.__scrollIntoViewCalls = (this.__scrollIntoViewCalls || 0) + 1; };
 
   // controllable scroll position (the B3 anchor-restore reads and adjusts it)
-  const scroll = { y: 0 };
+  const scroll = { y: 0, h: viewportHeight };
   Object.defineProperty(window, "scrollY", { get: () => scroll.y, configurable: true });
+  Object.defineProperty(window, "innerHeight", { get: () => scroll.h, configurable: true });
   window.scrollBy = (dx, dy) => { scroll.y += dy; };
   window.scrollTo = (x, y) => { scroll.y = y; };
 

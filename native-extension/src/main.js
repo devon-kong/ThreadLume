@@ -32,6 +32,7 @@ import {
   capturePreOpen, onReturnToList, cancelRestore, preOpenAnchor,
   computeAnchorAdjustment, restoreActive
 } from "./anchor-restore.js";
+import { armCommentsFirst, cancelCommentsFirst, commentsFirstArmed } from "./comments-first.js";
 import * as diagnostics from "./diagnostics.js";
 import {
   safeBackTarget, navTrailState, NAV_API, syncTrailFromLocation, recordNav
@@ -83,6 +84,8 @@ import {
       // B3 anchor restore
       capturePreOpen, onReturnToList, cancelRestore, preOpenAnchor,
       computeAnchorAdjustment, restoreActive,
+      // M2-A comments-first
+      armCommentsFirst, cancelCommentsFirst, commentsFirstArmed,
       // diagnostics
       diag: diagnostics.snapshot,
       lastRouteChangeAt: () => diagnostics.lastRouteChangeAt()

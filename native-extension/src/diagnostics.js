@@ -8,7 +8,8 @@ const state = {
   firstPaintAt: null,     // pane mounted (fast first paint)
   buildMs: null,          // route observed → pane mounted for the current read
   hydrationRefreshAt: null,
-  anchor: null            // last anchor-restore record (B3)
+  anchor: null,           // last anchor-restore record (B3)
+  commentsFirst: null     // last comments-first record (M2-A)
 };
 
 export function recordRouteChange(at) {
@@ -18,6 +19,7 @@ export function recordRouteChange(at) {
   state.firstPaintAt = null;
   state.buildMs = null;
   state.hydrationRefreshAt = null;
+  state.commentsFirst = null;
 }
 
 export function recordFirstPaint(at, buildMs) {
@@ -31,6 +33,10 @@ export function recordHydrationRefresh(at) {
 
 export function recordAnchorRestore(record) {
   state.anchor = record;
+}
+
+export function recordCommentsFirst(record) {
+  state.commentsFirst = record;
 }
 
 export const lastRouteChangeAt = () => state.lastRouteChangeAt;
@@ -47,6 +53,7 @@ export function snapshot() {
     firstPaintAt: state.firstPaintAt,
     buildMs: state.buildMs,
     hydrationRefreshAt: state.hydrationRefreshAt,
-    anchor: state.anchor ? { ...state.anchor } : null
+    anchor: state.anchor ? { ...state.anchor } : null,
+    commentsFirst: state.commentsFirst ? { ...state.commentsFirst } : null
   };
 }

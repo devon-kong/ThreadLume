@@ -19,6 +19,7 @@ import { extractFocal, extractFromArticle, focalCellByStatusId } from "./focal-e
 import { renderPane, updatePaneInPlace, setRichScanWindow, mountStyle, removePaneAndStyle } from "./reader-view.js";
 import { watchTheme, unwatchTheme } from "./theme-adapter.js";
 import { cancelRestore } from "./anchor-restore.js";
+import { cancelCommentsFirst, armCommentsFirst } from "./comments-first.js";
 import { onAction, clearOwnedTimeouts } from "./native-interaction.js";
 import * as diagnostics from "./diagnostics.js";
 
@@ -77,6 +78,11 @@ export async function buildReader() {
     recoveryArmed = false;
     recoveryLeft = 0;
     diagnostics.recordFirstPaint(performance.now(), performance.now() - buildStartedAt);
+    // M2-A comments-first (option C): for posts the left pane fully duplicates
+    // (text / photos / quote), bring the replies to the top of the right
+    // column with one bounded scroll once they render. Rich posts keep the
+    // native focal cell in view (its media/function needs the native carrier).
+    armCommentsFirst(focalId, data.rich, () => myGen === gen && statusIdFromPath() === focalId);
     // Decoupled upgrades. The first paint may come from the timeline's own
     // cell (instant, accurate for that render); two bounded, gen-guarded
     // refreshes then correct the pane in place — no remount, no flicker:
@@ -169,6 +175,7 @@ export function removeReader() {
   liveGen = 0;
   resetRecovery();
   cancelRestore("reader-removed");
+  cancelCommentsFirst("reader-removed");
   removePaneAndStyle();
   unwatchTheme();
   clearOwnedTimeouts();
