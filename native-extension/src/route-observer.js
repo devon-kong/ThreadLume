@@ -1,16 +1,27 @@
 // Peek Native — route observation (R4 G0-B: event-driven, poll as safety net).
 //
-// Event sources cover real SPA navigation instantly:
-//  - Navigation API "navigate": instant for every same-document navigation
-//    (pushState included — no popstate fires for those), any initiating world,
-//    keyboard included. Also feeds the close-decision trail with exact types
-//    and captures the reading anchor pre-commit (B3).
-//  - (fallback only) capture-phase click cascade: X navigations originate from
-//    a link click; re-check immediately and on a short bounded cascade in case
+// M1-R A1 boundary fix: in a real Chromium extension the isolated world CAN
+// register a Navigation API "navigate" listener, but Chromium never DELIVERS
+// the events to it (observed live, M1-B3 — the listener registers, the event
+// never fires). "Registrable" therefore must not be treated as "reachable",
+// and the title watcher — previously a NAV_API-absent fallback only — runs in
+// EVERY configuration as a co-primary signal:
+//
+//  - Navigation API "navigate" (when this world does receive it, e.g. a future
+//    Chromium): instant for every same-document navigation, any initiating
+//    world, keyboard included. Also feeds the close-decision trail with exact
+//    types and captures the reading anchor pre-commit (B3).
+//  - <title> mutation: X rewrites the title per route change, including
+//    keyboard/programmatic navigation that no click saw. The watcher re-binds
+//    itself when X replaces the <title> element wholesale and arms the same
+//    short bounded cascade the click path uses.
+//  - (co-signal) capture-phase click cascade: X navigations originate from a
+//    link click; re-check immediately and on a short bounded cascade in case
 //    the router defers pushState to a later task.
-//  - (fallback only) <title> mutation observer: X rewrites the title per
-//    route; covers keyboard navigation that no click saw.
-//  - popstate: browser back/forward (traverse) — also marks the trail.
+//  - popstate / hashchange: browser back/forward (traverse) — also marks the
+//    trail.
+//  - bounded poll: the honest last resort for paths that touch neither the
+//    title nor a click nor popstate (see ROUTE_POLL_IDLE_MS).
 //
 // The capture-phase click listener only OBSERVES clicks; it never
 // preventDefault and never intercepts navigation (X's router stays authoritative).
@@ -23,7 +34,7 @@ import {
   markPendingTraverse, consumePendingTraverse
 } from "./navigation-session.js";
 import { buildReader, removeReader, maybeRecover } from "./reader-lifecycle.js";
-import { capturePreOpen, onReturnToList } from "./anchor-restore.js";
+import { capturePreOpen, onReturnToList, preOpenAnchor } from "./anchor-restore.js";
 import { applyTheme } from "./theme-adapter.js";
 import { syncRichNote, paneMounted, mountedPane } from "./reader-view.js";
 import * as diagnostics from "./diagnostics.js";
@@ -32,6 +43,7 @@ let activeStatusId = null;
 let routeTimer = 0;
 let lastRouteChangeAt = -1; // perf probe: performance.now() of the latest detected route change
 let titleObserver = null;
+let titleElement = null;
 let clickCascadeTimers = [];
 
 export const getActiveStatusId = () => activeStatusId;
@@ -44,9 +56,11 @@ function onPossibleRouteChange(viaTraverse) {
 }
 
 export function checkRoute() {
-  if (!NAV_API) {
-    syncTrailFromLocation(consumePendingTraverse());
-  }
+  // Trail bookkeeping runs in EVERY configuration: with navigate events
+  // delivered it is a no-op dedup against recordNav's trail top; without them
+  // (observed Chromium isolated-world behavior) it is the only thing keeping
+  // the close-decision trail alive. Popstate marks the traverse flag first.
+  syncTrailFromLocation(consumePendingTraverse());
   const id = statusIdFromPath();
   if (id !== activeStatusId) {
     lastRouteChangeAt = performance.now(); // when the route change was OBSERVED
@@ -59,11 +73,13 @@ export function checkRoute() {
     const previous = activeStatusId;
     activeStatusId = id;
     if (id) {
-      // entering a detail: remember where the post sat in the list (B3). Only
-      // list → detail transitions capture; with the Navigation API the
-      // pre-commit capture already ran and this re-runs harmlessly (same DOM);
-      // detail → detail keeps the original list anchor untouched.
-      if (!previous) capturePreOpen(id);
+      // entering a detail: cancel any restore still pending from the previous
+      // session and re-run the capture as belt-and-braces. capturePreOpen
+      // refuses detail-context captures (A2 ownership), so on the committed
+      // detail URL this no longer records a position — the pre-commit click /
+      // navigate captures own that; the call stays so a route entry always
+      // cancels a superseded restore even when no click was seen (keyboard).
+      capturePreOpen(id, "route-check");
       removeReader(); // also invalidates any in-flight build for the old post
       buildReader();
     } else {
@@ -124,7 +140,7 @@ function onCaptureClick(event) {
       if (href.startsWith("/")) {
         const id = (href.match(/\/status\/(\d+)/) || [])[1] || null;
         // only list → detail opens capture; detail → detail keeps the anchor
-        if (id && !statusIdFromPath()) capturePreOpen(id);
+        if (id && !statusIdFromPath()) capturePreOpen(id, "click-precommit");
       }
     }
   } catch { /* anchor capture is best-effort */ }
@@ -135,6 +151,10 @@ export function startRouteObservation() {
   window.addEventListener("popstate", () => onPossibleRouteChange(true));
   window.addEventListener("hashchange", () => onPossibleRouteChange(false));
   document.addEventListener("click", onCaptureClick, true);
+  // The title watcher is a co-primary signal in EVERY configuration (A1): a
+  // real isolated world may never receive navigate events, so keyboard and
+  // programmatic SPA navigation must not depend on them.
+  watchTitle();
   if (NAV_API) {
     try {
       window.navigation.addEventListener("navigate", (event) => {
@@ -147,14 +167,12 @@ export function startRouteObservation() {
           if (event.destination?.url && event.navigationType === "push" && !statusIdFromPath()) {
             const destPath = new URL(event.destination.url).pathname;
             const destId = (destPath.match(/\/status\/(\d+)/) || [])[1] || null;
-            if (destId) capturePreOpen(destId);
+            if (destId) capturePreOpen(destId, "navigate-precommit");
           }
         } catch { /* anchor capture is best-effort */ }
         onPossibleRouteChange(event.navigationType === "traverse");
       });
-    } catch { /* poll + popstate + click cascade remain */ }
-  } else {
-    watchTitle();
+    } catch { /* title watcher + poll + popstate + click cascade remain */ }
   }
   scheduleRouteTick();
 }
@@ -167,14 +185,29 @@ function armClickCascade() {
 
 function watchTitle() {
   if (titleObserver) return;
-  titleObserver = new MutationObserver(() => onPossibleRouteChange(false));
-  const bind = () => {
-    const t = document.querySelector("head > title");
-    if (t) { titleObserver.disconnect(); titleObserver.observe(t, { childList: true, characterData: true, subtree: true }); }
-  };
-  bind();
-  // X can replace the title element wholesale; keep the observer bound to it
+  titleObserver = new MutationObserver(() => {
+    // X can replace the title element wholesale; every head childList change
+    // re-binds the watcher to the CURRENT title element before the route
+    // check, so a replaced element never leaves us blind (A1).
+    bindTitleElement();
+    onPossibleRouteChange(false);
+    // same bounded cascade as the click path: covers a router that touches
+    // the title a beat before committing pushState (or vice versa)
+    armClickCascade();
+  });
+  bindTitleElement();
   titleObserver.observe(document.head, { childList: true });
+}
+
+function bindTitleElement() {
+  // No <title> yet (exotic/early document): the head childList observation
+  // re-runs this when head changes, so the watcher self-heals.
+  const t = document.querySelector("head > title");
+  if (t && t !== titleElement) {
+    titleElement = t;
+    try { titleObserver.observe(t, { childList: true, characterData: true, subtree: true }); }
+    catch { /* detached title — the next head mutation rebinds */ }
+  }
 }
 
 export function stopRouteObservation() {
