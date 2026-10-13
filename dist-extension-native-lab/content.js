@@ -675,6 +675,11 @@ ${article.text}` : article.text;
   var LAD_ACTIVE = "ACTIVE";
   var LAD_UNSUPPORTED = "UNSUPPORTED";
   var LAD_ERROR = "ERROR";
+  var LAD_UNINSTALLED = "UNINSTALLED";
+  var LAD_HEALTH_ERROR = "HEALTH_ERROR";
+  var LAD_HEALTH_UNINSTALLED = "HEALTH_UNINSTALLED";
+  var LAD_HEALTH_ACTIVE = "HEALTH_ACTIVE";
+  var LAD_MARK_ARTICLE = "data-peek-lad-focal";
   var LAD_INSTALL_ACK_MS = 1200;
   var LAD_INSTALL_RETRY_MS = 250;
   var LAD_INSTALL_MAX_ATTEMPTS = 12;
@@ -712,6 +717,10 @@ ${article.text}` : article.text;
   var session = null;
   var nonceSeq = 0;
   var themeObserver2 = null;
+  var THEME_VARS = ["--peek-lad-bg", "--peek-lad-border", "--peek-lad-top"];
+  var savedInlineVars = null;
+  var themeSelfWrite = false;
+  var themeStats = { callbacks: 0, writes: 0, skippedWrites: 0, selfEchoDrops: 0 };
   function initLayoutAdapter() {
     if (!adapterEnabled() || initialized) return;
     initialized = true;
@@ -750,6 +759,7 @@ ${article.text}` : article.text;
       attempts: 0,
       everActive: false,
       nonce: null,
+      gen: null,
       ackTimer: 0,
       retryTimer: 0,
       failReason: null
@@ -776,15 +786,31 @@ ${article.text}` : article.text;
     if (session !== s || s.nonce !== nonce || s.phase !== "installing") return;
     failSession(s, "main-unresponsive");
   }
+  var RESPONSE_TYPES = /* @__PURE__ */ new Set([LAD_ACTIVE, LAD_UNSUPPORTED, LAD_ERROR, LAD_UNINSTALLED]);
+  var AUTONOMOUS_TYPES = /* @__PURE__ */ new Set([LAD_HEALTH_ERROR, LAD_HEALTH_UNINSTALLED, LAD_HEALTH_ACTIVE]);
   function handleMainMessage(m) {
+    if (AUTONOMOUS_TYPES.has(m.type)) {
+      handleAutonomous(m);
+      return;
+    }
+    if (!RESPONSE_TYPES.has(m.type)) return;
+    handleResponse(m);
+  }
+  function handleResponse(m) {
     const s = session;
     if (!s || m.nonce !== s.nonce) return;
     if (m.type === LAD_ACTIVE) {
       if (s.phase !== "installing") {
-        sendToMain({ type: LAD_UNINSTALL, nonce: ++nonceSeq, reason: "late-active-after-fail" });
+        sendToMain({ type: LAD_UNINSTALL, nonce: ++nonceSeq, reason: "late-active-after-fail", focusUrlId: s.focusUrlId });
         return;
       }
       clearTimeout(s.ackTimer);
+      s.gen = typeof m.gen === "number" ? m.gen : null;
+      if (!focalMarkerVerified(s.focusUrlId)) {
+        sendToMain({ type: LAD_UNINSTALL, nonce: ++nonceSeq, reason: "active-without-focal-marker", focusUrlId: s.focusUrlId });
+        failSession(s, "active-without-focal-marker");
+        return;
+      }
       s.phase = "active";
       s.everActive = true;
       setStateAttr("active");
@@ -808,6 +834,30 @@ ${article.text}` : article.text;
       return;
     }
   }
+  function handleAutonomous(m) {
+    const s = session;
+    const ours = s && m.focusUrlId === s.focusUrlId && typeof m.gen === "number" && m.gen === s.gen;
+    if (!ours) {
+      if (!s || s.phase !== "active") {
+        sendToMain({ type: LAD_UNINSTALL, nonce: ++nonceSeq, reason: "stale-health-event", focusUrlId: m.focusUrlId });
+      }
+      return;
+    }
+    switch (m.type) {
+      case LAD_HEALTH_ERROR:
+        if (s.phase === "active") failSession(s, m.reason || "main-health-error");
+        else if (s.phase === "installing") failSession(s, m.reason || "main-health-error");
+        break;
+      case LAD_HEALTH_UNINSTALLED:
+        if (s.phase === "active" || s.phase === "installing") dormantSession(s, m.reason || "main-self-uninstalled");
+        break;
+      case LAD_HEALTH_ACTIVE:
+        if (s.phase === "active") setStateAttr("active");
+        break;
+      default:
+        break;
+    }
+  }
   function failSession(s, reason) {
     if (session !== s) return;
     clearTimeout(s.ackTimer);
@@ -823,6 +873,15 @@ ${article.text}` : article.text;
     }
     console.warn(`[Peek M2-B1] \u5E03\u5C40\u9002\u914D\u4E0D\u53EF\u7528\uFF0C\u5DF2\u56DE\u9000 X \u539F\u751F\u5355\u680F\u8BE6\u60C5\u9875\uFF08\u539F\u56E0: ${reason}\uFF09\u3002\u5237\u65B0\u9875\u9762\u53EF\u91CD\u7F6E\u5B9E\u9A8C\u72B6\u6001\u3002`);
   }
+  function dormantSession(s, reason) {
+    if (session !== s) return;
+    clearTimeout(s.ackTimer);
+    clearTimeout(s.retryTimer);
+    s.phase = "dormant";
+    session = s;
+    removeLayout();
+    setStateAttr("idle");
+  }
   function teardownSession(reason) {
     const s = session;
     if (!s) return;
@@ -830,7 +889,15 @@ ${article.text}` : article.text;
     clearTimeout(s.ackTimer);
     clearTimeout(s.retryTimer);
     removeLayout();
-    sendToMain({ type: LAD_UNINSTALL, nonce: ++nonceSeq, reason });
+    sendToMain({ type: LAD_UNINSTALL, nonce: ++nonceSeq, reason, focusUrlId: s.focusUrlId });
+  }
+  function focalMarkerVerified(focusUrlId) {
+    try {
+      const cell = focalCellByStatusId(focusUrlId);
+      return Boolean(cell?.isConnected && cell.querySelector(`article[${LAD_MARK_ARTICLE}]`));
+    } catch {
+      return false;
+    }
   }
   function mountLayout() {
     removeLayout();
@@ -846,16 +913,57 @@ ${article.text}` : article.text;
     document.getElementById(STYLE_ID2)?.remove();
     document.documentElement.removeAttribute(HTML_ATTR);
     unwatchTheme2();
+    restoreInlineVars();
+  }
+  function captureInlineVars() {
+    if (savedInlineVars) return;
+    savedInlineVars = /* @__PURE__ */ new Map();
+    const root = document.documentElement;
+    for (const name of THEME_VARS) {
+      try {
+        savedInlineVars.set(name, {
+          value: root.style.getPropertyValue(name),
+          priority: root.style.getPropertyPriority(name)
+        });
+      } catch {
+        savedInlineVars.set(name, { value: "", priority: "" });
+      }
+    }
+  }
+  function restoreInlineVars() {
+    if (!savedInlineVars) return;
+    const root = document.documentElement;
+    for (const [name, saved] of savedInlineVars) {
+      try {
+        if (saved.value) root.style.setProperty(name, saved.value, saved.priority);
+        else root.style.removeProperty(name);
+      } catch {
+      }
+    }
+    savedInlineVars = null;
+  }
+  function writeRootVar(root, name, value) {
+    try {
+      if (root.style.getPropertyValue(name) === value) {
+        themeStats.skippedWrites++;
+        return;
+      }
+      themeSelfWrite = true;
+      themeStats.writes++;
+      root.style.setProperty(name, value);
+    } catch {
+    }
   }
   function applyAdapterTheme() {
     const theme = readTheme();
     const root = document.documentElement;
+    captureInlineVars();
     if (theme === "dark") {
-      root.style.setProperty("--peek-lad-bg", "#000000");
-      root.style.setProperty("--peek-lad-border", "#2f3336");
+      writeRootVar(root, "--peek-lad-bg", "#000000");
+      writeRootVar(root, "--peek-lad-border", "#2f3336");
     } else {
-      root.style.setProperty("--peek-lad-bg", "#ffffff");
-      root.style.setProperty("--peek-lad-border", "#eff3f4");
+      writeRootVar(root, "--peek-lad-bg", "#ffffff");
+      writeRootVar(root, "--peek-lad-border", "#eff3f4");
     }
     let top = 54;
     try {
@@ -863,17 +971,26 @@ ${article.text}` : article.text;
       if (Number.isFinite(h) && h >= 40 && h <= 80) top = Math.round(h);
     } catch {
     }
-    root.style.setProperty("--peek-lad-top", `${top}px`);
+    writeRootVar(root, "--peek-lad-top", `${top}px`);
   }
   function watchTheme2() {
     unwatchTheme2();
-    themeObserver2 = new MutationObserver(() => applyAdapterTheme());
+    themeObserver2 = new MutationObserver(() => {
+      themeStats.callbacks++;
+      if (themeSelfWrite) {
+        themeSelfWrite = false;
+        themeStats.selfEchoDrops++;
+        return;
+      }
+      applyAdapterTheme();
+    });
     themeObserver2.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "style", "data-theme"] });
     if (document.body) themeObserver2.observe(document.body, { attributes: true, attributeFilter: ["class", "style"] });
   }
   function unwatchTheme2() {
     themeObserver2?.disconnect();
     themeObserver2 = null;
+    themeSelfWrite = false;
   }
   function setStateAttr(state2) {
     try {
@@ -881,12 +998,27 @@ ${article.text}` : article.text;
     } catch {
     }
   }
+  function themeDiagnostics() {
+    return {
+      ...themeStats,
+      watching: Boolean(themeObserver2),
+      inlineVars: (() => {
+        try {
+          const root = document.documentElement;
+          return Object.fromEntries(THEME_VARS.map((n) => [n, root.style.getPropertyValue(n)]));
+        } catch {
+          return {};
+        }
+      })()
+    };
+  }
   function sessionSnapshot() {
     return session ? {
       focusUrlId: session.focusUrlId,
       phase: session.phase,
       attempts: session.attempts,
       everActive: session.everActive,
+      gen: session.gen,
       failReason: session.failReason
     } : null;
   }
@@ -1234,7 +1366,9 @@ ${article.text}` : article.text;
           onDetailRoute,
           offRoute,
           sessionSnapshot,
-          init: initLayoutAdapter
+          init: initLayoutAdapter,
+          themeDiagnostics
+          // P1-C loop-freedom observability
         }
       };
     }

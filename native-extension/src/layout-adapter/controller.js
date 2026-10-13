@@ -1,4 +1,4 @@
-// Peek M2-B1 — ISOLATED world controller for the experimental native layout
+// Peek M2-B1(-R) — ISOLATED world controller for the experimental native layout
 // adapter. Contract: docs/m2-b1/adapter-contract.md.
 //
 // Responsibilities: drive INSTALL/UNINSTALL per detail route, mount/remove the
@@ -10,14 +10,38 @@
 //
 // The whole module is inert unless the build-time experimental flag
 // __PEEK_LAYOUT_ADAPTER__ is true (default build: every entry point no-ops).
+//
+// M2-B1-R changes:
+//   P0-A  message contract split. Request responses (ACTIVE/UNSUPPORTED/
+//         ERROR/UNINSTALLED/STATE) correlate via the request nonce as before.
+//         Autonomous notifications (HEALTH_ERROR/HEALTH_UNINSTALLED/
+//         HEALTH_ACTIVE) are a separate family: they fire with NO request in
+//         flight and are validated against the session triple { gen,
+//         focusUrlId } plus the phase — a stale or foreign notification can
+//         never flip this controller's state, and an old session's event can
+//         never disturb a newer session. On HEALTH_ERROR (MAIN self-exited)
+//         the split CSS is removed in the same tick the message arrives.
+//         Correlation is NOT treated as authentication: same-origin page
+//         scripts can observe or fake these messages (they only ever shape the
+//         page they already own). Two hardening measures beyond matching:
+//         ACTIVE is honored only if the focal article marker is actually
+//         present in the DOM, and UNINSTALL commands carry the focus they
+//         name so a stale release cannot clobber a newer session's wrap.
+//   P1-C  the theme observer can no longer feed itself: own writes are
+//         suppressed for the delivery turn that echoes them, identical values
+//         are never re-written, and cleanup restores the exact pre-adapter
+//         inline variable values and priorities (not just the <style> tag).
 
 import {
   LAD_NS, LAD_FROM_ISOLATED, LAD_FROM_MAIN,
   LAD_INSTALL, LAD_UNINSTALL,
-  LAD_ACTIVE, LAD_UNSUPPORTED, LAD_ERROR,
+  LAD_ACTIVE, LAD_UNSUPPORTED, LAD_ERROR, LAD_UNINSTALLED,
+  LAD_HEALTH_ERROR, LAD_HEALTH_UNINSTALLED, LAD_HEALTH_ACTIVE,
+  LAD_MARK_ARTICLE,
   LAD_INSTALL_ACK_MS, LAD_INSTALL_RETRY_MS, LAD_INSTALL_MAX_ATTEMPTS,
 } from "./constants.js";
 import { readTheme } from "../theme-adapter.js";
+import { focalCellByStatusId } from "../focal-extractor.js";
 
 /* eslint-disable no-undef */ // __PEEK_LAYOUT_ADAPTER__ is an esbuild define
 export const adapterEnabled = () => __PEEK_LAYOUT_ADAPTER__ === true;
@@ -56,9 +80,15 @@ const LAYOUT_CSS = `
 }`;
 
 let initialized = false;
-let session = null; // { focusUrlId, phase, attempts, everActive, nonce, ackTimer, retryTimer, failReason }
+// { focusUrlId, phase, attempts, everActive, nonce, gen, ackTimer, retryTimer, failReason }
+let session = null;
 let nonceSeq = 0;
 let themeObserver = null;
+// P1-C theme bookkeeping
+const THEME_VARS = ["--peek-lad-bg", "--peek-lad-border", "--peek-lad-top"];
+let savedInlineVars = null;   // Map var → { value, priority } captured pre-adapter
+let themeSelfWrite = false;   // our own write is being echoed back to the observer
+export const themeStats = { callbacks: 0, writes: 0, skippedWrites: 0, selfEchoDrops: 0 };
 
 // ---------- init / messaging ----------
 
@@ -97,7 +127,7 @@ export function onDetailRoute(focalId) {
   teardownSession("superseded");
   session = {
     focusUrlId: focalId, phase: "installing", attempts: 0,
-    everActive: false, nonce: null, ackTimer: 0, retryTimer: 0, failReason: null,
+    everActive: false, nonce: null, gen: null, ackTimer: 0, retryTimer: 0, failReason: null,
   };
   setStateAttr("installing");
   attemptInstall();
@@ -128,17 +158,39 @@ function onAckTimeout(s, nonce) {
   failSession(s, "main-unresponsive");
 }
 
+// ---------- message dispatch (P0-A) ----------
+
+const RESPONSE_TYPES = new Set([LAD_ACTIVE, LAD_UNSUPPORTED, LAD_ERROR, LAD_UNINSTALLED]);
+const AUTONOMOUS_TYPES = new Set([LAD_HEALTH_ERROR, LAD_HEALTH_UNINSTALLED, LAD_HEALTH_ACTIVE]);
+
 function handleMainMessage(m) {
+  if (AUTONOMOUS_TYPES.has(m.type)) { handleAutonomous(m); return; }
+  if (!RESPONSE_TYPES.has(m.type)) return; // unknown types are ignored, never replayed
+  handleResponse(m);
+}
+
+function handleResponse(m) {
   const s = session;
   if (!s || m.nonce !== s.nonce) return; // stale or foreign response
   if (m.type === LAD_ACTIVE) {
     if (s.phase !== "installing") {
       // late ACTIVE after this session already failed — MAIN may hold a wrap
       // with no controller behind it: order it released, stay dormant
-      sendToMain({ type: LAD_UNINSTALL, nonce: ++nonceSeq, reason: "late-active-after-fail" });
+      sendToMain({ type: LAD_UNINSTALL, nonce: ++nonceSeq, reason: "late-active-after-fail", focusUrlId: s.focusUrlId });
       return;
     }
     clearTimeout(s.ackTimer);
+    s.gen = typeof m.gen === "number" ? m.gen : null;
+    // P0-A integrity: MAIN marks the focal article BEFORE answering ACTIVE.
+    // Trust the state change only if the marker is really there, in the cell
+    // the focus resolves to — otherwise mounting the split CSS would shift
+    // every cell right with nothing pinned (and a same-origin spoof would
+    // produce exactly that). Correlation is bookkeeping, not authentication.
+    if (!focalMarkerVerified(s.focusUrlId)) {
+      sendToMain({ type: LAD_UNINSTALL, nonce: ++nonceSeq, reason: "active-without-focal-marker", focusUrlId: s.focusUrlId });
+      failSession(s, "active-without-focal-marker");
+      return;
+    }
     s.phase = "active";
     s.everActive = true;
     setStateAttr("active");
@@ -158,13 +210,54 @@ function handleMainMessage(m) {
     return;
   }
   if (m.type === LAD_ERROR) {
-    // MAIN self-exited (shape drift, retention loss) — it already restored
-    // the wrapped method; tear the layout down and go dormant
+    // a request-level failure (e.g. residue-locked refusal, uninstall-failed
+    // during internal reinstall) — tear the layout down, go dormant
     if (session !== s) return;
     failSession(s, m.reason || "main-error");
     return;
   }
   // UNINSTALLED / STATE: acks only — teardown already ran locally
+}
+
+function handleAutonomous(m) {
+  const s = session;
+  // Session correlation (P0-A): the notification must name the session this
+  // controller currently holds — same focus identity and same install
+  // generation. Anything else is cross-talk from an older page state.
+  const ours = s && m.focusUrlId === s.focusUrlId &&
+    typeof m.gen === "number" && m.gen === s.gen;
+  if (!ours) {
+    // A wrap whose session we no longer hold must be released — but never by
+    // clobbering a live ACTIVE session (its own health tick owns it). The
+    // UNINSTALL names its focus so MAIN can refuse a mismatched release.
+    if (!s || s.phase !== "active") {
+      sendToMain({ type: LAD_UNINSTALL, nonce: ++nonceSeq, reason: "stale-health-event", focusUrlId: m.focusUrlId });
+    }
+    return;
+  }
+  switch (m.type) {
+    case LAD_HEALTH_ERROR:
+      // MAIN self-exited (shape drift, retention loss, restore failure): it
+      // already restored the wrapped method — remove the split CSS in the
+      // same tick and go dormant. This is the fix for the P0: this message
+      // must never be dropped for nonce mismatch.
+      if (s.phase === "active") failSession(s, m.reason || "main-health-error");
+      else if (s.phase === "installing") failSession(s, m.reason || "main-health-error");
+      // phase failed/dormant: teardown already ran; the event is a confirmation
+      break;
+    case LAD_HEALTH_UNINSTALLED:
+      // clean self-detected route exit on the MAIN side — no failure, just
+      // release the layout and wait for the controller's own route events
+      if (s.phase === "active" || s.phase === "installing") dormantSession(s, m.reason || "main-self-uninstalled");
+      break;
+    case LAD_HEALTH_ACTIVE:
+      // internal re-install succeeded (instance replaced underneath us):
+      // bookkeeping already matches; keep the session alive as-is
+      if (s.phase === "active") setStateAttr("active");
+      break;
+    default:
+      break;
+  }
 }
 
 function failSession(s, reason) {
@@ -181,6 +274,17 @@ function failSession(s, reason) {
   console.warn(`[Peek M2-B1] 布局适配不可用，已回退 X 原生单栏详情页（原因: ${reason}）。刷新页面可重置实验状态。`);
 }
 
+function dormantSession(s, reason) {
+  // a clean MAIN-side exit (route self-detection) — same cleanup, no failure
+  if (session !== s) return;
+  clearTimeout(s.ackTimer);
+  clearTimeout(s.retryTimer);
+  s.phase = "dormant";
+  session = s;
+  removeLayout();
+  setStateAttr("idle");
+}
+
 function teardownSession(reason) {
   const s = session;
   if (!s) return;
@@ -189,8 +293,17 @@ function teardownSession(reason) {
   clearTimeout(s.retryTimer);
   removeLayout();
   // fire-and-forget: MAIN releases any wrap from every phase (installing
-  // included — the wrap may have landed after our last status check)
-  sendToMain({ type: LAD_UNINSTALL, nonce: ++nonceSeq, reason });
+  // included — the wrap may have landed after our last status check). The
+  // command names its focus so a stale release can never clobber a newer
+  // session's wrap (P0-A).
+  sendToMain({ type: LAD_UNINSTALL, nonce: ++nonceSeq, reason, focusUrlId: s.focusUrlId });
+}
+
+function focalMarkerVerified(focusUrlId) {
+  try {
+    const cell = focalCellByStatusId(focusUrlId);
+    return Boolean(cell?.isConnected && cell.querySelector(`article[${LAD_MARK_ARTICLE}]`));
+  } catch { return false; }
 }
 
 // ---------- layout mounting ----------
@@ -210,17 +323,59 @@ function removeLayout() {
   document.getElementById(STYLE_ID)?.remove();
   document.documentElement.removeAttribute(HTML_ATTR);
   unwatchTheme();
+  restoreInlineVars();
+}
+
+// ---------- P1-C: theme mirroring without feedback loops ----------
+
+function captureInlineVars() {
+  if (savedInlineVars) return;
+  savedInlineVars = new Map();
+  const root = document.documentElement;
+  for (const name of THEME_VARS) {
+    try {
+      savedInlineVars.set(name, {
+        value: root.style.getPropertyValue(name),
+        priority: root.style.getPropertyPriority(name),
+      });
+    } catch { savedInlineVars.set(name, { value: "", priority: "" }); }
+  }
+}
+
+function restoreInlineVars() {
+  if (!savedInlineVars) return;
+  const root = document.documentElement;
+  for (const [name, saved] of savedInlineVars) {
+    try {
+      if (saved.value) root.style.setProperty(name, saved.value, saved.priority);
+      else root.style.removeProperty(name);
+    } catch { /* styleless document — nothing to restore */ }
+  }
+  savedInlineVars = null;
+}
+
+function writeRootVar(root, name, value) {
+  try {
+    if (root.style.getPropertyValue(name) === value) {
+      themeStats.skippedWrites++; // identical value: no DOM write, no echo, no loop
+      return;
+    }
+    themeSelfWrite = true; // the observer will see exactly this echo and drop it
+    themeStats.writes++;
+    root.style.setProperty(name, value);
+  } catch { /* no inline style support — CSS fallbacks cover the pane */ }
 }
 
 function applyAdapterTheme() {
   const theme = readTheme();
   const root = document.documentElement;
+  captureInlineVars(); // first write captures the pre-adapter state (values + priorities)
   if (theme === "dark") {
-    root.style.setProperty("--peek-lad-bg", "#000000");
-    root.style.setProperty("--peek-lad-border", "#2f3336");
+    writeRootVar(root, "--peek-lad-bg", "#000000");
+    writeRootVar(root, "--peek-lad-border", "#2f3336");
   } else {
-    root.style.setProperty("--peek-lad-bg", "#ffffff");
-    root.style.setProperty("--peek-lad-border", "#eff3f4");
+    writeRootVar(root, "--peek-lad-bg", "#ffffff");
+    writeRootVar(root, "--peek-lad-border", "#eff3f4");
   }
   // X's own banner height varies slightly by build; measure it, fall back to 54px
   let top = 54;
@@ -228,12 +383,20 @@ function applyAdapterTheme() {
     const h = document.querySelector('header[role="banner"]')?.getBoundingClientRect().height;
     if (Number.isFinite(h) && h >= 40 && h <= 80) top = Math.round(h);
   } catch { /* keep the fallback */ }
-  root.style.setProperty("--peek-lad-top", `${top}px`);
+  writeRootVar(root, "--peek-lad-top", `${top}px`);
 }
 
 function watchTheme() {
   unwatchTheme();
-  themeObserver = new MutationObserver(() => applyAdapterTheme());
+  themeObserver = new MutationObserver(() => {
+    themeStats.callbacks++;
+    // P1-C: our own writes are dropped — they changed nothing X cares about,
+    // and re-applying them is the seed of the setProperty → mutation →
+    // setProperty loop. The value-diff guard alone already terminates any
+    // chain; the flag removes even the single redundant pass.
+    if (themeSelfWrite) { themeSelfWrite = false; themeStats.selfEchoDrops++; return; }
+    applyAdapterTheme();
+  });
   themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "style", "data-theme"] });
   if (document.body) themeObserver.observe(document.body, { attributes: true, attributeFilter: ["class", "style"] });
 }
@@ -241,6 +404,7 @@ function watchTheme() {
 function unwatchTheme() {
   themeObserver?.disconnect();
   themeObserver = null;
+  themeSelfWrite = false;
 }
 
 function setStateAttr(state) {
@@ -249,11 +413,27 @@ function setStateAttr(state) {
 
 // ---------- diagnostics ----------
 
+// P1-C observability for the offline harness: loop-freedom is proven by
+// counting observer callbacks against actual style writes (tests read this
+// through the built artifact's test hook).
+export function themeDiagnostics() {
+  return {
+    ...themeStats,
+    watching: Boolean(themeObserver),
+    inlineVars: (() => {
+      try {
+        const root = document.documentElement;
+        return Object.fromEntries(THEME_VARS.map((n) => [n, root.style.getPropertyValue(n)]));
+      } catch { return {}; }
+    })(),
+  };
+}
+
 export function sessionSnapshot() {
   return session
     ? {
       focusUrlId: session.focusUrlId, phase: session.phase, attempts: session.attempts,
-      everActive: session.everActive, failReason: session.failReason,
+      everActive: session.everActive, gen: session.gen, failReason: session.failReason,
     }
     : null;
 }

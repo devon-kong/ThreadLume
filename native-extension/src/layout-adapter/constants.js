@@ -17,11 +17,18 @@ export const LAD_FROM_MAIN = "main";
 export const LAD_INSTALL = "INSTALL";
 export const LAD_UNINSTALL = "UNINSTALL";
 export const LAD_QUERY = "QUERY";
-// MAIN → ISOLATED results
+// MAIN → ISOLATED request responses (always correlate to a request via nonce)
 export const LAD_ACTIVE = "ACTIVE";
 export const LAD_UNSUPPORTED = "UNSUPPORTED";
 export const LAD_ERROR = "ERROR";
 export const LAD_UNINSTALLED = "UNINSTALLED";
+// MAIN → ISOLATED autonomous notifications (M2-B1-R P0-A): sent with NO request
+// in flight. Correlated by { gen, focusUrlId, reqNonce } — never by nonce alone,
+// because these fire outside any request/response exchange (health-check exits,
+// route self-detection, internal re-installs). The nonce field is null on them.
+export const LAD_HEALTH_ERROR = "HEALTH_ERROR";
+export const LAD_HEALTH_UNINSTALLED = "HEALTH_UNINSTALLED";
+export const LAD_HEALTH_ACTIVE = "HEALTH_ACTIVE";
 
 // The one virtualizer method this adapter may wrap (contract §0).
 export const LAD_KEY = "_getFinalRenderedItems";
@@ -33,6 +40,9 @@ export const LAD_MARK_ARTICLE = "data-peek-lad-focal";
 export const LAD_HEALTH_INTERVAL_MS = 1500;
 export const LAD_REINSTALL_BUDGET = 2;      // bounded instance-replacement re-install attempts
 export const LAD_CELL_MISS_TICKS = 2;       // transient re-render tolerance before exit
+// P1-B: same-cell article swap handling
+export const LAD_ARTICLE_SETTLE_MS = 120;   // debounce for the cell mutation watcher
+export const LAD_ARTICLE_GONE_MS = 3000;    // article absent longer than this → exit
 
 // ISOLATED controller timings
 export const LAD_INSTALL_ACK_MS = 1200;     // MAIN world absent/unresponsive → fail, no retry

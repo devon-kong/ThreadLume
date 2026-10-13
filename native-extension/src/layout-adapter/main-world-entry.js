@@ -39,10 +39,21 @@ import * as core from "./adapter-core.js";
     if (!m || typeof m !== "object" || m.ns !== LAD_NS || m.from !== LAD_FROM_ISOLATED) return;
     switch (m.type) {
       case LAD_INSTALL:
-        post(core.install({ focusUrlId: typeof m.focusUrlId === "string" ? m.focusUrlId : "" }), m.nonce);
+        // reqNonce records the correlation of the request that created this
+        // installation session; autonomous HEALTH_* notifications carry it
+        // back alongside the session generation (P0-A)
+        post(core.install({
+          focusUrlId: typeof m.focusUrlId === "string" ? m.focusUrlId : "",
+          reqNonce: typeof m.nonce === "number" ? m.nonce : null,
+        }), m.nonce);
         break;
       case LAD_UNINSTALL:
-        post(core.uninstall({ reason: typeof m.reason === "string" ? m.reason : "requested" }), m.nonce);
+        // focusUrlId scopes the release to the session it names — a stale
+        // release can never tear down a newer session's wrap (P0-A)
+        post(core.uninstall({
+          reason: typeof m.reason === "string" ? m.reason : "requested",
+          focusUrlId: typeof m.focusUrlId === "string" ? m.focusUrlId : undefined,
+        }), m.nonce);
         break;
       case LAD_QUERY:
         post({ type: "STATE", state: core.query() }, m.nonce);
@@ -60,6 +71,7 @@ import * as core from "./adapter-core.js";
       uninstall: core.uninstall,
       query: core.query,
       healthTick: core.healthTick,
+      verifyArticleBinding: core.verifyArticleBinding, // P1-B direct drive
     };
   }
 })();

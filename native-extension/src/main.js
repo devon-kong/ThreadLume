@@ -38,7 +38,8 @@ import {
 } from "./navigation-session.js";
 // M2-B1 experimental native layout adapter (inert in the default build)
 import {
-  adapterEnabled, initLayoutAdapter, sessionSnapshot, onDetailRoute, offRoute
+  adapterEnabled, initLayoutAdapter, sessionSnapshot, onDetailRoute, offRoute,
+  themeDiagnostics
 } from "./layout-adapter/controller.js";
 
 (() => {
@@ -95,7 +96,8 @@ import {
       layoutAdapter: {
         enabled: adapterEnabled,
         onDetailRoute, offRoute, sessionSnapshot,
-        init: initLayoutAdapter
+        init: initLayoutAdapter,
+        themeDiagnostics // P1-C loop-freedom observability
       }
     };
   }
