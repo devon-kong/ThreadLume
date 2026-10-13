@@ -1,0 +1,688 @@
+{
+ "mode": "m1r",
+ "rounds": [
+  {
+   "round": 0,
+   "samples": [
+    {
+     "sample": "video",
+     "target": "2109309251533570509",
+     "openedAt": "/thinkszyg/status/2109309251533570509",
+     "t1": 979,
+     "t2a": null,
+     "t2aCandidate": {
+      "ms": 2006,
+      "phase": "pre-scroll"
+     },
+     "t2b": null,
+     "t2bCandidate": {
+      "ms": 13213,
+      "phase": "pre-scroll"
+     },
+     "t3": null,
+     "video": {
+      "tag": 3,
+      "firstNodeAt": 979.1999998092651,
+      "firstPlayableAt": 1977.5999999046326,
+      "waiting": 0,
+      "retagged": true,
+      "currentTime": 0,
+      "paused": true,
+      "readyState": 4,
+      "connected": true
+     },
+     "videoIdentityAfterDeepScroll": {
+      "tracked": true,
+      "sameElement": false,
+      "trackedTag": 1,
+      "connected": false,
+      "waiting": 0,
+      "retagged": false,
+      "currentTime": null,
+      "paused": null,
+      "playableNow": false
+     },
+     "labIntegrity": null,
+     "heapDom": {
+      "afterScroll": {
+       "heap": 110,
+       "dom": 2284,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 1361,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "left": 14727.799999952316,
+      "cells": 14858.299999952316,
+      "anchor": 14727.899999856949,
+      "anchorVisible": 14727.899999856949,
+      "stable": 15866.699999809265
+     }
+    },
+    {
+     "sample": "photos",
+     "target": "2099877465795735861",
+     "openedAt": "/KinGao476942/status/2099877465795735861",
+     "t1": 982,
+     "t2a": null,
+     "t2aCandidate": {
+      "ms": 2003,
+      "phase": "pre-scroll"
+     },
+     "t2b": null,
+     "t2bCandidate": {
+      "ms": 13257,
+      "phase": "pre-scroll"
+     },
+     "t3": null,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": null,
+     "heapDom": {
+      "afterScroll": {
+       "heap": 116,
+       "dom": 2436,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 2356,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "left": 15569.700000047684,
+      "cells": 17811.299999952316,
+      "anchor": 15569.900000095367,
+      "anchorVisible": 15569.900000095367,
+      "stable": 19077.900000095367
+     }
+    },
+    {
+     "sample": "text",
+     "target": "1760839985715204230",
+     "openedAt": "/gefei55/status/1760839985715204230",
+     "t1": 1001,
+     "t2a": null,
+     "t2aCandidate": {
+      "ms": 1115,
+      "phase": "pre-scroll"
+     },
+     "t2b": null,
+     "t2bCandidate": {
+      "ms": 13408,
+      "phase": "pre-scroll"
+     },
+     "t3": null,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": null,
+     "heapDom": {
+      "afterScroll": {
+       "heap": 141,
+       "dom": 2111,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 1583,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "left": 14867.200000047684,
+      "cells": 17049.60000014305,
+      "anchor": 14867.5,
+      "anchorVisible": 14867.5,
+      "stable": 18037.400000095367
+     }
+    },
+    {
+     "sample": "highcomments",
+     "target": "2100757389112938573",
+     "openedAt": "/ruanyf/status/2100757389112938573",
+     "t1": 983,
+     "t2a": null,
+     "t2aCandidate": {
+      "ms": 2017,
+      "phase": "pre-scroll"
+     },
+     "t2b": null,
+     "t2bCandidate": {
+      "ms": 2017,
+      "phase": "pre-scroll"
+     },
+     "t3": 983,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": null,
+     "heapDom": {
+      "afterScroll": {
+       "heap": 143,
+       "dom": 2599,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 1301,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "left": 3377.9000000953674,
+      "cells": 4429.300000190735,
+      "anchor": 3378,
+      "anchorVisible": 3378,
+      "stable": 5578
+     }
+    }
+   ]
+  },
+  {
+   "round": 1,
+   "samples": [
+    {
+     "sample": "video",
+     "target": "2109309251533570509",
+     "openedAt": "/thinkszyg/status/2109309251533570509",
+     "t1": 982,
+     "t2a": null,
+     "t2aCandidate": {
+      "ms": 2017,
+      "phase": "pre-scroll"
+     },
+     "t2b": null,
+     "t2bCandidate": {
+      "ms": 13228,
+      "phase": "pre-scroll"
+     },
+     "t3": null,
+     "video": {
+      "tag": 4,
+      "firstNodeAt": 982.6000001430511,
+      "firstPlayableAt": 1983.4000000953674,
+      "waiting": 0,
+      "retagged": true,
+      "currentTime": 0.64,
+      "paused": false,
+      "readyState": 4,
+      "connected": true
+     },
+     "videoIdentityAfterDeepScroll": {
+      "tracked": true,
+      "sameElement": false,
+      "trackedTag": 2,
+      "connected": false,
+      "waiting": 0,
+      "retagged": true,
+      "currentTime": null,
+      "paused": null,
+      "playableNow": false
+     },
+     "labIntegrity": null,
+     "heapDom": {
+      "afterScroll": {
+       "heap": 141,
+       "dom": 2475,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 1371,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "left": 14776.400000095367,
+      "cells": 15832.200000047684,
+      "anchor": 14776.400000095367,
+      "anchorVisible": 14776.400000095367,
+      "stable": 16884.5
+     }
+    },
+    {
+     "sample": "photos",
+     "target": "2099877465795735861",
+     "openedAt": "/KinGao476942/status/2099877465795735861",
+     "t1": 979,
+     "t2a": null,
+     "t2aCandidate": {
+      "ms": 3227,
+      "phase": "pre-scroll"
+     },
+     "t2b": null,
+     "t2bCandidate": {
+      "ms": 13422,
+      "phase": "pre-scroll"
+     },
+     "t3": null,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": null,
+     "heapDom": {
+      "afterScroll": {
+       "heap": 143,
+       "dom": 2401,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 1622,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "left": 14777.100000143051,
+      "cells": 17025.60000014305,
+      "anchor": 14777.200000047684,
+      "anchorVisible": 14777.200000047684,
+      "stable": 18276.5
+     }
+    },
+    {
+     "sample": "text",
+     "target": "1760839985715204230",
+     "openedAt": "/gefei55/status/1760839985715204230",
+     "t1": 19,
+     "t2a": null,
+     "t2aCandidate": {
+      "ms": 2519,
+      "phase": "pre-scroll"
+     },
+     "t2b": null,
+     "t2bCandidate": {
+      "ms": 13754,
+      "phase": "pre-scroll"
+     },
+     "t3": null,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": null,
+     "heapDom": {
+      "afterScroll": {
+       "heap": 134,
+       "dom": 2423,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 1969,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "left": 15254.5,
+      "cells": 17472.5,
+      "anchor": 15254.900000095367,
+      "anchorVisible": 15254.900000095367,
+      "stable": 18466.900000095367
+     }
+    },
+    {
+     "sample": "highcomments",
+     "target": "2100757389112938573",
+     "openedAt": "/ruanyf/status/2100757389112938573",
+     "t1": 19,
+     "t2a": null,
+     "t2aCandidate": {
+      "ms": 1387,
+      "phase": "pre-scroll"
+     },
+     "t2b": null,
+     "t2bCandidate": {
+      "ms": 1387,
+      "phase": "pre-scroll"
+     },
+     "t3": 1023,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": null,
+     "heapDom": {
+      "afterScroll": {
+       "heap": 151,
+       "dom": 3880,
+       "longTasks": 1
+      }
+     },
+     "deepScrollMs": 2383,
+     "longTasksDuringDeepScroll": 1,
+     "t4": {
+      "left": 4732.799999952316,
+      "cells": 5783.200000047684,
+      "anchor": 4732.899999856949,
+      "anchorVisible": 4732.899999856949,
+      "stable": 6297.5
+     }
+    }
+   ]
+  },
+  {
+   "round": 2,
+   "samples": [
+    {
+     "sample": "video",
+     "target": "2109309251533570509",
+     "openedAt": "/thinkszyg/status/2109309251533570509",
+     "t1": 980,
+     "t2a": null,
+     "t2aCandidate": {
+      "ms": 1206,
+      "phase": "pre-scroll"
+     },
+     "t2b": null,
+     "t2bCandidate": {
+      "ms": 13438,
+      "phase": "pre-scroll"
+     },
+     "t3": null,
+     "video": {
+      "tag": 2,
+      "firstNodeAt": 981.0999999046326,
+      "firstPlayableAt": 1341.5999999046326,
+      "waiting": 0,
+      "retagged": true,
+      "currentTime": 0.62,
+      "paused": false,
+      "readyState": 4,
+      "connected": true
+     },
+     "videoIdentityAfterDeepScroll": {
+      "tracked": true,
+      "sameElement": false,
+      "trackedTag": 1,
+      "connected": false,
+      "waiting": 0,
+      "retagged": false,
+      "currentTime": null,
+      "paused": null,
+      "playableNow": false
+     },
+     "labIntegrity": null,
+     "heapDom": {
+      "afterScroll": {
+       "heap": 144,
+       "dom": 2304,
+       "longTasks": 1
+      }
+     },
+     "deepScrollMs": 1611,
+     "longTasksDuringDeepScroll": 1,
+     "t4": {
+      "left": 14869.599999904633,
+      "cells": 15926.199999809265,
+      "anchor": 14869.799999952316,
+      "anchorVisible": 14869.799999952316,
+      "stable": 16970.799999952316
+     }
+    },
+    {
+     "sample": "photos",
+     "target": "2099877465795735861",
+     "openedAt": "/KinGao476942/status/2099877465795735861",
+     "t1": 982,
+     "t2a": null,
+     "t2aCandidate": {
+      "ms": 2010,
+      "phase": "pre-scroll"
+     },
+     "t2b": null,
+     "t2bCandidate": {
+      "ms": 13341,
+      "phase": "pre-scroll"
+     },
+     "t3": null,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": null,
+     "heapDom": {
+      "afterScroll": {
+       "heap": 135,
+       "dom": 2230,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 1475,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "left": 14796.5,
+      "cells": 16918.60000014305,
+      "anchor": 14796.700000047684,
+      "anchorVisible": 14796.800000190735,
+      "stable": 17923.200000047684
+     }
+    },
+    {
+     "sample": "text",
+     "target": "1760839985715204230",
+     "openedAt": "/gefei55/status/1760839985715204230",
+     "t1": 19,
+     "t2a": null,
+     "t2aCandidate": {
+      "ms": 2480,
+      "phase": "pre-scroll"
+     },
+     "t2b": null,
+     "t2bCandidate": {
+      "ms": 13733,
+      "phase": "pre-scroll"
+     },
+     "t3": null,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": null,
+     "heapDom": {
+      "afterScroll": {
+       "heap": 157,
+       "dom": 2421,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 1874,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "left": 15233.099999904633,
+      "cells": 17455.39999985695,
+      "anchor": 15233.399999856949,
+      "anchorVisible": 15233.399999856949,
+      "stable": 18469.599999904633
+     }
+    },
+    {
+     "sample": "highcomments",
+     "target": "2100757389112938573",
+     "openedAt": "/ruanyf/status/2100757389112938573",
+     "t1": 999,
+     "t2a": null,
+     "t2aCandidate": {
+      "ms": 1274,
+      "phase": "pre-scroll"
+     },
+     "t2b": null,
+     "t2bCandidate": {
+      "ms": 1274,
+      "phase": "pre-scroll"
+     },
+     "t3": 1000,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": null,
+     "heapDom": {
+      "afterScroll": {
+       "heap": 167,
+       "dom": 4227,
+       "longTasks": 1
+      }
+     },
+     "deepScrollMs": 4286,
+     "longTasksDuringDeepScroll": 1,
+     "t4": {
+      "left": 6563.599999904633,
+      "cells": 7610.299999952316,
+      "anchor": 6563.799999952316,
+      "anchorVisible": 6563.899999856949,
+      "stable": 8858.599999904633
+     }
+    }
+   ]
+  },
+  {
+   "round": 3,
+   "samples": [
+    {
+     "sample": "video",
+     "target": "2109309251533570509",
+     "openedAt": "/thinkszyg/status/2109309251533570509",
+     "t1": 981,
+     "t2a": null,
+     "t2aCandidate": {
+      "ms": 2005,
+      "phase": "pre-scroll"
+     },
+     "t2b": null,
+     "t2bCandidate": {
+      "ms": 13192,
+      "phase": "pre-scroll"
+     },
+     "t3": null,
+     "video": {
+      "tag": 3,
+      "firstNodeAt": 980.8999998569489,
+      "firstPlayableAt": 1982.1999998092651,
+      "waiting": 0,
+      "retagged": true,
+      "currentTime": 0,
+      "paused": true,
+      "readyState": 4,
+      "connected": true
+     },
+     "videoIdentityAfterDeepScroll": {
+      "tracked": true,
+      "sameElement": false,
+      "trackedTag": 1,
+      "connected": false,
+      "waiting": 0,
+      "retagged": false,
+      "currentTime": null,
+      "paused": null,
+      "playableNow": false
+     },
+     "labIntegrity": null,
+     "heapDom": {
+      "afterScroll": {
+       "heap": 138,
+       "dom": 2457,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 1313,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "left": 14681.799999952316,
+      "cells": 14790.599999904633,
+      "anchor": 14681.799999952316,
+      "anchorVisible": 14681.799999952316,
+      "stable": 15809.399999856949
+     }
+    },
+    {
+     "sample": "photos",
+     "target": "2099877465795735861",
+     "openedAt": "/KinGao476942/status/2099877465795735861",
+     "t1": 977,
+     "t2a": null,
+     "t2aCandidate": {
+      "ms": 2016,
+      "phase": "pre-scroll"
+     },
+     "t2b": null,
+     "t2bCandidate": {
+      "ms": 13262,
+      "phase": "pre-scroll"
+     },
+     "t3": null,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": null,
+     "heapDom": {
+      "afterScroll": {
+       "heap": 131,
+       "dom": 2367,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 3372,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "left": 16675.799999952316,
+      "cells": 18795.299999952316,
+      "anchor": 16676.099999904633,
+      "anchorVisible": 16676.099999904633,
+      "stable": 19817.5
+     }
+    },
+    {
+     "sample": "text",
+     "target": "1760839985715204230",
+     "openedAt": "/gefei55/status/1760839985715204230",
+     "t1": 975,
+     "t2a": null,
+     "t2aCandidate": {
+      "ms": 1101,
+      "phase": "pre-scroll"
+     },
+     "t2b": null,
+     "t2bCandidate": {
+      "ms": 13397,
+      "phase": "pre-scroll"
+     },
+     "t3": null,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": null,
+     "heapDom": {
+      "afterScroll": {
+       "heap": 132,
+       "dom": 2268,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 1502,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "left": 14890.899999856949,
+      "cells": 17115.5,
+      "anchor": 14891.099999904633,
+      "anchorVisible": 14891.200000047684,
+      "stable": 18111.299999952316
+     }
+    },
+    {
+     "sample": "highcomments",
+     "target": "2100757389112938573",
+     "openedAt": "/ruanyf/status/2100757389112938573",
+     "t1": 20,
+     "t2a": null,
+     "t2aCandidate": {
+      "ms": 1294,
+      "phase": "pre-scroll"
+     },
+     "t2b": null,
+     "t2bCandidate": {
+      "ms": 1294,
+      "phase": "pre-scroll"
+     },
+     "t3": 1025,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": null,
+     "heapDom": {
+      "afterScroll": {
+       "heap": 152,
+       "dom": 4085,
+       "longTasks": 1
+      }
+     },
+     "deepScrollMs": 2323,
+     "longTasksDuringDeepScroll": 1,
+     "t4": {
+      "left": 4615,
+      "cells": 4702.700000047684,
+      "anchor": 4615.200000047684,
+      "anchorVisible": 4615.200000047684,
+      "stable": 5711.700000047684
+     }
+    }
+   ]
+  }
+ ],
+ "wrapper": {
+  "perCallUs": 0.23,
+  "totalMs": 0.7,
+  "wrappedOwnProperty": false
+ },
+ "idle": {
+  "longTasks": 0,
+  "longTaskMs": 0
+ },
+ "env": {
+  "viewport": {
+   "w": 1341,
+   "h": 804,
+   "dpr": 2
+  },
+  "theme": "rgb(255, 255, 255)",
+  "chrome": "152.0.0.0"
+ },
+ "note": "t0 = capture-phase click on the TARGET status link; all stamps are performance.now()-t0 from one in-page rAF loop; no fixed sleeps between click and measurement"
+}

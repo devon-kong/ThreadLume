@@ -1,0 +1,236 @@
+{
+ "startedAt": "2026-10-13T16:10:24.745Z",
+ "extCard": {
+  "webui": true,
+  "name": "Peek Native (M2-B1 Lab)",
+  "id": "ogahkcgimhiieflimdlkgpbhadmaalln",
+  "enabled": true,
+  "version": "0.10.0",
+  "devMode": null
+ },
+ "video": {
+  "split": {
+   "state": "active",
+   "focal": true,
+   "video": true,
+   "focalCount": 1
+  },
+  "t0": {
+   "video": true,
+   "paused": false,
+   "t": 3.63,
+   "ready": 4,
+   "muted": true,
+   "duration": 32
+  },
+  "t3s": {
+   "video": true,
+   "paused": false,
+   "t": 6.64,
+   "ready": 4,
+   "muted": true,
+   "duration": 32
+  },
+  "afterPauseClick": {
+   "video": true,
+   "paused": false,
+   "t": 6.64,
+   "ready": 4,
+   "muted": true,
+   "duration": 32
+  },
+  "afterMuteClick": {
+   "video": true,
+   "paused": false,
+   "t": 6.64,
+   "ready": 4,
+   "muted": true,
+   "duration": 32
+  }
+ },
+ "lightbox": {
+  "open": false,
+  "next": false
+ },
+ "lightboxAfterEsc": {
+  "open": false,
+  "focalStill": true
+ },
+ "quickSwitch": {
+  "b": {
+   "path": "/MaiYangAI/status/2100002220251185197",
+   "state": "active",
+   "focalCount": 1,
+   "focalMarked": true
+  },
+  "back": {
+   "path": "/KinGao476942/status/2099877465795735861",
+   "state": "active",
+   "focalCount": 1
+  },
+  "forward": {
+   "path": "/MaiYangAI/status/2100002220251185197",
+   "state": "active",
+   "focalCount": 1
+  }
+ },
+ "mismatch": {
+  "before": {
+   "state": "active",
+   "style": true
+  },
+  "deleted": {
+   "deleted": true
+  },
+  "after": {
+   "state": "failed",
+   "style": false,
+   "failedAttr": "wrapper-replaced",
+   "htmlAttr": null,
+   "nativeReadable": true
+  }
+ },
+ "pollSearch": {
+  "cells": 0
+ },
+ "pollHunt": {
+  "poll": false
+ },
+ "videoControlsRetest": {
+  "t0": {
+   "paused": true,
+   "t": 0,
+   "muted": true,
+   "ready": 4
+  },
+  "afterPlay": {
+   "paused": false,
+   "t": 0.98,
+   "muted": false,
+   "ready": 4
+  },
+  "afterPause": {
+   "paused": true,
+   "t": 2.04,
+   "muted": false,
+   "ready": 4
+  },
+  "afterResume": {
+   "paused": false,
+   "t": 3,
+   "muted": false,
+   "ready": 4
+  },
+  "sliderFound": true,
+  "afterSeek": {
+   "paused": false,
+   "t": 5.36,
+   "muted": false,
+   "ready": 4
+  },
+  "afterMute": {
+   "paused": true,
+   "t": 7.13,
+   "muted": false,
+   "ready": 4
+  },
+  "fullscreen": {
+   "fs": null,
+   "vw": 666
+  },
+  "afterEsc": {
+   "fs": null,
+   "adapter": "active",
+   "focal": true
+  },
+  "videoAfterEsc": {
+   "paused": false,
+   "t": 11.06,
+   "muted": false,
+   "ready": 4
+  }
+ },
+ "fullscreenRetest": {
+  "target": {
+   "found": true,
+   "x": 657.3125,
+   "y": 917.3125
+  },
+  "fs": {
+   "el": null,
+   "vw": 666
+  },
+  "afterEsc": {
+   "el": null,
+   "adapter": "active"
+  }
+ },
+ "fullscreenRetest2": {
+  "scrolled": {
+   "top": 120,
+   "scrollHeight": 1017
+  },
+  "target": {
+   "found": true,
+   "x": 657.3125,
+   "y": 797.3125,
+   "inView": false
+  }
+ },
+ "fullscreenRetest3": {
+  "target": {
+   "x": 657.3125,
+   "y": 697.3125,
+   "inView": true
+  },
+  "fs": {
+   "el": "DIV",
+   "vw": 1348
+  },
+  "afterEsc": {
+   "el": "DIV",
+   "adapter": "active",
+   "focal": true
+  }
+ },
+ "lightboxRetest": {
+  "imgPos": {
+   "x": 212,
+   "y": 608
+  },
+  "lightbox": {
+   "open": false,
+   "dialog": 2,
+   "imgs": 0
+  },
+  "afterNext": {
+   "open": false
+  },
+  "afterEsc": {
+   "open": false,
+   "adapter": "active",
+   "focal": true
+  }
+ },
+ "lightboxRetest2": {
+  "before": {
+   "open": true,
+   "imgs": 21,
+   "nextBtn": false
+  },
+  "afterNext": {
+   "open": true,
+   "imgs": 21,
+   "nextBtn": false
+  },
+  "afterEsc": {
+   "open": false,
+   "imgs": 0,
+   "nextBtn": false
+  },
+  "adapter": {
+   "state": "active",
+   "focal": true
+  }
+ }
+}
