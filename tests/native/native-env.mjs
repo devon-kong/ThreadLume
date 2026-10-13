@@ -91,7 +91,15 @@ export function makeTimers(clock) {
 }
 
 // Boot the production bundle once per fresh jsdom document.
-export function makeEnv({ url = "/home", html = "<!doctype html><html><body></body></html>" } = {}) {
+// navApi simulates the isolated-world Navigation API boundary (M1-R A1):
+//   - "absent" (default): no window.navigation — jsdom reality, NAV_API=false.
+//   - "silent": a navigation OBJECT exists and accepts a navigate listener,
+//     but events are NEVER delivered — the exact behavior observed in a real
+//     Chromium extension isolated world. entries()/currentEntry are absent so
+//     the close decision exercises its trail fallback, same as live.
+//   - "live": same object; tests may dispatchNavigate() to deliver events.
+export function makeEnv({ url = "/home", html, navApi = "absent" } = {}) {
+  if (!html) html = '<!doctype html><html><head><title>Home / X</title></head><body></body></html>';
   const dom = new JSDOM(html, { url: "https://x.com" + url });
   const { window } = dom;
   activeDoc = window.document;
@@ -109,6 +117,18 @@ export function makeEnv({ url = "/home", html = "<!doctype html><html><body></bo
   const location = { pathname: url, href: "https://x.com" + url, search: "", hash: "" };
   const history = { _backCalls: 0, back() { this._backCalls++; } };
   const DateShim = { now: () => clock.now };
+
+  const navListeners = [];
+  if (navApi !== "absent") {
+    window.navigation = {
+      // no entries()/currentEntry on purpose: the isolated world cannot rely
+      // on them, forcing the documented trail fallback (matches live M1)
+      addEventListener: (type, fn) => { if (type === "navigate") navListeners.push(fn); },
+    };
+  }
+  const dispatchNavigate = (type, destUrl) => {
+    for (const fn of [...navListeners]) fn({ navigationType: type, destination: { url: destUrl } });
+  };
 
   const boot = () => {
     window.__PEEK_NATIVE_TEST__ = true; // arm the production test hook (offline harness only)
@@ -138,11 +158,23 @@ export function makeEnv({ url = "/home", html = "<!doctype html><html><body></bo
   // Simulate X's pushState route change: the URL changes with NO popstate.
   // With the Navigation API unavailable (jsdom), detection falls to the
   // capture-phase click cascade (if a link click was seen) or the poll.
-  const pushNavigate = async (pathname, { viaClick = true } = {}) => {
+  const pushNavigate = async (pathname, { viaClick = true, advanceMs = 600 } = {}) => {
     if (viaClick) clickLink(pathname);
     location.pathname = pathname;
     location.href = "https://x.com" + pathname;
-    await timers.advance(600); // runs out the 350ms click cascade and one poll step
+    await timers.advance(advanceMs); // runs out the 350ms click cascade and one poll step
+  };
+  // Simulate a NON-CLICK SPA navigation (keyboard shortcut, X-internal
+  // pushState): URL changes, no popstate, no click; the title is rewritten
+  // like X does on route entry. With the Navigation API silent this must be
+  // detected by the title watcher — not by the idle poll.
+  const programmaticNavigate = async (pathname, { title = `Post by somebody / X`, advanceMs = 0 } = {}) => {
+    location.pathname = pathname;
+    location.href = "https://x.com" + pathname;
+    const t = window.document.querySelector("head > title");
+    if (t && title !== null) t.textContent = title;
+    if (advanceMs) await timers.advance(advanceMs);
+    else await timers.flushMicrotasks();
   };
   // A user click on a same-origin link (capture-phase listeners observe it;
   // jsdom performs no actual navigation on synthetic anchor clicks).
@@ -157,6 +189,8 @@ export function makeEnv({ url = "/home", html = "<!doctype html><html><body></bo
 
   const api = {
     dom, window, document: window.document, location, history, timers, clock, boot, navigate, pushNavigate, clickLink,
+    programmaticNavigate, dispatchNavigate,
+    navigateListenerCount: () => navListeners.length,
     scroll,
     get poc() { return window.__peekNativeTest; },
     pane: () => window.document.getElementById("peek-native-pane"),
