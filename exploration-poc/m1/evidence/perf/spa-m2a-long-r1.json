@@ -1,0 +1,105 @@
+{
+ "meta": {
+  "cond": "m2a",
+  "sample": "long",
+  "round": 1,
+  "scenario": "spa",
+  "url": "x.com/z35001116/status/2107948362414866685",
+  "viewport": {
+   "width": 1440,
+   "height": 900
+  },
+  "clickRetried": false,
+  "escRetries": 0
+ },
+ "commentsFirst": {
+  "statusId": "2107948362414866685",
+  "applied": true,
+  "target": 661,
+  "focalH": 661,
+  "vh": 900
+ },
+ "replyVisibilityAtSettle": {
+  "replyTop": -11,
+  "replyVisiblePct": 100
+ },
+ "clicks": [
+  {
+   "t": 21554.700000047684,
+   "x": 665,
+   "y": 610
+  }
+ ],
+ "clickAt": 21554.700000047684,
+ "escAt": 29744.5,
+ "t1": 21598.200000047684,
+ "t2": 22384.200000047684,
+ "t1Rel": 43.5,
+ "t2Rel": 829.5,
+ "paint": {
+  "paneFirstAt": 21598.200000047684,
+  "bodyFirstAt": 21598.200000047684
+ },
+ "t3": {
+  "paneActions": true,
+  "nativeComposer": true,
+  "paneOpen": true
+ },
+ "t4": {
+  "closedAt": 93.40000009536743,
+  "feedAt": 261.2000000476837,
+  "preScrollY": 6800,
+  "restoredScrollY": 6649,
+  "anchorDelta": 151,
+  "anchorTop": 588.171875,
+  "restored": true
+ },
+ "t5": {
+  "longtasks": [
+   51,
+   77,
+   71,
+   69,
+   71,
+   78,
+   66,
+   51,
+   76,
+   74,
+   101,
+   63,
+   55,
+   83,
+   81,
+   57,
+   114,
+   86,
+   80,
+   60,
+   85,
+   68,
+   78,
+   51
+  ],
+  "longtaskTotal": 1746,
+  "videoPlayingAt": null,
+  "videoScrollAt": null
+ },
+ "routeDetect": 4.099999904632568,
+ "anchorB3": {
+  "finalTops": [
+   588,
+   588,
+   588,
+   588,
+   588,
+   588,
+   588,
+   588,
+   588,
+   588
+  ],
+  "finalDelta": -0.171875,
+  "targetMaxPx": 60
+ }
+}

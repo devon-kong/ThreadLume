@@ -1,0 +1,83 @@
+{
+ "meta": {
+  "cond": "m2a",
+  "sample": "highReply",
+  "round": 1,
+  "scenario": "spa",
+  "url": "x.com/XiaoJi0403/status/2109146979972403349",
+  "viewport": {
+   "width": 1440,
+   "height": 900
+  },
+  "clickRetried": false,
+  "escRetries": 0
+ },
+ "commentsFirst": {
+  "statusId": "2109146979972403349",
+  "applied": false,
+  "why": "rich-native-kept"
+ },
+ "replyVisibilityAtSettle": {
+  "replyTop": -1883,
+  "replyVisiblePct": 100
+ },
+ "clicks": [
+  {
+   "t": 28696.5,
+   "x": 615,
+   "y": 568
+  }
+ ],
+ "clickAt": 28696.5,
+ "escAt": 36876.09999990463,
+ "t1": 28733.900000095367,
+ "t2": 30077.700000047684,
+ "t1Rel": 37.40000009536743,
+ "t2Rel": 1381.2000000476837,
+ "paint": {
+  "paneFirstAt": 28733.900000095367,
+  "bodyFirstAt": 28733.900000095367
+ },
+ "t3": {
+  "paneActions": true,
+  "nativeComposer": true,
+  "paneOpen": true
+ },
+ "t4": {
+  "closedAt": 75.5,
+  "feedAt": 197.40000009536743,
+  "preScrollY": 8400,
+  "restoredScrollY": 8249,
+  "anchorDelta": 151,
+  "anchorTop": 546.171875,
+  "restored": true
+ },
+ "t5": {
+  "longtasks": [
+   53,
+   80,
+   51,
+   63
+  ],
+  "longtaskTotal": 247,
+  "videoPlayingAt": null,
+  "videoScrollAt": null
+ },
+ "routeDetect": 1.9000000953674316,
+ "anchorB3": {
+  "finalTops": [
+   546,
+   546,
+   546,
+   546,
+   546,
+   546,
+   546,
+   546,
+   546,
+   546
+  ],
+  "finalDelta": -0.171875,
+  "targetMaxPx": 60
+ }
+}

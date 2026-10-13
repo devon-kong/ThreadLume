@@ -1,0 +1,81 @@
+{
+ "meta": {
+  "cond": "m2a",
+  "sample": "video",
+  "round": 3,
+  "scenario": "spa",
+  "url": "x.com/thinkszyg/status/2109309251533570509",
+  "viewport": {
+   "width": 1440,
+   "height": 900
+  },
+  "clickRetried": false,
+  "escRetries": 0
+ },
+ "commentsFirst": {
+  "statusId": "2109309251533570509",
+  "applied": false,
+  "why": "rich-native-kept"
+ },
+ "replyVisibilityAtSettle": {
+  "replyTop": -1810,
+  "replyVisiblePct": 100
+ },
+ "clicks": [
+  {
+   "t": 13925.700000047684,
+   "x": 673,
+   "y": 792
+  }
+ ],
+ "clickAt": 13925.700000047684,
+ "escAt": 22156.299999952316,
+ "t1": 13985,
+ "t2": 15237.400000095367,
+ "t1Rel": 59.299999952316284,
+ "t2Rel": 1311.7000000476837,
+ "paint": {
+  "paneFirstAt": 13985,
+  "bodyFirstAt": 13985
+ },
+ "t3": {
+  "paneActions": true,
+  "nativeComposer": false,
+  "paneOpen": true
+ },
+ "t4": {
+  "closedAt": 110.40000009536743,
+  "feedAt": 245.40000009536743,
+  "preScrollY": 1600,
+  "restoredScrollY": 1449,
+  "anchorDelta": 151,
+  "anchorTop": 770.171875,
+  "restored": true
+ },
+ "t5": {
+  "longtasks": [
+   53,
+   90
+  ],
+  "longtaskTotal": 143,
+  "videoPlayingAt": 8.399999856948853,
+  "videoScrollAt": 19994.10000014305
+ },
+ "routeDetect": 2.5999999046325684,
+ "anchorB3": {
+  "finalTops": [
+   770,
+   770,
+   770,
+   770,
+   770,
+   770,
+   770,
+   770,
+   770,
+   770
+  ],
+  "finalDelta": -0.171875,
+  "targetMaxPx": 60
+ }
+}
