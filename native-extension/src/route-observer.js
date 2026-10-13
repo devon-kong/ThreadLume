@@ -34,6 +34,10 @@ import {
   markPendingTraverse, consumePendingTraverse
 } from "./navigation-session.js";
 import { buildReader, removeReader, maybeRecover } from "./reader-lifecycle.js";
+// M2-B1: in the experimental build the user browses natively (no reader close
+// path), so X's own scroll restoration owns list returns — our correction
+// would fight it. Anchor captures stay (inert bookkeeping); restores are gated.
+import { adapterEnabled } from "./layout-adapter/controller.js";
 import { capturePreOpen, onReturnToList, preOpenAnchor } from "./anchor-restore.js";
 import { applyTheme } from "./theme-adapter.js";
 import { syncRichNote, paneMounted, mountedPane } from "./reader-view.js";
@@ -84,7 +88,7 @@ export function checkRoute() {
       buildReader();
     } else {
       removeReader();
-      if (previous) onReturnToList(previous);
+      if (previous && !adapterEnabled()) onReturnToList(previous);
     }
   } else if (id) {
     const pane = mountedPane();

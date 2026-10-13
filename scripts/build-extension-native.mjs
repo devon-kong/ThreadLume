@@ -1,11 +1,19 @@
 #!/usr/bin/env node
-// Build the Peek Native (M1) unpacked extension into dist-extension-native/.
+// Build the Peek Native unpacked extension.
 //
-// Isolation contract (M1-A2): this build NEVER touches dist-extension/ (the
-// Legacy build) and its output must not contain the Legacy private-API bridge
-// path in any form. The bundle is scanned for forbidden markers at build time
-// and the build fails loudly if any appear; tests/native re-verifies the
-// artifact independently.
+// Two artifacts, never the same directory:
+//   default:  dist-extension-native/      — the M1-R stable carrier. The M2-B1
+//             layout adapter is compiled OUT (define false, no MAIN-world
+//             script, manifest untouched): behavior identical to M1-R.
+//   lab:      dist-extension-native-lab/  — the M2-B1 experimental build
+//             (PEEK_LAYOUT_ADAPTER=1 or --lab). Enables the native layout
+//             adapter: content.js defines the flag true and the manifest gains
+//             a dedicated MAIN-world content script. Never a default mode.
+//
+// Isolation contract (M1-A2): neither build EVER touches dist-extension/ (the
+// Legacy build) and no output may contain the Legacy private-API bridge path
+// in any form. Bundles are scanned for forbidden markers at build time and the
+// build fails loudly if any appear; tests/native re-verifies independently.
 //
 // Bundle: esbuild (provided by the existing vite toolchain — no new runtime
 // dependency), IIFE, unminified so reviewers and tests can read the artifact.
@@ -16,7 +24,10 @@ import sharp from "sharp";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const source = path.join(root, "native-extension");
-const dist = path.resolve(root, "dist-extension-native");
+const lab = process.env.PEEK_LAYOUT_ADAPTER === "1" || process.argv.includes("--lab");
+const dist = lab
+  ? path.resolve(root, "dist-extension-native-lab")
+  : path.resolve(root, "dist-extension-native");
 const legacyDist = path.resolve(root, "dist-extension");
 const asset = path.join(root, "public", "assets", "tuzai-icon-source.png");
 
@@ -36,23 +47,41 @@ try {
 rmSync(dist, { recursive: true, force: true });
 mkdirSync(dist, { recursive: true });
 
-await build({
-  entryPoints: [path.join(source, "src", "main.js")],
+const COMMON = {
   bundle: true,
   format: "iife",
   platform: "browser",
   target: ["chrome100"],
-  outfile: path.join(dist, "content.js"),
   minify: false,
   sourcemap: false,
   logLevel: "warning",
   legalComments: "none",
-  banner: { js: "// Peek Native (M1) — bundled content script. Source: native-extension/src/*.js" }
+  define: { __PEEK_LAYOUT_ADAPTER__: lab ? "true" : "false" },
+};
+
+await build({
+  ...COMMON,
+  entryPoints: [path.join(source, "src", "main.js")],
+  outfile: path.join(dist, "content.js"),
+  banner: { js: `// Peek Native ${lab ? "(M2-B1 lab)" : "(M1)"} — bundled content script. Source: native-extension/src/*.js` },
 });
 
-// Build-time isolation gate: the artifact must not carry any Legacy-bridge
-// marker. Keep this list in sync with tests/native/native-isolation.test.mjs.
-const bundled = readFileSync(path.join(dist, "content.js"), "utf8");
+// Lab build only: the MAIN-world adapter script (separate bundle, separate
+// content-script entry with world "MAIN"). The default build never emits it.
+if (lab) {
+  if (!existsSync(path.join(source, "src", "layout-adapter", "main-world-entry.js"))) {
+    throw new Error("Missing lab entry: native-extension/src/layout-adapter/main-world-entry.js");
+  }
+  await build({
+    ...COMMON,
+    entryPoints: [path.join(source, "src", "layout-adapter", "main-world-entry.js")],
+    outfile: path.join(dist, "layout-adapter-main.js"),
+    banner: { js: "// Peek Native (M2-B1 lab) — MAIN-world layout adapter. Source: native-extension/src/layout-adapter/*" },
+  });
+}
+
+// Build-time isolation gate: no artifact may carry any Legacy-bridge marker.
+// Keep this list in sync with tests/native/native-isolation.test.mjs.
 const FORBIDDEN = [
   /XMLHttpRequest/,
   /\bwebpackChunk/,
@@ -68,12 +97,39 @@ const FORBIDDEN = [
   /chrome\.(scripting|tabs|cookies|webRequest|declarativeNetRequest)/,
   /hls\.js|hls\.min/i
 ];
-const offenders = FORBIDDEN.filter((re) => re.test(bundled)).map((re) => String(re));
-if (offenders.length) {
-  throw new Error(`Native bundle contains forbidden markers (Legacy-bridge isolation violated): ${offenders.join(", ")}`);
+
+const bundleFiles = lab ? ["content.js", "layout-adapter-main.js"] : ["content.js"];
+for (const file of bundleFiles) {
+  const bundled = readFileSync(path.join(dist, file), "utf8");
+  const offenders = FORBIDDEN.filter((re) => re.test(bundled)).map((re) => String(re));
+  if (offenders.length) {
+    throw new Error(`${file} contains forbidden markers (Legacy-bridge isolation violated): ${offenders.join(", ")}`);
+  }
 }
 
-cpSync(path.join(source, "manifest.json"), path.join(dist, "manifest.json"));
+// Manifest: the default build copies it verbatim (M1-R contract). The lab
+// build derives a clearly-labeled experimental manifest that additionally
+// registers the MAIN-world adapter script.
+if (!lab) {
+  cpSync(path.join(source, "manifest.json"), path.join(dist, "manifest.json"));
+} else {
+  const manifest = JSON.parse(readFileSync(path.join(source, "manifest.json"), "utf8"));
+  manifest.name = "Peek Native (M2-B1 Lab)";
+  manifest.version = "0.10.0";
+  manifest.description += "【实验构建：M2-B1 原生布局适配器已启用——左栏原生焦点帖 + 右栏原生评论；默认构建不含此模式。】";
+  const xMatches = manifest.content_scripts[0].matches;
+  manifest.content_scripts = [
+    {
+      matches: xMatches,
+      js: ["layout-adapter-main.js"],
+      run_at: "document_start",
+      world: "MAIN",
+    },
+    ...manifest.content_scripts,
+  ];
+  writeFileSync(path.join(dist, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
+}
+
 cpSync(path.join(source, "content.css"), path.join(dist, "content.css"));
 
 // Brand icon: same inline data-URL approach as the Legacy build, generated
@@ -93,4 +149,4 @@ for (const size of [16, 32, 48, 128]) {
   await sharp(asset).resize(size, size, { fit: "cover" }).png().toFile(path.join(iconDir, `icon${size}.png`));
 }
 
-console.log(`Built unpacked Peek Native (M1) extension: ${dist}`);
+console.log(`Built unpacked Peek Native ${lab ? "(M2-B1 lab)" : "(M1)"} extension: ${dist}`);

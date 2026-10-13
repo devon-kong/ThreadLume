@@ -16,6 +16,7 @@ import { dirname, join, resolve } from "node:path";
 
 const here = dirname(fileURLToPath(import.meta.url));
 export const NATIVE_DIST = resolve(here, "..", "..", "dist-extension-native");
+export const NATIVE_LAB_DIST = resolve(here, "..", "..", "dist-extension-native-lab");
 
 let bundledSource = null;
 export function nativeSource() {
@@ -27,6 +28,31 @@ export function nativeSource() {
     }
   }
   return bundledSource;
+}
+
+// M2-B1 lab artifacts (experimental build; produced by `npm run build:native:lab`)
+let labBundledSource = null;
+export function labSource() {
+  if (!labBundledSource) {
+    try {
+      labBundledSource = readFileSync(join(NATIVE_LAB_DIST, "content.js"), "utf8");
+    } catch {
+      throw new Error("dist-extension-native-lab/content.js not found — run `npm run build:native:lab` first");
+    }
+  }
+  return labBundledSource;
+}
+
+let mainWorldBundledSource = null;
+export function mainWorldSource() {
+  if (!mainWorldBundledSource) {
+    try {
+      mainWorldBundledSource = readFileSync(join(NATIVE_LAB_DIST, "layout-adapter-main.js"), "utf8");
+    } catch {
+      throw new Error("dist-extension-native-lab/layout-adapter-main.js not found — run `npm run build:native:lab` first");
+    }
+  }
+  return mainWorldBundledSource;
 }
 
 const BLOCK_TAGS = new Set([
@@ -98,7 +124,7 @@ export function makeTimers(clock) {
 //     Chromium extension isolated world. entries()/currentEntry are absent so
 //     the close decision exercises its trail fallback, same as live.
 //   - "live": same object; tests may dispatchNavigate() to deliver events.
-export function makeEnv({ url = "/home", html, navApi = "absent" } = {}) {
+export function makeEnv({ url = "/home", html, navApi = "absent", src = "default" } = {}) {
   if (!html) html = '<!doctype html><html><head><title>Home / X</title></head><body></body></html>';
   const dom = new JSDOM(html, { url: "https://x.com" + url });
   const { window } = dom;
@@ -132,18 +158,17 @@ export function makeEnv({ url = "/home", html, navApi = "absent" } = {}) {
 
   const boot = () => {
     window.__PEEK_NATIVE_TEST__ = true; // arm the production test hook (offline harness only)
-    const fn = new Function(
-      "window", "document", "location", "history",
-      "setTimeout", "clearTimeout", "setInterval", "clearInterval",
-      "queueMicrotask", "MutationObserver", "navigator", "getComputedStyle", "Date",
-      nativeSource(),
-    );
-    fn(
-      window, window.document, location, history,
-      timers.setTimeout, timers.clearTimeout, timers.setInterval, timers.clearInterval,
-      queueMicrotask, window.MutationObserver, window.navigator, window.getComputedStyle, DateShim,
-    );
+    runScript(window, location, history, timers, DateShim, src === "lab" ? labSource() : nativeSource());
     return window.__peekNativeTest;
+  };
+
+  // Boot any OTHER bundle of the same build into the SAME jsdom window (e.g.
+  // the M2-B1 MAIN-world layout adapter alongside the isolated content script).
+  // Same shims, same controllable timers — the two worlds genuinely share this
+  // window, exactly like MAIN + ISOLATED content scripts on a real page.
+  const bootScript = (source) => {
+    window.__PEEK_NATIVE_TEST__ = true;
+    runScript(window, location, history, timers, DateShim, source);
   };
 
   // Simulate a browser TRAVERSE (back/forward): popstate fires after the URL
@@ -188,7 +213,8 @@ export function makeEnv({ url = "/home", html, navApi = "absent" } = {}) {
   };
 
   const api = {
-    dom, window, document: window.document, location, history, timers, clock, boot, navigate, pushNavigate, clickLink,
+    dom, window, document: window.document, location, history, timers, clock, boot, bootScript,
+    navigate, pushNavigate, clickLink,
     programmaticNavigate, dispatchNavigate,
     navigateListenerCount: () => navListeners.length,
     scroll,
@@ -196,8 +222,28 @@ export function makeEnv({ url = "/home", html, navApi = "absent" } = {}) {
     pane: () => window.document.getElementById("peek-native-pane"),
     style: () => window.document.getElementById("peek-native-style"),
     panes: () => window.document.querySelectorAll("#peek-native-pane").length,
+    // M2-B1 lab observability
+    ladStyle: () => window.document.getElementById("peek-lad-style"),
+    ladTest: () => window.__peekLayoutAdapterTest,
+    ladMainInstalled: () => Boolean(window.__peekLayoutAdapterMainInstalled),
   };
   return api;
+}
+
+// Shared boot shim: every artifact runs with the same injected globals so the
+// REAL bundles are exercised, not test doubles.
+function runScript(window, location, history, timers, DateShim, source) {
+  const fn = new Function(
+    "window", "document", "location", "history",
+    "setTimeout", "clearTimeout", "setInterval", "clearInterval",
+    "queueMicrotask", "MutationObserver", "navigator", "getComputedStyle", "Date",
+    source,
+  );
+  fn(
+    window, window.document, location, history,
+    timers.setTimeout, timers.clearTimeout, timers.setInterval, timers.clearInterval,
+    queueMicrotask, window.MutationObserver, window.navigator, window.getComputedStyle, DateShim,
+  );
 }
 
 // ---------- X DOM fixture builders ----------

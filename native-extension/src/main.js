@@ -36,6 +36,10 @@ import * as diagnostics from "./diagnostics.js";
 import {
   safeBackTarget, navTrailState, NAV_API, syncTrailFromLocation, recordNav
 } from "./navigation-session.js";
+// M2-B1 experimental native layout adapter (inert in the default build)
+import {
+  adapterEnabled, initLayoutAdapter, sessionSnapshot, onDetailRoute, offRoute
+} from "./layout-adapter/controller.js";
 
 (() => {
   if (window.__peekNativeInstalled) return; // extension-reload idempotency
@@ -43,6 +47,7 @@ import {
 
   initNavigationSession();
   startRouteObservation();
+  initLayoutAdapter(); // registers the MAIN-world message bridge only in the lab build
 
   if (isDetailPath()) {
     setInitialStatusId(statusIdFromPath());
@@ -85,7 +90,13 @@ import {
       computeAnchorAdjustment, restoreActive,
       // diagnostics
       diag: diagnostics.snapshot,
-      lastRouteChangeAt: () => diagnostics.lastRouteChangeAt()
+      lastRouteChangeAt: () => diagnostics.lastRouteChangeAt(),
+      // M2-B1 lab hook: drive/inspect the layout adapter session directly
+      layoutAdapter: {
+        enabled: adapterEnabled,
+        onDetailRoute, offRoute, sessionSnapshot,
+        init: initLayoutAdapter
+      }
     };
   }
 })();
