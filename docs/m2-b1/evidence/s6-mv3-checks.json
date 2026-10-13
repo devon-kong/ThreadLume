@@ -1,0 +1,21 @@
+{
+ "splitA": {
+  "state": "active",
+  "focal": true
+ },
+ "composer": {
+  "typed": true,
+  "composerInRightPane": true,
+  "sendEnabled": null
+ },
+ "composerCleared": false,
+ "devReload": {
+  "clicked": true
+ },
+ "afterReload": {
+  "state": "active",
+  "focal": true,
+  "m1Pane": false,
+  "doublePane": 1
+ }
+}

@@ -1,0 +1,373 @@
+{
+ "mode": "lab",
+ "rounds": [
+  {
+   "round": 0,
+   "samples": [
+    {
+     "sample": "video",
+     "openedAt": "/thinkszyg/status/2109956494661656931",
+     "t1": 1580,
+     "t1Timeout": false,
+     "t2": null,
+     "t2b": null,
+     "t3": 1,
+     "videoPlayable": null,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 76,
+       "dom": 980
+      },
+      "afterScroll": {
+       "heap": 76,
+       "dom": 980,
+       "longTasksDuringSession": 0,
+       "longTaskMsTotal": 0
+      }
+     },
+     "deepScrollMs": 11066,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "integrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "video": false
+     },
+     "t4": 6,
+     "t4Timeout": false
+    },
+    {
+     "sample": "photos",
+     "openedAt": "/KinGao476942/status/2099877465795735861",
+     "t1": 1580,
+     "t1Timeout": false,
+     "t2": 502,
+     "t2b": 0,
+     "t3": 0,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 137,
+       "dom": 2407
+      },
+      "afterScroll": {
+       "heap": 171,
+       "dom": 2608,
+       "longTasksDuringSession": 0,
+       "longTaskMsTotal": 0
+      }
+     },
+     "deepScrollMs": 348,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "integrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "video": false
+     },
+     "t4": 4,
+     "t4Timeout": false
+    },
+    {
+     "sample": "text",
+     "openedAt": "/gefei55/status/1760839985715204230",
+     "t1": 1583,
+     "t1Timeout": false,
+     "t2": 518,
+     "t2b": 0,
+     "t3": 0,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 118,
+       "dom": 1765
+      },
+      "afterScroll": {
+       "heap": 106,
+       "dom": 2633,
+       "longTasksDuringSession": 1,
+       "longTaskMsTotal": 51
+      }
+     },
+     "deepScrollMs": 1325,
+     "longTasks": 1,
+     "longTaskMs": 51,
+     "integrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "video": false
+     },
+     "t4": 6,
+     "t4Timeout": false
+    }
+   ]
+  },
+  {
+   "round": 1,
+   "samples": [
+    {
+     "sample": "video",
+     "openedAt": "/thinkszyg/status/2109956494661656931",
+     "t1": 1615,
+     "t1Timeout": false,
+     "t2": null,
+     "t2b": null,
+     "t3": 1,
+     "videoPlayable": null,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 99,
+       "dom": 945
+      },
+      "afterScroll": {
+       "heap": 99,
+       "dom": 945,
+       "longTasksDuringSession": 2,
+       "longTaskMsTotal": 128
+      }
+     },
+     "deepScrollMs": 11039,
+     "longTasks": 2,
+     "longTaskMs": 128,
+     "integrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "video": false
+     },
+     "t4": 10,
+     "t4Timeout": false
+    },
+    {
+     "sample": "photos",
+     "openedAt": "/KinGao476942/status/2099877465795735861",
+     "t1": 1586,
+     "t1Timeout": false,
+     "t2": 497,
+     "t2b": 0,
+     "t3": 0,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 124,
+       "dom": 2422
+      },
+      "afterScroll": {
+       "heap": 140,
+       "dom": 2892,
+       "longTasksDuringSession": 0,
+       "longTaskMsTotal": 0
+      }
+     },
+     "deepScrollMs": 338,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "integrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "video": false
+     },
+     "t4": 9,
+     "t4Timeout": false
+    },
+    {
+     "sample": "text",
+     "openedAt": "/gefei55/status/1760839985715204230",
+     "t1": 1592,
+     "t1Timeout": false,
+     "t2": 390,
+     "t2b": 0,
+     "t3": 0,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 139,
+       "dom": 1764
+      },
+      "afterScroll": {
+       "heap": 144,
+       "dom": 2790,
+       "longTasksDuringSession": 1,
+       "longTaskMsTotal": 55
+      }
+     },
+     "deepScrollMs": 359,
+     "longTasks": 1,
+     "longTaskMs": 55,
+     "integrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "video": false
+     },
+     "t4": 3,
+     "t4Timeout": false
+    }
+   ]
+  },
+  {
+   "round": 2,
+   "samples": [
+    {
+     "sample": "video",
+     "openedAt": "/thinkszyg/status/2109956494661656931",
+     "t1": 1582,
+     "t1Timeout": false,
+     "t2": null,
+     "t2b": null,
+     "t3": 1,
+     "videoPlayable": null,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 121,
+       "dom": 945
+      },
+      "afterScroll": {
+       "heap": 121,
+       "dom": 945,
+       "longTasksDuringSession": 1,
+       "longTaskMsTotal": 95
+      }
+     },
+     "deepScrollMs": 11047,
+     "longTasks": 1,
+     "longTaskMs": 95,
+     "integrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "video": false
+     },
+     "t4": 5,
+     "t4Timeout": false
+    },
+    {
+     "sample": "photos",
+     "openedAt": "/KinGao476942/status/2099877465795735861",
+     "t1": 1590,
+     "t1Timeout": false,
+     "t2": 576,
+     "t2b": 0,
+     "t3": 0,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 136,
+       "dom": 3546
+      },
+      "afterScroll": {
+       "heap": 160,
+       "dom": 3285,
+       "longTasksDuringSession": 0,
+       "longTaskMsTotal": 0
+      }
+     },
+     "deepScrollMs": 342,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "integrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "video": false
+     },
+     "t4": 4,
+     "t4Timeout": false
+    },
+    {
+     "sample": "text",
+     "skipped": "click did not open a detail"
+    }
+   ]
+  },
+  {
+   "round": 3,
+   "samples": [
+    {
+     "sample": "video",
+     "skipped": "click did not open a detail"
+    },
+    {
+     "sample": "photos",
+     "skipped": "click did not open a detail"
+    },
+    {
+     "sample": "text",
+     "skipped": "click did not open a detail"
+    }
+   ]
+  },
+  {
+   "round": 4,
+   "samples": [
+    {
+     "sample": "video",
+     "skipped": "click did not open a detail"
+    },
+    {
+     "sample": "photos",
+     "openedAt": "/KinGao476942/status/2099877465795735861",
+     "t1": 1576,
+     "t1Timeout": false,
+     "t2": 482,
+     "t2b": 0,
+     "t3": 0,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 149,
+       "dom": 2445
+      },
+      "afterScroll": {
+       "heap": 168,
+       "dom": 2590,
+       "longTasksDuringSession": 0,
+       "longTaskMsTotal": 0
+      }
+     },
+     "deepScrollMs": 343,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "integrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "video": false
+     },
+     "t4": 5,
+     "t4Timeout": false
+    },
+    {
+     "sample": "text",
+     "openedAt": "/gefei55/status/1760839985715204230",
+     "t1": 1578,
+     "t1Timeout": false,
+     "t2": 513,
+     "t2b": 0,
+     "t3": 0,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 169,
+       "dom": 1748
+      },
+      "afterScroll": {
+       "heap": 184,
+       "dom": 2332,
+       "longTasksDuringSession": 1,
+       "longTaskMsTotal": 57
+      }
+     },
+     "deepScrollMs": 1258,
+     "longTasks": 1,
+     "longTaskMs": 57,
+     "integrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "video": false
+     },
+     "t4": 3,
+     "t4Timeout": false
+    }
+   ]
+  }
+ ],
+ "wrapper": {
+  "perCallUs": 1.13,
+  "totalMs": 3.4,
+  "wrappedOwnProperty": true
+ },
+ "note": null,
+ "idle": {
+  "longTasks": 0,
+  "longTaskMs": 0
+ }
+}

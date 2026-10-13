@@ -1,0 +1,426 @@
+{
+ "mode": "native",
+ "rounds": [
+  {
+   "round": 0,
+   "samples": [
+    {
+     "sample": "video",
+     "openedAt": "/thinkszyg/status/2109956494661656931",
+     "t1": 1577,
+     "t1Timeout": false,
+     "t2": null,
+     "t2b": null,
+     "t3": 0,
+     "videoPlayable": null,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 110,
+       "dom": 941
+      },
+      "afterScroll": {
+       "heap": 110,
+       "dom": 941,
+       "longTasksDuringSession": 0,
+       "longTaskMsTotal": 0
+      }
+     },
+     "deepScrollMs": 88,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "integrity": null,
+     "t4": 1,
+     "t4Timeout": false
+    },
+    {
+     "sample": "photos",
+     "openedAt": "/KinGao476942/status/2099877465795735861",
+     "t1": 1575,
+     "t1Timeout": false,
+     "t2": 0,
+     "t2b": null,
+     "t3": 0,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 120,
+       "dom": 2586
+      },
+      "afterScroll": {
+       "heap": 121,
+       "dom": 2586,
+       "longTasksDuringSession": 0,
+       "longTaskMsTotal": 0
+      }
+     },
+     "deepScrollMs": 93,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "integrity": null,
+     "t4": 1,
+     "t4Timeout": false
+    },
+    {
+     "sample": "text",
+     "openedAt": "/gefei55/status/1760839985715204230",
+     "t1": 1573,
+     "t1Timeout": false,
+     "t2": 0,
+     "t2b": null,
+     "t3": 0,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 123,
+       "dom": 2198
+      },
+      "afterScroll": {
+       "heap": 124,
+       "dom": 2198,
+       "longTasksDuringSession": 0,
+       "longTaskMsTotal": 0
+      }
+     },
+     "deepScrollMs": 87,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "integrity": null,
+     "t4": 1,
+     "t4Timeout": false
+    }
+   ]
+  },
+  {
+   "round": 1,
+   "samples": [
+    {
+     "sample": "video",
+     "openedAt": "/thinkszyg/status/2109956494661656931",
+     "t1": 1574,
+     "t1Timeout": false,
+     "t2": null,
+     "t2b": null,
+     "t3": 0,
+     "videoPlayable": null,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 111,
+       "dom": 941
+      },
+      "afterScroll": {
+       "heap": 111,
+       "dom": 941,
+       "longTasksDuringSession": 0,
+       "longTaskMsTotal": 0
+      }
+     },
+     "deepScrollMs": 88,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "integrity": null,
+     "t4": 0,
+     "t4Timeout": false
+    },
+    {
+     "sample": "photos",
+     "openedAt": "/KinGao476942/status/2099877465795735861",
+     "t1": 1632,
+     "t1Timeout": false,
+     "t2": 0,
+     "t2b": null,
+     "t3": 0,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 127,
+       "dom": 2860
+      },
+      "afterScroll": {
+       "heap": 128,
+       "dom": 2860,
+       "longTasksDuringSession": 0,
+       "longTaskMsTotal": 0
+      }
+     },
+     "deepScrollMs": 94,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "integrity": null,
+     "t4": 0,
+     "t4Timeout": false
+    },
+    {
+     "sample": "text",
+     "openedAt": "/gefei55/status/1760839985715204230",
+     "t1": 1574,
+     "t1Timeout": false,
+     "t2": 0,
+     "t2b": null,
+     "t3": 0,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 116,
+       "dom": 2181
+      },
+      "afterScroll": {
+       "heap": 117,
+       "dom": 2181,
+       "longTasksDuringSession": 0,
+       "longTaskMsTotal": 0
+      }
+     },
+     "deepScrollMs": 89,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "integrity": null,
+     "t4": 1,
+     "t4Timeout": false
+    }
+   ]
+  },
+  {
+   "round": 2,
+   "samples": [
+    {
+     "sample": "video",
+     "openedAt": "/thinkszyg/status/2109956494661656931",
+     "t1": 1577,
+     "t1Timeout": false,
+     "t2": null,
+     "t2b": null,
+     "t3": 0,
+     "videoPlayable": null,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 108,
+       "dom": 943
+      },
+      "afterScroll": {
+       "heap": 108,
+       "dom": 943,
+       "longTasksDuringSession": 0,
+       "longTaskMsTotal": 0
+      }
+     },
+     "deepScrollMs": 88,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "integrity": null,
+     "t4": 0,
+     "t4Timeout": false
+    },
+    {
+     "sample": "photos",
+     "openedAt": "/KinGao476942/status/2099877465795735861",
+     "t1": 1575,
+     "t1Timeout": false,
+     "t2": 0,
+     "t2b": null,
+     "t3": 0,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 125,
+       "dom": 2707
+      },
+      "afterScroll": {
+       "heap": 130,
+       "dom": 1615,
+       "longTasksDuringSession": 0,
+       "longTaskMsTotal": 0
+      }
+     },
+     "deepScrollMs": 113,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "integrity": null,
+     "t4": 0,
+     "t4Timeout": false
+    },
+    {
+     "sample": "text",
+     "openedAt": "/gefei55/status/1760839985715204230",
+     "t1": 1574,
+     "t1Timeout": false,
+     "t2": 0,
+     "t2b": null,
+     "t3": 0,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 120,
+       "dom": 2182
+      },
+      "afterScroll": {
+       "heap": 121,
+       "dom": 2182,
+       "longTasksDuringSession": 0,
+       "longTaskMsTotal": 0
+      }
+     },
+     "deepScrollMs": 96,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "integrity": null,
+     "t4": 1,
+     "t4Timeout": false
+    }
+   ]
+  },
+  {
+   "round": 3,
+   "samples": [
+    {
+     "sample": "video",
+     "openedAt": "/thinkszyg/status/2109956494661656931",
+     "t1": 1578,
+     "t1Timeout": false,
+     "t2": null,
+     "t2b": null,
+     "t3": 0,
+     "videoPlayable": null,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 109,
+       "dom": 943
+      },
+      "afterScroll": {
+       "heap": 109,
+       "dom": 943,
+       "longTasksDuringSession": 0,
+       "longTaskMsTotal": 0
+      }
+     },
+     "deepScrollMs": 108,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "integrity": null,
+     "t4": 0,
+     "t4Timeout": false
+    },
+    {
+     "sample": "photos",
+     "openedAt": "/KinGao476942/status/2099877465795735861",
+     "t1": 1589,
+     "t1Timeout": false,
+     "t2": 0,
+     "t2b": null,
+     "t3": 1,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 125,
+       "dom": 2584
+      },
+      "afterScroll": {
+       "heap": 131,
+       "dom": 1614,
+       "longTasksDuringSession": 0,
+       "longTaskMsTotal": 0
+      }
+     },
+     "deepScrollMs": 108,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "integrity": null,
+     "t4": 1,
+     "t4Timeout": false
+    },
+    {
+     "sample": "text",
+     "openedAt": "/gefei55/status/1760839985715204230",
+     "t1": 1596,
+     "t1Timeout": false,
+     "t2": 1,
+     "t2b": null,
+     "t3": 0,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 121,
+       "dom": 2183
+      },
+      "afterScroll": {
+       "heap": 121,
+       "dom": 2183,
+       "longTasksDuringSession": 0,
+       "longTaskMsTotal": 0
+      }
+     },
+     "deepScrollMs": 106,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "integrity": null,
+     "t4": 0,
+     "t4Timeout": false
+    }
+   ]
+  },
+  {
+   "round": 4,
+   "samples": [
+    {
+     "sample": "video",
+     "skipped": "click did not open a detail"
+    },
+    {
+     "sample": "photos",
+     "openedAt": "/KinGao476942/status/2099877465795735861",
+     "t1": 1650,
+     "t1Timeout": false,
+     "t2": 0,
+     "t2b": null,
+     "t3": 1,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 222,
+       "dom": 2551
+      },
+      "afterScroll": {
+       "heap": 224,
+       "dom": 2551,
+       "longTasksDuringSession": 0,
+       "longTaskMsTotal": 0
+      }
+     },
+     "deepScrollMs": 94,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "integrity": null,
+     "t4": 1,
+     "t4Timeout": false
+    },
+    {
+     "sample": "text",
+     "openedAt": "/gefei55/status/1760839985715204230",
+     "t1": 1579,
+     "t1Timeout": false,
+     "t2": 0,
+     "t2b": null,
+     "t3": 0,
+     "heapDom": {
+      "afterPaint": {
+       "heap": 127,
+       "dom": 2096
+      },
+      "afterScroll": {
+       "heap": 127,
+       "dom": 2096,
+       "longTasksDuringSession": 0,
+       "longTaskMsTotal": 0
+      }
+     },
+     "deepScrollMs": 93,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "integrity": null,
+     "t4": 1,
+     "t4Timeout": false
+    }
+   ]
+  }
+ ],
+ "wrapper": {
+  "perCallUs": 0.27,
+  "totalMs": 0.8,
+  "wrappedOwnProperty": false
+ },
+ "note": null,
+ "idle": {
+  "longTasks": 0,
+  "longTaskMs": 0
+ }
+}
