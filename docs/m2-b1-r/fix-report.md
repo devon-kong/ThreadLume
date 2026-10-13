@@ -2,9 +2,11 @@
 
 分支 `fix/peek-native-m2b1-r`（基于 M2-B1 验收提交 `5d43830`）。本轮定位：**小范围工程修复与准入验收**——只修 ChatGPT 独立验收指出的 P0×2 + P1×4，不动已验证稳定的布局适配架构。配套文档：[message-lifecycle.md](message-lifecycle.md)、[rollback-and-residue.md](rollback-and-residue.md)、[performance-report.md](performance-report.md)、[mv3-acceptance.md](mv3-acceptance.md)、[architecture-gate.md](architecture-gate.md)。
 
+**独立 Reviewer 复核**（G1–G13，直接读源码与测试并重跑全部套件）初判 **CONDITIONAL GO**，实锤一个执行方未发现的 P1（内部重装 gen 漂移可致 P0 症状复发）与两处报告数字失真；三项条件全部整改完成并通过复核（整改记录见 architecture-gate.md），最终判定 **GO**。最终回归：native **168/168**、主 119/119、r3-r 75/75。
+
 ## 第一部分：直接回答验收问题
 
-1. **P0 消息同步问题是否真正修复？** 是。自主通知独立成 `HEALTH_*` 类型族，携带 `{gen, reqNonce, focusUrlId}` 关联三元组；控制器按类型分诊，不再用请求 nonce 过滤自主事件。27 个新测试 + 实机结构失配回退共同验证。
+1. **P0 消息同步问题是否真正修复？** 是。自主通知独立成 `HEALTH_*` 类型族，携带 `{gen, reqNonce, focusUrlId}` 关联三元组；控制器按类型分诊，不再用请求 nonce 过滤自主事件。独立 Reviewer 复核中实锤并已整改一个相关衍生缺陷（内部重装 gen 漂移——重装不再换代、控制器收养延续代次，A10–A12 回归测试覆盖）。30 个双 world 集成测试 + 实机结构失配回退共同验证。
 2. **MAIN world 健康退出后，双栏 CSS 是否立即清理？** 是。`HEALTH_ERROR` 到达的同一消息处理内执行 `removeLayout()`（样式移除、`data-peek-lad` 摘除、`failed` 标记）；测试 A2 断言同一交付窗口内四项全部完成，实机 mismatch 测试（`mv3r-checks.json`）在删除包装方法后 ≤2 个健康拍内观测到完全回退且原生单栏可读。
 3. **恢复失败会不会再次错误安装？** 不会。恢复失败进入 `RESIDUE_LOCKED`：诊断引用保留至页面销毁，`install()` 在入口拒绝一切新安装（测试 B2），残留状态下包装器直通保证 X 正常渲染（B3），卸载请求不清锁（B4）。
 4. **同 cell 的 article 水合是否安全？** 是。cell 级 MutationObserver（120ms 去抖）+ 健康拍双通道重验；标记只重绑到经时间戳链接证明仍属焦点的 article；无法证明即安全退出；视频节点零接触（测试 C1–C6）。
