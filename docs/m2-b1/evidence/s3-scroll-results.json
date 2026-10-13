@@ -1,0 +1,87 @@
+{
+ "deepScroll": [
+  {
+   "scrollY": 2000,
+   "focalConnected": true,
+   "focalMarkedVideoSame": true,
+   "videoTime": 10.571,
+   "videoPaused": false,
+   "focalCellCount": 1,
+   "visibleReplyCells": 7
+  },
+  {
+   "scrollY": 4000,
+   "focalConnected": true,
+   "focalMarkedVideoSame": true,
+   "videoTime": 11.473,
+   "videoPaused": true,
+   "focalCellCount": 1,
+   "visibleReplyCells": 4
+  },
+  {
+   "scrollY": 5000,
+   "focalConnected": true,
+   "focalMarkedVideoSame": true,
+   "videoTime": 13.253,
+   "videoPaused": false,
+   "focalCellCount": 1,
+   "visibleReplyCells": 9
+  },
+  {
+   "scrollY": 5800,
+   "focalConnected": true,
+   "focalMarkedVideoSame": true,
+   "videoTime": 16.608,
+   "videoPaused": false,
+   "focalCellCount": 1,
+   "visibleReplyCells": 10
+  }
+ ],
+ "leftScroll": {
+  "before": {
+   "scrollTop": 0,
+   "scrollY": 0
+  },
+  "after": {
+   "scrollTop": 267,
+   "scrollY": 0
+  },
+  "leftMovesIndependently": true
+ },
+ "geometry": {
+  "focalCellCount": 1,
+  "focalStubHeight": 85,
+  "firstCellsPageY": [
+   53,
+   138,
+   138,
+   654,
+   654,
+   771,
+   870,
+   870
+  ],
+  "docHeight": 8031
+ },
+ "deepState": {
+  "scrollY": 5820,
+  "focalConnected": true,
+  "videoSame": true,
+  "videoTime": 25.785
+ },
+ "teardown": {
+  "ladState": "idle",
+  "styleRemoved": true,
+  "htmlAttrGone": true,
+  "markerGone": true,
+  "bannerVisible": true
+ },
+ "narrow1000": {
+  "ladState": "active",
+  "styleMounted": true,
+  "fixedArticle": {
+   "position": "fixed",
+   "width": 520
+  }
+ }
+}

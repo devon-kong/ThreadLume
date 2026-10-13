@@ -1,0 +1,35 @@
+{
+ "1440x900": {
+  "ladState": "active",
+  "fixedArticle": {
+   "position": "fixed",
+   "w": 749,
+   "h": 846
+  },
+  "rightCellLeft": 750,
+  "videoPresent": true,
+  "bannerDisplay": "none"
+ },
+ "1280x800": {
+  "ladState": "active",
+  "fixedArticle": {
+   "position": "fixed",
+   "w": 666,
+   "h": 746
+  },
+  "rightCellLeft": 667,
+  "videoPresent": true,
+  "bannerDisplay": "none"
+ },
+ "960x800": {
+  "ladState": "active",
+  "fixedArticle": {
+   "position": "relative",
+   "w": 598,
+   "h": 919
+  },
+  "rightCellLeft": null,
+  "videoPresent": true,
+  "bannerDisplay": "flex"
+ }
+}

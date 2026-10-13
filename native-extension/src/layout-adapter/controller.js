@@ -34,6 +34,9 @@ const FAILED_ATTR = "data-peek-lad-failed";
 const LAYOUT_CSS = `
 @media (min-width: 980px) {
   html[${HTML_ATTR}="on"] [data-testid="sidebarColumn"] { display: none !important; }
+  /* X's banner element IS the left nav rail on current builds — hiding it is
+     what keeps the fixed focal pane clean (z-order beats the pane otherwise) */
+  html[${HTML_ATTR}="on"] header[role="banner"] { display: none !important; }
   html[${HTML_ATTR}="on"] [data-testid="primaryColumn"] { width: 100vw !important; max-width: 100vw !important; }
   html[${HTML_ATTR}="on"] [data-testid="cellInnerDiv"] { margin-left: 52vw !important; width: 48vw !important; }
   html[${HTML_ATTR}="on"] [data-testid="cellInnerDiv"]:has(article[data-peek-lad-focal]) { transform: none !important; }
