@@ -1,5 +1,7 @@
 // Run through ego-browser nodejs stdin. Same-session, alternating M1-R/M2-A,
 // trusted SPA clicks, no account writes. Keeps historical evidence intact.
+// Preflight: temporarily disable other Peek extensions in chrome://extensions;
+// restore their original state after testing. Never run alongside PoC v5.
 const ROOT = '/Users/devon/claude/peek-main';
 const fs = await import('node:fs/promises');
 const { execFileSync } = await import('node:child_process');
@@ -120,12 +122,14 @@ for(let round=1;round<=3;round++)for(const [sample,author,id] of samples)for(con
     await page.cdp('Input.dispatchMouseEvent',{type:'mouseReleased',...coords,button:'left',clickCount:1});
     await page.waitForFunction(id=>location.pathname.includes('/status/'+id)&&document.getElementById('peek-native-pane')?.dataset.statusId===id,id,{timeout:10000});
     await page.waitForTimeout(6800); // bounded hydration/CF window; no manual scroll before reading visibility
+    const owner=await page.evaluate(()=>({count:document.querySelectorAll('#peek-native-pane').length,brand:document.querySelector('.peek-native-brand')?.textContent}));
+    if(owner.count!==1 || owner.brand!=='Peek')throw Error('Conflicting or missing reader: '+JSON.stringify(owner));
     const reading=await page.evaluate(()=>window.__pairedRead());
     await page.cdp('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27,nativeVirtualKeyCode:27});
     await page.cdp('Input.dispatchKeyEvent',{type:'keyUp',key:'Escape',code:'Escape',windowsVirtualKeyCode:27,nativeVirtualKeyCode:27});
     await page.waitForTimeout(3400);
     const rec=await page.evaluate(()=>window.__pairedRead());
-    records.push({...meta,...rec,visibility:reading.visibility,cf:reading.cf,finalDelta:rec.frames.length?rec.frames.at(-1).top-rec.anchorBefore:null});
+    records.push({...meta,readerOwner:owner,...rec,visibility:reading.visibility,cf:reading.cf,finalDelta:rec.frames.length?rec.frames.at(-1).top-rec.anchorBefore:null});
     console.log(JSON.stringify({...meta,t1:rec.t1,t2Dom:rec.t2Dom,t2Visible:rec.t2Visible,cf:reading.cf,closed:rec.closed,feed:rec.feed,finalDelta:records.at(-1).finalDelta}));
   }catch(e){records.push({...meta,error:String(e.message)});console.log('ERROR',meta,String(e.message));}
   await fs.writeFile(out,JSON.stringify({base,sourceHash,method:'alternating same-session SPA, rAF, structural DOM reply candidate; no request timing captured',records},null,2));

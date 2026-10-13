@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-13",
+  "browser": "ego-browser, existing task space 17",
+  "conflictingExtension": {
+    "name": "Peek Native Carrier PoC",
+    "version": "0.5.0",
+    "id": "hdlpejdgfeejjghejfcgncihlhmfamlj",
+    "initialState": "enabled",
+    "duringAcceptedMeasurements": "disabled via chrome://extensions UI",
+    "finalState": "enabled, confirmed via chrome://extensions UI"
+  },
+  "otherExtensionsChanged": false,
+  "accountWrites": false,
+  "mv3Acceptance": "NOT_TESTED: native builds were CDP isolated-world injected (L3)",
+  "discardedEvidence": "Measurements taken before discovering the enabled PoC were excluded; task scratch copies remain outside the repository.",
+  "acceptedEvidence": ["paired-2026-10-13.json", "photo-qa.json", "highreply-same-tab.json", "highreply-diagnostic.json"]
+}

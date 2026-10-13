@@ -1,0 +1,49 @@
+{
+  "base": "dfb94f74be6fa8968e06ec675245cce3cf0f015a",
+  "sourceHash": "a1a591d80dac0cdac92a49cda127193df1cea5b7967cbcc56de0e7c8db35d003",
+  "scenario": "direct detail navigation; read-only L3; 1440x900",
+  "records": [
+    {
+      "kind": "m1r",
+      "brand": "Peek",
+      "cf": null,
+      "scrollY": 10,
+      "paneCount": 1,
+      "leftPhotos": 2,
+      "focalTop": 43,
+      "replyBody": {
+        "top": 1155,
+        "height": 40,
+        "visiblePx": 0
+      },
+      "replyOwnStatus": [
+        "/KinGao476942/status/2109796026219692477"
+      ],
+      "screenshot": "photo-m1r.png"
+    },
+    {
+      "kind": "m2a",
+      "brand": "Peek",
+      "cf": {
+        "statusId": "2109792240776421482",
+        "applied": true,
+        "target": 1078,
+        "focalH": 1077.75,
+        "vh": 900
+      },
+      "scrollY": 1078,
+      "paneCount": 1,
+      "leftPhotos": 2,
+      "focalTop": -1025,
+      "replyBody": {
+        "top": 87,
+        "height": 40,
+        "visiblePx": 40
+      },
+      "replyOwnStatus": [
+        "/KinGao476942/status/2109796026219692477"
+      ],
+      "screenshot": "photo-m2a.png"
+    }
+  ]
+}
