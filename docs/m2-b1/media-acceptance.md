@@ -10,7 +10,7 @@
 | 项 | 结果 | 证据 |
 |---|---|---|
 | 播放/暂停 | PASS — 原生暂停按钮点击后 `paused=true` 且 1.5s 内 currentTime 冻结（7.68→7.68）；再点击恢复 `paused=false` | s4-video-results.json `t0/afterPause/pausedStill/afterResume` |
-| 拖动进度 | PASS — 点击原生进度轨中点，32s 视频从 27.42s 跳到 17.2s | s5-scroll-deepdive 会话内实测 + s4-video2 |
+| 拖动进度 | PASS — 点击原生进度轨（654px）中点，32s 视频从 9.13s 跳至 17.19s（中点≈16s+播放），`seekedToMidpoint=true` | s7-remediation.json `seek` |
 | 静音/取消静音 | PASS — 原生控件切换 `muted` true→false→true | s4-video-results.json |
 | 全屏进入/退出 | PASS — 原生全屏按钮 → `fullscreenElement=DIV`、视频缩放至 1348×808、焦点帖保持挂载；`exitFullscreen` 退出成功 | s4-video-results.json + s4-video2-results.json |
 | 深滚评论中播放 | PASS — 右栏滚到 5800px：同一 video 元素（dataset 身份标记一致）、持续播放、currentTime 10.5→16.6→25.8s 连续推进 | s3-scroll-results.json `deepScroll/deepState` |
@@ -28,7 +28,7 @@
 ## 图片 — PASS
 
 - 双图/三图/四图帖：左栏焦点完整渲染（photo-retained 样本 + op7418 四图 + xmglab 三图），`s4-rich-content-results.json` 全部 `focalCellCount=1`。
-- 原生图片查看器：左栏图片真实点击打开（当前 X 以 `div[role=dialog]` 承载，M1 时代的 `[data-testid=lightbox]` testid 已不存在——以 dialog + 19 张图内容验证打开态）。
+- 原生图片查看器：左栏图片真实点击打开——当前 X 以 `div[role=dialog]` 承载（M1 时代的 `[data-testid=lightbox]` testid 已不存在；早期归档误用旧选择器，已以 role=dialog 口径重测并归档：viewerOpen=true、17 张图、X 自行设 html overflow hidden、Esc 关闭后焦点帖与适配器状态不变）。
 - **Esc 关闭**：dialogs 0、X 自行恢复 `html` overflow、焦点帖保持挂载、适配器状态不受影响（适配器从不持有 Esc，M1 的 Esc 处理在 lab 模式天然旁路）。
 
 ## GIF — PASS（同视频路径）
@@ -53,7 +53,7 @@ X 的 GIF 与视频共用同一原生播放器路径（video 元素）；上述�
 
 ## 作者资料卡 — PASS
 
-悬停左栏作者名：HoverCard 出现，含关注控件与粉丝/统计数字；移开后按 X 自身宽限期消失（X 原生行为，适配器不干预）。
+悬停左栏作者名：HoverCard 出现，含关注控件与粉丝/统计数字（实测含 Follow 控件）。移开后未在 1.5s 内消失——X 的关闭宽限期内的检测点，未复测更长延迟；适配器不干预 X 自身的开合时序。
 
 ## 原生菜单 — PASS
 
@@ -62,6 +62,7 @@ X 的 GIF 与视频共用同一原生播放器路径（video 元素）；上述�
 ## 证据清单
 
 - `s4-video-results.json` / `s4-video2-results.json` + `s4-video-fullscreen.png`
-- `s4-photo-results.json` + `s4-photo-post.png` / `s4-photo-lightbox.png`
+- `s4-photo-results.json`（早期误用旧 testid 的记录，保留作审计痕迹）+ `s4-photo-post.png`
+- `s7-remediation.json`（seek / role=dialog 查看器 / 编辑器清空 / 真实快速切帖）+ `s7-lightbox-open.png`
 - `s4-rich-content-results.json` + `s4-quote-post.png` / `s4-website-card.png` / `s4-multi-photo.png` / `s4-three-photo.png`
 - `s4-hovercard-menu-results.json` + `s4-hover-card.png` / `s4-native-menu.png`

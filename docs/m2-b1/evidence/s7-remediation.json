@@ -1,0 +1,69 @@
+{
+ "seek": {
+  "railWidth": 654,
+  "duration": 32,
+  "timeBefore": 9.13,
+  "timeAfter": 17.19,
+  "seekedToMidpoint": true,
+  "jumped": true
+ },
+ "lightbox": {
+  "open": {
+   "dialogsOpen": 2,
+   "viewerOpen": true,
+   "viewerImages": 17,
+   "htmlOverflowByX": "hidden"
+  },
+  "closed": {
+   "dialogsOpen": 0,
+   "focalConnected": true,
+   "adapterState": "active"
+  }
+ },
+ "adapterOn_videoPlaying": {
+  "shallowTotal": 1971,
+  "deepTotal": 4600,
+  "videoPresent": true,
+  "videoPaused": false,
+  "videoTimeAtEnd": 12.3
+ },
+ "adapterOn_videoPaused": {
+  "shallowTotal": 3236,
+  "deepTotal": 4470,
+  "videoPresent": true,
+  "videoPaused": false,
+  "videoTimeAtEnd": 13.2
+ },
+ "adapterOff_native": {
+  "shallowTotal": 1287,
+  "deepTotal": 4672,
+  "videoPresent": false,
+  "videoPaused": null,
+  "videoTimeAtEnd": null
+ },
+ "composer": {
+  "composerInRightPane": true,
+  "typed": {
+   "text": "peek-m2b1-check",
+   "draftVisible": true
+  },
+  "cleared": {
+   "text": "发布你的回复",
+   "isEmptyOrPlaceholder": true
+  }
+ },
+ "quickSwitch": {
+  "from": {
+   "url": "/KinGao476942/status/2109792240776421482",
+   "state": "active",
+   "focal": 1
+  },
+  "to": {
+   "url": "/li_20cm/status/2109834878095343925",
+   "state": "active",
+   "focalCount": 1,
+   "composerPresent": true
+  },
+  "switched": true
+ }
+}

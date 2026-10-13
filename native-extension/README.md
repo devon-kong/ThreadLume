@@ -1,4 +1,10 @@
-# Peek Native（M1 工程底座）
+# Peek Native（M1 工程底座 + M2-B1 实验层）
+
+> **M2-B1（2026-10-13）**：本目录新增实验性「原生布局适配器」——左栏原生焦点帖 +
+> 右栏原生评论的单窗口分栏（`src/layout-adapter/`）。**默认构建不含该模式**
+> （行为与 M1-R 一致）；实验构建用 `npm run build:native:lab`，输出
+> `dist-extension-native-lab/`（manifest 追加 `world: "MAIN"` 条目）。合同与验收：
+> `docs/m2-b1/`。该实验模式不得设为默认、不得发布（见 architecture-gate.md）。
 
 本目录是 Peek 的 **Native 模式**正式工程源码（M1 第一包），由 R4 已验收的 PoC v5
 机制（`exploration-poc/mv3-poc/`）工程化而来。构建产物输出到 `dist-extension-native/`，

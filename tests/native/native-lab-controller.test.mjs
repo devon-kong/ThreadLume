@@ -140,7 +140,7 @@ test("E3 详情→详情切换：旧帖恢复、新帖包装、样式保持", as
 test("E4 MAIN world 缺失：ack 超时 → 诚实失败 + 休眠（不再重试）", async () => {
   const focusId = makeStatusId();
   const env = makeEnv({ url: `/somebody/status/${focusId}`, src: "lab" });
-  installTransport(env);
+  const { sent } = installTransport(env); // recording only — no MAIN world answers
   // NO MAIN-world boot — the controller is alone
   env.boot();
   mountDetailPage(env, { focusId });
@@ -150,10 +150,10 @@ test("E4 MAIN world 缺失：ack 超时 → 诚实失败 + 休眠（不再重试
   assert.equal(failedAttr(env), "main-unresponsive");
   assert.equal(ladStyle(env), false, "no layout on failure — native single column");
   assert.equal(env.pane(), null, "failure must NOT fall back to the M1 copy");
-  // dormancy: further route ticks must not re-INSTALL
-  const installsAfterFail = 0;
+  // dormancy: further route ticks must not re-INSTALL (count real messages)
+  const installsAtFail = sent.filter((m) => m.type === "INSTALL").length;
   await env.timers.advance(5000);
-  assert.equal(installsAfterFail, 0);
+  assert.equal(sent.filter((m) => m.type === "INSTALL").length, installsAtFail);
   assert.equal(stateAttr(env), "failed");
 });
 

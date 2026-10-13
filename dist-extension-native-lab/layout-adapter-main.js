@@ -382,6 +382,9 @@
       cellConnected: Boolean(S.cell?.isConnected),
       reinstallLeft: S.reinstallLeft,
       lastError: S.lastError,
+      // contract §8.3: a restore that threw may leave the wrap on a stale
+      // instance — the only clean recovery is a page refresh; surface it
+      possibleResidue: S.phase === "error" && (S.lastError === "restore-threw" || S.lastError === "restore-verify-failed"),
       stats: { ...S.stats }
     };
   }

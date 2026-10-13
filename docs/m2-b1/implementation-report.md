@@ -35,7 +35,7 @@
 
 ## 与既有模块的关系（G11）
 
-- 默认构建（`dist-extension-native/`）：manifest 一字不改、无 MAIN world 文件、适配器代码路径死代码化（define false）——M1-R 随时可独立构建，行为逐字节等价（P4 测试 + 93 项既有测试全绿 + Legacy 119 项全绿）。
+- 默认构建（`dist-extension-native/`）：manifest 一字不改、无 MAIN world 文件、适配器代码路径死代码化（define false）——M1-R 随时可独立构建，行为等价（控制器源码以常量 false 门控留在默认产物中成为惰性死代码，适配器核心与 MAIN 入口不在默认产物内；P4 测试 + 93 项既有测试全绿 + Legacy 119 项全绿）。
 - lab 构建（`dist-extension-native-lab/`）：manifest 注入 `world: "MAIN"` 条目、命名 `Peek Native (M2-B1 Lab)` v0.10.0、两个 bundle 均过禁止标记扫描。
 - Legacy（`extension/`）：零接触。
 
@@ -52,7 +52,7 @@
 5. **适配器是否能在所有已测终止路径恢复原方法？** 是。10 条终止路径（路由离开/重装/X 自替换/形状漂移/cell 消失/实例替换/预算耗尽/迟到包装/同焦点幂等/未激活卸载）单元全覆盖（B1/B6/C1–C7/E6），恢复后 `instance[key] === original` 断言 + 无 own-property 残留（prototype 情形）。
 6. **哪些 X 内部结构是必需依赖？** 见合同 §7 表（`_getFinalRenderedItems`/`_cells`/`props.list`/Fiber 键/entry 结构）。
 7. **X 更新导致失配时能否安全退回？** 能。安装期形状/所有权校验零副作用拒绝；运行期漂移健康检查安全退出并恢复方法；控制器拆布局回原生单栏；失败后路由内休眠，明确报告（C2/C3/B10/B11）。
-8. **T1/T2/T4 是否保持 M1-R 水平？** T1 中位数：lab 1580ms ≈ native 1577ms（±3ms）；A(M1-R) 基线见 performance-and-network.md（首轮因 X 软限流失败，重跑记录在案）。T2 在三模式均为即时刻（≤520ms）。
+8. **T1/T2/T4 是否保持 M1-R 水平？** T1 中位数：lab 1583ms vs M1-R 1580ms（+3ms，门槛 50ms）；native 1577ms。T2 受 X 限流窗口污染记录为 INCONCLUSIVE（B vs A 的可用样本 +117ms～+502ms，超门槛——列入 L4 复测关闭）。T4 三模式均毫秒级。
 9. **额外内存、CPU、React 渲染及媒体请求开销？** 包装开销 0.23–1.43μs/调用（3000 次直测）；空闲零 long task；深滚帧预算三配置一致（~80ms/10帧，受控实验）；扩展主动私有 API 请求 = 0。详见 performance-and-network.md。
 10. **是否仍保持零扩展主动私有 API 调用？** 是。代码级（无 fetch/XHR/webpack/凭据）+ 构建期扫描 + 测试 P3。
 11. **真实 MV3 是否完成？** 是——真实扩展运行时（manifest 注入 MAIN world content script、真实扩展 ID、真实 content script 注册管线）在本机 Chromium 152 加载并完成 S3/S4/S6 全部页面级验证；`--load-extension` 的装载机制说明与逐项检查单见 mv3-acceptance.md。

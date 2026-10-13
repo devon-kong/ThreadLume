@@ -12,11 +12,11 @@
 | 4 | 左侧原生视频正常 | PASS — 播放/暂停/进度/静音/全屏/标签页切换全套（S4） | s4-video-*.json |
 | 5 | 右侧连续深滚 | PASS — 5800px+ 深滚，焦点存活、评论持续加载 | s3-scroll-results.json |
 | 6 | 图片查看器及 Esc | PASS — 左栏图片打开原生查看器，Esc 关闭（X 自行恢复 overflow） | s4-photo-*.json |
-| 7 | 回复编辑器 | PASS — 右栏编辑器真实输入成功（输入后已清空，从未发送）；占位符状态确认 | s6-mv3-checks.json `composer` |
+| 7 | 回复编辑器 | PASS — 右栏编辑器真实输入 "peek-m2b1-check" 成功、随即清空（占位符感知校验 `isEmptyOrPlaceholder=true`），从未发送 | s7-remediation.json `composer` |
 | 8 | 关闭恢复 | PASS — 离开详情：样式/属性/标记清零、banner 恢复、方法恢复（prototype-owned property 删除） | s3-scroll-results.json `teardown` |
 | 9 | 扩展重新加载 | PASS — dev-mode Reload 按钮 + 页面刷新后：适配器重新 ACTIVE、单焦点、无 M1 面板、无双 pane | s6-mv3-checks.json `devReload/afterReload` |
 | 10 | 页面刷新 | PASS — 刷新即全状态重置（页面即边界），重新 INSTALL 正常 | 同上 + S5 各轮 goto |
-| 11 | 快速切帖 | PASS（真实+单元）— 真实：A 打开(active/1 focal) → 快速离开 → idle/0 focal 零残留；detail→detail 语义由真实构建产物单元测试 E3 覆盖（旧实例恢复+新实例包装+样式保持） | s5 会话记录；单元 E3 |
+| 11 | 快速切帖 | PASS（真实+单元）— 真实 detail→detail：A(active/1 focal) 点击右栏回复时间链接 → B(active/1 focal/编辑器在位)，`switched=true`；快速离开 detail → idle/0 focal 零残留；detail→detail 实例交接语义另有真实产物单元测试 E3 | s7-remediation.json `quickSwitch`；单元 E3 |
 | 12 | 禁用扩展后原生 X 恢复 | PASS — 管理页禁用后所有页面为原生渲染（S5 native 基线整个 pass 即运行在禁用态扩展的浏览器上）；重新启用即恢复适配 | s5-results-native.json 全程 |
 | 13 | 不兼容结构时自动安全退出 | PASS（单元级 + 真实回退路径）— 形状/所有权校验的 10 种失配在真实构建产物单元测试中全部走 UNSUPPORTED/ERROR 且方法恢复（B3/B4/B5/B10/C2/C3/C5/C7）；真实浏览器验证了回退终点（窄视口降级 = CSS 全部卸载 → 原生单栏正常渲染；MAIN 缺失 → `data-peek-lad-failed` 诚实标记）——"X 更新致真实失配"无法在本轮人为制造，列入 L4。 | 单元套件；s3-viewports.json 960×800 |
 
