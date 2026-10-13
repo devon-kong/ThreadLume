@@ -357,8 +357,8 @@ test("C1 路由离开 + healthTick：优雅卸载并恢复", () => {
   lad.healthTick();
   assert.equal(lad.query().phase, "idle");
   assert.equal(Object.getOwnPropertyDescriptor(virtualizer.instance, LAD_KEY), undefined);
-  const uninstalled = sent.find((m) => m.type === "UNINSTALLED");
-  assert.ok(uninstalled, "UNINSTALLED transition must be emitted");
+  const uninstalled = sent.find((m) => m.type === "HEALTH_UNINSTALLED");
+  assert.ok(uninstalled, "autonomous HEALTH_UNINSTALLED transition must be emitted");
   assert.equal(uninstalled.reason, "route-moved");
 });
 
@@ -368,7 +368,7 @@ test("C2 X 替换包装方法 + healthTick：安全退出且不碰 X 的新方�
   const xsNewMethod = function () { return []; };
   virtualizer.instance[LAD_KEY] = xsNewMethod;
   lad.healthTick();
-  const err = sent.find((m) => m.type === "ERROR");
+  const err = sent.find((m) => m.type === "HEALTH_ERROR");
   assert.ok(err);
   assert.equal(err.reason, "wrapper-replaced");
   assert.equal(virtualizer.instance[LAD_KEY], xsNewMethod); // X's value untouched
@@ -380,7 +380,7 @@ test("C3 形状漂移 + healthTick：安全退出并恢复原方法", () => {
   lad.install({ focusUrlId: focusId });
   virtualizer.instance._cells = undefined;
   lad.healthTick();
-  const err = sent.find((m) => m.type === "ERROR");
+  const err = sent.find((m) => m.type === "HEALTH_ERROR");
   assert.equal(err.reason, "shape-drift");
   assert.equal(Object.getOwnPropertyDescriptor(virtualizer.instance, LAD_KEY), undefined);
 });
@@ -411,7 +411,7 @@ test("C5 cell 彻底消失：两次 miss 后安全退出", () => {
   lad.healthTick();
   assert.equal(lad.query().phase, "active"); // transient tolerance (1st miss)
   lad.healthTick();
-  const err = sent.find((m) => m.type === "ERROR");
+  const err = sent.find((m) => m.type === "HEALTH_ERROR");
   assert.equal(err.reason, "focal-cell-gone");
   assert.equal(Object.getOwnPropertyDescriptor(virtualizer.instance, LAD_KEY), undefined);
   void env;
@@ -433,7 +433,7 @@ test("C6 实例被替换：有界内部重装成功（预算递减不重置）",
   assert.equal(Object.getOwnPropertyDescriptor(virtualizer.instance, LAD_KEY), undefined, "old instance restored");
   v2.showReplies(2, 8);
   assert.equal(v2.instance[LAD_KEY]()[0].item.id, focusId, "new instance wrapped");
-  assert.ok(sent.some((m) => m.type === "ACTIVE" && m.note === "reinstalled"));
+  assert.ok(sent.some((m) => m.type === "HEALTH_ACTIVE" && m.note === "reinstalled"));
   void cell2;
 });
 
@@ -459,7 +459,7 @@ test("C7 重装预算耗尽后持续失配：安全退出（无重试风暴）",
   lad.healthTick(); // budget exhausted: no re-install, miss #1
   assert.equal(lad.query().phase, "active");
   lad.healthTick(); // miss #2 → safe exit
-  const err = sent.filter((m) => m.type === "ERROR").pop();
+  const err = sent.filter((m) => m.type === "HEALTH_ERROR").pop();
   assert.equal(err.reason, "focal-cell-unmappable");
   assert.equal(lad.query().phase, "error");
   // the last managed instance must have been restored
