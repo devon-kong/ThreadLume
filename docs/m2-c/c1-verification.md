@@ -45,3 +45,18 @@
 | G12 无假等价 | PARTIAL | 明示双文档/可能重复播放器及成本，不当单实例通过 |
 
 下一步：按 `C1-README.md` 真实安装检查单验证容器与同时可见连续播放，再扩媒体与性能；不再叠加CSS去掩盖生命周期结构问题。
+
+
+## 0.1.1 真实安装后更新（取代上述“未安装”的历史状态）
+
+用户加载0.1.0后报告列表点击无反应。根因是上一版只接popup入口，没有列表点击处理。0.1.1新增可信列表点击 → 保持X原生导航 → session单次意图 → 双页创建，并提供详情页右上「Peek 双页」。Dual21/21，旧Native/Legacy源码未改，本次不重复旧212项作为新验证。
+
+真实MV3（没有mock runtime）测试确认公开runtime消息及详情按钮能创建两个原生页面，内容脚本角色正常，右页可定位。随后实测windows.update请求左1341→670px，返回仍1341px；右页要求671px、left764，实际900px、left268。两页在激活其各自tab的同一有界调用中都读到visible，但**窗口重叠，不能给真正并排PASS**，持续播放也未测。
+
+新增实际geometry gate；失败时只回滚owned右页、条件恢复左窗，保留原帖并显示错误。真实个人公开时间线的time permalink点击已使X进入目标status，最终pair/intent均null，原窗仍94/66/1341/891，页面显示“无法建立真正并排双页”并且提示不会被后续idle refresh清掉。截图只截扩展提示区域，排除账号及帖子内容。原始匿名证据见 `evidence/c1-installed-entry.json`。
+
+**最新结论：入口与安全失败修复可交付；本次受控Ego窗口的双栏布局 BLOCKED。** G11现为PARTIAL（真实安装和入口已测，媒体/关闭完整专项未测）；G5在所测Ego窗口为BLOCKED；G8仍NOT_TESTED。支持公开Split View API的路径仍需另环境实机验收。不能把限制推断为所有Ego窗口都不支持，也不能报告产品双页完成。
+
+补充owned清理实测：一次预先指定的详情按钮复核，在本扩展页面用公开window/tab事件登记新建资源，结果newWindows=1、newTabs=1、removed各1；随后tabs.get确认ownedTabsGone=[true]。session pair/intent均null。不能仅凭pair=null声称删除，本次额外证据才确认该边界。失败提示区域截图已检查不含账号信息。
+
+独立CI增加 `dual` job运行隔离构建和 `test:dual`，不会把现有M1-R/Legacy job替换掉。

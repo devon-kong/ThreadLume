@@ -9,7 +9,7 @@ function fixture(){
  const dom=new JSDOM(markup,{url:'https://x.com/a/status/123',runScripts:'outside-only',pretendToBeVisual:true});const w=dom.window;let role={role:'right',url:'https://x.com/a/status/123',mode:'split',hide:false};const listeners=[],scrolls=[];
  w.HTMLElement.prototype.getBoundingClientRect=()=>({bottom:600,top:100,height:500});w.scrollTo=p=>scrolls.push(p);
  w.chrome={runtime:{sendMessage:async()=>({ok:true,value:role}),onMessage:{addListener:fn=>listeners.push(fn)}}};w.eval(code);
- return {dom,w,scrolls,set:async value=>{role=value;listeners.forEach(fn=>fn({type:'refresh'}));await delay(35);}};
+ return {dom,w,scrolls,message:m=>listeners.forEach(fn=>fn(m)),set:async value=>{role=value;listeners.forEach(fn=>fn({type:'refresh'}));await delay(35);}};
 }
 test('one positioning, photo route preserves user scroll; hiding remounts and cleanup',async()=>{
  const f=fixture();try{
@@ -28,5 +28,12 @@ test('hide already enabled uses visible composer top, not hidden article rect',a
  const f=fixture();try{
  f.w.HTMLElement.prototype.getBoundingClientRect=function(){return this.matches('article[data-peek-dual-hidden]')?{top:0,bottom:0,height:0}:{top:100,bottom:600,height:500};};
  await f.set({role:'right',url:'https://x.com/a/status/123',mode:'split',hide:true});await delay(800);assert.equal(f.scrolls.length,1);assert.equal(f.scrolls[0].top,48);
+ }finally{f.dom.window.close();}
+});
+
+test('entry failure remains visible after subsequent idle role refresh',async()=>{
+ const f=fixture();try{
+ await f.set(null);f.message({type:'open-error',error:'无法建立真正并排'});await f.set(null);
+ assert.equal(f.w.document.getElementById('peek-dual-launcher').shadowRoot.querySelector('[role="status"]').textContent,'无法建立真正并排');
  }finally{f.dom.window.close();}
 });

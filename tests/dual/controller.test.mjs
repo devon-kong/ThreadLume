@@ -41,3 +41,17 @@ test('pending unrelated navigation prevents closing owned right tab',async()=>{
 test('user unsplits or moves right tab: release only, never close either',async()=>{
  for(const change of [{splitViewId:-1},{windowId:99}]){const m=mock(),c=createController(m.api),p=await c.open(1);Object.assign(m.tabs.get(p.right),change);assert.equal(await c.role(1),null);assert.deepEqual(m.removed,[]);}
 });
+test('native click intent survives worker recreation and opens once after target route',async()=>{
+ const m=mock();m.tabs.get(1).url='https://x.com/home';let c=createController(m.api);await c.prepare(1,'https://x.com/a/status/123');c=createController(m.api);
+ assert.equal((await c.followIntent(1)).state,'waiting');m.tabs.get(1).url='https://x.com/a/status/123';assert.equal((await c.followIntent(1)).state,'opened');assert.equal((await c.followIntent(1)).state,'idle');assert.equal(m.tabs.size,2);
+});
+test('intent for known post does not open unrelated native destination or another tab',async()=>{
+ const m=mock(),c=createController(m.api);await c.prepare(1,'https://x.com/a/status/123');m.tabs.get(1).url='https://x.com/b/status/456';assert.equal((await c.followIntent(1)).state,'waiting');assert.equal((await c.followIntent(99)).state,'idle');assert.equal(m.tabs.size,1);
+});
+test('fallback refuses silently ignored/clamped window geometry and rolls back',async()=>{
+ const m=mock(false);m.api.windows.update=async()=>{};const c=createController(m.api);
+ await assert.rejects(c.open(1),/无法建立真正并排/);assert.deepEqual(m.removed,[2]);assert.equal(m.state().pair,null);assert.equal(m.bounds.get(1).width,1440);
+});
+test('expired native click intent is consumed without opening pages',async()=>{
+ const m=mock(),c=createController(m.api);await c.prepare(1,'https://x.com/a/status/123');m.state().intent.expires=0;assert.equal((await c.followIntent(1)).state,'idle');assert.equal(m.tabs.size,1);
+});

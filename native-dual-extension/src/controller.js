@@ -38,6 +38,20 @@ export function createController(api) {
     return p;
   }
   return {
+    async prepare(id,url) {
+      if(url != null && !statusURL(url))throw Error('无法确认点击的帖子地址。');
+      await api.storage.session.set({intent:{id,url:url ? statusURL(url) : null,expires:Date.now()+10000}});
+    },
+    async followIntent(id) {
+      const intent=(await api.storage.session.get('intent')).intent;
+      if(!intent || intent.id!==id)return {state:'idle'};
+      if(intent.expires<=Date.now()) {await api.storage.session.set({intent:null});return {state:'idle'};}
+      const tab=await get(id),url=statusURL(tab?.url);
+      if(!url || (intent.url && url!==intent.url))return {state:'waiting'};
+      // Consume before creating pages; repeated navigation messages cannot duplicate a pair.
+      await api.storage.session.set({intent:null});
+      return {state:'opened',pair:await this.open(id)};
+    },
     async open(leftId) {
       const existing=await current();
       if(existing) { if(existing.left===leftId || existing.right===leftId)return existing;throw Error('已有双页阅读；请先结束当前配对。'); }
@@ -58,7 +72,14 @@ export function createController(api) {
           const width=Math.floor(w.width/2);
           const right=await api.windows.create({url,type:'normal',focused:true,left:w.left+width,top:w.top,width:w.width-width,height:w.height});
           p.rightWindowId=right.id;p.right=right.tabs?.[0]?.id;if(!Number.isInteger(p.right))throw Error('新窗口未返回标签页，未改变左页。');
-          p.applied={...p.original,width};await save(p);await api.windows.update(w.id,p.applied);
+          const requestedLeft={...p.original,width};
+          p.applied=requestedLeft;await save(p);
+          const placedLeft=await api.windows.update(w.id,requestedLeft) || await api.windows.get(w.id);
+          p.applied=geometry(placedLeft);await save(p);
+          const placedRight=await api.windows.get(right.id);
+          const requestedRight={left:w.left+width,top:w.top,width:w.width-width,height:w.height};
+          const positioned=(actual,requested)=>Object.keys(requested).every(k=>Math.abs(actual[k]-requested[k])<=2);
+          if(!positioned(placedLeft,requestedLeft) || !positioned(placedRight,requestedRight))throw Error('当前浏览器限制窗口尺寸或位置，无法建立真正并排双页。已保留原帖；自动分屏需浏览器提供 Split View API。');
         }
         p.pending=false;await save(p);await ping(p);return p;
       } catch(e) { await release(p,true);throw e; }

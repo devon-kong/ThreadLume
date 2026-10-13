@@ -1,0 +1,91 @@
+{
+  "date": "2026-10-13",
+  "environment": "Installed MV3 in Ego Browser, existing authorized TaskSpace21",
+  "extensionVersion": "0.1.1",
+  "usesMockRuntime": false,
+  "capabilities": {
+    "tabsCreateSplit": "undefined",
+    "windowsCreate": "function"
+  },
+  "initialDiagnosis": {
+    "v010ListClickHandler": false,
+    "popupRuntimeMessageCanCreateTwoNativeDocuments": true,
+    "overlappingWindowsWereNotTreatedAsParallelPass": true
+  },
+  "windowReproductionBeforeGeometryGuard": {
+    "sourceOriginal": {
+      "left": 94,
+      "top": 66,
+      "width": 1341,
+      "height": 891
+    },
+    "requestedSource": {
+      "left": 94,
+      "top": 66,
+      "width": 670,
+      "height": 891
+    },
+    "windowsUpdateReturnedSource": {
+      "left": 94,
+      "top": 66,
+      "width": 1341,
+      "height": 891
+    },
+    "requestedRight": {
+      "left": 764,
+      "top": 66,
+      "width": 671,
+      "height": 891
+    },
+    "observedRight": {
+      "left": 268,
+      "top": 90,
+      "width": 900,
+      "height": 891
+    },
+    "sameBoundedCallBothDocumentVisibility": [
+      "visible",
+      "visible"
+    ],
+    "independentWindowsPositioning": "FAIL",
+    "continuousPlayback": "NOT_TESTED"
+  },
+  "finalNativeClick": {
+    "source": "public author profile timeline",
+    "target": "2109851738488570184",
+    "method": "Ego real click on native time permalink, no injected event",
+    "nativeNavigationCompleted": true,
+    "persistedIntentConsumed": true,
+    "pairAfterFailure": null,
+    "intentAfterFailure": null,
+    "sourceWindowAfterRollback": {
+      "left": 94,
+      "top": 66,
+      "width": 1341,
+      "height": 891
+    },
+    "sourceContentStatus": {
+      "role": null,
+      "controls": false,
+      "launcher": true,
+      "nativeArticles": 3,
+      "players": 1,
+      "hiddenArticles": 0
+    },
+    "visibleError": "当前浏览器限制窗口尺寸或位置，无法建立真正并排双页。已保留原帖；自动分屏需浏览器提供 Split View API。",
+    "rightCreatedTabCleanup": "independently confirmed by final ownership check"
+  },
+  "privacy": "No credentials, headers, response bodies or private request URLs recorded; no account writes performed",
+  "finalOwnershipCheck": {
+    "method": "one preplanned native detail-button retry with public windows/tabs event listeners in own extension page",
+    "newWindows": 1,
+    "removedOwnedWindowEvents": 1,
+    "newTabs": 1,
+    "removedOwnedTabEvents": 1,
+    "ownedTabsGone": [
+      true
+    ],
+    "pair": null,
+    "intent": null
+  }
+}

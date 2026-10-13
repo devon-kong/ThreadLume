@@ -17,3 +17,7 @@ Research and independent review finished; browser probes cleaned and original Pe
 此前签名阻塞已解除：C1代码与研究提交 `e22f84d` 已推送至 `codex/peek-native-m2c-dual-page`，Draft PR #4：https://github.com/devon-kong/peek-exploration/pull/4 。保留签名配置，没有关闭签名。详细验证见 `c1-verification.md`。
 
 浏览器TaskSpace21中的临时注入已清理；原有 Peek Native (M1) 扩展已恢复启用，1Password未改变。已点击扩展管理页Load unpacked并handOff给用户；当前空间保留p1公开视频样本、p2扩展管理页，等待用户在原生目录选择器选择 `dist-extension-native-dual/`。未调用finish，因为等待用户操作；下轮经用户确认后resume同一space21，先确认C1安装再暂停M1做实际MV3验收。不要把当前handOff状态写成已安装。
+
+## 0.1.1 入口故障修复（2026-10-13）
+
+用户已在Ego加载C1，0.1.0的列表点击入口缺失得到确认。现已将安装目录更新并通过扩展管理页Reload到0.1.1，实际MV3消息、详情按钮与公开profile时间链接已测。新意图处理保留X原生导航，新增窗口geometry校验。所测TaskSpace窗口忽略1341→670调整，右窗钳制为900且位置重叠，故安全失败/反馈并回滚，当前该窗口双栏BLOCKED；详见c1-installed-entry.json。旧“待加载”的状态只描述当时handoff，已被本更新取代。原用户X标签页若未刷新，仍需刷新才能加载新内容脚本；没有强制刷新其他用户标签页。

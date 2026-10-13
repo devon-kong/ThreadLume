@@ -9,8 +9,10 @@ chrome.runtime.onMessage.addListener((message,sender,reply)=>{
   if(!popup && (!Number.isInteger(tab) || sender.frameId!==0))return;
   serial(async()=>{
     switch(message.type){
-      case 'open': if(popup)return controller.open(message.tabId);break;
-      case 'role': return controller.role(popup?message.tabId:tab);
+      case 'open': return controller.open(popup?message.tabId:tab);
+      case 'prepare-open': if(!popup)return controller.prepare(tab,message.url);break;
+      case 'follow-open': if(!popup)return controller.followIntent(tab);break;
+      case 'role': if(!popup)await controller.followIntent(tab);return controller.role(popup?message.tabId:tab);
       case 'hide': return controller.hide(popup?message.tabId:tab,message.value);
       case 'close': return controller.close(popup?message.tabId:tab);
     }
@@ -18,6 +20,6 @@ chrome.runtime.onMessage.addListener((message,sender,reply)=>{
   return true;
 });
 chrome.tabs.onRemoved.addListener(()=>{void serial(()=>controller.reconcile());});
-chrome.tabs.onUpdated.addListener((_id,change)=>{if(change.url || change.splitViewId!==undefined)void serial(()=>controller.reconcile());});
+chrome.tabs.onUpdated.addListener((id,change)=>{if(change.url || change.splitViewId!==undefined)void serial(async()=>{await controller.reconcile();if(change.url)await controller.followIntent(id);}).catch(error=>{void chrome.tabs.sendMessage(id,{type:'open-error',error:error.message}).catch(()=>{});});});
 
 chrome.tabs.onAttached.addListener(()=>{void serial(()=>controller.reconcile());});
