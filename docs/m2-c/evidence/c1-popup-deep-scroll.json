@@ -1,0 +1,110 @@
+{
+  "version": "0.1.2",
+  "scenario": "real native right wheel five screens; hide enabled; both popup windows visible",
+  "states": [
+    {
+      "role": "left",
+      "mode": "popups",
+      "hide": true,
+      "controls": true,
+      "launcher": false,
+      "screen": {
+        "left": 51,
+        "top": 25,
+        "width": 1749,
+        "height": 1100
+      },
+      "viewport": [
+        870,
+        1072
+      ],
+      "visibility": "visible",
+      "y": 10,
+      "nativeArticles": 14,
+      "players": 1,
+      "media": [
+        {
+          "id": 1,
+          "time": 17.620019,
+          "paused": false,
+          "muted": false,
+          "ready": 4,
+          "connected": true
+        }
+      ],
+      "fullscreen": false,
+      "focalTop": 43,
+      "hiddenArticles": 0
+    },
+    {
+      "role": "right",
+      "mode": "popups",
+      "hide": true,
+      "controls": true,
+      "launcher": false,
+      "screen": {
+        "left": 51,
+        "top": 25,
+        "width": 1749,
+        "height": 1100
+      },
+      "viewport": [
+        871,
+        1072
+      ],
+      "visibility": "visible",
+      "y": 6260,
+      "nativeArticles": 43,
+      "players": 2,
+      "media": [
+        {
+          "id": 3,
+          "time": 0.190729,
+          "paused": true,
+          "muted": true,
+          "ready": 4,
+          "connected": true
+        },
+        {
+          "id": 4,
+          "time": 0,
+          "paused": true,
+          "muted": false,
+          "ready": 4,
+          "connected": true
+        }
+      ],
+      "fullscreen": false,
+      "focalTop": null,
+      "hiddenArticles": 0
+    }
+  ],
+  "earlierToolObservations": [
+    {
+      "source": "same-session tool output preceding right hide/wheel; reconstructed from recorded tool result",
+      "left": {
+        "y": 10,
+        "players": 1,
+        "media": [
+          {
+            "id": 1,
+            "time": 0.439525,
+            "paused": false,
+            "muted": false,
+            "ready": 4,
+            "connected": true
+          }
+        ]
+      }
+    },
+    {
+      "source": "same-session tool output after returning right to top",
+      "right": {
+        "y": 0,
+        "hiddenArticles": 1,
+        "focalTop": 0,
+        "players": 2
+      }
+    }
+  ]
+}

@@ -60,3 +60,42 @@
 补充owned清理实测：一次预先指定的详情按钮复核，在本扩展页面用公开window/tab事件登记新建资源，结果newWindows=1、newTabs=1、removed各1；随后tabs.get确认ownedTabsGone=[true]。session pair/intent均null。不能仅凭pair=null声称删除，本次额外证据才确认该边界。失败提示区域截图已检查不含账号信息。
 
 独立CI增加 `dual` job运行隔离构建和 `test:dual`，不会把现有M1-R/Legacy job替换掉。
+
+## 0.1.2：用户要求 Ego 实机复核后的修正（当前状态）
+
+### 根因与最小修正
+
+原生 Tab 菜单没有 Split 项，Move Tab to New Window 禁用。Window 菜单的 macOS Move & Resize → Left 能改变唯一宿主窗口；当时六个 Space 的 `chrome.windows.getAll` 均报告同一 59/33/901/1084 geometry。这解释了普通 windows 路线的失败，不能用普通窗口 API 返回成功当并排证据。
+
+一次有限 popup 探测显示 `type:popup` 是独立可见 NSWindow，公开 API 的位置/尺寸有效。改为无 Split API 时创建两个可见 popup carrier，原始 source 页不搬移、不关闭、不改尺寸。每个 carrier 保持 X 自己的完整文档、React 与滚动上下文；关闭或创建失败只删除仍在原 owned 窗口且仍为目标 status/photo/video 的页面。截图不是 CSS DOM 搬移，也不是模拟 runtime。
+
+### 真实安装、可见原生 UI 证据
+
+- 用户已安装扩展的同一目录/ID，重新加载到 0.1.2；不是 CDP 内容脚本注入。通过 X 页真实「Peek 双页」点击打开。
+- 左 popup：51/25/870/1100，viewport 870×1072；右：929/25/871/1100，viewport 871×1072。8px 间隔，实际 geometry 校验成功。两页在同一次调用中 `visibility=visible`。
+- 右首屏原生 composer 和评论。打开 hide 开关后，通过原生 wheel 滚动五屏至 y=6260，原生 article 22→43（包含广告/非评论，不能把数量当真实分页证明）。左 y 始终10，focalTop43。左 media WeakMap id=1 从 time≈0.439525 到17.620019，paused=false、ready4、connected=true；没有重新创建左视频节点。只记录数字，不记录媒体URL或正文。
+- 右深滚时 focalTop=null，说明右侧自己的原帖可正常被虚拟列表回收。左节点仍在，不需要留存右侧播放器。原生滚回顶部后 y=0、hiddenArticles=1、focalTop=0，原帖重新挂载仍隐藏；左 hiddenArticles=0。
+- 原生视频点击暂停/播放可用；原生进度条 Increment 从23.55444到28.55444（验证 seek，未验收鼠标拖动）。原生全屏按钮进入，status fullscreen=true、viewport1800×1125；原生退出按钮退出后两窗恢复上述 geometry，fullscreen=false，左仍同一media id1/time28.55444。静音按钮交互改变 muted true→false。
+- 关闭首轮 pair：两个 carrier tabs.get 均不存在，source 保留。失败第二窗口/被钳制/用户重用页面的清理有回归测试。
+
+匿名JSON：`evidence/c1-popup-deep-scroll.json`、`evidence/c1-popup-fullscreen-restored.json`。`c1-popup-left-public.png` 与 `c1-popup-right-public.png` 是两个窗口分别获取的原生截图，已裁掉本人导航/回复框；不是同一桌面的完整合照，不拿截图拼接冒充单窗双栏。
+
+### 成本、未测与结论
+
+本次 source 是详情页，因此加两个 carrier 会有三个存活的同帖原生文档。右侧焦点隐藏不会保证取消已发生的媒体请求；深滚有两个右页评论/广告视频节点。没有主动 X 请求代码，但原生额外请求总量、长任务、T1/T2/T4 对照尚未测。禁止把静态零私有接口扫描当运行网络采样，更不能声称账号风险概率已量化。M2-A +330.4ms 仍未归因，仍 NO-GO。
+
+本次实机只覆盖固定视频帖与870/871宽的两个可见 popup：播放、暂停、seek Increment、静音切换、全屏/退出、右深滚、右隐藏/回收/再挂载、关闭 owned 页面。多图查看器/ESC优先级、GIF、Article、投票、全部原生菜单、真实分页祖先链、三种整屏尺寸、前进后退、MV3重载后遗留配对清理未完成。没有执行真实点赞/收藏/回复/转发/投票/关注。
+
+当前 Gate 更新：G5 在所测几何与样本下 PASS（真独立窗口/滚动），G2/G6/G11 PARTIAL（已真实安装及视频生命周期，但完整媒体与所有场景未测），G3 PARTIAL（显式开关后隐藏，默认关闭），G8 NOT_TESTED；G9 源码/产物 PASS、运行请求计数 NOT_TESTED；其余保持保守 PARTIAL/NOT_TESTED。整体为可试用的原生双窗口实验，不能推荐合并正式主线。
+
+### 独立复核与后续边界修正
+
+独立 Reviewer 直接检查源码、bundle、JSON、两张脱敏截图并运行测试，指出 source 换帖误复用旧pair与pending空ID同步参数异常。两项均先构造失败回归，再修复，最终24/24通过；README已整体更新。
+
+旧深滚/全屏记录中的起点和全屏进入状态已从当轮工具输出补入JSON，明确标记 `earlierToolObservations`，不冒充新增测量。新一次公开个人时间线time-link点击→原生详情→双popup创建，以及实际结束按钮→两carrier均不存在/source仍在，见 `c1-popup-click-close.json`。
+
+曾在后续检查发现 pair=null 而两carrier同URL/同窗口仍在。是否扩展重建导致Ego重载尚未归因；当轮不能宣称长期配对稳定。已按创建时的ID/窗口/目标URL人工检查并清理这两个测试owned页，未关闭用户其他页。新增只含固定reason/时钟的session.lastRelease诊断；最终安装后的有界检查暂停构建，见 `c1-popup-bounded-final.json`，即使该轮通过也不关闭旧未归因问题。
+
+正式工程化仍不推荐直接合并：需完成三视口、完整媒体、实际分页关系、生命周期稳定与同口径性能/额外原生请求计数。当前交付是能在Ego实际试用的双popup版本，不是单窗浮层完成。
+
+最终冻结产物后的有界检查：原生进入/退出全屏后111422ms，pair仍存在、两页均visible，左media id1仍播放；`lastRelease.reason=close`是前一次实际结束按钮留下的历史记录。该轮给出短期存活证据，不能归因或抹除先前pair丢失。已恢复macOS诊断前的宿主窗口尺寸；最终预览的右页隐藏开关开启。

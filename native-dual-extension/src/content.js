@@ -3,6 +3,8 @@ import {pairURL,statusURL} from './controller.js';
 import {findFocal,setHidden,detailComposer} from './focal.js';
 let role=null,marked=null,host=null,observer=null,timer=null,raf=0,stopped=false,positioned=false,path=location.pathname,routeTimer=null,settleTimer=null,stableSince=0,lastHeight=-1,locateAfterHide=false,entryError='',entryErrorPath='';
 const send=message=>chrome.runtime.sendMessage(message);
+const mediaIds=new WeakMap();let nextMediaId=0;
+function mediaStatus(){return [...document.querySelectorAll('video')].map(v=>{if(!mediaIds.has(v))mediaIds.set(v,++nextMediaId);return {id:mediaIds.get(v),time:v.currentTime,paused:v.paused,muted:v.muted,ready:v.readyState,connected:v.isConnected};});}
 function stopAuto(){stopped=true;}
 function cleanup(){
   setHidden(marked,false);marked=null;clearTimeout(settleTimer);settleTimer=null;host?.remove();host=null;
@@ -63,7 +65,7 @@ async function refresh(){
   host.style.cssText='position:fixed;top:4px;right:12px;z-index:2147483646';
   const shadow=host.attachShadow({mode:'open'});
   shadow.innerHTML='<style>:host{font:13px system-ui;color:#fff}div{display:flex;align-items:center;gap:8px;background:#17212b;padding:8px;border:1px solid #657786;border-radius:10px}button{font:inherit;color:inherit;background:#263849;border:1px solid #657786;border-radius:5px;padding:4px;cursor:pointer}label{display:flex;gap:4px}</style><div><span></span><label><input type="checkbox">隐藏右页原帖（实验）</label><button>结束双页</button></div>';
-  shadow.querySelector('span').textContent=`Peek · ${role.role==='left'?'原帖':'评论'} · ${role.mode==='split'?'浏览器分屏':'并排窗口'}`;
+  shadow.querySelector('span').textContent=`Peek · ${role.role==='left'?'原帖':'评论'} · ${role.mode==='split'?'浏览器分屏':'原生双窗口'}`;
   const checkbox=shadow.querySelector('input');checkbox.checked=role.hide;
   checkbox.onchange=async()=>{const r=await send({type:'hide',value:checkbox.checked});if(!r.ok){checkbox.checked=!checkbox.checked;shadow.querySelector('span').textContent=r.error;}};
   shadow.querySelector('button').onclick=()=>{void send({type:'close'});};
@@ -76,7 +78,7 @@ async function refresh(){
 chrome.runtime.onMessage.addListener((m,_sender,reply)=>{
   if(m.type==='refresh')void refresh();
   if(m.type==='open-error')launcher(m.error);
-  if(m.type==='status'){reply({role:role?.role || null,mode:role?.mode || null,hide:role?.hide || false,controls:!!document.getElementById('peek-dual-controls'),launcher:!!document.getElementById('peek-dual-launcher'),viewport:[innerWidth,innerHeight],visibility:document.visibilityState,y:scrollY,nativeArticles:document.querySelectorAll('article[data-testid="tweet"]').length,players:document.querySelectorAll('video').length,hiddenArticles:document.querySelectorAll('[data-peek-dual-hidden]').length});}
+  if(m.type==='status'){reply({role:role?.role || null,mode:role?.mode || null,hide:role?.hide || false,controls:!!document.getElementById('peek-dual-controls'),launcher:!!document.getElementById('peek-dual-launcher'),screen:{left:screen.availLeft,top:screen.availTop,width:screen.availWidth,height:screen.availHeight},viewport:[innerWidth,innerHeight],visibility:document.visibilityState,y:scrollY,nativeArticles:document.querySelectorAll('article[data-testid="tweet"]').length,players:document.querySelectorAll('video').length,media:mediaStatus(),fullscreen:!!document.fullscreenElement,focalTop:(role?findFocal(document,role.url):null)?.getBoundingClientRect().top??null,hiddenArticles:document.querySelectorAll('[data-peek-dual-hidden]').length});}
 });
 installEntry({win:window,send,onRoute:()=>{void refresh();},onError:error=>launcher(error)});
 window.addEventListener('pagehide',()=>{cleanup();role=null;});

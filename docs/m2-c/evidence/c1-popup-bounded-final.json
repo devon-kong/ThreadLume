@@ -1,0 +1,209 @@
+{
+  "version": "0.1.2",
+  "buildFrozen": true,
+  "fullscreenObservation": {
+    "state": {
+      "lastRelease": {
+        "at": 1791876399661,
+        "reason": "close"
+      },
+      "pair": {
+        "hide": false,
+        "left": 1862171839,
+        "leftWindowId": 1862171838,
+        "mode": "popups",
+        "pending": false,
+        "right": 1862171841,
+        "rightWindowId": 1862171840,
+        "source": 1862171739,
+        "url": "https://x.com/thinkszyg/status/2109309251533570509",
+        "windowId": 1862171738
+      }
+    },
+    "status": {
+      "role": "left",
+      "mode": "popups",
+      "hide": false,
+      "controls": true,
+      "launcher": false,
+      "screen": {
+        "left": 0,
+        "top": 0,
+        "width": 1800,
+        "height": 1125
+      },
+      "viewport": [
+        1800,
+        1125
+      ],
+      "visibility": "visible",
+      "y": 0,
+      "nativeArticles": 14,
+      "players": 1,
+      "media": [
+        {
+          "id": 1,
+          "time": 19.607105,
+          "paused": false,
+          "muted": false,
+          "ready": 4,
+          "connected": true
+        }
+      ],
+      "fullscreen": true,
+      "focalTop": 53,
+      "hiddenArticles": 0
+    }
+  },
+  "afterExit": {
+    "at": 1791876543266,
+    "pairPresent": true,
+    "releaseReason": "close",
+    "statuses": [
+      {
+        "role": "left",
+        "mode": "popups",
+        "hide": false,
+        "controls": true,
+        "launcher": false,
+        "screen": {
+          "left": 51,
+          "top": 25,
+          "width": 1749,
+          "height": 1100
+        },
+        "viewport": [
+          870,
+          1072
+        ],
+        "visibility": "visible",
+        "y": 0,
+        "nativeArticles": 15,
+        "players": 1,
+        "media": [
+          {
+            "id": 1,
+            "time": 16.311557,
+            "paused": false,
+            "muted": false,
+            "ready": 4,
+            "connected": true
+          }
+        ],
+        "fullscreen": false,
+        "focalTop": 53,
+        "hiddenArticles": 0
+      },
+      {
+        "role": "right",
+        "mode": "popups",
+        "hide": false,
+        "controls": true,
+        "launcher": false,
+        "screen": {
+          "left": 51,
+          "top": 25,
+          "width": 1749,
+          "height": 1100
+        },
+        "viewport": [
+          871,
+          1072
+        ],
+        "visibility": "visible",
+        "y": 919.5,
+        "nativeArticles": 22,
+        "players": 1,
+        "media": [
+          {
+            "id": 1,
+            "time": 0.401408,
+            "paused": true,
+            "muted": true,
+            "ready": 4,
+            "connected": true
+          }
+        ],
+        "fullscreen": false,
+        "focalTop": -866.5,
+        "hiddenArticles": 0
+      }
+    ]
+  },
+  "boundedLater": {
+    "at": 1791876654688,
+    "pairPresent": true,
+    "lastReleaseReason": "close",
+    "statuses": [
+      {
+        "role": "left",
+        "mode": "popups",
+        "hide": false,
+        "controls": true,
+        "launcher": false,
+        "screen": {
+          "left": 51,
+          "top": 25,
+          "width": 1749,
+          "height": 1100
+        },
+        "viewport": [
+          870,
+          1072
+        ],
+        "visibility": "visible",
+        "y": 0,
+        "nativeArticles": 15,
+        "players": 1,
+        "media": [
+          {
+            "id": 1,
+            "time": 31.349228,
+            "paused": false,
+            "muted": false,
+            "ready": 4,
+            "connected": true
+          }
+        ],
+        "fullscreen": false,
+        "focalTop": 53,
+        "hiddenArticles": 0
+      },
+      {
+        "role": "right",
+        "mode": "popups",
+        "hide": false,
+        "controls": true,
+        "launcher": false,
+        "screen": {
+          "left": 51,
+          "top": 25,
+          "width": 1749,
+          "height": 1100
+        },
+        "viewport": [
+          871,
+          1072
+        ],
+        "visibility": "visible",
+        "y": 919.5,
+        "nativeArticles": 22,
+        "players": 1,
+        "media": [
+          {
+            "id": 1,
+            "time": 0.401408,
+            "paused": true,
+            "muted": true,
+            "ready": 4,
+            "connected": true
+          }
+        ],
+        "fullscreen": false,
+        "focalTop": -866.5,
+        "hiddenArticles": 0
+      }
+    ],
+    "elapsedSinceAfterExitMs": 111422
+  }
+}

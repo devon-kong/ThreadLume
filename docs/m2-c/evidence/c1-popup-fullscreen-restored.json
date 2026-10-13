@@ -1,0 +1,125 @@
+{
+  "version": "0.1.2",
+  "scenario": "X native pause resume; native slider increment 23.55444 to 28.55444; fullscreen true at 1800x1125; exit restored",
+  "states": [
+    {
+      "role": "left",
+      "mode": "popups",
+      "hide": true,
+      "controls": true,
+      "launcher": false,
+      "screen": {
+        "left": 51,
+        "top": 25,
+        "width": 1749,
+        "height": 1100
+      },
+      "viewport": [
+        870,
+        1072
+      ],
+      "visibility": "visible",
+      "y": 10,
+      "nativeArticles": 14,
+      "players": 1,
+      "media": [
+        {
+          "id": 1,
+          "time": 28.55444,
+          "paused": true,
+          "muted": false,
+          "ready": 4,
+          "connected": true
+        }
+      ],
+      "fullscreen": false,
+      "focalTop": 43,
+      "hiddenArticles": 0
+    },
+    {
+      "role": "right",
+      "mode": "popups",
+      "hide": true,
+      "controls": true,
+      "launcher": false,
+      "screen": {
+        "left": 51,
+        "top": 25,
+        "width": 1749,
+        "height": 1100
+      },
+      "viewport": [
+        871,
+        1072
+      ],
+      "visibility": "visible",
+      "y": 6260,
+      "nativeArticles": 43,
+      "players": 2,
+      "media": [
+        {
+          "id": 3,
+          "time": 0.190729,
+          "paused": true,
+          "muted": true,
+          "ready": 4,
+          "connected": true
+        },
+        {
+          "id": 4,
+          "time": 0,
+          "paused": true,
+          "muted": false,
+          "ready": 4,
+          "connected": true
+        }
+      ],
+      "fullscreen": false,
+      "focalTop": null,
+      "hiddenArticles": 0
+    }
+  ],
+  "geometry": [
+    {
+      "left": 51,
+      "top": 25,
+      "width": 870,
+      "height": 1100,
+      "type": "popup"
+    },
+    {
+      "left": 929,
+      "top": 25,
+      "width": 871,
+      "height": 1100,
+      "type": "popup"
+    }
+  ],
+  "earlierToolObservations": [
+    {
+      "source": "same-session CUA AX native slider Increment result",
+      "seekBefore": 23.55444,
+      "seekAfter": 28.55444
+    },
+    {
+      "source": "same-session runtime status immediately after native fullscreen button",
+      "left": {
+        "viewport": [
+          1800,
+          1125
+        ],
+        "fullscreen": true,
+        "media": [
+          {
+            "id": 1,
+            "time": 28.55444,
+            "paused": true,
+            "muted": false,
+            "ready": 4,
+            "connected": true
+          }
+        ]
+      }
+    }
+  ]
+}

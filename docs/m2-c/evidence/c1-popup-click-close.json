@@ -1,0 +1,17 @@
+{
+  "version": "0.1.2",
+  "scenario": "real public profile time link to 2109906124527026527 opens two popups; real End pair button; source remains",
+  "state": {
+    "intent": null,
+    "lastRelease": {
+      "at": 1791876399661,
+      "reason": "close"
+    },
+    "pair": null
+  },
+  "closed": [
+    true,
+    true
+  ],
+  "sourceExists": true
+}
