@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-13",
+  "browser": "EgoBrowser task space 19",
+  "peek": {
+    "name": "Peek Native (M1)",
+    "version": "0.9.0",
+    "initialEnabled": true,
+    "disabledViaExtensionsUIForTests": true,
+    "restoredEnabled": true
+  },
+  "otherExtensionsChanged": false,
+  "restored": {
+    "paneCount": 1,
+    "probeStyle": 0,
+    "probeGlobal": false
+  },
+  "realM2B0MV3Installed": false,
+  "localPreview": {
+    "url": "http://127.0.0.1:5178/",
+    "title": "Peek · X 帖子浮层阅读器",
+    "opened": true,
+    "unchangedBaseline": true
+  }
+}

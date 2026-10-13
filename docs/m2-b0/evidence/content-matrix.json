@@ -1,0 +1,3438 @@
+[
+  {
+    "sample": "short",
+    "native": {
+      "viewport": [
+        1440,
+        900
+      ],
+      "scrollElement": "HTML",
+      "windowScroll": 10,
+      "extensionPanes": 0,
+      "focal": [
+        {
+          "tag": "ARTICLE",
+          "testid": "tweet",
+          "role": "article",
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "hidden",
+            "hidden"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            452.5
+          ],
+          "scroll": [
+            0,
+            453,
+            453
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            536.5
+          ],
+          "scroll": [
+            0,
+            566,
+            537
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            363.5,
+            43,
+            598,
+            537.5
+          ],
+          "scroll": [
+            0,
+            566,
+            537
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": "cellInnerDiv",
+          "role": null,
+          "position": "absolute",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            537.5
+          ],
+          "scroll": [
+            0,
+            566,
+            538
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            363.5,
+            43,
+            598,
+            4801.5
+          ],
+          "scroll": [
+            0,
+            4802,
+            4802
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            4801.5
+          ],
+          "scroll": [
+            0,
+            4802,
+            4802
+          ]
+        },
+        {
+          "tag": "SECTION",
+          "testid": null,
+          "role": "region",
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            4801.5
+          ],
+          "scroll": [
+            0,
+            4802,
+            4802
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            -10,
+            598,
+            4854.5
+          ],
+          "scroll": [
+            0,
+            4855,
+            4855
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": "primaryColumn",
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            600,
+            4854.5
+          ],
+          "scroll": [
+            0,
+            4855,
+            4855
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            1050,
+            4854.5
+          ],
+          "scroll": [
+            0,
+            4855,
+            4855
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            1050,
+            4854.5
+          ],
+          "scroll": [
+            0,
+            4855,
+            4855
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            1050,
+            4854.5
+          ],
+          "scroll": [
+            0,
+            4855,
+            4855
+          ]
+        },
+        {
+          "tag": "MAIN",
+          "testid": null,
+          "role": "main",
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            1077.5,
+            4854.5
+          ],
+          "scroll": [
+            0,
+            4855,
+            4855
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            -10,
+            1440,
+            4854.5
+          ],
+          "scroll": [
+            0,
+            4855,
+            4855
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            4855,
+            900
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            4855,
+            900
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "static",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            4855,
+            900
+          ]
+        },
+        {
+          "tag": "BODY",
+          "testid": null,
+          "role": null,
+          "position": "static",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            4855,
+            900
+          ]
+        },
+        {
+          "tag": "HTML",
+          "testid": null,
+          "role": null,
+          "position": "static",
+          "transform": "none",
+          "overflow": [
+            "auto",
+            "scroll"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            10,
+            4854,
+            900
+          ]
+        }
+      ],
+      "video": [],
+      "cells": [
+        {
+          "testid": "cellInnerDiv",
+          "article": true,
+          "composer": true,
+          "rect": [
+            363.5,
+            43,
+            598,
+            537.5
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": false,
+          "composer": false,
+          "rect": [
+            363.5,
+            580.5,
+            598,
+            0
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": true,
+          "composer": false,
+          "rect": [
+            363.5,
+            580.5,
+            598,
+            119
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": false,
+          "composer": false,
+          "rect": [
+            363.5,
+            699.5,
+            598,
+            0
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": true,
+          "composer": false,
+          "rect": [
+            363.5,
+            699.5,
+            598,
+            119
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": false,
+          "composer": false,
+          "rect": [
+            363.5,
+            818.5,
+            598,
+            0
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": true,
+          "composer": false,
+          "rect": [
+            363.5,
+            818.5,
+            598,
+            119
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": false,
+          "composer": false,
+          "rect": [
+            363.5,
+            937.5,
+            598,
+            0
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": true,
+          "composer": false,
+          "rect": [
+            363.5,
+            937.5,
+            598,
+            669
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": false,
+          "composer": false,
+          "rect": [
+            363.5,
+            1606.5,
+            598,
+            0
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": true,
+          "composer": false,
+          "rect": [
+            363.5,
+            1606.5,
+            598,
+            99
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": false,
+          "composer": false,
+          "rect": [
+            363.5,
+            1705.5,
+            598,
+            0
+          ]
+        }
+      ],
+      "content": {
+        "textChars": 113,
+        "photos": 0,
+        "videos": 0,
+        "articleChars": 0,
+        "articleImages": 0,
+        "quoteCards": 2,
+        "poll": false,
+        "actions": [
+          "caret",
+          "reply",
+          "retweet",
+          "like",
+          "bookmark"
+        ]
+      }
+    },
+    "initial": {
+      "mode": "a",
+      "innerScroll": false,
+      "active": true,
+      "reason": null,
+      "installMs": 0.09999990463256836,
+      "endedAfterMs": null,
+      "viewport": [
+        1440,
+        900
+      ],
+      "windowScroll": 10,
+      "sectionScroll": 0,
+      "sectionHeight": 4802,
+      "articleScroll": 0,
+      "articleHeight": 846,
+      "articleClient": 846,
+      "connected": true,
+      "sameParent": true,
+      "cellConnected": true,
+      "sameCellParent": true,
+      "rect": {
+        "x": 0,
+        "y": 54,
+        "w": 748.796875,
+        "h": 846
+      },
+      "mediaRect": null,
+      "sameMediaParent": null,
+      "sameVideo": null,
+      "videoConnected": null,
+      "video": null,
+      "nativeVideos": 2,
+      "visibleArticles": 4,
+      "liveCells": 25
+    },
+    "left": {
+      "mode": "a",
+      "innerScroll": false,
+      "active": true,
+      "reason": null,
+      "installMs": 0.09999990463256836,
+      "endedAfterMs": null,
+      "viewport": [
+        1440,
+        900
+      ],
+      "windowScroll": 10,
+      "sectionScroll": 0,
+      "sectionHeight": 4506,
+      "articleScroll": 0,
+      "articleHeight": 846,
+      "articleClient": 846,
+      "connected": true,
+      "sameParent": true,
+      "cellConnected": true,
+      "sameCellParent": true,
+      "rect": {
+        "x": 0,
+        "y": 54,
+        "w": 748.796875,
+        "h": 846
+      },
+      "mediaRect": null,
+      "sameMediaParent": null,
+      "sameVideo": null,
+      "videoConnected": null,
+      "video": null,
+      "nativeVideos": 2,
+      "visibleArticles": 5,
+      "liveCells": 25
+    },
+    "after": {
+      "mode": "a",
+      "innerScroll": false,
+      "active": true,
+      "reason": null,
+      "installMs": 0.09999990463256836,
+      "endedAfterMs": null,
+      "viewport": [
+        1440,
+        900
+      ],
+      "windowScroll": 10,
+      "sectionScroll": 0,
+      "sectionHeight": 4506,
+      "articleScroll": 0,
+      "articleHeight": 846,
+      "articleClient": 846,
+      "connected": true,
+      "sameParent": true,
+      "cellConnected": true,
+      "sameCellParent": true,
+      "rect": {
+        "x": 0,
+        "y": 54,
+        "w": 748.796875,
+        "h": 846
+      },
+      "mediaRect": null,
+      "sameMediaParent": null,
+      "sameVideo": null,
+      "videoConnected": null,
+      "video": null,
+      "nativeVideos": 2,
+      "visibleArticles": 5,
+      "liveCells": 25
+    }
+  },
+  {
+    "sample": "photo",
+    "native": {
+      "viewport": [
+        1440,
+        900
+      ],
+      "scrollElement": "HTML",
+      "windowScroll": 10,
+      "extensionPanes": 0,
+      "focal": [
+        {
+          "tag": "ARTICLE",
+          "testid": "tweet",
+          "role": "article",
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "hidden",
+            "hidden"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            929.375
+          ],
+          "scroll": [
+            0,
+            929,
+            929
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            1013.375
+          ],
+          "scroll": [
+            0,
+            1042,
+            1013
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            363.5,
+            43,
+            598,
+            1014.375
+          ],
+          "scroll": [
+            0,
+            1042,
+            1013
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": "cellInnerDiv",
+          "role": null,
+          "position": "absolute",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            1014.375
+          ],
+          "scroll": [
+            0,
+            1042,
+            1014
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            363.5,
+            43,
+            598,
+            10799
+          ],
+          "scroll": [
+            0,
+            10799,
+            10799
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            10799
+          ],
+          "scroll": [
+            0,
+            10799,
+            10799
+          ]
+        },
+        {
+          "tag": "SECTION",
+          "testid": null,
+          "role": "region",
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            10799
+          ],
+          "scroll": [
+            0,
+            10799,
+            10799
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            -10,
+            598,
+            10852
+          ],
+          "scroll": [
+            0,
+            10852,
+            10852
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": "primaryColumn",
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            600,
+            10852
+          ],
+          "scroll": [
+            0,
+            10852,
+            10852
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            1050,
+            10852
+          ],
+          "scroll": [
+            0,
+            10852,
+            10852
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            1050,
+            10852
+          ],
+          "scroll": [
+            0,
+            10852,
+            10852
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            1050,
+            10852
+          ],
+          "scroll": [
+            0,
+            10852,
+            10852
+          ]
+        },
+        {
+          "tag": "MAIN",
+          "testid": null,
+          "role": "main",
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            1077.5,
+            10852
+          ],
+          "scroll": [
+            0,
+            10852,
+            10852
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            -10,
+            1440,
+            10852
+          ],
+          "scroll": [
+            0,
+            10852,
+            10852
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            10852,
+            900
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            10852,
+            900
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "static",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            10852,
+            900
+          ]
+        },
+        {
+          "tag": "BODY",
+          "testid": null,
+          "role": null,
+          "position": "static",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            10852,
+            900
+          ]
+        },
+        {
+          "tag": "HTML",
+          "testid": null,
+          "role": null,
+          "position": "static",
+          "transform": "none",
+          "overflow": [
+            "auto",
+            "scroll"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            10,
+            10852,
+            900
+          ]
+        }
+      ],
+      "video": [],
+      "cells": [
+        {
+          "testid": "cellInnerDiv",
+          "article": true,
+          "composer": true,
+          "rect": [
+            363.5,
+            43,
+            598,
+            1014.375
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": false,
+          "composer": false,
+          "rect": [
+            363.5,
+            1057.5,
+            598,
+            0
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": true,
+          "composer": false,
+          "rect": [
+            363.5,
+            1057.5,
+            598,
+            119
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": false,
+          "composer": false,
+          "rect": [
+            363.5,
+            1176.5,
+            598,
+            0
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": true,
+          "composer": false,
+          "rect": [
+            363.5,
+            1176.5,
+            598,
+            97
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": true,
+          "composer": false,
+          "rect": [
+            363.5,
+            1273.5,
+            598,
+            99
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": false,
+          "composer": false,
+          "rect": [
+            363.5,
+            1372.5,
+            598,
+            0
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": true,
+          "composer": false,
+          "rect": [
+            363.5,
+            1372.5,
+            598,
+            97
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": true,
+          "composer": false,
+          "rect": [
+            363.5,
+            1469.5,
+            598,
+            99
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": false,
+          "composer": false,
+          "rect": [
+            363.5,
+            1568.5,
+            598,
+            0
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": true,
+          "composer": false,
+          "rect": [
+            363.5,
+            1568.5,
+            598,
+            517.796875
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": false,
+          "composer": false,
+          "rect": [
+            363.5,
+            2086.5,
+            598,
+            0
+          ]
+        }
+      ],
+      "content": {
+        "textChars": 357,
+        "photos": 2,
+        "videos": 0,
+        "articleChars": 0,
+        "articleImages": 0,
+        "quoteCards": 0,
+        "poll": false,
+        "actions": [
+          "caret",
+          "reply",
+          "retweet",
+          "like",
+          "bookmark"
+        ]
+      }
+    },
+    "initial": {
+      "mode": "a",
+      "innerScroll": false,
+      "active": true,
+      "reason": null,
+      "installMs": 0.09999990463256836,
+      "endedAfterMs": null,
+      "viewport": [
+        1440,
+        900
+      ],
+      "windowScroll": 10,
+      "sectionScroll": 0,
+      "sectionHeight": 10648,
+      "articleScroll": 0,
+      "articleHeight": 1031,
+      "articleClient": 846,
+      "connected": true,
+      "sameParent": true,
+      "cellConnected": true,
+      "sameCellParent": true,
+      "rect": {
+        "x": 0,
+        "y": 54,
+        "w": 748.796875,
+        "h": 846
+      },
+      "mediaRect": null,
+      "sameMediaParent": null,
+      "sameVideo": null,
+      "videoConnected": null,
+      "video": null,
+      "nativeVideos": 0,
+      "visibleArticles": 1,
+      "liveCells": 23
+    },
+    "left": {
+      "mode": "a",
+      "innerScroll": false,
+      "active": true,
+      "reason": null,
+      "installMs": 0.09999990463256836,
+      "endedAfterMs": null,
+      "viewport": [
+        1440,
+        900
+      ],
+      "windowScroll": 10,
+      "sectionScroll": 0,
+      "sectionHeight": 10448,
+      "articleScroll": 185,
+      "articleHeight": 1031,
+      "articleClient": 846,
+      "connected": true,
+      "sameParent": true,
+      "cellConnected": true,
+      "sameCellParent": true,
+      "rect": {
+        "x": 0,
+        "y": 54,
+        "w": 748.796875,
+        "h": 846
+      },
+      "mediaRect": null,
+      "sameMediaParent": null,
+      "sameVideo": null,
+      "videoConnected": null,
+      "video": null,
+      "nativeVideos": 1,
+      "visibleArticles": 7,
+      "liveCells": 29
+    },
+    "after": {
+      "mode": "a",
+      "innerScroll": false,
+      "active": true,
+      "reason": null,
+      "installMs": 0.09999990463256836,
+      "endedAfterMs": null,
+      "viewport": [
+        1440,
+        900
+      ],
+      "windowScroll": 10,
+      "sectionScroll": 0,
+      "sectionHeight": 10448,
+      "articleScroll": 0,
+      "articleHeight": 1031,
+      "articleClient": 846,
+      "connected": true,
+      "sameParent": true,
+      "cellConnected": true,
+      "sameCellParent": true,
+      "rect": {
+        "x": 0,
+        "y": 54,
+        "w": 748.796875,
+        "h": 846
+      },
+      "mediaRect": null,
+      "sameMediaParent": null,
+      "sameVideo": null,
+      "videoConnected": null,
+      "video": null,
+      "nativeVideos": 1,
+      "visibleArticles": 7,
+      "liveCells": 29
+    }
+  },
+  {
+    "sample": "article",
+    "native": {
+      "viewport": [
+        1440,
+        900
+      ],
+      "scrollElement": "HTML",
+      "windowScroll": 10,
+      "extensionPanes": 0,
+      "focal": [
+        {
+          "tag": "ARTICLE",
+          "testid": "tweet",
+          "role": "article",
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "hidden",
+            "hidden"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            8677.796875
+          ],
+          "scroll": [
+            0,
+            8678,
+            8678
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            8761.796875
+          ],
+          "scroll": [
+            0,
+            8791,
+            8762
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            363.5,
+            43,
+            598,
+            8762.796875
+          ],
+          "scroll": [
+            0,
+            8791,
+            8762
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": "cellInnerDiv",
+          "role": null,
+          "position": "absolute",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            8762.796875
+          ],
+          "scroll": [
+            0,
+            8791,
+            8763
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            363.5,
+            43,
+            598,
+            19460
+          ],
+          "scroll": [
+            0,
+            19460,
+            19460
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            19460
+          ],
+          "scroll": [
+            0,
+            19460,
+            19460
+          ]
+        },
+        {
+          "tag": "SECTION",
+          "testid": null,
+          "role": "region",
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            19460
+          ],
+          "scroll": [
+            0,
+            19460,
+            19460
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            -10,
+            598,
+            19513
+          ],
+          "scroll": [
+            0,
+            19513,
+            19513
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": "primaryColumn",
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            600,
+            19513
+          ],
+          "scroll": [
+            0,
+            19513,
+            19513
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            1050,
+            19513
+          ],
+          "scroll": [
+            0,
+            19513,
+            19513
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            1050,
+            19513
+          ],
+          "scroll": [
+            0,
+            19513,
+            19513
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            1050,
+            19513
+          ],
+          "scroll": [
+            0,
+            19513,
+            19513
+          ]
+        },
+        {
+          "tag": "MAIN",
+          "testid": null,
+          "role": "main",
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            1077.5,
+            19513
+          ],
+          "scroll": [
+            0,
+            19513,
+            19513
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            -10,
+            1440,
+            19513
+          ],
+          "scroll": [
+            0,
+            19513,
+            19513
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            19513,
+            900
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            19513,
+            900
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "static",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            19513,
+            900
+          ]
+        },
+        {
+          "tag": "BODY",
+          "testid": null,
+          "role": null,
+          "position": "static",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            19513,
+            900
+          ]
+        },
+        {
+          "tag": "HTML",
+          "testid": null,
+          "role": null,
+          "position": "static",
+          "transform": "none",
+          "overflow": [
+            "auto",
+            "scroll"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            10,
+            19513,
+            900
+          ]
+        }
+      ],
+      "video": [],
+      "cells": [
+        {
+          "testid": "cellInnerDiv",
+          "article": true,
+          "composer": true,
+          "rect": [
+            363.5,
+            43,
+            598,
+            8762.796875
+          ]
+        }
+      ],
+      "content": {
+        "textChars": 0,
+        "photos": 8,
+        "videos": 0,
+        "articleChars": 4662,
+        "articleImages": 7,
+        "quoteCards": 0,
+        "poll": false,
+        "actions": [
+          "caret",
+          "reply",
+          "retweet",
+          "like",
+          "bookmark",
+          "reply",
+          "retweet",
+          "like",
+          "bookmark"
+        ]
+      }
+    },
+    "initial": {
+      "mode": "a",
+      "innerScroll": false,
+      "active": true,
+      "reason": null,
+      "installMs": 0.20000004768371582,
+      "endedAfterMs": null,
+      "viewport": [
+        1440,
+        900
+      ],
+      "windowScroll": 10,
+      "sectionScroll": 0,
+      "sectionHeight": 19460,
+      "articleScroll": 0,
+      "articleHeight": 8682,
+      "articleClient": 846,
+      "connected": true,
+      "sameParent": true,
+      "cellConnected": true,
+      "sameCellParent": true,
+      "rect": {
+        "x": 0,
+        "y": 54,
+        "w": 748.796875,
+        "h": 846
+      },
+      "mediaRect": null,
+      "sameMediaParent": null,
+      "sameVideo": null,
+      "videoConnected": null,
+      "video": null,
+      "nativeVideos": 0,
+      "visibleArticles": 2,
+      "liveCells": 1
+    },
+    "left": {
+      "mode": "a",
+      "innerScroll": false,
+      "active": true,
+      "reason": null,
+      "installMs": 0.20000004768371582,
+      "endedAfterMs": null,
+      "viewport": [
+        1440,
+        900
+      ],
+      "windowScroll": 10,
+      "sectionScroll": 0,
+      "sectionHeight": 9649,
+      "articleScroll": 400,
+      "articleHeight": 8682,
+      "articleClient": 846,
+      "connected": true,
+      "sameParent": true,
+      "cellConnected": true,
+      "sameCellParent": true,
+      "rect": {
+        "x": 0,
+        "y": 54,
+        "w": 748.796875,
+        "h": 846
+      },
+      "mediaRect": null,
+      "sameMediaParent": null,
+      "sameVideo": null,
+      "videoConnected": null,
+      "video": null,
+      "nativeVideos": 0,
+      "visibleArticles": 4,
+      "liveCells": 30
+    },
+    "after": {
+      "mode": "a",
+      "innerScroll": false,
+      "active": true,
+      "reason": null,
+      "installMs": 0.20000004768371582,
+      "endedAfterMs": null,
+      "viewport": [
+        1440,
+        900
+      ],
+      "windowScroll": 10,
+      "sectionScroll": 0,
+      "sectionHeight": 9649,
+      "articleScroll": 0,
+      "articleHeight": 8682,
+      "articleClient": 846,
+      "connected": true,
+      "sameParent": true,
+      "cellConnected": true,
+      "sameCellParent": true,
+      "rect": {
+        "x": 0,
+        "y": 54,
+        "w": 748.796875,
+        "h": 846
+      },
+      "mediaRect": null,
+      "sameMediaParent": null,
+      "sameVideo": null,
+      "videoConnected": null,
+      "video": null,
+      "nativeVideos": 0,
+      "visibleArticles": 4,
+      "liveCells": 30
+    }
+  },
+  {
+    "sample": "highReply",
+    "native": {
+      "viewport": [
+        1440,
+        900
+      ],
+      "scrollElement": "HTML",
+      "windowScroll": 0,
+      "extensionPanes": 0,
+      "focal": [
+        {
+          "tag": "ARTICLE",
+          "testid": "tweet",
+          "role": "article",
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "hidden",
+            "hidden"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            53,
+            598,
+            788.0234375
+          ],
+          "scroll": [
+            0,
+            788,
+            788
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            53,
+            598,
+            872.0234375
+          ],
+          "scroll": [
+            0,
+            901,
+            872
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            363.5,
+            53,
+            598,
+            873.0234375
+          ],
+          "scroll": [
+            0,
+            901,
+            872
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": "cellInnerDiv",
+          "role": null,
+          "position": "absolute",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            53,
+            598,
+            873.0234375
+          ],
+          "scroll": [
+            0,
+            901,
+            873
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            363.5,
+            53,
+            598,
+            1073.5
+          ],
+          "scroll": [
+            0,
+            1074,
+            1074
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            53,
+            598,
+            1073.5
+          ],
+          "scroll": [
+            0,
+            1074,
+            1074
+          ]
+        },
+        {
+          "tag": "SECTION",
+          "testid": null,
+          "role": "region",
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            53,
+            598,
+            1073.5
+          ],
+          "scroll": [
+            0,
+            1074,
+            1074
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            0,
+            598,
+            1126.5
+          ],
+          "scroll": [
+            0,
+            1127,
+            1127
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": "primaryColumn",
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            0,
+            600,
+            1126.5
+          ],
+          "scroll": [
+            0,
+            1127,
+            1127
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            0,
+            1050,
+            1126.5
+          ],
+          "scroll": [
+            0,
+            1127,
+            1127
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            0,
+            1050,
+            1126.5
+          ],
+          "scroll": [
+            0,
+            1127,
+            1127
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            0,
+            1050,
+            1126.5
+          ],
+          "scroll": [
+            0,
+            1127,
+            1127
+          ]
+        },
+        {
+          "tag": "MAIN",
+          "testid": null,
+          "role": "main",
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            0,
+            1077.5,
+            1126.5
+          ],
+          "scroll": [
+            0,
+            1127,
+            1127
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            0,
+            1440,
+            1126.5
+          ],
+          "scroll": [
+            0,
+            1127,
+            1127
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            0,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            1127,
+            900
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            0,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            1127,
+            900
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "static",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            0,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            1127,
+            900
+          ]
+        },
+        {
+          "tag": "BODY",
+          "testid": null,
+          "role": null,
+          "position": "static",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            0,
+            0,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            1127,
+            900
+          ]
+        },
+        {
+          "tag": "HTML",
+          "testid": null,
+          "role": null,
+          "position": "static",
+          "transform": "none",
+          "overflow": [
+            "auto",
+            "scroll"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            0,
+            0,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            1126,
+            900
+          ]
+        }
+      ],
+      "video": [],
+      "cells": [
+        {
+          "testid": "cellInnerDiv",
+          "article": true,
+          "composer": true,
+          "rect": [
+            363.5,
+            53,
+            598,
+            873.0234375
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": false,
+          "composer": false,
+          "rect": [
+            363.5,
+            926.5,
+            598,
+            200
+          ]
+        }
+      ],
+      "content": {
+        "textChars": 80,
+        "photos": 0,
+        "videos": 0,
+        "articleChars": 0,
+        "articleImages": 0,
+        "quoteCards": 0,
+        "poll": false,
+        "actions": [
+          "caret",
+          "reply",
+          "retweet",
+          "like",
+          "bookmark"
+        ]
+      }
+    },
+    "initial": {
+      "mode": "a",
+      "innerScroll": false,
+      "active": true,
+      "reason": null,
+      "installMs": 0.10000014305114746,
+      "endedAfterMs": null,
+      "viewport": [
+        1440,
+        900
+      ],
+      "windowScroll": 0,
+      "sectionScroll": 0,
+      "sectionHeight": 1074,
+      "articleScroll": 0,
+      "articleHeight": 846,
+      "articleClient": 846,
+      "connected": true,
+      "sameParent": true,
+      "cellConnected": true,
+      "sameCellParent": true,
+      "rect": {
+        "x": 0,
+        "y": 54,
+        "w": 748.796875,
+        "h": 846
+      },
+      "mediaRect": null,
+      "sameMediaParent": null,
+      "sameVideo": null,
+      "videoConnected": null,
+      "video": null,
+      "nativeVideos": 0,
+      "visibleArticles": 1,
+      "liveCells": 2
+    },
+    "left": {
+      "mode": "a",
+      "innerScroll": false,
+      "active": true,
+      "reason": null,
+      "installMs": 0.10000014305114746,
+      "endedAfterMs": null,
+      "viewport": [
+        1440,
+        900
+      ],
+      "windowScroll": 0,
+      "sectionScroll": 0,
+      "sectionHeight": 847,
+      "articleScroll": 0,
+      "articleHeight": 846,
+      "articleClient": 846,
+      "connected": true,
+      "sameParent": true,
+      "cellConnected": true,
+      "sameCellParent": true,
+      "rect": {
+        "x": 0,
+        "y": 54,
+        "w": 748.796875,
+        "h": 846
+      },
+      "mediaRect": null,
+      "sameMediaParent": null,
+      "sameVideo": null,
+      "videoConnected": null,
+      "video": null,
+      "nativeVideos": 1,
+      "visibleArticles": 1,
+      "liveCells": 2
+    },
+    "after": {
+      "mode": "a",
+      "innerScroll": false,
+      "active": true,
+      "reason": null,
+      "installMs": 0.10000014305114746,
+      "endedAfterMs": null,
+      "viewport": [
+        1440,
+        900
+      ],
+      "windowScroll": 0,
+      "sectionScroll": 0,
+      "sectionHeight": 847,
+      "articleScroll": 0,
+      "articleHeight": 846,
+      "articleClient": 846,
+      "connected": true,
+      "sameParent": true,
+      "cellConnected": true,
+      "sameCellParent": true,
+      "rect": {
+        "x": 0,
+        "y": 54,
+        "w": 748.796875,
+        "h": 846
+      },
+      "mediaRect": null,
+      "sameMediaParent": null,
+      "sameVideo": null,
+      "videoConnected": null,
+      "video": null,
+      "nativeVideos": 1,
+      "visibleArticles": 1,
+      "liveCells": 2
+    }
+  },
+  {
+    "sample": "long",
+    "native": {
+      "viewport": [
+        1440,
+        900
+      ],
+      "scrollElement": "HTML",
+      "windowScroll": 10,
+      "extensionPanes": 0,
+      "focal": [
+        {
+          "tag": "ARTICLE",
+          "testid": "tweet",
+          "role": "article",
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "hidden",
+            "hidden"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            624
+          ],
+          "scroll": [
+            0,
+            624,
+            624
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            708
+          ],
+          "scroll": [
+            0,
+            737,
+            708
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            363.5,
+            43,
+            598,
+            709
+          ],
+          "scroll": [
+            0,
+            737,
+            708
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": "cellInnerDiv",
+          "role": null,
+          "position": "absolute",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            709
+          ],
+          "scroll": [
+            0,
+            737,
+            709
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            363.5,
+            43,
+            598,
+            1602
+          ],
+          "scroll": [
+            0,
+            1602,
+            1602
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            1602
+          ],
+          "scroll": [
+            0,
+            1602,
+            1602
+          ]
+        },
+        {
+          "tag": "SECTION",
+          "testid": null,
+          "role": "region",
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            43,
+            598,
+            1602
+          ],
+          "scroll": [
+            0,
+            1602,
+            1602
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            363.5,
+            -10,
+            598,
+            1655
+          ],
+          "scroll": [
+            0,
+            1655,
+            1655
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": "primaryColumn",
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            600,
+            1655
+          ],
+          "scroll": [
+            0,
+            1655,
+            1655
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            1050,
+            1655
+          ],
+          "scroll": [
+            0,
+            1655,
+            1655
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            1050,
+            1655
+          ],
+          "scroll": [
+            0,
+            1655,
+            1655
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            1050,
+            1655
+          ],
+          "scroll": [
+            0,
+            1655,
+            1655
+          ]
+        },
+        {
+          "tag": "MAIN",
+          "testid": null,
+          "role": "main",
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            362.5,
+            -10,
+            1077.5,
+            1655
+          ],
+          "scroll": [
+            0,
+            1655,
+            1655
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            -10,
+            1440,
+            1655
+          ],
+          "scroll": [
+            0,
+            1655,
+            1655
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            1655,
+            900
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "relative",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            1655,
+            900
+          ]
+        },
+        {
+          "tag": "DIV",
+          "testid": null,
+          "role": null,
+          "position": "static",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "flex",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            1655,
+            900
+          ]
+        },
+        {
+          "tag": "BODY",
+          "testid": null,
+          "role": null,
+          "position": "static",
+          "transform": "none",
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            0,
+            1655,
+            900
+          ]
+        },
+        {
+          "tag": "HTML",
+          "testid": null,
+          "role": null,
+          "position": "static",
+          "transform": "none",
+          "overflow": [
+            "auto",
+            "scroll"
+          ],
+          "contain": "none",
+          "filter": "none",
+          "display": "block",
+          "rect": [
+            0,
+            -10,
+            1440,
+            900
+          ],
+          "scroll": [
+            10,
+            1655,
+            900
+          ]
+        }
+      ],
+      "video": [],
+      "cells": [
+        {
+          "testid": "cellInnerDiv",
+          "article": true,
+          "composer": true,
+          "rect": [
+            363.5,
+            43,
+            598,
+            709
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": false,
+          "composer": false,
+          "rect": [
+            363.5,
+            734,
+            598,
+            0
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": false,
+          "composer": false,
+          "rect": [
+            363.5,
+            734,
+            598,
+            64
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": true,
+          "composer": false,
+          "rect": [
+            363.5,
+            798,
+            598,
+            219
+          ]
+        },
+        {
+          "testid": "cellInnerDiv",
+          "article": false,
+          "composer": false,
+          "rect": [
+            363.5,
+            1017,
+            598,
+            200
+          ]
+        }
+      ],
+      "content": {
+        "textChars": 806,
+        "photos": 0,
+        "videos": 0,
+        "articleChars": 0,
+        "articleImages": 0,
+        "quoteCards": 0,
+        "poll": false,
+        "actions": [
+          "caret",
+          "reply",
+          "retweet",
+          "like",
+          "bookmark"
+        ]
+      }
+    },
+    "initial": {
+      "mode": "a",
+      "innerScroll": false,
+      "active": true,
+      "reason": null,
+      "installMs": 0.20000004768371582,
+      "endedAfterMs": null,
+      "viewport": [
+        1440,
+        900
+      ],
+      "windowScroll": 10,
+      "sectionScroll": 0,
+      "sectionHeight": 1602,
+      "articleScroll": 0,
+      "articleHeight": 846,
+      "articleClient": 846,
+      "connected": true,
+      "sameParent": true,
+      "cellConnected": true,
+      "sameCellParent": true,
+      "rect": {
+        "x": 0,
+        "y": 54,
+        "w": 748.796875,
+        "h": 846
+      },
+      "mediaRect": null,
+      "sameMediaParent": null,
+      "sameVideo": null,
+      "videoConnected": null,
+      "video": null,
+      "nativeVideos": 0,
+      "visibleArticles": 2,
+      "liveCells": 5
+    },
+    "left": {
+      "mode": "a",
+      "innerScroll": false,
+      "active": true,
+      "reason": null,
+      "installMs": 0.20000004768371582,
+      "endedAfterMs": null,
+      "viewport": [
+        1440,
+        900
+      ],
+      "windowScroll": 10,
+      "sectionScroll": 0,
+      "sectionHeight": 996,
+      "articleScroll": 0,
+      "articleHeight": 846,
+      "articleClient": 846,
+      "connected": true,
+      "sameParent": true,
+      "cellConnected": true,
+      "sameCellParent": true,
+      "rect": {
+        "x": 0,
+        "y": 54,
+        "w": 748.796875,
+        "h": 846
+      },
+      "mediaRect": null,
+      "sameMediaParent": null,
+      "sameVideo": null,
+      "videoConnected": null,
+      "video": null,
+      "nativeVideos": 0,
+      "visibleArticles": 2,
+      "liveCells": 5
+    },
+    "after": {
+      "mode": "a",
+      "innerScroll": false,
+      "active": true,
+      "reason": null,
+      "installMs": 0.20000004768371582,
+      "endedAfterMs": null,
+      "viewport": [
+        1440,
+        900
+      ],
+      "windowScroll": 10,
+      "sectionScroll": 0,
+      "sectionHeight": 996,
+      "articleScroll": 0,
+      "articleHeight": 846,
+      "articleClient": 846,
+      "connected": true,
+      "sameParent": true,
+      "cellConnected": true,
+      "sameCellParent": true,
+      "rect": {
+        "x": 0,
+        "y": 54,
+        "w": 748.796875,
+        "h": 846
+      },
+      "mediaRect": null,
+      "sameMediaParent": null,
+      "sameVideo": null,
+      "videoConnected": null,
+      "video": null,
+      "nativeVideos": 0,
+      "visibleArticles": 2,
+      "liveCells": 5
+    }
+  }
+]

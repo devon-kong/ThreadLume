@@ -1,0 +1,206 @@
+[
+  {
+    "target": 0,
+    "mode": "a",
+    "innerScroll": false,
+    "active": true,
+    "reason": null,
+    "installMs": 0.10000014305114746,
+    "endedAfterMs": null,
+    "viewport": [
+      1440,
+      900
+    ],
+    "windowScroll": 0,
+    "sectionScroll": 0,
+    "sectionHeight": 9197,
+    "articleScroll": 220,
+    "articleHeight": 1068,
+    "articleClient": 846,
+    "connected": true,
+    "sameParent": true,
+    "cellConnected": true,
+    "sameCellParent": true,
+    "rect": {
+      "x": 0,
+      "y": 54,
+      "w": 748.796875,
+      "h": 846
+    },
+    "mediaRect": {
+      "x": 17,
+      "y": 57,
+      "w": 713.796875,
+      "h": 713.796875
+    },
+    "sameMediaParent": true,
+    "sameVideo": true,
+    "videoConnected": true,
+    "video": {
+      "paused": false,
+      "time": 28.333861,
+      "ready": 4,
+      "muted": true,
+      "dimensions": [
+        1472,
+        1472
+      ]
+    },
+    "nativeVideos": 1,
+    "visibleArticles": 5,
+    "liveCells": 27
+  },
+  {
+    "target": 800,
+    "mode": "a",
+    "innerScroll": false,
+    "active": true,
+    "reason": null,
+    "installMs": 0.10000014305114746,
+    "endedAfterMs": null,
+    "viewport": [
+      1440,
+      900
+    ],
+    "windowScroll": 800,
+    "sectionScroll": 0,
+    "sectionHeight": 9197,
+    "articleScroll": 220,
+    "articleHeight": 1068,
+    "articleClient": 846,
+    "connected": true,
+    "sameParent": true,
+    "cellConnected": true,
+    "sameCellParent": true,
+    "rect": {
+      "x": 0,
+      "y": 54,
+      "w": 748.796875,
+      "h": 846
+    },
+    "mediaRect": {
+      "x": 17,
+      "y": 57,
+      "w": 713.796875,
+      "h": 713.796875
+    },
+    "sameMediaParent": true,
+    "sameVideo": true,
+    "videoConnected": true,
+    "video": {
+      "paused": false,
+      "time": 29.04345,
+      "ready": 4,
+      "muted": true,
+      "dimensions": [
+        1472,
+        1472
+      ]
+    },
+    "nativeVideos": 1,
+    "visibleArticles": 5,
+    "liveCells": 27
+  },
+  {
+    "target": 1600,
+    "mode": "a",
+    "innerScroll": false,
+    "active": true,
+    "reason": null,
+    "installMs": 0.10000014305114746,
+    "endedAfterMs": null,
+    "viewport": [
+      1440,
+      900
+    ],
+    "windowScroll": 1600,
+    "sectionScroll": 0,
+    "sectionHeight": 9197,
+    "articleScroll": 220,
+    "articleHeight": 1068,
+    "articleClient": 846,
+    "connected": true,
+    "sameParent": true,
+    "cellConnected": true,
+    "sameCellParent": true,
+    "rect": {
+      "x": 0,
+      "y": 54,
+      "w": 748.796875,
+      "h": 846
+    },
+    "mediaRect": {
+      "x": 17,
+      "y": 57,
+      "w": 713.796875,
+      "h": 713.796875
+    },
+    "sameMediaParent": true,
+    "sameVideo": true,
+    "videoConnected": true,
+    "video": {
+      "paused": false,
+      "time": 29.748256,
+      "ready": 4,
+      "muted": true,
+      "dimensions": [
+        1472,
+        1472
+      ]
+    },
+    "nativeVideos": 1,
+    "visibleArticles": 10,
+    "liveCells": 27
+  },
+  {
+    "target": 2800,
+    "mode": "a",
+    "innerScroll": false,
+    "active": false,
+    "reason": "focal-unmounted",
+    "installMs": 0.10000014305114746,
+    "endedAfterMs": 39601,
+    "viewport": [
+      1440,
+      900
+    ],
+    "windowScroll": 2732,
+    "sectionScroll": 0,
+    "sectionHeight": 8457,
+    "articleScroll": 0,
+    "articleHeight": 0,
+    "articleClient": 0,
+    "connected": false,
+    "sameParent": true,
+    "cellConnected": false,
+    "sameCellParent": false,
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0
+    },
+    "mediaRect": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0
+    },
+    "sameMediaParent": true,
+    "sameVideo": false,
+    "videoConnected": false,
+    "video": {
+      "paused": true,
+      "time": 0,
+      "ready": 0,
+      "muted": true,
+      "dimensions": [
+        0,
+        0
+      ]
+    },
+    "nativeVideos": 0,
+    "visibleArticles": 9,
+    "liveCells": 27
+  }
+]

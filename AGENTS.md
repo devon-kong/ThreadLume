@@ -52,3 +52,5 @@ Build app UI in `src/`. Keep `.openai/hosting.json`, `worker/index.js`, `scripts
 - The unpacked extension output is `dist-extension/`; the demo remains Sites-compatible and builds to `dist/client/`.
 
 - 2026-09-25 用户明确要求：Peek 收藏分类必须联动 X 原生收藏夹，不建立本地替代分类。点击收藏提供原生文件夹选择、仅保存所有书签、已收藏帖重新分类及显式取消收藏。缺权限/接口不可用时仍可普通收藏。新建和管理文件夹跳转 X 原生页面；不得把模拟测试等同真实账号联动验收。
+
+- 2026-10-13 M2-B0 实验约束：原帖仅展示一次，左栏目标为完整原生内容、媒体与动作，右栏为原生评论；允许可恢复 CSS 布局探索，禁止 React Fiber/内部虚拟列表方法修改、React 节点搬移/复制、认证桥接或主动私有接口。每条候选最多一轮实现和一轮针对性修复；结构阻断即停止，保留 M1-R 和 Legacy。

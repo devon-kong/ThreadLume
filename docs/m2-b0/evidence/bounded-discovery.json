@@ -1,0 +1,18 @@
+[
+  {
+    "kind": "gif",
+    "articleCount": 5,
+    "videoCount": 0,
+    "pollCount": 0,
+    "alert": false,
+    "error": false
+  },
+  {
+    "kind": "poll",
+    "articleCount": 0,
+    "videoCount": 0,
+    "pollCount": 0,
+    "alert": false,
+    "error": true
+  }
+]

@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-13",
+  "base": "dfb94f74be6fa8968e06ec675245cce3cf0f015a",
+  "tests": [
+    {
+      "command": "npm run test:native",
+      "passed": 93,
+      "failed": 0,
+      "buildIncluded": true
+    },
+    {
+      "command": "npm test",
+      "passed": 119,
+      "failed": 0,
+      "buildIncluded": true
+    },
+    {
+      "command": "npm run test:r3-r",
+      "passed": 75,
+      "failed": 0
+    },
+    {
+      "command": "node --test exploration-poc/m2-b0/probe.test.mjs",
+      "passed": 5,
+      "failed": 0
+    }
+  ],
+  "total": 292,
+  "independentReviewerReranAllSuites": true,
+  "reviewerBuilt": false,
+  "productionSourceDiffFromBase": false,
+  "realMV3M2B0": "NOT_TESTED",
+  "performanceGate": "NOT_TESTED",
+  "architectureGate": "NO-GO"
+}

@@ -1,0 +1,335 @@
+{
+  "method": "same tab SPA rAF; fixed 12 windows; passive ResourceTiming; T2 structural candidate only; non-M1/A close via X back button",
+  "records": [
+    {
+      "round": 1,
+      "kind": "m1r",
+      "start": 13129.200000047684,
+      "t1": 975.499999952317,
+      "t2aCandidate": null,
+      "t2bCandidate": null,
+      "t3": 975.499999952317,
+      "closeAt": null,
+      "t4": 1003.5999999523156,
+      "replyId": null,
+      "longTasks": [
+        {
+          "start": 2230.2000000476837,
+          "duration": 53
+        }
+      ],
+      "resources": [
+        {
+          "category": "media",
+          "operation": null,
+          "start": 4577.200000047684,
+          "responseStart": -13129.200000047684,
+          "end": 4582.599999904633,
+          "duration": 5.3999998569488525
+        },
+        {
+          "category": "media",
+          "operation": null,
+          "start": 4577.299999952316,
+          "responseStart": -13129.200000047684,
+          "end": 4580.900000095367,
+          "duration": 3.6000001430511475
+        }
+      ],
+      "maxFrameGap": 1007.6000000000022,
+      "probeFailure": null,
+      "paneCount": 1,
+      "videoInstances": 1
+    },
+    {
+      "round": 1,
+      "kind": "m2a",
+      "start": 12571.399999856949,
+      "t1": 989.6000001430511,
+      "t2aCandidate": null,
+      "t2bCandidate": null,
+      "t3": 989.6000001430511,
+      "closeAt": null,
+      "t4": 18.80000004768226,
+      "replyId": null,
+      "longTasks": [],
+      "resources": [],
+      "maxFrameGap": 1008.2999999999993,
+      "probeFailure": null,
+      "paneCount": 1,
+      "videoInstances": 1
+    },
+    {
+      "round": 1,
+      "kind": "native",
+      "start": 15232.100000143051,
+      "t1": 1025.0999998569496,
+      "t2aCandidate": null,
+      "t2bCandidate": null,
+      "t3": 1025.0999998569496,
+      "closeAt": null,
+      "t4": 1841.699999904631,
+      "replyId": null,
+      "longTasks": [],
+      "resources": [],
+      "maxFrameGap": 1008.3000000000029,
+      "probeFailure": null,
+      "paneCount": 0,
+      "videoInstances": 1
+    },
+    {
+      "round": 1,
+      "kind": "m2b0",
+      "start": 11468.799999952316,
+      "t1": 957.7000000476837,
+      "t2aCandidate": null,
+      "t2bCandidate": null,
+      "t3": 957.7000000476837,
+      "closeAt": null,
+      "t4": 951.6999998569481,
+      "replyId": null,
+      "longTasks": [
+        {
+          "start": 2189,
+          "duration": 52
+        }
+      ],
+      "resources": [],
+      "maxFrameGap": 1007.7000000000007,
+      "probeFailure": null,
+      "paneCount": 0,
+      "videoInstances": 1
+    },
+    {
+      "round": 2,
+      "kind": "m2a",
+      "start": 10532.5,
+      "t1": 18.855999999999767,
+      "t2aCandidate": null,
+      "t2bCandidate": null,
+      "t3": 1018.8999999999996,
+      "closeAt": null,
+      "t4": 38.40000004768444,
+      "replyId": null,
+      "longTasks": [
+        {
+          "start": 2231.9000000953674,
+          "duration": 53
+        }
+      ],
+      "resources": [
+        {
+          "category": "media",
+          "operation": null,
+          "start": 4579.599999904633,
+          "responseStart": -10532.5,
+          "end": 4584.900000095367,
+          "duration": 5.300000190734863
+        },
+        {
+          "category": "media",
+          "operation": null,
+          "start": 4579.799999952316,
+          "responseStart": -10532.5,
+          "end": 4582.700000047684,
+          "duration": 2.9000000953674316
+        }
+      ],
+      "maxFrameGap": 1008.5,
+      "probeFailure": null,
+      "paneCount": 1,
+      "videoInstances": 2
+    },
+    {
+      "round": 2,
+      "kind": "m1r",
+      "error": "Target navigation not confirmed within 10000ms; excluded (raw error URL/title removed during review sanitization)"
+    },
+    {
+      "round": 2,
+      "kind": "m2b0",
+      "start": 9523.799999952316,
+      "t1": 996.9000000476844,
+      "t2aCandidate": null,
+      "t2bCandidate": null,
+      "t3": 996.9000000476844,
+      "closeAt": null,
+      "t4": 1818.6000000476834,
+      "replyId": null,
+      "longTasks": [],
+      "resources": [
+        {
+          "category": "image",
+          "operation": null,
+          "start": 2214.0999999046326,
+          "responseStart": -9523.799999952316,
+          "end": 4194.099999904633,
+          "duration": 1980
+        }
+      ],
+      "maxFrameGap": 1008.3000000000011,
+      "probeFailure": null,
+      "paneCount": 0,
+      "videoInstances": 1
+    },
+    {
+      "round": 2,
+      "kind": "native",
+      "start": 11313.700000047684,
+      "t1": 316.999999952317,
+      "t2aCandidate": null,
+      "t2bCandidate": null,
+      "t3": 316.999999952317,
+      "closeAt": null,
+      "t4": 239.5,
+      "replyId": null,
+      "longTasks": [
+        {
+          "start": 1507.0999999046326,
+          "duration": 51
+        }
+      ],
+      "resources": [
+        {
+          "category": "media",
+          "operation": null,
+          "start": 3983.2999999523163,
+          "responseStart": -11313.700000047684,
+          "end": 3989.2000000476837,
+          "duration": 5.900000095367432
+        },
+        {
+          "category": "media",
+          "operation": null,
+          "start": 3983.5,
+          "responseStart": -11313.700000047684,
+          "end": 3987.5999999046326,
+          "duration": 4.099999904632568
+        }
+      ],
+      "maxFrameGap": 1008.3999999999996,
+      "probeFailure": null,
+      "paneCount": 0,
+      "videoInstances": 1
+    },
+    {
+      "round": 3,
+      "kind": "m1r",
+      "start": 10575.899999856949,
+      "t1": 969.0920001430513,
+      "t2aCandidate": null,
+      "t2bCandidate": null,
+      "t3": 969.0920001430513,
+      "closeAt": null,
+      "t4": 22.19999995231592,
+      "replyId": null,
+      "longTasks": [
+        {
+          "start": 2214.4000000953674,
+          "duration": 52
+        }
+      ],
+      "resources": [],
+      "maxFrameGap": 1001,
+      "probeFailure": null,
+      "paneCount": 1,
+      "videoInstances": 2
+    },
+    {
+      "round": 3,
+      "kind": "m2a",
+      "error": "Target navigation not confirmed within 10000ms; excluded (raw error URL/title removed during review sanitization)"
+    },
+    {
+      "round": 3,
+      "kind": "native",
+      "start": 11665.299999952316,
+      "t1": 326.60000004768335,
+      "t2aCandidate": null,
+      "t2bCandidate": null,
+      "t3": 326.60000004768335,
+      "closeAt": null,
+      "t4": 1358.4000001430504,
+      "replyId": null,
+      "longTasks": [],
+      "resources": [
+        {
+          "category": "media",
+          "operation": null,
+          "start": 2943.2000000476837,
+          "responseStart": -11665.299999952316,
+          "end": 3712.2000000476837,
+          "duration": 769
+        },
+        {
+          "category": "media",
+          "operation": null,
+          "start": 3715.0999999046326,
+          "responseStart": -11665.299999952316,
+          "end": 3978.7999999523163,
+          "duration": 263.7000000476837
+        },
+        {
+          "category": "image",
+          "operation": null,
+          "start": 3888,
+          "responseStart": -11665.299999952316,
+          "end": 3892.5,
+          "duration": 4.5
+        },
+        {
+          "category": "media",
+          "operation": null,
+          "start": 3979.0999999046326,
+          "responseStart": -11665.299999952316,
+          "end": 3982.9000000953674,
+          "duration": 3.8000001907348633
+        },
+        {
+          "category": "media",
+          "operation": null,
+          "start": 3979.2000000476837,
+          "responseStart": -11665.299999952316,
+          "end": 3981.2000000476837,
+          "duration": 2
+        }
+      ],
+      "maxFrameGap": 1008.5,
+      "probeFailure": null,
+      "paneCount": 0,
+      "videoInstances": 2
+    },
+    {
+      "round": 3,
+      "kind": "m2b0",
+      "start": 11104,
+      "t1": 322.2999999999993,
+      "t2aCandidate": null,
+      "t2bCandidate": null,
+      "t3": 322.2999999999993,
+      "closeAt": null,
+      "t4": 1317.9000000476844,
+      "replyId": null,
+      "longTasks": [
+        {
+          "start": 2503.7000000476837,
+          "duration": 51
+        }
+      ],
+      "resources": [
+        {
+          "category": "media",
+          "operation": null,
+          "start": 3413.5,
+          "responseStart": -11104,
+          "end": 4354.899999856949,
+          "duration": 941.3999998569489
+        }
+      ],
+      "maxFrameGap": 1008.5,
+      "probeFailure": null,
+      "paneCount": 0,
+      "videoInstances": 2
+    }
+  ]
+}

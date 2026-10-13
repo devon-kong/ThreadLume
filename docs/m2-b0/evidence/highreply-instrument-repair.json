@@ -1,0 +1,149 @@
+{
+  "method": "same tab SPA rAF; fixed 6 diagnostic windows after empty-cell instrumentation repair; original 12 retained; passive ResourceTiming; T2 structural candidate only; non-M1/A close via X back button",
+  "records": [
+    {
+      "round": 1,
+      "kind": "m1r",
+      "armedAt": 11952.100000143051,
+      "start": 12926.300000190735,
+      "t1": 20.399999809265864,
+      "t2aCandidate": 2212.199999809265,
+      "t2bCandidate": null,
+      "t3": 327.2999998092655,
+      "closeAt": null,
+      "t4": 717.0999999523156,
+      "replyId": "2109238249432469817",
+      "longTasks": [],
+      "resources": [],
+      "maxFrameGap": 1007.7999999999993,
+      "probeFailure": null,
+      "paneCount": 1,
+      "videoInstances": 1
+    },
+    {
+      "round": 1,
+      "kind": "m2a",
+      "armedAt": 10562.900000095367,
+      "start": 11520.700000047684,
+      "t1": 27.729999952316575,
+      "t2aCandidate": 1620.3999999523166,
+      "t2bCandidate": null,
+      "t3": 320.499999952317,
+      "closeAt": null,
+      "t4": 346.2000000000007,
+      "replyId": "2109238249432469817",
+      "longTasks": [
+        {
+          "start": 1591.4000000953674,
+          "duration": 52
+        }
+      ],
+      "resources": [],
+      "maxFrameGap": 1007.1999999999989,
+      "probeFailure": null,
+      "paneCount": 1,
+      "videoInstances": 2
+    },
+    {
+      "round": 2,
+      "kind": "m2a",
+      "armedAt": 12846.900000095367,
+      "start": 13828,
+      "t1": 964.7000000000007,
+      "t2aCandidate": 2230.8999999999996,
+      "t2bCandidate": null,
+      "t3": 964.7000000000007,
+      "closeAt": null,
+      "t4": 1009.1999998092651,
+      "replyId": "2109238249432469817",
+      "longTasks": [],
+      "resources": [
+        {
+          "category": "media",
+          "operation": null,
+          "start": 4584.100000143051,
+          "responseStart": -13828,
+          "end": 4592.300000190735,
+          "duration": 8.200000047683716
+        },
+        {
+          "category": "media",
+          "operation": null,
+          "start": 4584.5,
+          "responseStart": -13828,
+          "end": 4588.900000095367,
+          "duration": 4.400000095367432
+        }
+      ],
+      "maxFrameGap": 1008.6000000000004,
+      "probeFailure": null,
+      "paneCount": 1,
+      "videoInstances": 1
+    },
+    {
+      "round": 2,
+      "kind": "m1r",
+      "armedAt": 10113,
+      "start": 11074.299999952316,
+      "t1": 961.1000000476834,
+      "t2aCandidate": 2302.7000000476837,
+      "t2bCandidate": null,
+      "t3": 961.1000000476834,
+      "closeAt": null,
+      "t4": 12.500000143050784,
+      "replyId": "2109238249432469817",
+      "longTasks": [
+        {
+          "start": 2281.2000000476837,
+          "duration": 65
+        }
+      ],
+      "resources": [],
+      "maxFrameGap": 1007.2999999999993,
+      "probeFailure": null,
+      "paneCount": 1,
+      "videoInstances": 1
+    },
+    {
+      "round": 3,
+      "kind": "m1r",
+      "armedAt": 9828.100000143051,
+      "start": 10638,
+      "t1": 21.631999999999607,
+      "t2aCandidate": 2796.5,
+      "t2bCandidate": null,
+      "t3": 328.7000000000007,
+      "closeAt": null,
+      "t4": 201.09999980926477,
+      "replyId": "2109238249432469817",
+      "longTasks": [],
+      "resources": [
+        {
+          "category": "media",
+          "operation": null,
+          "start": 3994.300000190735,
+          "responseStart": -10638,
+          "end": 3996.800000190735,
+          "duration": 2.5
+        },
+        {
+          "category": "media",
+          "operation": null,
+          "start": 3994.300000190735,
+          "responseStart": -10638,
+          "end": 3999,
+          "duration": 4.699999809265137
+        }
+      ],
+      "maxFrameGap": 1008.3999999999996,
+      "probeFailure": null,
+      "paneCount": 1,
+      "videoInstances": 2
+    },
+    {
+      "round": 3,
+      "kind": "m2a",
+      "error": "Navigation or observation failed; excluded"
+    }
+  ]
+}

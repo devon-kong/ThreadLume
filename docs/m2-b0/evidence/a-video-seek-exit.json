@@ -1,0 +1,103 @@
+{
+  "before": {
+    "mode": "a",
+    "innerScroll": false,
+    "active": true,
+    "reason": null,
+    "installMs": 0.10000014305114746,
+    "endedAfterMs": null,
+    "viewport": [
+      1440,
+      900
+    ],
+    "windowScroll": 10,
+    "sectionScroll": 0,
+    "sectionHeight": 9197,
+    "articleScroll": 220,
+    "articleHeight": 1068,
+    "articleClient": 846,
+    "connected": true,
+    "sameParent": true,
+    "cellConnected": true,
+    "sameCellParent": true,
+    "rect": {
+      "x": 0,
+      "y": 54,
+      "w": 748.796875,
+      "h": 846
+    },
+    "mediaRect": {
+      "x": 17,
+      "y": 57,
+      "w": 713.796875,
+      "h": 713.796875
+    },
+    "sameMediaParent": true,
+    "sameVideo": true,
+    "videoConnected": true,
+    "video": {
+      "paused": true,
+      "time": 27.273905,
+      "ready": 4,
+      "muted": true,
+      "dimensions": [
+        1472,
+        1472
+      ]
+    },
+    "nativeVideos": 1,
+    "visibleArticles": 5,
+    "liveCells": 27
+  },
+  "after": {
+    "mode": "a",
+    "innerScroll": false,
+    "active": true,
+    "reason": null,
+    "installMs": 0.10000014305114746,
+    "endedAfterMs": null,
+    "viewport": [
+      1440,
+      900
+    ],
+    "windowScroll": 10,
+    "sectionScroll": 0,
+    "sectionHeight": 9197,
+    "articleScroll": 220,
+    "articleHeight": 1068,
+    "articleClient": 846,
+    "connected": true,
+    "sameParent": true,
+    "cellConnected": true,
+    "sameCellParent": true,
+    "rect": {
+      "x": 0,
+      "y": 54,
+      "w": 748.796875,
+      "h": 846
+    },
+    "mediaRect": {
+      "x": 17,
+      "y": 57,
+      "w": 713.796875,
+      "h": 713.796875
+    },
+    "sameMediaParent": true,
+    "sameVideo": true,
+    "videoConnected": true,
+    "video": {
+      "paused": true,
+      "time": 27.485564,
+      "ready": 4,
+      "muted": true,
+      "dimensions": [
+        1472,
+        1472
+      ]
+    },
+    "nativeVideos": 1,
+    "visibleArticles": 5,
+    "liveCells": 27
+  },
+  "fullscreen": false
+}

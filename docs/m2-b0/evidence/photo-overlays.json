@@ -1,0 +1,129 @@
+{
+  "lightbox": {
+    "active": true,
+    "chain": [
+      {
+        "tag": "DIV",
+        "role": "dialog",
+        "position": "relative",
+        "overflow": "visible",
+        "transform": "none"
+      },
+      {
+        "tag": "DIV",
+        "role": null,
+        "position": "relative",
+        "overflow": "visible",
+        "transform": "none"
+      },
+      {
+        "tag": "DIV",
+        "role": null,
+        "position": "relative",
+        "overflow": "visible",
+        "transform": "none"
+      },
+      {
+        "tag": "DIV",
+        "role": null,
+        "position": "fixed",
+        "overflow": "visible",
+        "transform": "none"
+      },
+      {
+        "tag": "DIV",
+        "role": null,
+        "position": "absolute",
+        "overflow": "visible",
+        "transform": "none"
+      },
+      {
+        "tag": "DIV",
+        "role": null,
+        "position": "relative",
+        "overflow": "visible",
+        "transform": "none"
+      },
+      {
+        "tag": "DIV",
+        "role": null,
+        "position": "relative",
+        "overflow": "visible",
+        "transform": "none"
+      },
+      {
+        "tag": "DIV",
+        "role": null,
+        "position": "static",
+        "overflow": "visible",
+        "transform": "none"
+      },
+      {
+        "tag": "BODY",
+        "role": null,
+        "position": "static",
+        "overflow": "visible",
+        "transform": "none"
+      },
+      {
+        "tag": "HTML",
+        "role": null,
+        "position": "static",
+        "overflow": "hidden",
+        "transform": "none"
+      }
+    ]
+  },
+  "returned": {
+    "mode": "a",
+    "innerScroll": false,
+    "active": true,
+    "reason": null,
+    "installMs": 0.19999980926513672,
+    "endedAfterMs": null,
+    "viewport": [
+      1440,
+      900
+    ],
+    "windowScroll": 10,
+    "sectionScroll": 0,
+    "sectionHeight": 10104,
+    "articleScroll": 0,
+    "articleHeight": 1031,
+    "articleClient": 846,
+    "connected": true,
+    "sameParent": true,
+    "cellConnected": true,
+    "sameCellParent": true,
+    "rect": {
+      "x": 0,
+      "y": 54,
+      "w": 748.796875,
+      "h": 846
+    },
+    "mediaRect": null,
+    "sameMediaParent": null,
+    "sameVideo": null,
+    "videoConnected": null,
+    "video": null,
+    "nativeVideos": 2,
+    "visibleArticles": 7,
+    "liveCells": 29
+  },
+  "menu": {
+    "r": {
+      "x": 514.046875,
+      "y": 66,
+      "width": 217.75,
+      "height": 0,
+      "top": 66,
+      "right": 731.796875,
+      "bottom": 66,
+      "left": 514.046875
+    },
+    "insideFocal": false
+  },
+  "hover": {
+    "observed": false
+  }
+}

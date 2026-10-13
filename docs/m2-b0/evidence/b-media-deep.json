@@ -1,0 +1,257 @@
+[
+  {
+    "step": "install",
+    "mode": "b",
+    "innerScroll": false,
+    "active": true,
+    "reason": null,
+    "installMs": 3.3999998569488525,
+    "endedAfterMs": null,
+    "viewport": [
+      1440,
+      900
+    ],
+    "windowScroll": 10,
+    "sectionScroll": 0,
+    "sectionHeight": 9636,
+    "articleScroll": 0,
+    "articleHeight": 1068,
+    "articleClient": 846,
+    "connected": true,
+    "sameParent": true,
+    "cellConnected": true,
+    "sameCellParent": true,
+    "rect": {
+      "x": 0,
+      "y": 54,
+      "w": 748.796875,
+      "h": 846
+    },
+    "mediaRect": {
+      "x": 16,
+      "y": 360,
+      "w": 716.796875,
+      "h": 520
+    },
+    "sameMediaParent": true,
+    "sameVideo": true,
+    "videoConnected": true,
+    "video": {
+      "paused": true,
+      "time": 0,
+      "ready": 0,
+      "muted": false,
+      "dimensions": [
+        0,
+        0
+      ]
+    },
+    "nativeVideos": 1,
+    "visibleArticles": 1,
+    "liveCells": 16
+  },
+  {
+    "target": 0,
+    "mode": "b",
+    "innerScroll": false,
+    "active": true,
+    "reason": null,
+    "installMs": 3.3999998569488525,
+    "endedAfterMs": null,
+    "viewport": [
+      1440,
+      900
+    ],
+    "windowScroll": 0,
+    "sectionScroll": 0,
+    "sectionHeight": 9772,
+    "articleScroll": 0,
+    "articleHeight": 1068,
+    "articleClient": 846,
+    "connected": true,
+    "sameParent": true,
+    "cellConnected": true,
+    "sameCellParent": true,
+    "rect": {
+      "x": 0,
+      "y": 54,
+      "w": 748.796875,
+      "h": 846
+    },
+    "mediaRect": {
+      "x": 16,
+      "y": 360,
+      "w": 716.796875,
+      "h": 520
+    },
+    "sameMediaParent": true,
+    "sameVideo": true,
+    "videoConnected": true,
+    "video": {
+      "paused": false,
+      "time": 0.528431,
+      "ready": 4,
+      "muted": true,
+      "dimensions": [
+        1472,
+        1472
+      ]
+    },
+    "nativeVideos": 2,
+    "visibleArticles": 5,
+    "liveCells": 28
+  },
+  {
+    "target": 800,
+    "mode": "b",
+    "innerScroll": false,
+    "active": true,
+    "reason": null,
+    "installMs": 3.3999998569488525,
+    "endedAfterMs": null,
+    "viewport": [
+      1440,
+      900
+    ],
+    "windowScroll": 800,
+    "sectionScroll": 0,
+    "sectionHeight": 9772,
+    "articleScroll": 0,
+    "articleHeight": 1068,
+    "articleClient": 846,
+    "connected": true,
+    "sameParent": true,
+    "cellConnected": true,
+    "sameCellParent": true,
+    "rect": {
+      "x": 0,
+      "y": 54,
+      "w": 748.796875,
+      "h": 846
+    },
+    "mediaRect": {
+      "x": 16,
+      "y": 360,
+      "w": 716.796875,
+      "h": 520
+    },
+    "sameMediaParent": true,
+    "sameVideo": true,
+    "videoConnected": true,
+    "video": {
+      "paused": false,
+      "time": 1.236212,
+      "ready": 4,
+      "muted": true,
+      "dimensions": [
+        1472,
+        1472
+      ]
+    },
+    "nativeVideos": 2,
+    "visibleArticles": 5,
+    "liveCells": 28
+  },
+  {
+    "target": 1600,
+    "mode": "b",
+    "innerScroll": false,
+    "active": true,
+    "reason": null,
+    "installMs": 3.3999998569488525,
+    "endedAfterMs": null,
+    "viewport": [
+      1440,
+      900
+    ],
+    "windowScroll": 1600,
+    "sectionScroll": 0,
+    "sectionHeight": 9772,
+    "articleScroll": 0,
+    "articleHeight": 1068,
+    "articleClient": 846,
+    "connected": true,
+    "sameParent": true,
+    "cellConnected": true,
+    "sameCellParent": true,
+    "rect": {
+      "x": 0,
+      "y": 54,
+      "w": 748.796875,
+      "h": 846
+    },
+    "mediaRect": {
+      "x": 16,
+      "y": 360,
+      "w": 716.796875,
+      "h": 520
+    },
+    "sameMediaParent": true,
+    "sameVideo": true,
+    "videoConnected": true,
+    "video": {
+      "paused": false,
+      "time": 1.942673,
+      "ready": 4,
+      "muted": true,
+      "dimensions": [
+        1472,
+        1472
+      ]
+    },
+    "nativeVideos": 2,
+    "visibleArticles": 9,
+    "liveCells": 28
+  },
+  {
+    "target": 2800,
+    "mode": "b",
+    "innerScroll": false,
+    "active": false,
+    "reason": "focal-unmounted",
+    "installMs": 3.3999998569488525,
+    "endedAfterMs": 2571.399999856949,
+    "viewport": [
+      1440,
+      900
+    ],
+    "windowScroll": 2800,
+    "sectionScroll": 0,
+    "sectionHeight": 8345,
+    "articleScroll": 0,
+    "articleHeight": 0,
+    "articleClient": 0,
+    "connected": false,
+    "sameParent": true,
+    "cellConnected": false,
+    "sameCellParent": false,
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0
+    },
+    "mediaRect": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0
+    },
+    "sameMediaParent": true,
+    "sameVideo": false,
+    "videoConnected": false,
+    "video": {
+      "paused": true,
+      "time": 0,
+      "ready": 0,
+      "muted": true,
+      "dimensions": [
+        0,
+        0
+      ]
+    },
+    "nativeVideos": 2,
+    "visibleArticles": 3,
+    "liveCells": 47
+  }
+]
