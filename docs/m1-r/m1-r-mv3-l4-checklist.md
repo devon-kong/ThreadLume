@@ -16,23 +16,10 @@
 | 7 | 连续打开/关闭 5 次（不同帖子） | 每次单面板、无残留、无滚动异常 | ☐ |
 | 8 | 深色/浅色切换（X 设置或系统） | 阅读器跟随 X 当前主题 | ☐ |
 | 9 | 独立 Profile 安装 `dist-extension/`（Legacy） | Legacy 可正常安装使用（回退能力完好） | ☐ |
-| 10 | **一次性只读探针**（本轮新增，回答 A1 的平台边界问题）：控制台执行下方脚本后，用键盘打开任一帖子 | 输出 `navDelivered` 字段：true=当前 Chrome 向扩展世界送达 navigate 事件；false=不送达（title 共主信号为必需路径）——两种结果均属正常，仅作记录 | ☐ |
+| 10 | **检测时延记录**（A1 验收点）：停顿 10 秒后用键盘快捷键打开一篇帖子，主观判断阅读器出现是否有可感知延迟 | 阅读器立即出现（事件送达时由 navigate 路径驱动；不送达时由 title 路径驱动——两者任一生效即达标。事件送达性归因超出页面可观察范围，如需精确归因可在有头环境运行 `docs/m1-r/evidence/chrome-real-content-script-navapi-probe.mjs`，仅记录不阻断） | ☐ |
 | 11 | （可选）对一条真实帖子点赞，检查右侧原生控件与左栏定位高亮反馈 | 点赞成功且由你本人点击；左栏只定位不代点 | ☐ |
 
-第 10 步探针脚本（在 x.com 页面控制台执行，仅读取，不改任何状态）：
-
-```js
-(() => {
-  // 在页面主世界标记一次，看扩展（隔离世界）能否通过 DOM 观察到路由变化时间戳
-  const before = document.documentElement.getAttribute("data-peek-native-route-change-at");
-  // 请在执行本脚本后用键盘快捷键打开一篇帖子，再次执行：
-  //   const after = document.documentElement.getAttribute("data-peek-native-route-change-at");
-  // after > before 即路由被即时观察（title 或 navigate 路径生效）
-  console.log({ before, navDelivered: "见注释：键盘导航后对比 after" });
-})();
-```
-
-更直接的判定（二选一即可）：键盘打开帖子时阅读器**立即**出现 = 第 4 步通过，无论事件是否送达（两条检测路径任一生效即达标）。
+第 10 步补充说明：页面侧无法区分事件送达与 title 路径（两者都表现为"立即出现"），因此第 10 步验收的是用户可感知的**时延**，而非事件归因。归因实验脚本已随仓库提供（有头环境运行）。
 
 ## 判定口径
 
