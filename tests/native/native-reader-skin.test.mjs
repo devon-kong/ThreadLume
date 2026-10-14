@@ -231,3 +231,21 @@ test("K9 皮肤 CSS 的几何变量与 skinGeometry() 单一来源一致（预�
   // the handoff target: focal top = topbar + inset, expressed through the vars
   assert.ok(skin.includes(`top: calc(var(--peek-reader-top) + var(--peek-reader-inset))`));
 });
+
+test("K10 画布 !important 规则存在时，主题仍跟随 X 的内联信号（就地切换）", async () => {
+  // The skin's canvas rule is !important, so the COMPUTED body background is
+  // ours while mounted (jsdom does not implement that cascade — the real
+  // cascade is covered by the live `themeinline` scenario). readTheme() reads
+  // X's INLINE body background first, which is exactly the signal X writes.
+  const { env, focusId, poc } = makeSkinEnv({});
+  env.document.body.style.backgroundColor = "rgb(255, 255, 255)";
+  await env.pushNavigate(`/somebody/status/${focusId}`);
+  await realSleep(5);
+  assert.equal(poc.layoutAdapter.themeDiagnostics().inlineVars["--peek-lad-bg"], "#ffffff");
+  env.document.body.style.backgroundColor = "rgb(0, 0, 0)"; // X's in-place dark write
+  await realSleep(10);
+  const d = poc.layoutAdapter.themeDiagnostics();
+  assert.equal(d.inlineVars["--peek-lad-bg"], "#000000", "palette follows the inline theme write while mounted");
+  assert.equal(d.inlineVars["--peek-lad-page"], "#0b0e11", "canvas switches with the same signal");
+  assert.equal(d.inlineVars["--peek-lad-fg"], "#e7e9ea");
+});
