@@ -452,7 +452,7 @@ function applyAdapterTheme() {
   writeRootVar(root, "--peek-lad-fg", pal.fg);
   writeRootVar(root, "--peek-lad-dim", pal.dim);
   writeRootVar(root, "--peek-lad-hover", pal.hover);
-  writeRootVar(root, "--peek-lad-backdrop", pal.backdrop);
+  writeRootVar(root, "--peek-lad-page", pal.page);
   writeRootVar(root, "--peek-lad-shadow", pal.shadow);
   // X's own banner height varies slightly by build; measure it, fall back to 54px
   let top = 54;

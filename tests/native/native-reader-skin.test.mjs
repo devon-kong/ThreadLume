@@ -86,14 +86,13 @@ function makeSkinEnv({ url } = {}) {
 }
 
 const topbar = (env) => env.document.getElementById("peek-reader-topbar");
-const backdrop = (env) => env.document.getElementById("peek-reader-backdrop");
 const skinStyle = (env) => env.document.getElementById("peek-reader-skin");
 const stateAttr = (env) => env.document.documentElement.getAttribute("data-peek-lad-state");
 const styleText = (env, id) => env.document.getElementById(id)?.textContent || "";
 
 // ---------- mount / teardown ----------
 
-test("K1 ACTIVE：皮肤样式、顶栏与背景幕挂载；顶栏无品牌图形、标题为 Peek、几何变量就位", async () => {
+test("K1 ACTIVE：皮肤样式、顶栏与画布暗化挂载；顶栏无品牌图形、标题为 Peek、几何变量就位", async () => {
   const { env, focusId } = makeSkinEnv({});
   await env.pushNavigate(`/somebody/status/${focusId}`);
   await realSleep(5);
@@ -101,7 +100,6 @@ test("K1 ACTIVE：皮肤样式、顶栏与背景幕挂载；顶栏无品牌图�
   assert.ok(skinStyle(env), "skin style mounted");
   const bar = topbar(env);
   assert.ok(bar, "top bar mounted");
-  assert.ok(backdrop(env), "backdrop mounted");
   assert.equal(bar.querySelectorAll("img, image").length, 0, "NO brand imagery in the reader chrome (rabbit-logo ban)");
   assert.ok(bar.textContent.includes("Peek"), "compact Peek wordmark only");
   assert.ok(bar.querySelector('[aria-label="返回"]'), "safe back control");
@@ -112,6 +110,13 @@ test("K1 ACTIVE：皮肤样式、顶栏与背景幕挂载；顶栏无品牌图�
   assert.ok(css.includes("border-radius: var(--peek-reader-radius)"), "rounded focal card");
   assert.ok(css.includes("box-shadow: var(--peek-lad-shadow"), "card shadow");
   assert.ok(css.includes("@media (max-width: 979.98px)"), "chrome is media-inert below the split breakpoint");
+  // the surround is the PAGE CANVAS (no overlay node — an overlay would dim the
+  // card/sheet too; measured live)
+  assert.ok(css.includes('html[data-peek-lad="on"] body,'), "page canvas dim rule present");
+  assert.ok(css.includes('[data-testid="primaryColumn"] {') && css.includes("background-color: var(--peek-lad-page"), "canvas colour on html/body and X's primary column");
+  assert.equal(env.document.getElementById("peek-reader-backdrop"), null, "no overlay node: the dim is the canvas");
+  assert.ok(css.includes(':has([data-testid="swipe-to-dismiss"])'), "top bar yields while X's image lightbox is open");
+  assert.ok(css.includes("z-index: 1;"), "top bar above the sheet contexts (z 1)");
 });
 
 test("K2 主题调色板变量在挂载时写入并随主题切换更新", async () => {
@@ -120,7 +125,7 @@ test("K2 主题调色板变量在挂载时写入并随主题切换更新", async
   await env.pushNavigate(`/somebody/status/${focusId}`);
   await realSleep(5);
   const d0 = poc.layoutAdapter.themeDiagnostics();
-  for (const v of ["--peek-lad-fg", "--peek-lad-dim", "--peek-lad-hover", "--peek-lad-backdrop", "--peek-lad-shadow"]) {
+  for (const v of ["--peek-lad-fg", "--peek-lad-dim", "--peek-lad-hover", "--peek-lad-page", "--peek-lad-shadow"]) {
     assert.ok(d0.inlineVars[v], `${v} written at mount`);
   }
   assert.equal(d0.inlineVars["--peek-lad-bg"], "#ffffff", "light card");
@@ -128,7 +133,7 @@ test("K2 主题调色板变量在挂载时写入并随主题切换更新", async
   await realSleep(10);
   const d1 = poc.layoutAdapter.themeDiagnostics();
   assert.equal(d1.inlineVars["--peek-lad-bg"], "#000000", "dark card after theme flip");
-  assert.ok(d1.inlineVars["--peek-lad-backdrop"].includes("231"), "dark backdrop value follows the theme");
+  assert.equal(d1.inlineVars["--peek-lad-page"], "#0b0e11", "dark canvas value follows the theme");
 });
 
 test("K3 X 自带详情应用栏被标记隐藏；离开路由后标记移除", async () => {
@@ -146,12 +151,12 @@ test("K4 路由离开：皮肤样式与全部自有节点清理，焦点标记�
   const { env, fixture, focusId } = makeSkinEnv({});
   await env.pushNavigate(`/somebody/status/${focusId}`);
   await realSleep(5);
-  assert.ok(topbar(env) && backdrop(env));
+  assert.ok(topbar(env));
   await env.pushNavigate("/home");
   await realSleep(5);
   assert.equal(env.document.getElementById("peek-reader-topbar"), null, "top bar removed");
-  assert.equal(env.document.getElementById("peek-reader-backdrop"), null, "backdrop removed");
-  assert.equal(skinStyle(env), null, "skin style removed");
+  assert.equal(env.document.getElementById("peek-reader-skin"), null, "skin style removed (canvas rule released with it)");
+  assert.equal(env.document.getElementById("peek-reader-backdrop"), null, "no overlay node ever existed");
   assert.equal(fixture.art.hasAttribute(LAD_MARK_ARTICLE), false, "focal marker released");
   assert.equal(stateAttr(env), "idle");
 });

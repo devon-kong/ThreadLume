@@ -29,23 +29,25 @@ import { mkdirSync, writeFileSync } from "node:fs";
 mkdirSync(SHOTS, { recursive: true });
 
 const RESULTS_PATH = "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/experience-results.json";
-// Merge-per-scenario discipline (same honesty rule as L4: a scenario's record
-// comes from its first PASSING run; failures stay visible in the same file's
-// history field, never silently replaced by a luckier rerun).
-let prior = [];
-try { prior = JSON.parse((await import("node:fs")).readFileSync(RESULTS_PATH, "utf8")); } catch { prior = []; }
-const history = prior.flatMap((r) => (r.history || []).concat(r.pass === false ? [{ scenario: r.scenario, kind: r.kind ?? null, pass: false, error: r.error ?? null }] : []));
-const results = prior.filter((r) => r.pass !== false); // keep first PASSING record per key
+// Results format: { generatedAt, buildId, history: [failures, deduped], records: [first-PASSING record per scenario|kind] }.
+// Same honesty rule as L4: a scenario's record comes from its first PASSING
+// run; failures are appended to a deduped history, never silently replaced.
+let prior = { history: [], records: [], buildId: null };
+try {
+  const raw = JSON.parse((await import("node:fs")).readFileSync(RESULTS_PATH, "utf8"));
+  if (Array.isArray(raw)) prior = { history: (raw[0]?.history ?? []).filter((h, i, a) => a.findIndex((x) => JSON.stringify(x) === JSON.stringify(h)) === i), records: raw.filter((r) => r.pass !== false), buildId: null };
+  else prior = raw;
+} catch { /* first run */ }
+const history = prior.history.filter((h, i, a) => a.findIndex((x) => JSON.stringify(x) === JSON.stringify(h)) === i);
+const results = prior.records.filter((r) => r.pass !== false);
 const keyOf = (x) => `${x.scenario}|${x.kind ?? ""}`;
 const record = (r) => {
   const idx = results.findIndex((x) => keyOf(x) === keyOf(r));
   if (r.pass === false) {
-    // a later failure never replaces an earlier PASS — it is appended to history
     history.push({ scenario: r.scenario, kind: r.kind ?? null, pass: false, error: r.error ?? null, at: new Date().toISOString() });
-    if (idx < 0) results.push({ ...r, history });
-    else results[idx].history = history;
-  } else if (idx >= 0) results[idx] = { ...r, history };
-  else results.push({ ...r, history });
+    if (idx < 0) results.push(r);
+  } else if (idx >= 0) results[idx] = r;
+  else results.push(r);
   console.log(JSON.stringify({ ...r, shots: r.shots?.map((s) => String(s).split("/").pop()) }));
 };
 
@@ -104,8 +106,17 @@ const skinState = () => page.evaluate(`(() => {
   const a = document.querySelector("article[data-peek-lad-focal]");
   const bar = document.getElementById("peek-reader-topbar");
   return {
-    topbar: Boolean(bar), backdrop: Boolean(document.getElementById("peek-reader-backdrop")),
+    topbar: Boolean(bar),
+    // the surround is the PAGE CANVAS (no overlay node); assert the body
+    // computes to a colour different from the card surface (dimmed canvas)
+    pageCanvas: (() => {
+      const body = getComputedStyle(document.body).backgroundColor;
+      const card = a ? getComputedStyle(a).backgroundColor : null;
+      return { body, card, dimmed: Boolean(body && card && body !== card) };
+    })(),
     skinStyle: Boolean(document.getElementById("peek-reader-skin")),
+    topbarZ: bar ? getComputedStyle(bar).zIndex : null,
+    overlayNodeAbsent: document.getElementById("peek-reader-backdrop") === null,
     // the Native UI must carry NO brand imagery in its chrome (rabbit-logo ban)
     brandFree: bar ? bar.querySelectorAll("img, image").length === 0 && (bar.textContent || "").includes("Peek") : null,
     appbarTaggedHidden: (() => { const t = document.querySelector("[data-peek-reader-appbar]"); return t ? getComputedStyle(t).display === "none" : false; })(),
@@ -174,7 +185,7 @@ if (run("fourposts")) {
     record({
       scenario: "fourposts", kind,
       pass: r.pv.id === s.id && r.pv.maxLen > 8 && fs.focal && fs.focalCount === 1 && fs.textLen > 8 && !fs.pvNow
-        && skin.topbar && skin.backdrop && skin.brandFree && !skin.hOverflow && geomOk,
+        && skin.topbar && skin.pageCanvas?.dimmed && skin.topbarZ === "1" && skin.overlayNodeAbsent && skin.brandFree && !skin.hOverflow && geomOk,
       preview: r.pv, focal: fs, skin, geomOk,
       shots: [r.shot, shotNative].filter(Boolean),
     });
@@ -313,6 +324,26 @@ if (run("lightbox")) {
   }
   const shotLb = `${SHOTS}/lightbox-1-open.png`;
   await page.screenshot({ path: shotLb });
+  // the lightbox must paint ABOVE the reader chrome: its own top-left close
+  // control must be the topmost element (skin chrome stays at z 50/51, below
+  // X's layers — a bar above them would swallow the close click)
+  const closeProbe = await page.evaluate(() => {
+    const b = [...document.querySelectorAll("button,[role=button]")].find((x) => ["关闭", "Close"].includes(x.getAttribute("aria-label") || ""));
+    if (!b) return { found: false };
+    const r = b.getBoundingClientRect();
+    const x = Math.round(r.x + r.width / 2), y = Math.round(r.y + r.height / 2);
+    const el = document.elementFromPoint(x, y);
+    return { found: true, x, y, coveredByTopbar: Boolean(el?.closest("#peek-reader-topbar")), clickable: Boolean(el && (el === b || b.contains(el) || el.closest('[aria-label="关闭"],[aria-label="Close"]') === b)) };
+  });
+  let closeClicked = null;
+  if (closeProbe.found && closeProbe.clickable) {
+    await page.mouse.click(closeProbe.x, closeProbe.y, { label: "灯箱原生关闭" });
+    await sleep(1500);
+    closeClicked = await page.evaluate(() => !document.querySelector('[role="dialog"], [aria-modal="true"]'));
+    // reopen for the Esc path
+    await page.mouse.click(photoPos.x, photoPos.y, { label: "重开图片灯箱" });
+    await sleep(2200);
+  }
   await page.keyboard.press("Escape"); // must close the LIGHTBOX only
   await sleep(1200);
   const afterEsc = await page.evaluate(() => ({
@@ -325,9 +356,9 @@ if (run("lightbox")) {
   await page.screenshot({ path: shotAfter });
   record({
     scenario: "lightbox",
-    pass: Boolean(fs0.focal && opened && afterEsc.dialogGone && afterEsc.onDetail && afterEsc.focal === 1 && afterEsc.state === "active"),
-    expect: "lightbox opens above the skin; Esc closes the lightbox only — reader stays ACTIVE (skin binds no Esc)",
-    opened, afterEsc, shots: [shotLb, shotAfter],
+    pass: Boolean(fs0.focal && opened && closeProbe.clickable && !closeProbe.coveredByTopbar && closeClicked && afterEsc.dialogGone && afterEsc.onDetail && afterEsc.focal === 1 && afterEsc.state === "active"),
+    expect: "lightbox paints above the skin; its own close control is clickable; Esc closes the lightbox only — reader stays ACTIVE (skin binds no Esc)",
+    opened, closeProbe, closeClicked, afterEsc, shots: [shotLb, shotAfter],
   });
 }
 
@@ -622,13 +653,17 @@ if (run("theme")) {
     const fs = await focalState();
     const bg = await page.evaluate(() => ({
       body: getComputedStyle(document.body).backgroundColor,
+      col: getComputedStyle(document.querySelector("[data-testid=primaryColumn]")).backgroundColor,
       focal: document.querySelector("article[data-peek-lad-focal]") ? getComputedStyle(document.querySelector("article[data-peek-lad-focal]")).backgroundColor : null,
       bar: document.getElementById("peek-reader-topbar") ? getComputedStyle(document.getElementById("peek-reader-topbar")).backgroundColor : null,
-      backdrop: document.getElementById("peek-reader-backdrop") ? getComputedStyle(document.getElementById("peek-reader-backdrop")).backgroundColor : null,
     }));
     const shot = `${SHOTS}/theme-2-native.png`;
     await page.screenshot({ path: shot });
-    out = { ...out, pass: topen.opened && pv.id === s.id && fs.focal && fs.focalCount === 1 && bg.body === theme1, preview: pv, focal: fs, colors: bg, shots: [shot] };
+    // the reading card follows X's theme; the canvas (body/column/top bar) is
+    // the skin's dim by design — so assert: card === X theme bg, and bar ===
+    // canvas === column (one consistent surround colour)
+    const canvasConsistent = bg.body === bg.col && bg.col === bg.bar;
+    out = { ...out, pass: topen.opened && pv.id === s.id && fs.focal && fs.focalCount === 1 && bg.focal === theme1 && canvasConsistent && bg.col !== theme1, preview: pv, focal: fs, colors: bg, canvasConsistent, shots: [shot] };
     await page.goto("https://x.com/settings/display");
     await sleep(3000);
     const restoreIdx = usedSwatch === 1 ? 0 : 1;
@@ -689,5 +724,6 @@ if (run("reload")) {
   record({ scenario: "reload", pass: ropen.opened && ropen.pv.id === s.id && fs.focal && fs.focalCount === 1 && skin.topbar, marker, preview: ropen.pv, focal: fs });
 }
 
-writeFileSync(RESULTS_PATH, JSON.stringify(results, null, 1));
+const buildId = await page.evaluate(() => document.documentElement.getAttribute("data-peek-artifact")).catch(() => null);
+writeFileSync(RESULTS_PATH, JSON.stringify({ generatedAt: new Date().toISOString(), buildId, history, records: results }, null, 1));
 console.log("EXPERIENCE DONE:", results.map((r) => `${r.scenario}${r.kind ? ":" + r.kind : ""}:${r.pass === null ? "NOT_TESTED" : r.pass ? "PASS" : "FAIL"}`).join(" "));
