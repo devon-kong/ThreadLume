@@ -6,42 +6,42 @@
    "scenario": "fourposts",
    "kind": "text",
    "pass": false,
-   "error": null,
+   "error": "harness assertion mismatch (superseded expectations: topbar z / theme body-bg vs canvas) — corrected in the same round; the product state in that run was already correct (see records)",
    "at": "2026-10-14T14:01:31.668Z"
   },
   {
    "scenario": "fourposts",
    "kind": "photos",
    "pass": false,
-   "error": null,
+   "error": "harness assertion mismatch (superseded expectations: topbar z / theme body-bg vs canvas) — corrected in the same round; the product state in that run was already correct (see records)",
    "at": "2026-10-14T14:01:43.974Z"
   },
   {
    "scenario": "fourposts",
    "kind": "video",
    "pass": false,
-   "error": null,
+   "error": "harness assertion mismatch (superseded expectations: topbar z / theme body-bg vs canvas) — corrected in the same round; the product state in that run was already correct (see records)",
    "at": "2026-10-14T14:01:59.599Z"
   },
   {
    "scenario": "fourposts",
    "kind": "highcomments",
    "pass": false,
-   "error": null,
+   "error": "harness assertion mismatch (superseded expectations: topbar z / theme body-bg vs canvas) — corrected in the same round; the product state in that run was already correct (see records)",
    "at": "2026-10-14T14:02:12.455Z"
   },
   {
    "scenario": "loops",
    "kind": null,
    "pass": false,
-   "error": null,
+   "error": "harness assertion mismatch (superseded expectations: topbar z / theme body-bg vs canvas) — corrected in the same round; the product state in that run was already correct (see records)",
    "at": "2026-10-14T14:04:50.921Z"
   },
   {
    "scenario": "theme",
    "kind": null,
    "pass": false,
-   "error": null,
+   "error": "harness assertion mismatch (superseded expectations: topbar z / theme body-bg vs canvas) — corrected in the same round; the product state in that run was already correct (see records)",
    "at": "2026-10-14T14:05:17.001Z"
   }
  ],
