@@ -21,6 +21,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } fr
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
+import { artifactPrologue, buildIdFor } from "./artifact-prologue.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const source = path.join(root, "native-extension");
@@ -30,6 +31,14 @@ const dist = lab
   : path.resolve(root, "dist-extension-native");
 const legacyDist = path.resolve(root, "dist-extension");
 const asset = path.join(root, "public", "assets", "tuzai-icon-source.png");
+// Diagnostic builds: lab builds always; the default carrier only when
+// explicitly building a measurement copy (PEEK_BUILD_DIAG=1). Diagnostics add
+// a non-sensitive build-identity DOM marker plus capture/mount timestamps —
+// nothing else. A pristine default build (no env) carries none of it.
+const diag = lab || process.env.PEEK_BUILD_DIAG === "1";
+// Controlled synchronous stall inside preview extraction (clock-validation
+// builds only; PEEK_DIAG_DELAY_MS=50 → busy-wait that long before mounting).
+const diagDelayMs = Math.max(0, Number(process.env.PEEK_DIAG_DELAY_MS || 0));
 
 if (!dist.startsWith(root + path.sep)) throw new Error("Refusing to clean an output outside the project root");
 if (dist === legacyDist) throw new Error("Refusing to overwrite the Legacy build output");
@@ -56,7 +65,12 @@ const COMMON = {
   sourcemap: false,
   logLevel: "warning",
   legalComments: "none",
-  define: { __PEEK_LAYOUT_ADAPTER__: lab ? "true" : "false" },
+  define: {
+    __PEEK_LAYOUT_ADAPTER__: lab ? "true" : "false",
+    // test-build diagnostics (see artifact-prologue.mjs); false = compiled out
+    __PEEK_DIAG_STAMPS__: diag ? "true" : "false",
+    __PEEK_DIAG_DELAY_MS__: String(diagDelayMs),
+  },
 };
 
 await build({
@@ -65,6 +79,18 @@ await build({
   outfile: path.join(dist, "content.js"),
   banner: { js: `// Peek Native ${lab ? "(M2-B1 lab)" : "(M1)"} — bundled content script. Source: native-extension/src/*.js` },
 });
+
+// Diagnostic builds stamp their identity FIRST, before any bundle code runs
+// (scripts/artifact-prologue.mjs for the exact text and rationale). The scan
+// below therefore covers the final file, prologue included.
+const contentMode = lab ? "m2a" : "m1r";
+if (diag) {
+  const contentPath = path.join(dist, "content.js");
+  const bundled = readFileSync(contentPath, "utf8");
+  const buildId = buildIdFor(contentMode, bundled);
+  writeFileSync(contentPath, artifactPrologue(buildId, contentMode) + bundled);
+  console.log(`Artifact identity: build ${buildId} (mode ${contentMode}, diag stamps on${diagDelayMs ? `, ${diagDelayMs}ms preview stall` : ""})`);
+}
 
 // Lab build only: the MAIN-world adapter script (separate bundle, separate
 // content-script entry with world "MAIN"). The default build never emits it.
@@ -149,4 +175,4 @@ for (const size of [16, 32, 48, 128]) {
   await sharp(asset).resize(size, size, { fit: "cover" }).png().toFile(path.join(iconDir, `icon${size}.png`));
 }
 
-console.log(`Built unpacked Peek Native ${lab ? "(M2-B1 lab)" : "(M1)"} extension: ${dist}`);
+console.log(`Built unpacked Peek Native ${lab ? "(M2-B1 lab)" : "(M1)"} extension: ${dist}${diag ? " [diagnostics]" : ""}`);
