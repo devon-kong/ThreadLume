@@ -141,6 +141,15 @@ function scheduleRouteTick() {
 //  2. Route-check cascade — an immediate + bounded re-check safety net that
 //     covers router-deferred pushState in every configuration.
 function onCaptureClick(event) {
+  // Test-build probe (esbuild define; compiled out of non-diag builds): the
+  // handler-entry timestamp on the shared <html>, so the harness can verify
+  // its own window-capture t0 preceded the extension's document-capture work.
+  // Timestamps only — never page content, never credentials.
+  /* eslint-disable no-undef */
+  if (__PEEK_DIAG_STAMPS__) {
+    try { document.documentElement.setAttribute("data-peek-capture-at", String(performance.now())); } catch { /* probe only */ }
+  }
+  /* eslint-enable no-undef */
   try {
     const a = event.target?.closest?.("a[href]");
     if (a) {

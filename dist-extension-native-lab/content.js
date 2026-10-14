@@ -1,3 +1,20 @@
+// Peek artifact diagnostics (test builds only): non-sensitive build identity
+// stamped into the shared DOM for the measurement harness (ISOLATED-world JS
+// is unreadable from the page). Bookkeeping only — never an auth token.
+(function () {
+  try {
+    var el = document.documentElement;
+    if (!el) return;
+    var mark = {"build":"m2a-202610140933-29fc210ac2","mode":"m2a"};
+    var prev = el.getAttribute("data-peek-artifact");
+    if (!prev) { el.setAttribute("data-peek-artifact", JSON.stringify(mark)); return; }
+    var list = null;
+    try { list = JSON.parse(prev); } catch (e) { list = null; }
+    if (!Array.isArray(list)) list = [list];
+    list.push(mark);
+    el.setAttribute("data-peek-artifact", JSON.stringify(list));
+  } catch (e) { /* diagnostics must never break the page */ }
+})();
 // Peek Native (M2-B1 lab) — bundled content script. Source: native-extension/src/*.js
 (() => {
   // native-extension/src/constants.js
@@ -693,6 +710,11 @@ ${article.text}` : article.text;
   var P = null;
   var genSeq = 0;
   function captureClickForPreview(event) {
+    if (0 > 0) {
+      const busyUntil = performance.now() + 0;
+      while (performance.now() < busyUntil) {
+      }
+    }
     const found = extractPreviewTarget(event);
     if (!found) {
       if (P) clearPreview("click-elsewhere");
@@ -704,6 +726,8 @@ ${article.text}` : article.text;
   }
   function extractPreviewTarget(event) {
     if (statusIdFromPath()) return null;
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return null;
+    if (event.button !== void 0 && event.button !== 0) return null;
     if (window.innerWidth < PREVIEW_MIN_VIEWPORT_PX) return null;
     const a = event?.target?.closest?.('a[href*="/status/"]');
     if (!a) return null;
@@ -731,12 +755,23 @@ ${article.text}` : article.text;
     overlay.setAttribute("role", "presentation");
     overlay.innerHTML = previewHtml(data, posterUrl);
     P = { statusId, gen: gen2, phase: "ready", overlay, timer: 0, mountedAt: performance.now() };
-    document.body?.appendChild(overlay);
-    if (!document.getElementById(PREVIEW_STYLE_ID)) {
-      const style = document.createElement("style");
-      style.id = PREVIEW_STYLE_ID;
-      style.textContent = previewCss();
-      document.head?.appendChild(style);
+    try {
+      document.body?.appendChild(overlay);
+      if (!document.getElementById(PREVIEW_STYLE_ID)) {
+        const style = document.createElement("style");
+        style.id = PREVIEW_STYLE_ID;
+        style.textContent = previewCss();
+        document.head?.appendChild(style);
+      }
+    } catch (err) {
+      clearPreview("mount-failed");
+      throw err;
+    }
+    if (true) {
+      try {
+        document.documentElement.setAttribute("data-peek-mount-at", String(performance.now()));
+      } catch {
+      }
     }
     P.timer = setTimeout(() => {
       if (P && P.gen === gen2 && P.phase === "ready") clearPreview("route-timeout");
@@ -1379,6 +1414,12 @@ ${article.text}` : article.text;
     routeTimer = setTimeout(routeTick, isDetailPath() || paneMounted() ? ROUTE_POLL_ACTIVE_MS : ROUTE_POLL_IDLE_MS);
   }
   function onCaptureClick(event) {
+    if (true) {
+      try {
+        document.documentElement.setAttribute("data-peek-capture-at", String(performance.now()));
+      } catch {
+      }
+    }
     try {
       const a = event.target?.closest?.("a[href]");
       if (a) {

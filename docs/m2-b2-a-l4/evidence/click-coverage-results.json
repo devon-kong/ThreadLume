@@ -1,0 +1,367 @@
+[
+ {
+  "scenario": "timestamp",
+  "expect": "instant preview, correct id",
+  "pass": true,
+  "clicks": [
+   {
+    "at": 5568.4,
+    "tag": "TIME",
+    "statusHref": "/WangNextDoor2/status/2110134484808991100",
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false,
+    "button": 0
+   }
+  ],
+  "pvOn": true,
+  "pvFirstAt": 5648,
+  "pvLastAt": 5927,
+  "pvId": "2110134484808991100",
+  "pvLen": 210,
+  "pvNow": false,
+  "lightbox": false,
+  "composer": false,
+  "menu": false,
+  "path": "/WangNextDoor2/status/2110134484808991100"
+ },
+ {
+  "scenario": "bodytext",
+  "expect": "X navigates natively; no preview (documented COVERAGE GAP, fail-open)",
+  "pass": true,
+  "nativeNavigated": false,
+  "clicks": [
+   {
+    "at": 5657.7,
+    "tag": "DIV",
+    "statusHref": null,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false,
+    "button": 0
+   }
+  ],
+  "pvOn": false,
+  "pvFirstAt": null,
+  "pvLastAt": null,
+  "pvId": null,
+  "pvLen": 0,
+  "pvNow": false,
+  "lightbox": false,
+  "composer": false,
+  "menu": false,
+  "path": "/home"
+ },
+ {
+  "scenario": "quotecard",
+  "expect": "no preview of the outer post; X's own quote handling intact",
+  "pass": true,
+  "previewedOuterPost": false,
+  "clicks": [
+   {
+    "at": 5440.5,
+    "tag": "DIV",
+    "statusHref": null,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false,
+    "button": 0
+   }
+  ],
+  "pvOn": false,
+  "pvFirstAt": null,
+  "pvLastAt": null,
+  "pvId": null,
+  "pvLen": 0,
+  "pvNow": false,
+  "lightbox": false,
+  "composer": false,
+  "menu": false,
+  "path": "/home"
+ },
+ {
+  "scenario": "image",
+  "expect": "X native photo handling intact; any preview must show the correct post",
+  "pass": true,
+  "nativePhoto": true,
+  "wrongIdPreview": false,
+  "imgPosFound": true,
+  "clicks": [
+   {
+    "at": 5127,
+    "tag": "DIV",
+    "statusHref": null,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false,
+    "button": 0
+   },
+   {
+    "at": 6217,
+    "tag": "IMG",
+    "statusHref": "/wangray/status/2110209855344758827/photo/1",
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false,
+    "button": 0
+   }
+  ],
+  "pvOn": true,
+  "pvFirstAt": 6274,
+  "pvLastAt": 6308,
+  "pvId": "2110209855344758827",
+  "pvLen": 254,
+  "pvNow": false,
+  "lightbox": false,
+  "composer": false,
+  "menu": false,
+  "path": "/wangray/status/2110209855344758827/photo/1"
+ },
+ {
+  "scenario": "video",
+  "expect": "native playback toggles; no preview; no navigation",
+  "pass": true,
+  "playing": {
+   "paused": true,
+   "t": 0
+  },
+  "clicks": [
+   {
+    "at": 4985,
+    "tag": "DIV",
+    "statusHref": null,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false,
+    "button": 0
+   }
+  ],
+  "pvOn": false,
+  "pvFirstAt": null,
+  "pvLastAt": null,
+  "pvId": null,
+  "pvLen": 0,
+  "pvNow": false,
+  "lightbox": false,
+  "composer": false,
+  "menu": false,
+  "path": "/home"
+ },
+ {
+  "scenario": "replybtn",
+  "expect": "composer opens; no preview; no navigation",
+  "pass": true,
+  "clicks": [
+   {
+    "at": 5748.2,
+    "tag": "path",
+    "statusHref": null,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false,
+    "button": 0
+   }
+  ],
+  "pvOn": false,
+  "pvFirstAt": null,
+  "pvLastAt": null,
+  "pvId": null,
+  "pvLen": 0,
+  "pvNow": false,
+  "lightbox": false,
+  "composer": false,
+  "menu": false,
+  "path": "/compose/post"
+ },
+ {
+  "scenario": "actionbtns",
+  "expect": "like/repost/bookmark live outside any status anchor → preview capture structurally impossible; not physically clicked (zero-account-write rule)",
+  "pass": true,
+  "structural": {
+   "like": {
+    "count": 5,
+    "insideStatusAnchor": 0
+   },
+   "retweet": {
+    "count": 5,
+    "insideStatusAnchor": 0
+   },
+   "bookmark": {
+    "count": 5,
+    "insideStatusAnchor": 0
+   }
+  }
+ },
+ {
+  "scenario": "ctrlclick",
+  "expect": "new-tab navigation is X/browser's own; any transient preview must clear within the 1200ms bounded budget",
+  "pass": true,
+  "early": {
+   "clicks": [],
+   "pvOn": false,
+   "pvFirstAt": null,
+   "pvLastAt": null,
+   "pvId": null,
+   "pvLen": 0,
+   "pvNow": false,
+   "lightbox": false,
+   "composer": false,
+   "menu": false,
+   "path": "/home"
+  },
+  "late": {
+   "clicks": [],
+   "pvOn": false,
+   "pvFirstAt": null,
+   "pvLastAt": null,
+   "pvId": null,
+   "pvLen": 0,
+   "pvNow": false,
+   "lightbox": false,
+   "composer": false,
+   "menu": false,
+   "path": "/home"
+  }
+ },
+ {
+  "scenario": "shiftclick",
+  "expect": "new-window navigation is X/browser's own; any transient preview must clear within the 1200ms bounded budget",
+  "pass": true,
+  "early": {
+   "clicks": [
+    {
+     "at": 5652.5,
+     "tag": "TIME",
+     "statusHref": "/berryxia/status/2110142125644099956",
+     "ctrl": false,
+     "meta": false,
+     "shift": true,
+     "alt": false,
+     "button": 0
+    }
+   ],
+   "pvOn": false,
+   "pvFirstAt": null,
+   "pvLastAt": null,
+   "pvId": null,
+   "pvLen": 0,
+   "pvNow": false,
+   "lightbox": false,
+   "composer": false,
+   "menu": false,
+   "path": "/home"
+  },
+  "late": {
+   "clicks": [
+    {
+     "at": 5652.5,
+     "tag": "TIME",
+     "statusHref": "/berryxia/status/2110142125644099956",
+     "ctrl": false,
+     "meta": false,
+     "shift": true,
+     "alt": false,
+     "button": 0
+    }
+   ],
+   "pvOn": false,
+   "pvFirstAt": null,
+   "pvLastAt": null,
+   "pvId": null,
+   "pvLen": 0,
+   "pvNow": false,
+   "lightbox": false,
+   "composer": false,
+   "menu": false,
+   "path": "/home"
+  }
+ },
+ {
+  "scenario": "middleclick",
+  "expect": "no preview at all (middle click fires auxclick, not click); this tab unaffected",
+  "pass": true,
+  "clicks": [],
+  "pvOn": false,
+  "pvFirstAt": null,
+  "pvLastAt": null,
+  "pvId": null,
+  "pvLen": 0,
+  "pvNow": false,
+  "lightbox": false,
+  "composer": false,
+  "menu": false,
+  "path": "/home"
+ },
+ {
+  "scenario": "rapid",
+  "expect": "after back and a fresh click, no stale preview of the previous post may remain",
+  "pass": true,
+  "openedA": true,
+  "staleFirstPostPreview": false,
+  "clicks": [
+   {
+    "at": 7467.9,
+    "tag": "DIV",
+    "statusHref": null,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false,
+    "button": 0
+   },
+   {
+    "at": 8474.2,
+    "tag": "TIME",
+    "statusHref": "/wangray/status/2110188962736406532",
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false,
+    "button": 0
+   }
+  ],
+  "pvOn": true,
+  "pvFirstAt": 8542,
+  "pvLastAt": 8542,
+  "pvId": "2110188962736406532",
+  "pvLen": 168,
+  "pvNow": false,
+  "lightbox": false,
+  "composer": false,
+  "menu": false,
+  "path": "/wangray/status/2110188962736406532"
+ },
+ {
+  "scenario": "clicklog",
+  "expect": "modifier keys observable on real clicks",
+  "clicks": [
+   {
+    "at": 7467.9,
+    "tag": "DIV",
+    "statusHref": null,
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false,
+    "button": 0
+   },
+   {
+    "at": 8474.2,
+    "tag": "TIME",
+    "statusHref": "/wangray/status/2110188962736406532",
+    "ctrl": false,
+    "meta": false,
+    "shift": false,
+    "alt": false,
+    "button": 0
+   }
+  ]
+ }
+]

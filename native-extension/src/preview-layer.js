@@ -56,6 +56,16 @@ let genSeq = 0;
 // click. Everything up to the overlay mount is synchronous: the clicked cell
 // is guaranteed to still be mounted because X's handler has not run yet.
 export function captureClickForPreview(event) {
+  // Clock-validation builds only (PEEK_DIAG_DELAY_MS=50): a deliberate
+  // synchronous stall before extraction. The perf harness must include this
+  // cost in t1a — a monitor that records t0 after the extension's own capture
+  // handler would silently hide exactly this kind of in-handler work.
+  /* eslint-disable no-undef */
+  if (__PEEK_DIAG_STAMPS__ && __PEEK_DIAG_DELAY_MS__ > 0) {
+    const busyUntil = performance.now() + __PEEK_DIAG_DELAY_MS__;
+    while (performance.now() < busyUntil) { /* controlled stall, test builds only */ }
+  }
+  /* eslint-enable no-undef */
   const found = extractPreviewTarget(event);
   if (!found) {
     // a click that will not open a previewable detail must not leave a stale
@@ -81,6 +91,12 @@ export function captureClickForPreview(event) {
 //     fail open: no preview, X navigates exactly as before.
 function extractPreviewTarget(event) {
   if (statusIdFromPath()) return null; // already on a detail page
+  // Modified or non-primary clicks belong to the browser (new tab / new
+  // window) or to X's own handling — never to an instant preview of THIS
+  // tab. Without this guard a ctrl/shift/alt+click would flash a ~1.2s
+  // preview that only the route timeout clears (observed live, L4-S3).
+  if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return null;
+  if (event.button !== undefined && event.button !== 0) return null;
   if (window.innerWidth < PREVIEW_MIN_VIEWPORT_PX) return null;
   const a = event?.target?.closest?.('a[href*="/status/"]');
   if (!a) return null;
@@ -123,13 +139,28 @@ function mountPreview(statusId, data, posterUrl) {
   // anything below throws, the overlay is still tracked by P and removable —
   // no orphan with a fixed id, no duplicate id on the next mount.
   P = { statusId, gen, phase: "ready", overlay, timer: 0, mountedAt: performance.now() };
-  document.body?.appendChild(overlay);
-  if (!document.getElementById(PREVIEW_STYLE_ID)) {
-    const style = document.createElement("style");
-    style.id = PREVIEW_STYLE_ID;
-    style.textContent = previewCss();
-    document.head?.appendChild(style);
+  try {
+    document.body?.appendChild(overlay);
+    if (!document.getElementById(PREVIEW_STYLE_ID)) {
+      const style = document.createElement("style");
+      style.id = PREVIEW_STYLE_ID;
+      style.textContent = previewCss();
+      document.head?.appendChild(style);
+    }
+  } catch (err) {
+    // mount failed mid-sequence (DOM insertion, style insert): drop the armed
+    // state entirely — no orphan P, no un-cleared timer, no half-mounted
+    // overlay — then let the caller's own guard see the failure.
+    clearPreview("mount-failed");
+    throw err;
   }
+  // Test-build probe: when the overlay actually entered the DOM. Read against
+  // data-peek-capture-at to decompose t1a (capture → extract → mount).
+  /* eslint-disable no-undef */
+  if (__PEEK_DIAG_STAMPS__) {
+    try { document.documentElement.setAttribute("data-peek-mount-at", String(performance.now())); } catch { /* probe only */ }
+  }
+  /* eslint-enable no-undef */
   P.timer = setTimeout(() => {
     // only the "still on the list" state can time out; once the route has
     // confirmed, the adapter budget and route observer own every exit

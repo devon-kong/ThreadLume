@@ -1,0 +1,1572 @@
+{
+ "mode": "m2a",
+ "rounds": [
+  {
+   "round": 0,
+   "samples": [
+    {
+     "sample": "video",
+     "target": "2109309251533570509",
+     "openedAt": "/thinkszyg/status/2109309251533570509",
+     "identity": {
+      "present": true,
+      "mode": "m2a",
+      "build": "m2a-202610140753-29fc210ac2",
+      "conflict": false
+     },
+     "t0base": {
+      "click": "window-capture",
+      "pointerdownAt": null
+     },
+     "diag": {
+      "captureDeltaMs": 0.1,
+      "extractMs": 5.1
+     },
+     "t1a": 44,
+     "t1b": 390,
+     "handoff": {
+      "dupFrames": 1,
+      "blankLeftFrames": 0,
+      "leftoverPreviewFrames": 0,
+      "articleJumpPx": {
+       "dx": 0,
+       "dy": 0
+      },
+      "textJumpPx": {
+       "dy": -11,
+       "previewFontPx": "15px",
+       "nativeFontPx": "17px"
+      }
+     },
+     "t2aCandidate": {
+      "ms": 1328,
+      "phase": "pre-scroll"
+     },
+     "t2bCandidate": {
+      "ms": 1330,
+      "phase": "pre-scroll"
+     },
+     "t2net": null,
+     "t3": 413,
+     "video": {
+      "tag": 2,
+      "firstNodeAt": 372.7000000476837,
+      "firstPlayableAt": 704.7000000476837,
+      "waiting": 0,
+      "retagged": true,
+      "currentTime": 0,
+      "paused": true,
+      "readyState": 4,
+      "connected": true
+     },
+     "videoIdentityAfterDeepScroll": {
+      "tracked": true,
+      "sameElement": true,
+      "trackedTag": 1,
+      "connected": true,
+      "waiting": 0,
+      "retagged": false,
+      "currentTime": 0.09,
+      "paused": false,
+      "playableNow": true
+     },
+     "labIntegrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "videoInFocal": true,
+      "state": "active",
+      "previewLeftover": false
+     },
+     "resources": {
+      "xOther": {
+       "count": 6,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "videoMedia": {
+       "count": 7,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "mediaImages": {
+       "count": 1,
+       "cacheHits": 1,
+       "bytes": 0
+      }
+     },
+     "heapDom": {
+      "beforeClick": {
+       "longTasks": 0,
+       "heap": 93
+      },
+      "afterScroll": {
+       "heap": 96,
+       "dom": 882,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 345,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "a": 61.5,
+      "left": 61.40000009536743,
+      "cells": 723.7999999523163,
+      "anchor": 723.9000000953674,
+      "anchorVisible": 723.9000000953674,
+      "stable": 1224.7999999523163
+     }
+    },
+    {
+     "sample": "photos",
+     "target": "2099877465795735861",
+     "openedAt": "/KinGao476942/status/2099877465795735861",
+     "identity": {
+      "present": true,
+      "mode": "m2a",
+      "build": "m2a-202610140753-29fc210ac2",
+      "conflict": false
+     },
+     "t0base": {
+      "click": "window-capture",
+      "pointerdownAt": null
+     },
+     "diag": {
+      "captureDeltaMs": 0.1,
+      "extractMs": 1.4
+     },
+     "t1a": 79,
+     "t1b": 370,
+     "handoff": {
+      "dupFrames": 0,
+      "blankLeftFrames": 0,
+      "leftoverPreviewFrames": 0,
+      "articleJumpPx": {
+       "dx": -314,
+       "dy": 11
+      },
+      "textJumpPx": {
+       "dy": 0,
+       "previewFontPx": "15px",
+       "nativeFontPx": "17px"
+      }
+     },
+     "t2aCandidate": {
+      "ms": 2054,
+      "phase": "pre-scroll"
+     },
+     "t2bCandidate": {
+      "ms": 2358,
+      "phase": "pre-scroll"
+     },
+     "t2net": null,
+     "t3": 664,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "videoInFocal": false,
+      "state": "active",
+      "previewLeftover": false
+     },
+     "resources": {
+      "xOther": {
+       "count": 5,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "rest11": {
+       "count": 1,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "gqlOther": {
+       "count": 1,
+       "cacheHits": 0,
+       "bytes": 337
+      }
+     },
+     "heapDom": {
+      "beforeClick": {
+       "longTasks": 0,
+       "heap": 94
+      },
+      "afterScroll": {
+       "heap": 120,
+       "dom": 2845,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 1567,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "a": 69.89999985694885,
+      "left": 69.79999995231628,
+      "cells": 1025.2999999523163,
+      "anchor": 1025.2999999523163,
+      "anchorVisible": 1028.7999999523163,
+      "stable": 1533.7000000476837
+     }
+    },
+    {
+     "sample": "text",
+     "target": "1760839985715204230",
+     "openedAt": "/gefei55/status/1760839985715204230",
+     "identity": {
+      "present": true,
+      "mode": "m2a",
+      "build": "m2a-202610140753-29fc210ac2",
+      "conflict": false
+     },
+     "t0base": {
+      "click": "window-capture",
+      "pointerdownAt": null
+     },
+     "diag": {
+      "captureDeltaMs": 0,
+      "extractMs": 2
+     },
+     "t1a": 27,
+     "t1b": 386,
+     "handoff": {
+      "dupFrames": 0,
+      "blankLeftFrames": 0,
+      "leftoverPreviewFrames": 0,
+      "articleJumpPx": {
+       "dx": -314,
+       "dy": 11
+      },
+      "textJumpPx": {
+       "dy": 0,
+       "previewFontPx": "15px",
+       "nativeFontPx": "17px"
+      }
+     },
+     "t2aCandidate": {
+      "ms": 1230,
+      "phase": "pre-scroll"
+     },
+     "t2bCandidate": {
+      "ms": 1236,
+      "phase": "pre-scroll"
+     },
+     "t2net": null,
+     "t3": 682,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "videoInFocal": false,
+      "state": "active",
+      "previewLeftover": false
+     },
+     "resources": {
+      "xOther": {
+       "count": 9,
+       "cacheHits": 0,
+       "bytes": 376
+      },
+      "rest11": {
+       "count": 1,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "gqlOther": {
+       "count": 1,
+       "cacheHits": 0,
+       "bytes": 337
+      }
+     },
+     "heapDom": {
+      "beforeClick": {
+       "longTasks": 0,
+       "heap": 94
+      },
+      "afterScroll": {
+       "heap": 133,
+       "dom": 3965,
+       "longTasks": 2
+      }
+     },
+     "deepScrollMs": 1565,
+     "longTasksDuringDeepScroll": 2,
+     "t4": {
+      "a": 58.80000019073486,
+      "left": 58.700000047683716,
+      "cells": 641.6000001430511,
+      "anchor": 641.7000000476837,
+      "anchorVisible": 644.5,
+      "stable": 1147.6000001430511
+     }
+    },
+    {
+     "sample": "highcomments",
+     "target": "2100757389112938573",
+     "openedAt": "/ruanyf/status/2100757389112938573",
+     "identity": {
+      "present": true,
+      "mode": "m2a",
+      "build": "m2a-202610140753-29fc210ac2",
+      "conflict": false
+     },
+     "t0base": {
+      "click": "window-capture",
+      "pointerdownAt": null
+     },
+     "diag": {
+      "captureDeltaMs": 0,
+      "extractMs": 1.4
+     },
+     "t1a": 76,
+     "t1b": 381,
+     "handoff": {
+      "dupFrames": 0,
+      "blankLeftFrames": 0,
+      "leftoverPreviewFrames": 0,
+      "articleJumpPx": {
+       "dx": -314,
+       "dy": 1
+      },
+      "textJumpPx": {
+       "dy": 0,
+       "previewFontPx": "15px",
+       "nativeFontPx": "17px"
+      }
+     },
+     "t2aCandidate": {
+      "ms": 1261,
+      "phase": "pre-scroll"
+     },
+     "t2bCandidate": null,
+     "t2net": null,
+     "t3": 671,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "videoInFocal": false,
+      "state": "active",
+      "previewLeftover": false
+     },
+     "resources": {
+      "xOther": {
+       "count": 5,
+       "cacheHits": 0,
+       "bytes": 0
+      }
+     },
+     "heapDom": {
+      "beforeClick": {
+       "longTasks": 0,
+       "heap": 100
+      },
+      "afterScroll": {
+       "heap": 137,
+       "dom": 3939,
+       "longTasks": 1
+      }
+     },
+     "deepScrollMs": 1543,
+     "longTasksDuringDeepScroll": 1,
+     "t4": {
+      "a": 79.40000009536743,
+      "left": 79.30000019073486,
+      "cells": 273.30000019073486,
+      "anchor": 273.30000019073486,
+      "anchorVisible": 273.30000019073486,
+      "stable": 774.8000001907349
+     }
+    }
+   ]
+  },
+  {
+   "round": 1,
+   "samples": [
+    {
+     "sample": "video",
+     "target": "2109309251533570509",
+     "openedAt": "/thinkszyg/status/2109309251533570509",
+     "identity": {
+      "present": true,
+      "mode": "m2a",
+      "build": "m2a-202610140753-29fc210ac2",
+      "conflict": false
+     },
+     "t0base": {
+      "click": "window-capture",
+      "pointerdownAt": null
+     },
+     "diag": {
+      "captureDeltaMs": 0,
+      "extractMs": 1.3
+     },
+     "t1a": 32,
+     "t1b": 392,
+     "handoff": {
+      "dupFrames": 1,
+      "blankLeftFrames": 0,
+      "leftoverPreviewFrames": 0,
+      "articleJumpPx": {
+       "dx": 0,
+       "dy": 0
+      },
+      "textJumpPx": {
+       "dy": -11,
+       "previewFontPx": "15px",
+       "nativeFontPx": "17px"
+      }
+     },
+     "t2aCandidate": {
+      "ms": 1673,
+      "phase": "pre-scroll"
+     },
+     "t2bCandidate": {
+      "ms": 1677,
+      "phase": "pre-scroll"
+     },
+     "t2net": null,
+     "t3": 400,
+     "video": {
+      "tag": 2,
+      "firstNodeAt": 378.2000000476837,
+      "firstPlayableAt": 716.6000001430511,
+      "waiting": 0,
+      "retagged": true,
+      "currentTime": 0,
+      "paused": true,
+      "readyState": 4,
+      "connected": true
+     },
+     "videoIdentityAfterDeepScroll": {
+      "tracked": true,
+      "sameElement": true,
+      "trackedTag": 1,
+      "connected": true,
+      "waiting": 0,
+      "retagged": false,
+      "currentTime": 0.09,
+      "paused": false,
+      "playableNow": true
+     },
+     "labIntegrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "videoInFocal": true,
+      "state": "active",
+      "previewLeftover": false
+     },
+     "resources": {
+      "xOther": {
+       "count": 6,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "videoMedia": {
+       "count": 3,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "mediaImages": {
+       "count": 1,
+       "cacheHits": 1,
+       "bytes": 0
+      }
+     },
+     "heapDom": {
+      "beforeClick": {
+       "longTasks": 0,
+       "heap": 154
+      },
+      "afterScroll": {
+       "heap": 137,
+       "dom": 882,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 361,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "a": 87.5,
+      "left": 87.5,
+      "cells": 1014.5999999046326,
+      "anchor": 1014.5999999046326,
+      "anchorVisible": 1014.7000000476837,
+      "stable": 1514.7999999523163
+     }
+    },
+    {
+     "sample": "photos",
+     "target": "2099877465795735861",
+     "openedAt": "/KinGao476942/status/2099877465795735861",
+     "identity": {
+      "present": true,
+      "mode": "m2a",
+      "build": "m2a-202610140753-29fc210ac2",
+      "conflict": false
+     },
+     "t0base": {
+      "click": "window-capture",
+      "pointerdownAt": null
+     },
+     "diag": {
+      "captureDeltaMs": 0,
+      "extractMs": 1.6
+     },
+     "t1a": 74,
+     "t1b": 378,
+     "handoff": {
+      "dupFrames": 0,
+      "blankLeftFrames": 0,
+      "leftoverPreviewFrames": 0,
+      "articleJumpPx": {
+       "dx": -314,
+       "dy": 11
+      },
+      "textJumpPx": {
+       "dy": 0,
+       "previewFontPx": "15px",
+       "nativeFontPx": "17px"
+      }
+     },
+     "t2aCandidate": {
+      "ms": 2115,
+      "phase": "pre-scroll"
+     },
+     "t2bCandidate": {
+      "ms": 2379,
+      "phase": "pre-scroll"
+     },
+     "t2net": null,
+     "t3": 663,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "videoInFocal": false,
+      "state": "active",
+      "previewLeftover": false
+     },
+     "resources": {
+      "xOther": {
+       "count": 6,
+       "cacheHits": 0,
+       "bytes": 376
+      },
+      "rest11": {
+       "count": 1,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "gqlOther": {
+       "count": 1,
+       "cacheHits": 0,
+       "bytes": 337
+      }
+     },
+     "heapDom": {
+      "beforeClick": {
+       "longTasks": 0,
+       "heap": 171
+      },
+      "afterScroll": {
+       "heap": 201,
+       "dom": 3987,
+       "longTasks": 1
+      }
+     },
+     "deepScrollMs": 1600,
+     "longTasksDuringDeepScroll": 1,
+     "t4": {
+      "a": 63.59999990463257,
+      "left": 63.59999990463257,
+      "cells": 1703.2999999523163,
+      "anchor": 1703.2999999523163,
+      "anchorVisible": 1708,
+      "stable": 2210.0999999046326
+     }
+    },
+    {
+     "sample": "text",
+     "target": "1760839985715204230",
+     "openedAt": "/gefei55/status/1760839985715204230",
+     "identity": {
+      "present": true,
+      "mode": "m2a",
+      "build": "m2a-202610140753-29fc210ac2",
+      "conflict": false
+     },
+     "t0base": {
+      "click": "window-capture",
+      "pointerdownAt": null
+     },
+     "diag": {
+      "captureDeltaMs": 0.1,
+      "extractMs": 1.2
+     },
+     "t1a": 24,
+     "t1b": 370,
+     "handoff": {
+      "dupFrames": 0,
+      "blankLeftFrames": 0,
+      "leftoverPreviewFrames": 0,
+      "articleJumpPx": {
+       "dx": -314,
+       "dy": 11
+      },
+      "textJumpPx": {
+       "dy": 0,
+       "previewFontPx": "15px",
+       "nativeFontPx": "17px"
+      }
+     },
+     "t2aCandidate": {
+      "ms": 1202,
+      "phase": "pre-scroll"
+     },
+     "t2bCandidate": {
+      "ms": 2346,
+      "phase": "pre-scroll"
+     },
+     "t2net": null,
+     "t3": 661,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "videoInFocal": false,
+      "state": "active",
+      "previewLeftover": false
+     },
+     "resources": {
+      "mediaImages": {
+       "count": 1,
+       "cacheHits": 1,
+       "bytes": 0
+      },
+      "rest11": {
+       "count": 1,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "xOther": {
+       "count": 9,
+       "cacheHits": 0,
+       "bytes": 376
+      }
+     },
+     "heapDom": {
+      "beforeClick": {
+       "longTasks": 0,
+       "heap": 156
+      },
+      "afterScroll": {
+       "heap": 167,
+       "dom": 4246,
+       "longTasks": 1
+      }
+     },
+     "deepScrollMs": 1567,
+     "longTasksDuringDeepScroll": 1,
+     "t4": {
+      "a": 60.5,
+      "left": 60.5,
+      "cells": 2499.5,
+      "anchor": 2499.5,
+      "anchorVisible": 2502.2000000476837,
+      "stable": 3003.7999999523163
+     }
+    },
+    {
+     "sample": "highcomments",
+     "target": "2100757389112938573",
+     "openedAt": "/ruanyf/status/2100757389112938573",
+     "identity": {
+      "present": true,
+      "mode": "m2a",
+      "build": "m2a-202610140753-29fc210ac2",
+      "conflict": false
+     },
+     "t0base": {
+      "click": "window-capture",
+      "pointerdownAt": null
+     },
+     "diag": {
+      "captureDeltaMs": 0.1,
+      "extractMs": 1.2
+     },
+     "t1a": 74,
+     "t1b": 367,
+     "handoff": {
+      "dupFrames": 0,
+      "blankLeftFrames": 0,
+      "leftoverPreviewFrames": 0,
+      "articleJumpPx": {
+       "dx": -314,
+       "dy": 1
+      },
+      "textJumpPx": {
+       "dy": 0,
+       "previewFontPx": "15px",
+       "nativeFontPx": "17px"
+      }
+     },
+     "t2aCandidate": {
+      "ms": 2019,
+      "phase": "pre-scroll"
+     },
+     "t2bCandidate": {
+      "ms": 2019,
+      "phase": "pre-scroll"
+     },
+     "t2net": null,
+     "t3": 660,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "videoInFocal": false,
+      "state": "active",
+      "previewLeftover": false
+     },
+     "resources": {
+      "rest11": {
+       "count": 2,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "xOther": {
+       "count": 6,
+       "cacheHits": 0,
+       "bytes": 376
+      },
+      "gqlOther": {
+       "count": 1,
+       "cacheHits": 0,
+       "bytes": 337
+      }
+     },
+     "heapDom": {
+      "beforeClick": {
+       "longTasks": 0,
+       "heap": 127
+      },
+      "afterScroll": {
+       "heap": 164,
+       "dom": 2428,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 1588,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "a": 65.79999995231628,
+      "left": 65.69999980926514,
+      "cells": 442.09999990463257,
+      "anchor": 442.09999990463257,
+      "anchorVisible": 442.09999990463257,
+      "stable": 945
+     }
+    }
+   ]
+  },
+  {
+   "round": 2,
+   "samples": [
+    {
+     "sample": "video",
+     "target": "2109309251533570509",
+     "openedAt": "/thinkszyg/status/2109309251533570509",
+     "identity": {
+      "present": true,
+      "mode": "m2a",
+      "build": "m2a-202610140753-29fc210ac2",
+      "conflict": false
+     },
+     "t0base": {
+      "click": "window-capture",
+      "pointerdownAt": null
+     },
+     "diag": {
+      "captureDeltaMs": 0,
+      "extractMs": 1.4
+     },
+     "t1a": 27,
+     "t1b": 386,
+     "handoff": {
+      "dupFrames": 1,
+      "blankLeftFrames": 0,
+      "leftoverPreviewFrames": 0,
+      "articleJumpPx": {
+       "dx": 0,
+       "dy": 0
+      },
+      "textJumpPx": {
+       "dy": -11,
+       "previewFontPx": "15px",
+       "nativeFontPx": "17px"
+      }
+     },
+     "t2aCandidate": {
+      "ms": 1227,
+      "phase": "pre-scroll"
+     },
+     "t2bCandidate": {
+      "ms": 1232,
+      "phase": "pre-scroll"
+     },
+     "t2net": null,
+     "t3": 392,
+     "video": {
+      "tag": 2,
+      "firstNodeAt": 369.40000009536743,
+      "firstPlayableAt": 717.0999999046326,
+      "waiting": 0,
+      "retagged": true,
+      "currentTime": 0,
+      "paused": true,
+      "readyState": 4,
+      "connected": true
+     },
+     "videoIdentityAfterDeepScroll": {
+      "tracked": true,
+      "sameElement": true,
+      "trackedTag": 1,
+      "connected": true,
+      "waiting": 0,
+      "retagged": false,
+      "currentTime": 0.08,
+      "paused": false,
+      "playableNow": true
+     },
+     "labIntegrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "videoInFocal": true,
+      "state": "active",
+      "previewLeftover": false
+     },
+     "resources": {
+      "xOther": {
+       "count": 6,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "videoMedia": {
+       "count": 3,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "mediaImages": {
+       "count": 1,
+       "cacheHits": 1,
+       "bytes": 0
+      }
+     },
+     "heapDom": {
+      "beforeClick": {
+       "longTasks": 0,
+       "heap": 169
+      },
+      "afterScroll": {
+       "heap": 172,
+       "dom": 880,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 354,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "a": 63.700000047683716,
+      "left": 63.700000047683716,
+      "cells": 691.1000001430511,
+      "anchor": 691.1000001430511,
+      "anchorVisible": 691.1000001430511,
+      "stable": 1194.7000000476837
+     }
+    },
+    {
+     "sample": "photos",
+     "target": "2099877465795735861",
+     "openedAt": "/KinGao476942/status/2099877465795735861",
+     "identity": {
+      "present": true,
+      "mode": "m2a",
+      "build": "m2a-202610140753-29fc210ac2",
+      "conflict": false
+     },
+     "t0base": {
+      "click": "window-capture",
+      "pointerdownAt": null
+     },
+     "diag": {
+      "captureDeltaMs": 0,
+      "extractMs": 1.1
+     },
+     "t1a": 22,
+     "t1b": 369,
+     "handoff": {
+      "dupFrames": 0,
+      "blankLeftFrames": 0,
+      "leftoverPreviewFrames": 0,
+      "articleJumpPx": {
+       "dx": -314,
+       "dy": 11
+      },
+      "textJumpPx": {
+       "dy": 0,
+       "previewFontPx": "15px",
+       "nativeFontPx": "17px"
+      }
+     },
+     "t2aCandidate": {
+      "ms": 1129,
+      "phase": "pre-scroll"
+     },
+     "t2bCandidate": {
+      "ms": 1134,
+      "phase": "pre-scroll"
+     },
+     "t2net": null,
+     "t3": 655,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "videoInFocal": false,
+      "state": "active",
+      "previewLeftover": false
+     },
+     "resources": {
+      "xOther": {
+       "count": 9,
+       "cacheHits": 0,
+       "bytes": 376
+      },
+      "rest11": {
+       "count": 1,
+       "cacheHits": 0,
+       "bytes": 0
+      }
+     },
+     "heapDom": {
+      "beforeClick": {
+       "longTasks": 0,
+       "heap": 150
+      },
+      "afterScroll": {
+       "heap": 189,
+       "dom": 3508,
+       "longTasks": 1
+      }
+     },
+     "deepScrollMs": 1606,
+     "longTasksDuringDeepScroll": 1,
+     "t4": {
+      "a": 54.5,
+      "left": 54.5,
+      "cells": 2682.7000000476837,
+      "anchor": 2682.7999999523163,
+      "anchorVisible": 2685.9000000953674,
+      "stable": 3190.5
+     }
+    },
+    {
+     "sample": "text",
+     "target": "1760839985715204230",
+     "openedAt": "/gefei55/status/1760839985715204230",
+     "identity": {
+      "present": true,
+      "mode": "m2a",
+      "build": "m2a-202610140753-29fc210ac2",
+      "conflict": false
+     },
+     "t0base": {
+      "click": "window-capture",
+      "pointerdownAt": null
+     },
+     "diag": {
+      "captureDeltaMs": 0,
+      "extractMs": 1.3
+     },
+     "t1a": 75,
+     "t1b": 368,
+     "handoff": {
+      "dupFrames": 0,
+      "blankLeftFrames": 0,
+      "leftoverPreviewFrames": 0,
+      "articleJumpPx": {
+       "dx": -314,
+       "dy": 11
+      },
+      "textJumpPx": {
+       "dy": 0,
+       "previewFontPx": "15px",
+       "nativeFontPx": "17px"
+      }
+     },
+     "t2aCandidate": {
+      "ms": 1479,
+      "phase": "pre-scroll"
+     },
+     "t2bCandidate": {
+      "ms": 1481,
+      "phase": "pre-scroll"
+     },
+     "t2net": null,
+     "t3": 663,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "videoInFocal": false,
+      "state": "active",
+      "previewLeftover": false
+     },
+     "resources": {
+      "xOther": {
+       "count": 5,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "rest11": {
+       "count": 1,
+       "cacheHits": 0,
+       "bytes": 0
+      }
+     },
+     "heapDom": {
+      "beforeClick": {
+       "longTasks": 0,
+       "heap": 177
+      },
+      "afterScroll": {
+       "heap": 180,
+       "dom": 837,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 578,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "a": 62.89999985694885,
+      "left": 62.799999952316284,
+      "cells": 664.5,
+      "anchor": 664.5999999046326,
+      "anchorVisible": 667.0999999046326,
+      "stable": 1168.7999999523163
+     }
+    },
+    {
+     "sample": "highcomments",
+     "target": "2100757389112938573",
+     "openedAt": "/ruanyf/status/2100757389112938573",
+     "identity": {
+      "present": true,
+      "mode": "m2a",
+      "build": "m2a-202610140753-29fc210ac2",
+      "conflict": false
+     },
+     "t0base": {
+      "click": "window-capture",
+      "pointerdownAt": null
+     },
+     "diag": {
+      "captureDeltaMs": 0.1,
+      "extractMs": 1.6
+     },
+     "t1a": 24,
+     "t1b": 375,
+     "handoff": {
+      "dupFrames": 0,
+      "blankLeftFrames": 0,
+      "leftoverPreviewFrames": 0,
+      "articleJumpPx": {
+       "dx": -314,
+       "dy": 1
+      },
+      "textJumpPx": {
+       "dy": 0,
+       "previewFontPx": "15px",
+       "nativeFontPx": "17px"
+      }
+     },
+     "t2aCandidate": {
+      "ms": 1311,
+      "phase": "pre-scroll"
+     },
+     "t2bCandidate": {
+      "ms": 1316,
+      "phase": "pre-scroll"
+     },
+     "t2net": null,
+     "t3": 672,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "videoInFocal": false,
+      "state": "active",
+      "previewLeftover": false
+     },
+     "resources": {
+      "mediaImages": {
+       "count": 2,
+       "cacheHits": 2,
+       "bytes": 0
+      },
+      "xOther": {
+       "count": 9,
+       "cacheHits": 0,
+       "bytes": 376
+      },
+      "rest11": {
+       "count": 1,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "gqlOther": {
+       "count": 1,
+       "cacheHits": 0,
+       "bytes": 337
+      }
+     },
+     "heapDom": {
+      "beforeClick": {
+       "longTasks": 0,
+       "heap": 163
+      },
+      "afterScroll": {
+       "heap": 201,
+       "dom": 4049,
+       "longTasks": 1
+      }
+     },
+     "deepScrollMs": 1625,
+     "longTasksDuringDeepScroll": 1,
+     "t4": {
+      "a": 58.5,
+      "left": 58.5,
+      "cells": 439.7000000476837,
+      "anchor": 439.7999999523163,
+      "anchorVisible": 439.7999999523163,
+      "stable": 941.5999999046326
+     }
+    }
+   ]
+  },
+  {
+   "round": 3,
+   "samples": [
+    {
+     "sample": "video",
+     "target": "2109309251533570509",
+     "openedAt": "/thinkszyg/status/2109309251533570509",
+     "identity": {
+      "present": true,
+      "mode": "m2a",
+      "build": "m2a-202610140753-29fc210ac2",
+      "conflict": false
+     },
+     "t0base": {
+      "click": "window-capture",
+      "pointerdownAt": null
+     },
+     "diag": {
+      "captureDeltaMs": 0.1,
+      "extractMs": 2.1
+     },
+     "t1a": 36,
+     "t1b": 389,
+     "handoff": {
+      "dupFrames": 0,
+      "blankLeftFrames": 0,
+      "leftoverPreviewFrames": 0,
+      "articleJumpPx": {
+       "dx": -314,
+       "dy": 11
+      },
+      "textJumpPx": {
+       "dy": 0,
+       "previewFontPx": "15px",
+       "nativeFontPx": "17px"
+      }
+     },
+     "t2aCandidate": {
+      "ms": 1394,
+      "phase": "pre-scroll"
+     },
+     "t2bCandidate": {
+      "ms": 1404,
+      "phase": "pre-scroll"
+     },
+     "t2net": null,
+     "t3": 677,
+     "video": {
+      "tag": 2,
+      "firstNodeAt": 381.7000000476837,
+      "firstPlayableAt": 1518.6000001430511,
+      "waiting": 0,
+      "retagged": true,
+      "currentTime": 0,
+      "paused": true,
+      "readyState": 4,
+      "connected": true
+     },
+     "videoIdentityAfterDeepScroll": {
+      "tracked": true,
+      "sameElement": true,
+      "trackedTag": 1,
+      "connected": true,
+      "waiting": 0,
+      "retagged": false,
+      "currentTime": 0,
+      "paused": true,
+      "playableNow": false
+     },
+     "labIntegrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "videoInFocal": true,
+      "state": "active",
+      "previewLeftover": false
+     },
+     "resources": {
+      "xOther": {
+       "count": 6,
+       "cacheHits": 0,
+       "bytes": 376
+      },
+      "rest11": {
+       "count": 1,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "videoMedia": {
+       "count": 12,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "gqlOther": {
+       "count": 1,
+       "cacheHits": 0,
+       "bytes": 337
+      }
+     },
+     "heapDom": {
+      "beforeClick": {
+       "longTasks": 0,
+       "heap": 155
+      },
+      "afterScroll": {
+       "heap": 169,
+       "dom": 2428,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 628,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "a": 88,
+      "left": 88,
+      "cells": 218.10000014305115,
+      "anchor": 218.10000014305115,
+      "anchorVisible": 218.10000014305115,
+      "stable": 721.4000000953674
+     }
+    },
+    {
+     "sample": "photos",
+     "target": "2099877465795735861",
+     "openedAt": "/KinGao476942/status/2099877465795735861",
+     "identity": {
+      "present": true,
+      "mode": "m2a",
+      "build": "m2a-202610140753-29fc210ac2",
+      "conflict": false
+     },
+     "t0base": {
+      "click": "window-capture",
+      "pointerdownAt": null
+     },
+     "diag": {
+      "captureDeltaMs": 0.1,
+      "extractMs": 1.3
+     },
+     "t1a": 24,
+     "t1b": 369,
+     "handoff": {
+      "dupFrames": 0,
+      "blankLeftFrames": 0,
+      "leftoverPreviewFrames": 0,
+      "articleJumpPx": {
+       "dx": -314,
+       "dy": 11
+      },
+      "textJumpPx": {
+       "dy": 0,
+       "previewFontPx": "15px",
+       "nativeFontPx": "17px"
+      }
+     },
+     "t2aCandidate": {
+      "ms": 1935,
+      "phase": "pre-scroll"
+     },
+     "t2bCandidate": {
+      "ms": 1935,
+      "phase": "pre-scroll"
+     },
+     "t2net": null,
+     "t3": 652,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "videoInFocal": false,
+      "state": "active",
+      "previewLeftover": false
+     },
+     "resources": {
+      "rest11": {
+       "count": 1,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "xOther": {
+       "count": 9,
+       "cacheHits": 0,
+       "bytes": 376
+      },
+      "gqlOther": {
+       "count": 1,
+       "cacheHits": 0,
+       "bytes": 337
+      }
+     },
+     "heapDom": {
+      "beforeClick": {
+       "longTasks": 0,
+       "heap": 145
+      },
+      "afterScroll": {
+       "heap": 148,
+       "dom": 893,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 597,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "a": 50,
+      "left": 50,
+      "cells": 1899.7999999523163,
+      "anchor": 1899.7999999523163,
+      "anchorVisible": 1899.7999999523163,
+      "stable": 2402.100000143051
+     }
+    },
+    {
+     "sample": "text",
+     "target": "1760839985715204230",
+     "openedAt": "/gefei55/status/1760839985715204230",
+     "identity": {
+      "present": true,
+      "mode": "m2a",
+      "build": "m2a-202610140753-29fc210ac2",
+      "conflict": false
+     },
+     "t0base": {
+      "click": "window-capture",
+      "pointerdownAt": null
+     },
+     "diag": {
+      "captureDeltaMs": 0,
+      "extractMs": 1.8
+     },
+     "t1a": 77,
+     "t1b": 376,
+     "handoff": {
+      "dupFrames": 0,
+      "blankLeftFrames": 0,
+      "leftoverPreviewFrames": 0,
+      "articleJumpPx": {
+       "dx": -314,
+       "dy": 11
+      },
+      "textJumpPx": {
+       "dy": 0,
+       "previewFontPx": "15px",
+       "nativeFontPx": "17px"
+      }
+     },
+     "t2aCandidate": {
+      "ms": 2054,
+      "phase": "pre-scroll"
+     },
+     "t2bCandidate": {
+      "ms": 2396,
+      "phase": "pre-scroll"
+     },
+     "t2net": null,
+     "t3": 666,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "videoInFocal": false,
+      "state": "active",
+      "previewLeftover": false
+     },
+     "resources": {
+      "rest11": {
+       "count": 2,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "xOther": {
+       "count": 6,
+       "cacheHits": 0,
+       "bytes": 376
+      },
+      "gqlOther": {
+       "count": 1,
+       "cacheHits": 0,
+       "bytes": 337
+      }
+     },
+     "heapDom": {
+      "beforeClick": {
+       "longTasks": 0,
+       "heap": 170
+      },
+      "afterScroll": {
+       "heap": 195,
+       "dom": 2532,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 1575,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "a": 58.60000014305115,
+      "left": 58.5,
+      "cells": 2464,
+      "anchor": 2464.100000143051,
+      "anchorVisible": 2466.300000190735,
+      "stable": 2968.100000143051
+     }
+    },
+    {
+     "sample": "highcomments",
+     "target": "2100757389112938573",
+     "openedAt": "/ruanyf/status/2100757389112938573",
+     "identity": {
+      "present": true,
+      "mode": "m2a",
+      "build": "m2a-202610140753-29fc210ac2",
+      "conflict": false
+     },
+     "t0base": {
+      "click": "window-capture",
+      "pointerdownAt": null
+     },
+     "diag": {
+      "captureDeltaMs": 0,
+      "extractMs": 1.2
+     },
+     "t1a": 23,
+     "t1b": 374,
+     "handoff": {
+      "dupFrames": 1,
+      "blankLeftFrames": 0,
+      "leftoverPreviewFrames": 0,
+      "articleJumpPx": {
+       "dx": 0,
+       "dy": 0
+      },
+      "textJumpPx": {
+       "dy": -1,
+       "previewFontPx": "15px",
+       "nativeFontPx": "17px"
+      }
+     },
+     "t2aCandidate": {
+      "ms": 1586,
+      "phase": "pre-scroll"
+     },
+     "t2bCandidate": {
+      "ms": 1599,
+      "phase": "pre-scroll"
+     },
+     "t2net": null,
+     "t3": 374,
+     "videoIdentityAfterDeepScroll": null,
+     "labIntegrity": {
+      "focalConnected": true,
+      "focalCount": 1,
+      "videoInFocal": false,
+      "state": "active",
+      "previewLeftover": false
+     },
+     "resources": {
+      "xOther": {
+       "count": 5,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "rest11": {
+       "count": 1,
+       "cacheHits": 0,
+       "bytes": 0
+      },
+      "mediaImages": {
+       "count": 1,
+       "cacheHits": 1,
+       "bytes": 0
+      }
+     },
+     "heapDom": {
+      "beforeClick": {
+       "longTasks": 0,
+       "heap": 170
+      },
+      "afterScroll": {
+       "heap": 170,
+       "dom": 822,
+       "longTasks": 0
+      }
+     },
+     "deepScrollMs": 345,
+     "longTasksDuringDeepScroll": 0,
+     "t4": {
+      "a": 79.90000009536743,
+      "left": 79.90000009536743,
+      "cells": 1027.2999999523163,
+      "anchor": 1027.2999999523163,
+      "anchorVisible": 1027.7999999523163,
+      "stable": 1531.5
+     }
+    }
+   ]
+  }
+ ],
+ "wrapper": {
+  "perCallUs": 0.53,
+  "totalMs": 1.6,
+  "wrappedOwnProperty": true
+ },
+ "idle": {
+  "longTasks": 0,
+  "longTaskMs": 0
+ },
+ "env": {
+  "viewport": {
+   "w": 1341,
+   "h": 804,
+   "dpr": 2
+  },
+  "theme": "rgb(255, 255, 255)",
+  "chrome": "152.0.0.0",
+  "identityMarker": "{\"build\":\"m2a-202610140740-ec295705ee\",\"mode\":\"m2a\"}"
+ },
+ "note": "t0 = WINDOW-capture click on the TARGET status link (strictly before the extension's document-capture handler); t0down = window-capture pointerdown; stamps are performance.now()-t0 from one in-page sampler on a bounded 4ms timer chain (rAF is compositor-linked and freezes on idle timelines — observed live); frame counts are 4ms-sample approximations, visual evidence carried by screenshots/recording"
+}

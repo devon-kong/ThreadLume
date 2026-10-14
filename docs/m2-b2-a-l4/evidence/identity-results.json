@@ -1,0 +1,769 @@
+{
+ "runs": [
+  {
+   "expect": "m2a",
+   "reloaded": false,
+   "checks": {
+    "v1_marker": {
+     "pass": true,
+     "marker": {
+      "raw": "{\"build\":\"m2a-202610140712-7c2a0e23b6\",\"mode\":\"m2a\"}",
+      "parsed": {
+       "build": "m2a-202610140712-7c2a0e23b6",
+       "mode": "m2a"
+      },
+      "conflict": false,
+      "attrs": [
+       "data-peek-artifact",
+       "data-peek-lad-state"
+      ],
+      "overlays": 0,
+      "mode": "m2a",
+      "build": "m2a-202610140712-7c2a0e23b6"
+     }
+    },
+    "v4_wrongModeRefused": {
+     "pass": false
+    },
+    "v2_afterRefresh": {
+     "pass": true,
+     "marker": {
+      "raw": "{\"build\":\"m2a-202610140712-7c2a0e23b6\",\"mode\":\"m2a\"}",
+      "parsed": {
+       "build": "m2a-202610140712-7c2a0e23b6",
+       "mode": "m2a"
+      },
+      "conflict": false,
+      "attrs": [
+       "data-peek-artifact",
+       "data-peek-lad-state"
+      ],
+      "overlays": 0,
+      "mode": "m2a",
+      "build": "m2a-202610140712-7c2a0e23b6"
+     }
+    },
+    "v3_afterExtensionReload": {
+     "pass": true,
+     "marker": {
+      "raw": "{\"build\":\"m2a-202610140712-7c2a0e23b6\",\"mode\":\"m2a\"}",
+      "parsed": {
+       "build": "m2a-202610140712-7c2a0e23b6",
+       "mode": "m2a"
+      },
+      "conflict": false,
+      "attrs": [
+       "data-peek-artifact",
+       "data-peek-lad-state"
+      ],
+      "overlays": 0,
+      "mode": "m2a",
+      "build": "m2a-202610140712-7c2a0e23b6"
+     },
+     "reloadPressedBefore": false
+    },
+    "v5_singleImplementation": {
+     "pass": true,
+     "overlays": 0
+    },
+    "buildId": "m2a-202610140712-7c2a0e23b6"
+   },
+   "env": {
+    "url": "chrome://new-tab-page/",
+    "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
+   }
+  },
+  {
+   "expect": "m2a",
+   "reloaded": false,
+   "checks": {
+    "v1_marker": {
+     "pass": true,
+     "marker": {
+      "raw": "{\"build\":\"m2a-202610140712-7c2a0e23b6\",\"mode\":\"m2a\"}",
+      "parsed": {
+       "build": "m2a-202610140712-7c2a0e23b6",
+       "mode": "m2a"
+      },
+      "conflict": false,
+      "attrs": [
+       "data-peek-artifact",
+       "data-peek-lad-state"
+      ],
+      "overlays": 0,
+      "mode": "m2a",
+      "build": "m2a-202610140712-7c2a0e23b6"
+     }
+    },
+    "v4_wrongModeRefused": {
+     "pass": true
+    },
+    "v2_afterRefresh": {
+     "pass": true,
+     "marker": {
+      "raw": "{\"build\":\"m2a-202610140712-7c2a0e23b6\",\"mode\":\"m2a\"}",
+      "parsed": {
+       "build": "m2a-202610140712-7c2a0e23b6",
+       "mode": "m2a"
+      },
+      "conflict": false,
+      "attrs": [
+       "data-peek-artifact",
+       "data-peek-lad-state"
+      ],
+      "overlays": 0,
+      "mode": "m2a",
+      "build": "m2a-202610140712-7c2a0e23b6"
+     }
+    },
+    "v3_afterExtensionReload": {
+     "pass": true,
+     "marker": {
+      "raw": "{\"build\":\"m2a-202610140712-7c2a0e23b6\",\"mode\":\"m2a\"}",
+      "parsed": {
+       "build": "m2a-202610140712-7c2a0e23b6",
+       "mode": "m2a"
+      },
+      "conflict": false,
+      "attrs": [
+       "data-peek-artifact",
+       "data-peek-lad-state"
+      ],
+      "overlays": 0,
+      "mode": "m2a",
+      "build": "m2a-202610140712-7c2a0e23b6"
+     },
+     "reloadPressedBefore": false
+    },
+    "v5_singleImplementation": {
+     "pass": true,
+     "overlays": 0
+    },
+    "buildId": "m2a-202610140712-7c2a0e23b6"
+   },
+   "env": {
+    "url": "https://x.com/home",
+    "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
+   }
+  },
+  {
+   "expect": "b1r",
+   "reloaded": false,
+   "checks": {
+    "v1_marker": {
+     "pass": false,
+     "marker": {
+      "raw": "{\"build\":\"m2a-202610140712-7c2a0e23b6\",\"mode\":\"m2a\"}",
+      "parsed": {
+       "build": "m2a-202610140712-7c2a0e23b6",
+       "mode": "m2a"
+      },
+      "conflict": false,
+      "attrs": [
+       "data-peek-artifact",
+       "data-peek-lad-state"
+      ],
+      "overlays": 0,
+      "mode": "m2a",
+      "build": "m2a-202610140712-7c2a0e23b6"
+     }
+    },
+    "v4_wrongModeRefused": {
+     "pass": false
+    },
+    "v2_afterRefresh": {
+     "pass": false,
+     "marker": {
+      "raw": "{\"build\":\"m2a-202610140712-7c2a0e23b6\",\"mode\":\"m2a\"}",
+      "parsed": {
+       "build": "m2a-202610140712-7c2a0e23b6",
+       "mode": "m2a"
+      },
+      "conflict": false,
+      "attrs": [
+       "data-peek-artifact",
+       "data-peek-lad-state"
+      ],
+      "overlays": 0,
+      "mode": "m2a",
+      "build": "m2a-202610140712-7c2a0e23b6"
+     }
+    },
+    "v3_afterExtensionReload": {
+     "pass": false,
+     "marker": {
+      "raw": "{\"build\":\"m2a-202610140712-7c2a0e23b6\",\"mode\":\"m2a\"}",
+      "parsed": {
+       "build": "m2a-202610140712-7c2a0e23b6",
+       "mode": "m2a"
+      },
+      "conflict": false,
+      "attrs": [
+       "data-peek-artifact",
+       "data-peek-lad-state"
+      ],
+      "overlays": 0,
+      "mode": "m2a",
+      "build": "m2a-202610140712-7c2a0e23b6"
+     },
+     "reloadPressedBefore": false
+    },
+    "v5_singleImplementation": {
+     "pass": true,
+     "overlays": 0
+    },
+    "buildId": "m2a-202610140712-7c2a0e23b6"
+   },
+   "env": {
+    "url": "chrome://new-tab-page/",
+    "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
+   }
+  },
+  {
+   "expect": "native",
+   "reloaded": false,
+   "checks": {
+    "v1_marker": {
+     "pass": false,
+     "marker": {
+      "raw": "{\"build\":\"m2a-202610140712-7c2a0e23b6\",\"mode\":\"m2a\"}",
+      "parsed": {
+       "build": "m2a-202610140712-7c2a0e23b6",
+       "mode": "m2a"
+      },
+      "conflict": false,
+      "attrs": [
+       "data-peek-artifact",
+       "data-peek-lad-state"
+      ],
+      "overlays": 0,
+      "mode": "m2a",
+      "build": "m2a-202610140712-7c2a0e23b6"
+     }
+    },
+    "v4_wrongModeRefused": {
+     "pass": false
+    },
+    "v2_afterRefresh": {
+     "pass": false,
+     "marker": {
+      "raw": "{\"build\":\"m2a-202610140712-7c2a0e23b6\",\"mode\":\"m2a\"}",
+      "parsed": {
+       "build": "m2a-202610140712-7c2a0e23b6",
+       "mode": "m2a"
+      },
+      "conflict": false,
+      "attrs": [
+       "data-peek-artifact",
+       "data-peek-lad-state"
+      ],
+      "overlays": 0,
+      "mode": "m2a",
+      "build": "m2a-202610140712-7c2a0e23b6"
+     }
+    },
+    "v3_afterExtensionReload": {
+     "pass": false,
+     "marker": {
+      "raw": "{\"build\":\"m2a-202610140712-7c2a0e23b6\",\"mode\":\"m2a\"}",
+      "parsed": {
+       "build": "m2a-202610140712-7c2a0e23b6",
+       "mode": "m2a"
+      },
+      "conflict": false,
+      "attrs": [
+       "data-peek-artifact",
+       "data-peek-lad-state"
+      ],
+      "overlays": 0,
+      "mode": "m2a",
+      "build": "m2a-202610140712-7c2a0e23b6"
+     },
+     "reloadPressedBefore": false
+    },
+    "v5_singleImplementation": {
+     "pass": true,
+     "overlays": 0
+    },
+    "buildId": "m2a-202610140712-7c2a0e23b6"
+   },
+   "env": {
+    "url": "chrome://new-tab-page/",
+    "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
+   }
+  },
+  {
+   "expect": "b1r",
+   "reloaded": false,
+   "checks": {
+    "v1_marker": {
+     "pass": true,
+     "marker": {
+      "raw": "{\"build\":\"b1r-202610140906-3a3017ded3\",\"mode\":\"b1r\"}",
+      "parsed": {
+       "build": "b1r-202610140906-3a3017ded3",
+       "mode": "b1r"
+      },
+      "conflict": false,
+      "attrs": [
+       "data-peek-artifact",
+       "data-peek-lad-state"
+      ],
+      "overlays": 0,
+      "mode": "b1r",
+      "build": "b1r-202610140906-3a3017ded3"
+     }
+    },
+    "v4_wrongModeRefused": {
+     "pass": true
+    },
+    "v2_afterRefresh": {
+     "pass": true,
+     "marker": {
+      "raw": "{\"build\":\"b1r-202610140906-3a3017ded3\",\"mode\":\"b1r\"}",
+      "parsed": {
+       "build": "b1r-202610140906-3a3017ded3",
+       "mode": "b1r"
+      },
+      "conflict": false,
+      "attrs": [
+       "data-peek-artifact",
+       "data-peek-lad-state"
+      ],
+      "overlays": 0,
+      "mode": "b1r",
+      "build": "b1r-202610140906-3a3017ded3"
+     }
+    },
+    "v3_afterExtensionReload": {
+     "pass": true,
+     "marker": {
+      "raw": "{\"build\":\"b1r-202610140906-3a3017ded3\",\"mode\":\"b1r\"}",
+      "parsed": {
+       "build": "b1r-202610140906-3a3017ded3",
+       "mode": "b1r"
+      },
+      "conflict": false,
+      "attrs": [
+       "data-peek-artifact",
+       "data-peek-lad-state"
+      ],
+      "overlays": 0,
+      "mode": "b1r",
+      "build": "b1r-202610140906-3a3017ded3"
+     },
+     "reloadPressedBefore": false
+    },
+    "v5_singleImplementation": {
+     "pass": true,
+     "overlays": 0
+    },
+    "buildId": "b1r-202610140906-3a3017ded3"
+   },
+   "env": {
+    "url": "https://x.com/home",
+    "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
+   }
+  },
+  {
+   "expect": "m1r",
+   "reloaded": false,
+   "checks": {
+    "v1_marker": {
+     "pass": true,
+     "marker": {
+      "raw": "{\"build\":\"m1r-202610140913-58889092e7\",\"mode\":\"m1r\"}",
+      "parsed": {
+       "build": "m1r-202610140913-58889092e7",
+       "mode": "m1r"
+      },
+      "conflict": false,
+      "attrs": [
+       "data-peek-artifact"
+      ],
+      "overlays": 0,
+      "mode": "m1r",
+      "build": "m1r-202610140913-58889092e7"
+     }
+    },
+    "v4_wrongModeRefused": {
+     "pass": true
+    },
+    "v2_afterRefresh": {
+     "pass": true,
+     "marker": {
+      "raw": "{\"build\":\"m1r-202610140913-58889092e7\",\"mode\":\"m1r\"}",
+      "parsed": {
+       "build": "m1r-202610140913-58889092e7",
+       "mode": "m1r"
+      },
+      "conflict": false,
+      "attrs": [
+       "data-peek-artifact"
+      ],
+      "overlays": 0,
+      "mode": "m1r",
+      "build": "m1r-202610140913-58889092e7"
+     }
+    },
+    "v3_afterExtensionReload": {
+     "pass": true,
+     "marker": {
+      "raw": "{\"build\":\"m1r-202610140913-58889092e7\",\"mode\":\"m1r\"}",
+      "parsed": {
+       "build": "m1r-202610140913-58889092e7",
+       "mode": "m1r"
+      },
+      "conflict": false,
+      "attrs": [
+       "data-peek-artifact"
+      ],
+      "overlays": 0,
+      "mode": "m1r",
+      "build": "m1r-202610140913-58889092e7"
+     },
+     "reloadPressedBefore": false
+    },
+    "v5_singleImplementation": {
+     "pass": true,
+     "overlays": 0
+    },
+    "buildId": "m1r-202610140913-58889092e7"
+   },
+   "env": {
+    "url": "chrome://new-tab-page/",
+    "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
+   }
+  },
+  {
+   "expect": "native",
+   "reloaded": false,
+   "checks": {
+    "v1_marker": {
+     "pass": true,
+     "marker": {
+      "raw": null,
+      "parsed": null,
+      "conflict": false,
+      "attrs": [],
+      "overlays": 0,
+      "mode": null,
+      "build": null
+     }
+    },
+    "v4_wrongModeRefused": {
+     "pass": true
+    },
+    "v2_afterRefresh": {
+     "pass": true,
+     "marker": {
+      "raw": null,
+      "parsed": null,
+      "conflict": false,
+      "attrs": [],
+      "overlays": 0,
+      "mode": null,
+      "build": null
+     }
+    },
+    "v3_afterExtensionReload": {
+     "pass": true,
+     "marker": {
+      "raw": null,
+      "parsed": null,
+      "conflict": false,
+      "attrs": [],
+      "overlays": 0,
+      "mode": null,
+      "build": null
+     },
+     "reloadPressedBefore": false
+    },
+    "v5_singleImplementation": {
+     "pass": true,
+     "overlays": 0
+    },
+    "buildId": null
+   },
+   "env": {
+    "url": "https://x.com/home",
+    "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
+   }
+  },
+  {
+   "expect": "native",
+   "reloaded": false,
+   "checks": {
+    "v1_marker": {
+     "pass": true,
+     "marker": {
+      "raw": null,
+      "parsed": null,
+      "conflict": false,
+      "attrs": [],
+      "overlays": 0,
+      "mode": null,
+      "build": null
+     }
+    },
+    "v4_wrongModeRefused": {
+     "pass": true
+    },
+    "v2_afterRefresh": {
+     "pass": true,
+     "marker": {
+      "raw": null,
+      "parsed": null,
+      "conflict": false,
+      "attrs": [],
+      "overlays": 0,
+      "mode": null,
+      "build": null
+     }
+    },
+    "v3_afterExtensionReload": {
+     "pass": true,
+     "marker": {
+      "raw": null,
+      "parsed": null,
+      "conflict": false,
+      "attrs": [],
+      "overlays": 0,
+      "mode": null,
+      "build": null
+     },
+     "reloadPressedBefore": false
+    },
+    "v5_singleImplementation": {
+     "pass": true,
+     "overlays": 0
+    },
+    "buildId": null
+   },
+   "env": {
+    "url": "https://x.com/home",
+    "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
+   }
+  },
+  {
+   "expect": "native",
+   "reloaded": false,
+   "checks": {
+    "v1_marker": {
+     "pass": true,
+     "marker": {
+      "raw": null,
+      "parsed": null,
+      "conflict": false,
+      "attrs": [],
+      "overlays": 0,
+      "mode": null,
+      "build": null
+     }
+    },
+    "v4_wrongModeRefused": {
+     "pass": true
+    },
+    "v2_afterRefresh": {
+     "pass": true,
+     "marker": {
+      "raw": null,
+      "parsed": null,
+      "conflict": false,
+      "attrs": [],
+      "overlays": 0,
+      "mode": null,
+      "build": null
+     }
+    },
+    "v3_afterExtensionReload": {
+     "pass": true,
+     "marker": {
+      "raw": null,
+      "parsed": null,
+      "conflict": false,
+      "attrs": [],
+      "overlays": 0,
+      "mode": null,
+      "build": null
+     },
+     "reloadPressedBefore": false
+    },
+    "v5_singleImplementation": {
+     "pass": true,
+     "overlays": 0
+    },
+    "buildId": null
+   },
+   "env": {
+    "url": "https://x.com/home",
+    "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
+   }
+  },
+  {
+   "expect": "native",
+   "reloaded": false,
+   "checks": {
+    "v1_marker": {
+     "pass": true,
+     "marker": {
+      "raw": null,
+      "parsed": null,
+      "conflict": false,
+      "attrs": [],
+      "overlays": 0,
+      "mode": null,
+      "build": null
+     }
+    },
+    "v4_wrongModeRefused": {
+     "pass": true
+    },
+    "v2_afterRefresh": {
+     "pass": true,
+     "marker": {
+      "raw": null,
+      "parsed": null,
+      "conflict": false,
+      "attrs": [],
+      "overlays": 0,
+      "mode": null,
+      "build": null
+     }
+    },
+    "v3_afterExtensionReload": {
+     "pass": true,
+     "marker": {
+      "raw": null,
+      "parsed": null,
+      "conflict": false,
+      "attrs": [],
+      "overlays": 0,
+      "mode": null,
+      "build": null
+     },
+     "reloadPressedBefore": false
+    },
+    "v5_singleImplementation": {
+     "pass": true,
+     "overlays": 0
+    },
+    "buildId": null
+   },
+   "env": {
+    "url": "https://x.com/home",
+    "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
+   }
+  },
+  {
+   "expect": "native",
+   "reloaded": false,
+   "checks": {
+    "v1_marker": {
+     "pass": true,
+     "marker": {
+      "raw": null,
+      "parsed": null,
+      "conflict": false,
+      "attrs": [],
+      "overlays": 0,
+      "mode": null,
+      "build": null
+     }
+    },
+    "v4_wrongModeRefused": {
+     "pass": true
+    },
+    "v2_afterRefresh": {
+     "pass": true,
+     "marker": {
+      "raw": null,
+      "parsed": null,
+      "conflict": false,
+      "attrs": [],
+      "overlays": 0,
+      "mode": null,
+      "build": null
+     }
+    },
+    "v3_afterExtensionReload": {
+     "pass": true,
+     "marker": {
+      "raw": null,
+      "parsed": null,
+      "conflict": false,
+      "attrs": [],
+      "overlays": 0,
+      "mode": null,
+      "build": null
+     },
+     "reloadPressedBefore": false
+    },
+    "v5_singleImplementation": {
+     "pass": true,
+     "overlays": 0
+    },
+    "buildId": null
+   },
+   "env": {
+    "url": "https://x.com/home",
+    "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
+   }
+  },
+  {
+   "expect": "native",
+   "reloaded": false,
+   "checks": {
+    "v1_marker": {
+     "pass": true,
+     "marker": {
+      "raw": null,
+      "parsed": null,
+      "conflict": false,
+      "attrs": [],
+      "overlays": 0,
+      "mode": null,
+      "build": null
+     }
+    },
+    "v4_wrongModeRefused": {
+     "pass": true
+    },
+    "v2_afterRefresh": {
+     "pass": true,
+     "marker": {
+      "raw": null,
+      "parsed": null,
+      "conflict": false,
+      "attrs": [],
+      "overlays": 0,
+      "mode": null,
+      "build": null
+     }
+    },
+    "v3_afterExtensionReload": {
+     "pass": true,
+     "marker": {
+      "raw": null,
+      "parsed": null,
+      "conflict": false,
+      "attrs": [],
+      "overlays": 0,
+      "mode": null,
+      "build": null
+     },
+     "reloadPressedBefore": false
+    },
+    "v5_singleImplementation": {
+     "pass": true,
+     "overlays": 0
+    },
+    "buildId": null
+   },
+   "env": {
+    "url": "https://x.com/home",
+    "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
+   }
+  }
+ ]
+}
