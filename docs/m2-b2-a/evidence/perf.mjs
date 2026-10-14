@@ -283,7 +283,8 @@ const NETMON = `(function () {
   try {
     new PerformanceObserver((l) => {
       for (const e of l.getEntries()) {
-        if (e.initiatorType === "fetch" && /graphql/.test(e.name) && /TweetDetail|TweetResultByRestId|Conversation/.test(e.name)) {
+        if ((e.initiatorType === "fetch" || e.initiatorType === "xmlhttprequest") &&
+            /graphql/.test(e.name) && /TweetDetail|TweetResultByRestId|Conversation|Detail/.test(e.name)) {
           window.__peekNet.push({ start: Math.round(e.startTime), end: Math.round(e.responseEnd), dur: Math.round(e.duration) });
         }
       }
