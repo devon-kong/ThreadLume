@@ -140,3 +140,16 @@ Reviewer：独立 agent（与执行方隔离，未参与任何实现）；2026-1
 - 回退完整性（Legacy/demo/worker/scripts 零改动、稳定标签在位、默认 carrier 产物可重建）保持不变。
 
 遗留问题仅为第 7 节的 P3（`performance-comparison.md` 一处 diag 数值与两处窗口指代/结论段的陈旧表述、两处过期源码注释、一处报告计数），全部为文档/注释整理，**不影响任何功能、性能或安全结论**，建议随下一次文档提交一并订正，无需再次测量。
+
+## 10. 执行方处置记录（P3，commit `7567875`）
+
+Reviewer 终校列出的 6 项 P3（文档/注释陈旧）已在本轮文档提交中全部订正，未改动任何功能代码：
+
+1. `performance-comparison.md` diag 数值改为各窗口实测（captureDelta 最大 0.1/0.4/0.2/0.3ms；extract 中位 1.0/1.35/1.15 新 UI、1.75/1.85 L4）；
+2. 同文件漂移节的窗口指代改为"早前窗口（21:24/21:32、22:16/22:21）"，正式结论明确为 22:56/23:01 背靠背配对；
+3. 结论段差值改用 final2 配对（−2.5/−21.5/−7.0/−6.8/−107.6）并按 Reviewer 建议表述为"噪声量级内的无退化证据"；
+4. `backdrop` 字段说明订正为"旧字段只存在于 22:16/22:21 两场；最终两场已用 `overlayNodeAbsent`/`canvas`"；
+5. 过期注释已改：`reader-skin.js` 头部 z-index 1 + `:has()` 让位；`experience-checks.mjs` 灯箱断言注释同步；
+6. `visual-qa.md` 结果总表标题改为"16 条 records 全部通过"。
+
+以上订正后重跑并重建：`node --test tests/native/*.test.mjs` = 223 pass / 0 fail；lab 与默认载体产物重建成功且内容哈希不变（`3abb7ea0aa`）。
