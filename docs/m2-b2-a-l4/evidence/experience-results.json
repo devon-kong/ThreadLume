@@ -1,7 +1,7 @@
 {
  "note": {
-  "note": "Scenarios were run repeatedly across the session; X's timeline reflows under lazy hydration made real-pointer clicks land off-target intermittently (click-verification + retry in harness). Per the no-retesting-until-favorable rule, runs were NOT repeated to chase a single all-green file: each record here is taken from the first run in which that scenario passed, with the source run log recorded in runLog. Failed-run records are retained in /tmp logs and summarized in experience-acceptance.md.",
-  "flakiness": "cell-level native navigation (no preview) on reflow-shifted clicks is X-native behavior; the extension correctly does not preview when the click target is not inside a status link"
+  "provenance": "每条记录为该场景首次通过（或 Reviewer 后复验）的运行，runLog 标注来源；失败运行完整保留在会话日志（xp1/xp2/xp4/xp-fp 等）并在 experience-acceptance.md §5 如实汇总，未删除未修饰。",
+  "reverified": "theme 与 reload 在 Reviewer 指出 P1 声明缺口后修复脚本并重测（2026-10-14）：深色主题实测走通（rgb(255,255,255)→rgb(0,0,0)，焦点帖背景 rgb(0,0,0)）；reload 后标记在 x.com 文档正确读取（mode m2a）。"
  },
  "runs": [
   {
@@ -363,40 +363,6 @@
    "runLog": "xl5 (loops with re-render poll)"
   },
   {
-   "scenario": "theme",
-   "themeBefore": "rgb(255, 255, 255)",
-   "toggled": {
-    "ok": true,
-    "from": null,
-    "to": ""
-   },
-   "pass": true,
-   "preview": {
-    "onFrames": 50,
-    "firstOn": 5813,
-    "lastOn": 6090,
-    "id": "1760839985715204230",
-    "maxLen": 215,
-    "pvNow": false
-   },
-   "focal": {
-    "focal": true,
-    "focalCount": 1,
-    "state": "active",
-    "split": true,
-    "textLen": 362,
-    "hasVideo": false
-   },
-   "colors": {
-    "body": "rgb(255, 255, 255)",
-    "focal": "rgb(255, 255, 255)"
-   },
-   "shots": [
-    "theme-2-native.png"
-   ],
-   "runLog": "xp-final"
-  },
-  {
    "scenario": "narrow",
    "pass": true,
    "expect": "below 980px: no preview offered, no split layout — X native single column",
@@ -422,13 +388,17 @@
    "runLog": "xp-final"
   },
   {
-   "scenario": "reload",
+   "scenario": "theme",
+   "themeBefore": "rgb(255, 255, 255)",
+   "themeAfterToggle": "rgb(0, 0, 0)",
+   "themeChanged": true,
+   "swatchUsed": 1,
+   "swatches": 2,
    "pass": true,
-   "marker": null,
    "preview": {
-    "onFrames": 49,
-    "firstOn": 3609,
-    "lastOn": 3888,
+    "onFrames": 53,
+    "firstOn": 5640,
+    "lastOn": 5922,
     "id": "1760839985715204230",
     "maxLen": 215,
     "pvNow": false
@@ -441,7 +411,38 @@
     "textLen": 362,
     "hasVideo": false
    },
-   "runLog": "xp-final"
+   "colors": {
+    "body": "rgb(0, 0, 0)",
+    "focal": "rgb(0, 0, 0)"
+   },
+   "shots": [
+    "theme-2-native.png"
+   ],
+   "restored": 0,
+   "themeAfterRestore": "rgb(255, 255, 255)",
+   "runLog": "xt2 (theme re-verified after reviewer P1: swatch selection fixed, dark theme实测 rgb(0,0,0))"
+  },
+  {
+   "scenario": "reload",
+   "pass": true,
+   "marker": "{\"build\":\"m2a-202610140933-29fc210ac2\",\"mode\":\"m2a\"}",
+   "preview": {
+    "onFrames": 51,
+    "firstOn": 3713,
+    "lastOn": 3995,
+    "id": "1760839985715204230",
+    "maxLen": 215,
+    "pvNow": false
+   },
+   "focal": {
+    "focal": true,
+    "focalCount": 1,
+    "state": "active",
+    "split": true,
+    "textLen": 362,
+    "hasVideo": false
+   },
+   "runLog": "xt (reload re-verified after reviewer P1: marker read on x.com document, mode m2a)"
   }
  ]
 }

@@ -1,0 +1,157 @@
+{
+ "m2a": {
+  "samples": 16,
+  "t1a_median": 34.0,
+  "t1a_all": [
+   44,
+   79,
+   27,
+   76,
+   32,
+   74,
+   24,
+   74,
+   27,
+   22,
+   75,
+   24,
+   36,
+   24,
+   77,
+   23
+  ],
+  "t1b_median": 375.5,
+  "t1b_by_kind": {
+   "video": 389.5,
+   "photos": 369.5,
+   "text": 373.0,
+   "highcomments": 374.5
+  },
+  "t3_median": 662.0,
+  "t2a_median": 1436.5,
+  "t2b_median": 1599,
+  "t4a_median": 63.2,
+  "t4_stable_median": 1369.8,
+  "dupFrames_total": 4,
+  "blankLeftFrames_total": 0,
+  "leftoverPreviewFrames_total": 0,
+  "textJumpDy": [
+   -11,
+   0,
+   0,
+   0,
+   -11,
+   0,
+   0,
+   0,
+   -11,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   -1
+  ],
+  "fonts": [
+   [
+    "15px",
+    "17px"
+   ]
+  ],
+  "crossOriginRequests": 0,
+  "identity": {
+   "present": true,
+   "mode": "m2a",
+   "build": "m2a-202610140753-29fc210ac2",
+   "conflict": false
+  }
+ },
+ "b1r": {
+  "samples": 16,
+  "t1a_median": null,
+  "t1a_all": null,
+  "t1b_median": 371.0,
+  "t1b_by_kind": {
+   "video": 371.0,
+   "photos": 369.0,
+   "text": 371.5,
+   "highcomments": 367.5
+  },
+  "t3_median": 663.5,
+  "t2a_median": 2023,
+  "t2b_median": 2018.5,
+  "t4a_median": 63.5,
+  "t4_stable_median": 1772.9,
+  "dupFrames_total": null,
+  "blankLeftFrames_total": null,
+  "leftoverPreviewFrames_total": null,
+  "textJumpDy": null,
+  "fonts": null,
+  "crossOriginRequests": 0,
+  "identity": {
+   "present": true,
+   "mode": "b1r",
+   "build": "b1r-202610140906-3a3017ded3",
+   "conflict": false
+  }
+ },
+ "m1r": {
+  "samples": 14,
+  "t1a_median": null,
+  "t1a_all": null,
+  "t1b_median": 74.0,
+  "t1b_by_kind": {
+   "video": 81.5,
+   "photos": 72.0,
+   "text": 74.0,
+   "highcomments": 56.5
+  },
+  "t3_median": 595.5,
+  "t2a_median": 2004,
+  "t2b_median": 12103,
+  "t4a_median": 65.7,
+  "t4_stable_median": 2463.8,
+  "dupFrames_total": null,
+  "blankLeftFrames_total": null,
+  "leftoverPreviewFrames_total": null,
+  "textJumpDy": null,
+  "fonts": null,
+  "crossOriginRequests": 1,
+  "identity": {
+   "present": true,
+   "mode": "m1r",
+   "build": "m1r-202610140913-58889092e7",
+   "conflict": false
+  }
+ },
+ "native": {
+  "samples": 15,
+  "t1a_median": null,
+  "t1a_all": null,
+  "t1b_median": 357,
+  "t1b_by_kind": {
+   "video": 359,
+   "photos": 360.5,
+   "text": 356.5,
+   "highcomments": 355.5
+  },
+  "t3_median": 657.0,
+  "t2a_median": 1994,
+  "t2b_median": 12121,
+  "t4a_median": 59.2,
+  "t4_stable_median": 1820.4,
+  "dupFrames_total": null,
+  "blankLeftFrames_total": null,
+  "leftoverPreviewFrames_total": null,
+  "textJumpDy": null,
+  "fonts": null,
+  "crossOriginRequests": 0,
+  "identity": {
+   "present": false,
+   "mode": null,
+   "build": null,
+   "conflict": false
+  }
+ }
+}

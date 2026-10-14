@@ -318,18 +318,29 @@ if (run("theme")) {
   const theme0 = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.goto("https://x.com/settings/display");
   await sleep(3500);
-  const toggled = await page.evaluate(`(() => {
-    const radios = [...document.querySelectorAll('[role="radiogroup"] [role="radio"], [role="radio"]')];
-    const current = radios.find((r) => r.getAttribute("aria-checked") === "true");
-    const other = radios.find((r) => r.getAttribute("aria-checked") !== "true");
-    const nameOf = (r) => (r ? (r.textContent || "").trim().slice(0, 20) : null);
-    if (!other) return { ok: false, radios: radios.map(nameOf) };
-    other.click();
-    return { ok: true, from: nameOf(current), to: nameOf(other) };
+  // X display settings: the theme swatches carry NO aria-checked and no inner
+  // text — "the other one" cannot be found by attribute. Current account is
+  // light: the SECOND swatch is dark/dim. Real pointer click, then VERIFY the
+  // theme actually changed; try the other swatch if it did not.
+  const swatches = await page.evaluate(`(() => {
+    const radios = [...document.querySelectorAll('[role="radio"]')];
+    return radios.map((r) => {
+      const b = r.getBoundingClientRect();
+      return { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) };
+    });
   })()`);
-  await sleep(2500);
-  let out = { scenario: "theme", themeBefore: theme0, toggled };
-  if (toggled.ok) {
+  const theme1Try = async (idx) => {
+    if (!swatches[idx]) return null;
+    await page.mouse.click(swatches[idx].x, swatches[idx].y, { label: "点击主题色块" });
+    await sleep(3000);
+    return page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  };
+  let theme1 = await theme1Try(1);
+  let usedSwatch = 1;
+  if (theme1 === theme0) { theme1 = await theme1Try(0); usedSwatch = 0; }
+  const themeChanged = theme1 !== theme0;
+  let out = { scenario: "theme", themeBefore: theme0, themeAfterToggle: theme1, themeChanged, swatchUsed: usedSwatch, swatches: swatches.length };
+  if (themeChanged) {
     const id = "1760839985715204230";
     const topen = await openWithPreview("https://x.com/gefei55", id, { previewShot: `${SHOTS}/theme-1-preview.png` });
     const pv = topen.pv;
@@ -340,19 +351,19 @@ if (run("theme")) {
     }));
     const shot = `${SHOTS}/theme-2-native.png`;
     await page.screenshot({ path: shot });
-    out = { ...out, pass: topen.opened && pv.id === id && fs.focal && fs.focalCount === 1, preview: pv, focal: fs, colors: bg, shots: [shot] };
+    out = { ...out, pass: topen.opened && pv.id === id && fs.focal && fs.focalCount === 1 && bg.body === theme1, preview: pv, focal: fs, colors: bg, shots: [shot] };
     await page.goto("https://x.com/settings/display");
     await sleep(3000);
-    await page.evaluate(`(() => {
-      const radios = [...document.querySelectorAll('[role="radiogroup"] [role="radio"], [role="radio"]')];
-      const orig = ${JSON.stringify(theme0)};
-      const dark = radios.find((r) => /深色|Dark|暗/i.test(r.textContent || ""));
-      const light = radios.find((r) => /浅色|默认|Light|Default/i.test(r.textContent || ""));
-      const target = /rgb\\(0, 0, 0\\)|rgb\\(5, 5, 5\\)|black/i.test(orig) ? dark : light;
-      if (target) target.click();
-      return true;
-    })()`);
-    await sleep(2000);
+    // restore the original theme: the swatch we did NOT use for the switch
+    const restoreIdx = usedSwatch === 1 ? 0 : 1;
+    let restored = null;
+    if (swatches[restoreIdx]) {
+      await page.mouse.click(swatches[restoreIdx].x, swatches[restoreIdx].y, { label: "恢复原主题" });
+      await sleep(2500);
+      restored = restoreIdx;
+    }
+    out.restored = restored;
+    out.themeAfterRestore = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   } else {
     out.pass = false;
   }
@@ -394,9 +405,11 @@ if (run("reload")) {
   await page.waitForTimeout(2000);
   await page.click('loc=role:button[name="Reload"]', { label: "重载扩展" });
   await page.waitForTimeout(2000);
-  const marker = await page.evaluate(() => document.documentElement.getAttribute("data-peek-artifact"));
   const id = "1760839985715204230";
   const ropen = await openWithPreview("https://x.com/gefei55", id, {});
+  // the marker is readable only on an x.com document (content scripts do not
+  // inject into chrome:// pages) — read it after openWithPreview's navigation
+  const marker = await page.evaluate(() => document.documentElement.getAttribute("data-peek-artifact"));
   const fs = await focalState();
   record({ scenario: "reload", pass: ropen.opened && ropen.pv.id === id && fs.focal && fs.focalCount === 1, marker, preview: ropen.pv, focal: fs });
 }
