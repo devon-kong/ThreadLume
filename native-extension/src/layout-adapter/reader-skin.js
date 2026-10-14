@@ -1,19 +1,28 @@
 // Peek M2-B2-B — reader skin: the visual layer of the native split reader.
 //
 // Scope (S2 contract): VISUAL ONLY. This module owns the floating-card
-// geometry, the theme palette for chrome, the reader top bar and the dim
-// backdrop — all extension-owned nodes appended to <body>, never touching
-// X's React tree. It does NOT touch GraphQL, fibers, the virtualizer
-// retention wrap, data extraction, preview identity, native interactions,
-// or credentials.
+// geometry, the theme palette for chrome, the reader top bar and the dimmed
+// page canvas — plus one extension-owned node (the top bar) appended to
+// <body>, never touching X's React tree. It does NOT touch GraphQL, fibers,
+// the virtualizer retention wrap, data extraction, preview identity, native
+// interactions, or credentials.
 //
 // Layering discipline: the controller's LAYOUT_CSS remains the functional
 // baseline (edge-to-edge 52vw/48vw split, verified at L4). This skin mounts
 // AFTER it with equal-specificity !important overrides; if the skin style is
 // absent or removed the layout degrades gracefully to the L4 baseline.
 //
+// Dimming discipline (S3 remediation, measured live): the "surround" is the
+// PAGE CANVAS COLOR, not an overlay. A fixed overlay above the page would also
+// dim the reading card and the sheet (the card lives inside X's z-index:0
+// wrapper contexts, so a root-level overlay paints over it — verified by pixel
+// sampling), and a root-level z-index ≥1 chrome paints over X's #layers and
+// swallows the image lightbox's own close control. So: the canvas (html/body)
+// is dimmed, the card and sheet cells carry their own bright background, and
+// the top bar sits at z-index 0 — above the conversation cells, BELOW #layers.
+//
 // Two variants share one geometry source:
-//   "floating" (A): inset rounded focal card + dim backdrop + sheet margins
+//   "floating" (A): inset rounded focal card + dimmed canvas + sheet margins
 //   "flush"     (B): refined edge-to-edge split (fallback — same top bar)
 // preview-layer.js reads the SAME geometry/palette helpers so the instant
 // preview and the pinned native article are pixel-continuous.
@@ -32,13 +41,13 @@ export function skinPalette(theme) {
     ? {
       card: "#000000", fg: "#e7e9ea", dim: "#71767b", border: "#2f3336",
       hover: "rgba(231,233,234,0.08)", accent: "#1d9bf0",
-      backdrop: SKIN_VARIANT === "flush" ? "rgba(0,0,0,0)" : "rgba(231,233,234,0.05)",
+      page: SKIN_VARIANT === "flush" ? "#000000" : "#0b0e11",
       shadow: SKIN_VARIANT === "flush" ? "none" : "0 8px 28px rgba(0,0,0,0.55)",
     }
     : {
       card: "#ffffff", fg: "#0f1419", dim: "#536471", border: "#eff3f4",
       hover: "rgba(15,20,25,0.06)", accent: "#1d9bf0",
-      backdrop: SKIN_VARIANT === "flush" ? "rgba(0,0,0,0)" : "rgba(15,20,25,0.07)",
+      page: SKIN_VARIANT === "flush" ? "#ffffff" : "#edf1f4",
       shadow: SKIN_VARIANT === "flush" ? "none" : "0 8px 28px rgba(15,20,25,0.14)",
     };
 }
@@ -47,12 +56,11 @@ export function skinPalette(theme) {
 // owns their values (single writer, P1-C loop-free); these are the names.
 export const SKIN_THEME_VARS = [
   "--peek-lad-fg", "--peek-lad-dim", "--peek-lad-hover",
-  "--peek-lad-backdrop", "--peek-lad-shadow",
+  "--peek-lad-page", "--peek-lad-shadow",
 ];
 
 export const SKIN_STYLE_ID = "peek-reader-skin";
 export const SKIN_TOPBAR_ID = "peek-reader-topbar";
-export const SKIN_BACKDROP_ID = "peek-reader-backdrop";
 
 const ICON_BACK =
   '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>';
@@ -86,7 +94,7 @@ export function skinCss() {
   }
   /* ---- right conversation sheet: constant geometry (never animated — the
      virtualizer measures cells against these widths) + card background so the
-     dim backdrop shows through the gaps as visual separation ---- */
+     dimmed canvas shows through the gaps as visual separation ---- */
   html[data-peek-lad="on"] [data-testid="cellInnerDiv"] {
     margin-left: calc(52vw + var(--peek-reader-gap)) !important;
     width: calc(48vw - var(--peek-reader-gap) - var(--peek-reader-inset)) !important;
@@ -103,22 +111,33 @@ export function skinCss() {
   html[data-peek-lad="on"] [data-testid="primaryColumn"] section[role="region"] {
     padding-top: calc(var(--peek-reader-top) + var(--peek-reader-inset)) !important;
   }
-  /* X's column hairlines must not cross the backdrop gaps */
+  /* X's column hairlines must not cross the canvas gaps */
   html[data-peek-lad="on"] [data-testid="primaryColumn"] {
     border-inline: 0 !important;
   }
-  /* ---- extension-owned chrome ---- */
-  #${SKIN_BACKDROP_ID} {
-    position: fixed; inset: 0; z-index: 55;
-    background: var(--peek-lad-backdrop, rgba(15,20,25,0.07));
-    pointer-events: none; /* the background is NOT a fake interactive timeline */
+  /* ---- dimmed page canvas: the "surround" IS the page background. The card
+     and the sheet cells paint their own bright surface; every gap, margin and
+     the strip under the top bar show this canvas colour. No overlay node, no
+     stacking race. X's primary column paints its own theme background across
+     the full viewport (measured), so it must carry the canvas colour too. ---- */
+  html[data-peek-lad="on"], html[data-peek-lad="on"] body,
+  html[data-peek-lad="on"] [data-testid="primaryColumn"] {
+    background-color: var(--peek-lad-page, #edf1f4) !important;
+  }
+  /* ---- extension-owned chrome: the top bar IS the canvas colour (the page
+     scrolls under it). X packs its whole page into root-level z-index:0
+     contexts, so a z-index ≥1 bar is the only way to stay above the sheet —
+     and that also puts it above X's #layers. While the image lightbox is open
+     the bar therefore yields (CSS-only :has, no JS): the lightbox owns the
+     screen and its own close control must never be covered (measured live). ---- */
+  html[data-peek-lad="on"]:has([data-testid="swipe-to-dismiss"]) #${SKIN_TOPBAR_ID} {
+    display: none !important;
   }
   #${SKIN_TOPBAR_ID} {
     position: fixed; top: 0; left: 0; right: 0; height: var(--peek-reader-top);
-    z-index: 60; display: flex; align-items: center; gap: 4px;
+    z-index: 1; display: flex; align-items: center; gap: 4px;
     padding: 0 12px; box-sizing: border-box;
-    background: var(--peek-lad-bg, #ffffff);
-    border-bottom: 1px solid var(--peek-lad-border, #eff3f4);
+    background: var(--peek-lad-page, #edf1f4);
     color: var(--peek-lad-fg, #0f1419);
     font-family: inherit;
   }
@@ -143,14 +162,15 @@ export function skinCss() {
   #${SKIN_TOPBAR_ID} .pk-tb-native:hover { color: var(--peek-lad-fg, #0f1419); }
 }
 @media (max-width: 979.98px) {
-  /* below the split breakpoint the skin's chrome must not exist visually */
-  #${SKIN_BACKDROP_ID}, #${SKIN_TOPBAR_ID} { display: none !important; }
+  /* below the split breakpoint the skin's chrome must not exist visually;
+     the canvas rule above is inside the min-width block and is inert here */
+  #${SKIN_TOPBAR_ID} { display: none !important; }
 }`;
 }
 
 // ---------- chrome mount (controller calls with its close/release callbacks) ----------
 
-let chrome = null; // { bar, backdrop, appBar }
+let chrome = null; // { bar, appBar }
 
 // Tag X's own detail app bar so the skin CSS can hide it. Structural depth of
 // the bar varies across X builds; the stable anchor is the back button. The
@@ -178,10 +198,6 @@ function tagXAppBar() {
 
 export function mountSkinChrome({ onBack, onNativeView } = {}) {
   removeSkinChrome();
-  const backdrop = document.createElement("div");
-  backdrop.id = SKIN_BACKDROP_ID;
-  backdrop.setAttribute("aria-hidden", "true");
-
   const bar = document.createElement("div");
   bar.id = SKIN_TOPBAR_ID;
   bar.setAttribute("role", "toolbar");
@@ -209,9 +225,8 @@ export function mountSkinChrome({ onBack, onNativeView } = {}) {
   nativeBtn.addEventListener("click", () => { try { onNativeView?.(); } catch { /* best-effort */ } });
 
   bar.append(back, title, spacer, nativeBtn);
-  chrome = { bar, backdrop, appBar: tagXAppBar() };
+  chrome = { bar, appBar: tagXAppBar() };
   try {
-    document.body?.appendChild(backdrop);
     document.body?.appendChild(bar);
   } catch (err) {
     // half-mounted chrome must not survive — drop both nodes and rethrow so
@@ -224,14 +239,12 @@ export function mountSkinChrome({ onBack, onNativeView } = {}) {
 
 export function removeSkinChrome() {
   if (!chrome) {
-    // defensive: nodes may exist from a crashed mount without module state
+    // defensive: a node may exist from a crashed mount without module state
     document.getElementById(SKIN_TOPBAR_ID)?.remove();
-    document.getElementById(SKIN_BACKDROP_ID)?.remove();
     document.querySelector("[data-peek-reader-appbar]")?.removeAttribute("data-peek-reader-appbar");
     return;
   }
   chrome.bar?.remove();
-  chrome.backdrop?.remove();
   try { chrome.appBar?.removeAttribute("data-peek-reader-appbar"); } catch { /* node gone */ }
   chrome = null;
 }
