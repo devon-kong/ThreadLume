@@ -178,6 +178,43 @@ test("Q5 非活跃会话收到异代次事件 → stale 释放路径保持可用
   assert.equal(session(poc), null, "and still no session to adopt into");
 });
 
+test("R1 回放的 ACTIVE（active 会话）被忽略：绝不释放活的包装（Review P3）", async () => {
+  const { env, poc, sent, focusId } = makeLabEnv();
+  await activeSession(env);
+  const gen = session(poc).gen;
+  const activeMsg = sent.find((m) => m.type === "ACTIVE" && m.gen === gen);
+  assert.ok(activeMsg, "a real ACTIVE was observed on the transport");
+  const uninstallBefore = sent.filter((m) => m.type === "UNINSTALL").length;
+  // replay it verbatim, like a same-origin script that observed one real message
+  const ev = new env.window.MessageEvent("message", {
+    source: env.window, origin: ORIGIN,
+    data: { ns: LAD_NS, from: LAD_FROM_MAIN, ...activeMsg },
+  });
+  env.window.dispatchEvent(ev);
+  await realSleep(5);
+  assert.equal(sent.filter((m) => m.type === "UNINSTALL").length, uninstallBefore,
+    "a replayed ACTIVE must not order the live wrap released");
+  assert.equal(session(poc).phase, "active", "live session untouched");
+  assert.equal(ladStyle(env), true, "split CSS stays");
+  void focusId;
+});
+
+test("R2 迟到 ACTIVE（failed/dormant 会话）仍释放孤儿包装（E6 语义保留）", async () => {
+  const { env, poc, sent, focusId } = makeLabEnv();
+  await activeSession(env);
+  const activeMsg = sent.find((m) => m.type === "ACTIVE");
+  poc.layoutAdapter.offRoute(); // controller session gone (dormant/none)
+  await realSleep(5);
+  const ev = new env.window.MessageEvent("message", {
+    source: env.window, origin: ORIGIN,
+    data: { ns: LAD_NS, from: LAD_FROM_MAIN, ...activeMsg },
+  });
+  env.window.dispatchEvent(ev);
+  await realSleep(5);
+  assert.equal(session(poc), null);
+  void focusId;
+});
+
 test("Q6 无焦点字段的伪造事件不产生无限定释放（A12 回归）", async () => {
   const { env, poc, sent } = makeLabEnv();
   await activeSession(env);

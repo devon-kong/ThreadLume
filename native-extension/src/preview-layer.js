@@ -64,6 +64,9 @@ export function captureClickForPreview(event) {
     return;
   }
   const { statusId, data, posterUrl } = found;
+  // waiting implies the URL already points at this post, and
+  // extractPreviewTarget refuses detail pages first — so this guard is
+  // defensive only; kept because a same-id rebind would still be correct.
   if (P && P.statusId === statusId && P.phase === "waiting") return; // already handing off
   mountPreview(statusId, data, posterUrl);
 }
@@ -116,6 +119,10 @@ function mountPreview(statusId, data, posterUrl) {
   overlay.setAttribute("aria-hidden", "true");
   overlay.setAttribute("role", "presentation");
   overlay.innerHTML = previewHtml(data, posterUrl);
+  // P is armed BEFORE the node enters the DOM (review P3 hardening): if
+  // anything below throws, the overlay is still tracked by P and removable —
+  // no orphan with a fixed id, no duplicate id on the next mount.
+  P = { statusId, gen, phase: "ready", overlay, timer: 0, mountedAt: performance.now() };
   document.body?.appendChild(overlay);
   if (!document.getElementById(PREVIEW_STYLE_ID)) {
     const style = document.createElement("style");
@@ -123,12 +130,11 @@ function mountPreview(statusId, data, posterUrl) {
     style.textContent = previewCss();
     document.head?.appendChild(style);
   }
-  const timer = setTimeout(() => {
+  P.timer = setTimeout(() => {
     // only the "still on the list" state can time out; once the route has
     // confirmed, the adapter budget and route observer own every exit
     if (P && P.gen === gen && P.phase === "ready") clearPreview("route-timeout");
   }, PREVIEW_ROUTE_TIMEOUT_MS);
-  P = { statusId, gen, phase: "ready", overlay, timer, mountedAt: performance.now() };
 }
 
 function previewHtml(data, posterUrl) {

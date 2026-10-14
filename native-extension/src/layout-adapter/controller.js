@@ -177,12 +177,18 @@ function handleResponse(m) {
   const s = session;
   if (!s || m.nonce !== s.nonce) return; // stale or foreign response
   if (m.type === LAD_ACTIVE) {
-    if (s.phase !== "installing") {
-      // late ACTIVE after this session already failed — MAIN may hold a wrap
-      // with no controller behind it: order it released, stay dormant
+    // A late ACTIVE after this session already failed/dormant means MAIN may
+    // hold a wrap with no controller behind it: order it released, stay
+    // dormant. Review P3: the branch must NOT fire for phase "active" — there
+    // the nonce matches a wrap that is LIVE, and a same-origin replay of one
+    // observed ACTIVE message would otherwise order the live wrap released
+    // while the split CSS stays. A replayed ACTIVE for an active session is
+    // simply ignored (its own ACTIVE already created the session).
+    if (s.phase === "failed" || s.phase === "dormant") {
       sendToMain({ type: LAD_UNINSTALL, nonce: ++nonceSeq, reason: "late-active-after-fail", focusUrlId: s.focusUrlId });
       return;
     }
+    if (s.phase !== "installing") return; // active: replay — ignore (see above)
     clearTimeout(s.ackTimer);
     s.gen = typeof m.gen === "number" ? m.gen : null;
     // P0-A integrity: MAIN marks the focal article BEFORE answering ACTIVE.
