@@ -730,6 +730,7 @@ ${article.text}` : article.text;
     overlay.setAttribute("aria-hidden", "true");
     overlay.setAttribute("role", "presentation");
     overlay.innerHTML = previewHtml(data, posterUrl);
+    P = { statusId, gen: gen2, phase: "ready", overlay, timer: 0, mountedAt: performance.now() };
     document.body?.appendChild(overlay);
     if (!document.getElementById(PREVIEW_STYLE_ID)) {
       const style = document.createElement("style");
@@ -737,10 +738,9 @@ ${article.text}` : article.text;
       style.textContent = previewCss();
       document.head?.appendChild(style);
     }
-    const timer = setTimeout(() => {
+    P.timer = setTimeout(() => {
       if (P && P.gen === gen2 && P.phase === "ready") clearPreview("route-timeout");
     }, PREVIEW_ROUTE_TIMEOUT_MS);
-    P = { statusId, gen: gen2, phase: "ready", overlay, timer, mountedAt: performance.now() };
   }
   function previewHtml(data, posterUrl) {
     const handleAt = data.handle ? "@" + data.handle.replace(/^\//, "") : "";
@@ -958,10 +958,11 @@ ${article.text}` : article.text;
     const s = session;
     if (!s || m.nonce !== s.nonce) return;
     if (m.type === LAD_ACTIVE) {
-      if (s.phase !== "installing") {
+      if (s.phase === "failed" || s.phase === "dormant") {
         sendToMain({ type: LAD_UNINSTALL, nonce: ++nonceSeq, reason: "late-active-after-fail", focusUrlId: s.focusUrlId });
         return;
       }
+      if (s.phase !== "installing") return;
       clearTimeout(s.ackTimer);
       s.gen = typeof m.gen === "number" ? m.gen : null;
       if (!focalMarkerVerified(s.focusUrlId)) {
