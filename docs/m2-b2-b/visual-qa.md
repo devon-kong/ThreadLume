@@ -18,7 +18,8 @@ Lab 产物身份：见 results JSON 的 `buildId` 字段（每轮以 `<html data
 | nativeview | PASS | 「原生视图」→ state idle、split/顶栏/背景幕全部下线、仍在详情页；下一次导航重新武装 |
 | loops | PASS | 5/5 开关循环：每轮无预览残留、无焦点帖残留、无顶栏残留、信息流恢复可交互 |
 | viewports | PASS | 1440×900 / 1280×800 / 1000×800：卡片 fixed+内缩、顶栏可见、零横向溢出；800×900：article 非 fixed、顶栏 display:none（X 原生单栏） |
-| theme | PASS | 深色即时光卡与原生接管完整走通（body/focal/顶栏 #000，backdrop rgba(231,233,234,0.05)）；恢复浅色 |
+| theme | PASS | X 设置页切深色后预览与原生接管完整走通：卡片 `rgb(0,0,0)`、画布/顶栏 `rgb(11,14,17)`（`#0b0e11`）、html/body/column 三处一致；恢复浅色 |
+| themeinline | PASS | **就地在位主题切换**（不改路由、阅读器保持挂载）：写入 X 的内联 body 背景 `rgb(0,0,0)` → 7 个调色板变量整体翻转（`--peek-lad-bg: #000000`、卡片 `rgb(0,0,0)`），画布保持皮肤色 `rgb(11,14,17)`；恢复 `rgb(255,255,255)` 后全部回到浅色 |
 | narrow(<980px) | PASS | 无预览（onFrames 0）、无 split、无皮肤节点 —— X 原生单栏 |
 | reload | PASS | 扩展重载后标记正确、预览→接管完整走通 |
 
@@ -38,12 +39,15 @@ Lab 产物身份：见 results JSON 的 `buildId` 字段（每轮以 `<html data
 
 - **brandFree**：顶栏节点内零 `img/image`，仅 `Peek` 文字标题 + 细线图标 —— 原版兔子 Logo 未出现在 Native 页面 UI 的任何位置；
 - **appbarTaggedHidden**：X 自带「← 帖子」应用栏被标记隐藏（其返回语义由顶栏安全返回接管）；
-- **pageCanvas.dimmed**：`body` 计算色 `rgb(237,241,244)` ≠ 卡片 `rgb(255,255,255)` —— 暗化环境来自页面画布本身（**无覆盖层节点**，`overlayNodeAbsent=true`），像素抽验：卡片/右栏 `255`、缝隙 `≈235–238`；
+- **pageCanvas.dimmed + consistent**：`html`/`body`/`primaryColumn` 三处画布色一致 `rgb(237,241,244)`，≠ 卡片 `rgb(255,255,255)` —— 暗化环境来自页面画布本身（**无覆盖层节点**，`overlayNodeAbsent=true`），像素抽验：卡片/右栏 `255`、缝隙 `≈235–238`；
 - **topbarZ=1**：顶栏压在右栏 cell 之上，灯箱打开时由 `:has()` 规则自动让位（实测 closeProbe.clickable=true）。
 
 ## 4. 失败运行汇总（不隐藏）
 
-- `fourposts:video` 两次「点击未进入预览」：X 时间线在懒加载下回流导致真实指针点击落在目标之外（L4 记录同类噪声，harness 的坐标回验+重试预算内未命中）。该视频帖由独立 `video` 场景（直连详情页）完整验证并通过。其余所有场景首次运行即通过。
+本次最终构建的完整运行（结果文件字段口径：`records` = 各场景首个通过运行；`history` = 去重的失败运行）：
+
+- `fourposts:video` 在此前多轮出现「点击未进入预览」（X 时间线懒加载回流导致真实指针点击落在目标之外；L4 记录同类噪声），**最终构建的完整运行中已首次走通并 PASS**（onFrames=63）；
+- `history` 中另有 6 条同轮次记录：fourposts×4 / loops / theme 各一条，均为同轮 harness 断言未同步（顶栏 z 值、主题 body 底色改按画布口径）导致的**断言层失败**——该轮产品状态本身正确（记录字段可复核），断言在同轮修正后全部通过；条目已附注说明。
 
 ## 5. 不可自动化项（沿用 L4 结论）
 

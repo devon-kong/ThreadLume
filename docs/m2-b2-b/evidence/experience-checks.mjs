@@ -111,8 +111,11 @@ const skinState = () => page.evaluate(`(() => {
     // computes to a colour different from the card surface (dimmed canvas)
     pageCanvas: (() => {
       const body = getComputedStyle(document.body).backgroundColor;
+      const html = getComputedStyle(document.documentElement).backgroundColor;
+      const col = document.querySelector("[data-testid=primaryColumn]") ? getComputedStyle(document.querySelector("[data-testid=primaryColumn]")).backgroundColor : null;
       const card = a ? getComputedStyle(a).backgroundColor : null;
-      return { body, card, dimmed: Boolean(body && card && body !== card) };
+      // one consistent canvas across html/body/column, different from the card
+      return { body, html, col, card, consistent: body === html && html === col, dimmed: Boolean(body && card && body !== card) };
     })(),
     skinStyle: Boolean(document.getElementById("peek-reader-skin")),
     topbarZ: bar ? getComputedStyle(bar).zIndex : null,
@@ -185,7 +188,7 @@ if (run("fourposts")) {
     record({
       scenario: "fourposts", kind,
       pass: r.pv.id === s.id && r.pv.maxLen > 8 && fs.focal && fs.focalCount === 1 && fs.textLen > 8 && !fs.pvNow
-        && skin.topbar && skin.pageCanvas?.dimmed && skin.topbarZ === "1" && skin.overlayNodeAbsent && skin.brandFree && !skin.hOverflow && geomOk,
+        && skin.topbar && skin.pageCanvas?.dimmed && skin.pageCanvas?.consistent && skin.topbarZ === "1" && skin.overlayNodeAbsent && skin.brandFree && !skin.hOverflow && geomOk,
       preview: r.pv, focal: fs, skin, geomOk,
       shots: [r.shot, shotNative].filter(Boolean),
     });
@@ -366,14 +369,24 @@ if (run("lightbox")) {
 if (run("menu")) {
   const s = SAMPLES.text;
   await page.goto(`${s.profile}/status/${s.id}`);
-  await sleep(5000);
-  const pos = await page.evaluate(() => {
-    const scope = document.querySelector("article[data-peek-lad-focal]");
-    const btn = scope?.querySelector('[data-testid="caret"]');
-    if (!btn) return null;
-    const r = btn.getBoundingClientRect();
-    return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) };
-  });
+  // poll for the reader to activate (a fresh load can take longer than 5s on a
+  // slow X render; the caret only exists once the focal card is pinned)
+  let pos = null;
+  let lastState = null;
+  for (let i = 0; i < 24 && !pos; i++) {
+    await sleep(700);
+    const r = await page.evaluate(() => {
+      const scope = document.querySelector("article[data-peek-lad-focal]");
+      const btn = scope?.querySelector('[data-testid="caret"]');
+      const state = document.documentElement.getAttribute("data-peek-lad-state");
+      if (!btn) return { state };
+      const b = btn.getBoundingClientRect();
+      return { state, x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) };
+    });
+    lastState = r.state;
+    if (r.x != null) pos = { x: r.x, y: r.y };
+  }
+  void lastState;
   let menu = null;
   if (pos) {
     await page.mouse.click(pos.x, pos.y, { label: "打开焦点帖菜单" });
@@ -399,7 +412,7 @@ if (run("menu")) {
   record({
     scenario: "menu",
     pass: Boolean(pos && menu?.open && menu.withinViewport && menu.topmostIsMenu && closed),
-    menu, escClosed: closed, shots: [shot],
+    menu, escClosed: closed, ladState: lastState, shots: [shot],
   });
 }
 
@@ -621,6 +634,49 @@ if (run("loops")) {
   const shot = `${SHOTS}/loops-final-feed.png`;
   await page.screenshot({ path: shot });
   record({ scenario: "loops", pass: loops.length === 5 && loops.every((l) => l.pass), loops, shots: [shot] });
+}
+
+// ---------- in-place theme change (the skin must follow X live) ----------
+// The canvas rule is !important, so the COMPUTED body background is ours while
+// mounted; X conveys its theme through the INLINE body background (measured).
+// readTheme() reads that signal first — this scenario proves the palette still
+// follows an in-place X theme write without unmounting the reader.
+if (run("themeinline")) {
+  const s = SAMPLES.text;
+  await page.goto(`${s.profile}/status/${s.id}`);
+  await sleep(5000);
+  const read = () => page.evaluate(`(() => {
+    const root = document.documentElement;
+    const a = document.querySelector("article[data-peek-lad-focal]");
+    return {
+      varBg: root.style.getPropertyValue("--peek-lad-bg"),
+      varPage: root.style.getPropertyValue("--peek-lad-page"),
+      card: a ? getComputedStyle(a).backgroundColor : null,
+      body: getComputedStyle(document.body).backgroundColor,
+      inline: document.body.style.backgroundColor,
+      state: root.getAttribute("data-peek-lad-state"),
+    };
+  })()`);
+  const before = await read();
+  await page.evaluate(() => { document.body.style.backgroundColor = "rgb(0, 0, 0)"; });
+  await sleep(900);
+  const dark = await read();
+  await page.evaluate(() => { document.body.style.backgroundColor = "rgb(255, 255, 255)"; });
+  await sleep(900);
+  const back = await read();
+  const shot = `${SHOTS}/themeinline-1-dark.png`;
+  await page.evaluate(() => { document.body.style.backgroundColor = "rgb(0, 0, 0)"; });
+  await sleep(700);
+  await page.screenshot({ path: shot });
+  await page.evaluate(() => { document.body.style.backgroundColor = "rgb(255, 255, 255)"; });
+  await sleep(700);
+  record({
+    scenario: "themeinline",
+    pass: Boolean(before.state === "active" && before.varBg === "#ffffff" && dark.varBg === "#000000" && dark.card === "rgb(0, 0, 0)"
+      && dark.body === "rgb(11, 14, 17)" && back.varBg === "#ffffff" && back.card === "rgb(255, 255, 255)"),
+    expect: "in-place X theme write (inline body background) flips the palette while mounted; the canvas stays the skin's colour; restoring flips back",
+    before, dark, back, shots: [shot],
+  });
 }
 
 // ---------- theme switch ----------

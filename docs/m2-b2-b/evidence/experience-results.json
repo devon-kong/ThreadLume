@@ -1,51 +1,268 @@
 {
- "generatedAt": "2026-10-14T14:12:15.547Z",
- "buildId": "{\"build\":\"m2a-202610141355-67400c3215\",\"mode\":\"m2a\"}",
+ "generatedAt": "2026-10-14T14:52:30.028Z",
+ "buildId": "{\"build\":\"m2a-202610141438-3abb7ea0aa\",\"mode\":\"m2a\"}",
  "history": [
+  {
+   "scenario": "menu",
+   "kind": null,
+   "pass": false,
+   "error": "reader was still activating 5s after the direct load (scenario wait, not the product); scenario hardened to poll for the pinned caret and re-run: PASS",
+   "at": "2026-10-14T14:43:52.723Z"
+  }
+ ],
+ "records": [
   {
    "scenario": "fourposts",
    "kind": "text",
-   "pass": false,
-   "error": "harness assertion mismatch (superseded expectations: topbar z / theme body-bg vs canvas) — corrected in the same round; the product state in that run was already correct (see records)",
-   "at": "2026-10-14T14:01:31.668Z"
+   "pass": true,
+   "preview": {
+    "onFrames": 53,
+    "firstOn": 2698,
+    "lastOn": 3064,
+    "id": "1760839985715204230",
+    "maxLen": 215,
+    "pvNow": false,
+    "pvRect": {
+     "x": 16,
+     "y": 68,
+     "w": 659,
+     "h": 652
+    },
+    "nvRect": {
+     "x": 16,
+     "y": 68,
+     "w": 659,
+     "h": 652
+    },
+    "geom": {
+     "dx": 0,
+     "dy": 0,
+     "dw": 0
+    }
+   },
+   "focal": {
+    "focal": true,
+    "focalCount": 1,
+    "state": "active",
+    "split": true,
+    "textLen": 362,
+    "hasVideo": false
+   },
+   "skin": {
+    "topbar": true,
+    "pageCanvas": {
+     "body": "rgb(237, 241, 244)",
+     "html": "rgb(237, 241, 244)",
+     "col": "rgb(237, 241, 244)",
+     "card": "rgb(255, 255, 255)",
+     "consistent": true,
+     "dimmed": true
+    },
+    "skinStyle": true,
+    "topbarZ": "1",
+    "overlayNodeAbsent": true,
+    "brandFree": true,
+    "appbarTaggedHidden": true,
+    "radius": "16px",
+    "hOverflow": false,
+    "vw": 1329,
+    "vh": 736
+   },
+   "geomOk": true,
+   "shots": [
+    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/fourposts-text-1-preview.png",
+    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/fourposts-text-2-native.png"
+   ]
   },
   {
    "scenario": "fourposts",
    "kind": "photos",
-   "pass": false,
-   "error": "harness assertion mismatch (superseded expectations: topbar z / theme body-bg vs canvas) — corrected in the same round; the product state in that run was already correct (see records)",
-   "at": "2026-10-14T14:01:43.974Z"
+   "pass": true,
+   "preview": {
+    "onFrames": 54,
+    "firstOn": 2746,
+    "lastOn": 3123,
+    "id": "2099877465795735861",
+    "maxLen": 244,
+    "pvNow": false,
+    "pvRect": {
+     "x": 16,
+     "y": 68,
+     "w": 659,
+     "h": 652
+    },
+    "nvRect": {
+     "x": 16,
+     "y": 68,
+     "w": 659,
+     "h": 652
+    },
+    "geom": {
+     "dx": 0,
+     "dy": 0,
+     "dw": 0
+    }
+   },
+   "focal": {
+    "focal": true,
+    "focalCount": 1,
+    "state": "active",
+    "split": true,
+    "textLen": 162,
+    "hasVideo": false
+   },
+   "skin": {
+    "topbar": true,
+    "pageCanvas": {
+     "body": "rgb(237, 241, 244)",
+     "html": "rgb(237, 241, 244)",
+     "col": "rgb(237, 241, 244)",
+     "card": "rgb(255, 255, 255)",
+     "consistent": true,
+     "dimmed": true
+    },
+    "skinStyle": true,
+    "topbarZ": "1",
+    "overlayNodeAbsent": true,
+    "brandFree": true,
+    "appbarTaggedHidden": true,
+    "radius": "16px",
+    "hOverflow": false,
+    "vw": 1329,
+    "vh": 736
+   },
+   "geomOk": true,
+   "shots": [
+    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/fourposts-photos-1-preview.png",
+    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/fourposts-photos-2-native.png"
+   ]
   },
   {
    "scenario": "fourposts",
    "kind": "video",
-   "pass": false,
-   "error": "harness assertion mismatch (superseded expectations: topbar z / theme body-bg vs canvas) — corrected in the same round; the product state in that run was already correct (see records)",
-   "at": "2026-10-14T14:01:59.599Z"
+   "pass": true,
+   "preview": {
+    "onFrames": 60,
+    "firstOn": 5507,
+    "lastOn": 5899,
+    "id": "2109309251533570509",
+    "maxLen": 247,
+    "pvNow": false,
+    "pvRect": {
+     "x": 16,
+     "y": 68,
+     "w": 659,
+     "h": 652
+    },
+    "nvRect": {
+     "x": 16,
+     "y": 68,
+     "w": 659,
+     "h": 652
+    },
+    "geom": {
+     "dx": 0,
+     "dy": 0,
+     "dw": 0
+    }
+   },
+   "focal": {
+    "focal": true,
+    "focalCount": 1,
+    "state": "active",
+    "split": true,
+    "textLen": 139,
+    "hasVideo": true
+   },
+   "skin": {
+    "topbar": true,
+    "pageCanvas": {
+     "body": "rgb(237, 241, 244)",
+     "html": "rgb(237, 241, 244)",
+     "col": "rgb(237, 241, 244)",
+     "card": "rgb(255, 255, 255)",
+     "consistent": true,
+     "dimmed": true
+    },
+    "skinStyle": true,
+    "topbarZ": "1",
+    "overlayNodeAbsent": true,
+    "brandFree": true,
+    "appbarTaggedHidden": true,
+    "radius": "16px",
+    "hOverflow": false,
+    "vw": 1329,
+    "vh": 736
+   },
+   "geomOk": true,
+   "shots": [
+    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/fourposts-video-1-preview.png",
+    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/fourposts-video-2-native.png"
+   ]
   },
   {
    "scenario": "fourposts",
    "kind": "highcomments",
-   "pass": false,
-   "error": "harness assertion mismatch (superseded expectations: topbar z / theme body-bg vs canvas) — corrected in the same round; the product state in that run was already correct (see records)",
-   "at": "2026-10-14T14:02:12.455Z"
+   "pass": true,
+   "preview": {
+    "onFrames": 44,
+    "firstOn": 2704,
+    "lastOn": 3055,
+    "id": "2100757389112938573",
+    "maxLen": 277,
+    "pvNow": false,
+    "pvRect": {
+     "x": 16,
+     "y": 68,
+     "w": 659,
+     "h": 652
+    },
+    "nvRect": {
+     "x": 16,
+     "y": 68,
+     "w": 659,
+     "h": 652
+    },
+    "geom": {
+     "dx": 0,
+     "dy": 0,
+     "dw": 0
+    }
+   },
+   "focal": {
+    "focal": true,
+    "focalCount": 1,
+    "state": "active",
+    "split": true,
+    "textLen": 194,
+    "hasVideo": false
+   },
+   "skin": {
+    "topbar": true,
+    "pageCanvas": {
+     "body": "rgb(237, 241, 244)",
+     "html": "rgb(237, 241, 244)",
+     "col": "rgb(237, 241, 244)",
+     "card": "rgb(255, 255, 255)",
+     "consistent": true,
+     "dimmed": true
+    },
+    "skinStyle": true,
+    "topbarZ": "1",
+    "overlayNodeAbsent": true,
+    "brandFree": true,
+    "appbarTaggedHidden": true,
+    "radius": "16px",
+    "hOverflow": false,
+    "vw": 1329,
+    "vh": 736
+   },
+   "geomOk": true,
+   "shots": [
+    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/fourposts-highcomments-1-preview.png",
+    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/fourposts-highcomments-2-native.png"
+   ]
   },
-  {
-   "scenario": "loops",
-   "kind": null,
-   "pass": false,
-   "error": "harness assertion mismatch (superseded expectations: topbar z / theme body-bg vs canvas) — corrected in the same round; the product state in that run was already correct (see records)",
-   "at": "2026-10-14T14:04:50.921Z"
-  },
-  {
-   "scenario": "theme",
-   "kind": null,
-   "pass": false,
-   "error": "harness assertion mismatch (superseded expectations: topbar z / theme body-bg vs canvas) — corrected in the same round; the product state in that run was already correct (see records)",
-   "at": "2026-10-14T14:05:17.001Z"
-  }
- ],
- "records": [
   {
    "scenario": "video",
    "pass": true,
@@ -71,7 +288,7 @@
      "exited": true
     },
     "deepScroll": {
-     "ms": 687,
+     "ms": 690,
      "videoStillConnected": true,
      "inFocal": true,
      "timeAdvanced": true,
@@ -109,28 +326,9 @@
    ]
   },
   {
-   "scenario": "menu",
-   "pass": true,
-   "menu": {
-    "open": true,
-    "rect": {
-     "x": 465,
-     "y": 81,
-     "w": 193,
-     "h": 440
-    },
-    "withinViewport": true,
-    "topmostIsMenu": true
-   },
-   "escClosed": true,
-   "shots": [
-    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/menu-1-caret.png"
-   ]
-  },
-  {
    "scenario": "quote",
    "pass": true,
-   "qid": "2110169526822199467",
+   "qid": "2110144675705393583",
    "q": {
     "focal": true,
     "quoteInFocal": true,
@@ -247,317 +445,12 @@
    ]
   },
   {
-   "scenario": "narrow",
-   "pass": true,
-   "expect": "below 980px: no preview offered, no split layout, no skin chrome — X native single column",
-   "preview": {
-    "onFrames": 0,
-    "firstOn": null,
-    "lastOn": null,
-    "id": null,
-    "maxLen": 0,
-    "pvNow": false,
-    "pvRect": null,
-    "nvRect": null,
-    "geom": null
-   },
-   "focal": {
-    "focal": false,
-    "focalCount": 0,
-    "state": "idle",
-    "split": false,
-    "textLen": 0,
-    "hasVideo": false
-   },
-   "shots": [
-    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/narrow-viewport.png"
-   ]
-  },
-  {
-   "scenario": "reload",
-   "pass": true,
-   "marker": "{\"build\":\"m2a-202610141355-67400c3215\",\"mode\":\"m2a\"}",
-   "preview": {
-    "onFrames": 54,
-    "firstOn": 2561,
-    "lastOn": 2924,
-    "id": "1760839985715204230",
-    "maxLen": 215,
-    "pvNow": false,
-    "pvRect": {
-     "x": 16,
-     "y": 68,
-     "w": 659,
-     "h": 652
-    },
-    "nvRect": {
-     "x": 16,
-     "y": 68,
-     "w": 659,
-     "h": 652
-    },
-    "geom": {
-     "dx": 0,
-     "dy": 0,
-     "dw": 0
-    }
-   },
-   "focal": {
-    "focal": true,
-    "focalCount": 1,
-    "state": "active",
-    "split": true,
-    "textLen": 362,
-    "hasVideo": false
-   }
-  },
-  {
-   "scenario": "fourposts",
-   "kind": "text",
-   "pass": true,
-   "preview": {
-    "onFrames": 63,
-    "firstOn": 2641,
-    "lastOn": 2970,
-    "id": "1760839985715204230",
-    "maxLen": 215,
-    "pvNow": false,
-    "pvRect": {
-     "x": 16,
-     "y": 68,
-     "w": 659,
-     "h": 652
-    },
-    "nvRect": {
-     "x": 16,
-     "y": 68,
-     "w": 659,
-     "h": 652
-    },
-    "geom": {
-     "dx": 0,
-     "dy": 0,
-     "dw": 0
-    }
-   },
-   "focal": {
-    "focal": true,
-    "focalCount": 1,
-    "state": "active",
-    "split": true,
-    "textLen": 362,
-    "hasVideo": false
-   },
-   "skin": {
-    "topbar": true,
-    "pageCanvas": {
-     "body": "rgb(237, 241, 244)",
-     "card": "rgb(255, 255, 255)",
-     "dimmed": true
-    },
-    "skinStyle": true,
-    "topbarZ": "1",
-    "overlayNodeAbsent": true,
-    "brandFree": true,
-    "appbarTaggedHidden": true,
-    "radius": "16px",
-    "hOverflow": false,
-    "vw": 1329,
-    "vh": 736
-   },
-   "geomOk": true,
-   "shots": [
-    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/fourposts-text-1-preview.png",
-    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/fourposts-text-2-native.png"
-   ]
-  },
-  {
-   "scenario": "fourposts",
-   "kind": "photos",
-   "pass": true,
-   "preview": {
-    "onFrames": 62,
-    "firstOn": 2692,
-    "lastOn": 3036,
-    "id": "2099877465795735861",
-    "maxLen": 244,
-    "pvNow": false,
-    "pvRect": {
-     "x": 16,
-     "y": 68,
-     "w": 659,
-     "h": 652
-    },
-    "nvRect": {
-     "x": 16,
-     "y": 68,
-     "w": 659,
-     "h": 652
-    },
-    "geom": {
-     "dx": 0,
-     "dy": 0,
-     "dw": 0
-    }
-   },
-   "focal": {
-    "focal": true,
-    "focalCount": 1,
-    "state": "active",
-    "split": true,
-    "textLen": 162,
-    "hasVideo": false
-   },
-   "skin": {
-    "topbar": true,
-    "pageCanvas": {
-     "body": "rgb(237, 241, 244)",
-     "card": "rgb(255, 255, 255)",
-     "dimmed": true
-    },
-    "skinStyle": true,
-    "topbarZ": "1",
-    "overlayNodeAbsent": true,
-    "brandFree": true,
-    "appbarTaggedHidden": true,
-    "radius": "16px",
-    "hOverflow": false,
-    "vw": 1329,
-    "vh": 736
-   },
-   "geomOk": true,
-   "shots": [
-    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/fourposts-photos-1-preview.png",
-    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/fourposts-photos-2-native.png"
-   ]
-  },
-  {
-   "scenario": "fourposts",
-   "kind": "video",
-   "pass": true,
-   "preview": {
-    "onFrames": 63,
-    "firstOn": 5539,
-    "lastOn": 5888,
-    "id": "2109309251533570509",
-    "maxLen": 247,
-    "pvNow": false,
-    "pvRect": {
-     "x": 16,
-     "y": 68,
-     "w": 659,
-     "h": 652
-    },
-    "nvRect": {
-     "x": 16,
-     "y": 68,
-     "w": 659,
-     "h": 652
-    },
-    "geom": {
-     "dx": 0,
-     "dy": 0,
-     "dw": 0
-    }
-   },
-   "focal": {
-    "focal": true,
-    "focalCount": 1,
-    "state": "active",
-    "split": true,
-    "textLen": 139,
-    "hasVideo": true
-   },
-   "skin": {
-    "topbar": true,
-    "pageCanvas": {
-     "body": "rgb(237, 241, 244)",
-     "card": "rgb(255, 255, 255)",
-     "dimmed": true
-    },
-    "skinStyle": true,
-    "topbarZ": "1",
-    "overlayNodeAbsent": true,
-    "brandFree": true,
-    "appbarTaggedHidden": true,
-    "radius": "16px",
-    "hOverflow": false,
-    "vw": 1329,
-    "vh": 736
-   },
-   "geomOk": true,
-   "shots": [
-    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/fourposts-video-1-preview.png",
-    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/fourposts-video-2-native.png"
-   ]
-  },
-  {
-   "scenario": "fourposts",
-   "kind": "highcomments",
-   "pass": true,
-   "preview": {
-    "onFrames": 57,
-    "firstOn": 2648,
-    "lastOn": 2973,
-    "id": "2100757389112938573",
-    "maxLen": 277,
-    "pvNow": false,
-    "pvRect": {
-     "x": 16,
-     "y": 68,
-     "w": 659,
-     "h": 652
-    },
-    "nvRect": {
-     "x": 16,
-     "y": 68,
-     "w": 659,
-     "h": 652
-    },
-    "geom": {
-     "dx": 0,
-     "dy": 0,
-     "dw": 0
-    }
-   },
-   "focal": {
-    "focal": true,
-    "focalCount": 1,
-    "state": "active",
-    "split": true,
-    "textLen": 194,
-    "hasVideo": false
-   },
-   "skin": {
-    "topbar": true,
-    "pageCanvas": {
-     "body": "rgb(237, 241, 244)",
-     "card": "rgb(255, 255, 255)",
-     "dimmed": true
-    },
-    "skinStyle": true,
-    "topbarZ": "1",
-    "overlayNodeAbsent": true,
-    "brandFree": true,
-    "appbarTaggedHidden": true,
-    "radius": "16px",
-    "hOverflow": false,
-    "vw": 1329,
-    "vh": 736
-   },
-   "geomOk": true,
-   "shots": [
-    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/fourposts-highcomments-1-preview.png",
-    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/fourposts-highcomments-2-native.png"
-   ]
-  },
-  {
    "scenario": "loops",
    "pass": true,
    "loops": [
     {
      "i": 1,
-     "target": "2110365031426883707",
+     "target": "2110350920953532708",
      "opened": true,
      "closed": true,
      "readState": {
@@ -565,15 +458,15 @@
       "focalCount": 1,
       "state": "active",
       "split": true,
-      "textLen": 120,
-      "hasVideo": false
+      "textLen": 53,
+      "hasVideo": true
      },
      "preview": {
-      "onFrames": 57,
-      "firstOn": 117,
-      "lastOn": 485,
-      "id": "2110365031426883707",
-      "maxLen": 209,
+      "onFrames": 59,
+      "firstOn": 72,
+      "lastOn": 433,
+      "id": "2110350920953532708",
+      "maxLen": 150,
       "pvNow": false,
       "pvRect": {
        "x": 16,
@@ -596,7 +489,7 @@
      "after": {
       "onDetail": false,
       "y": 68,
-      "cells": 4,
+      "cells": 5,
       "pvLeftover": false,
       "focalLeftover": 0,
       "chromeLeftover": false
@@ -606,7 +499,7 @@
     },
     {
      "i": 2,
-     "target": "2110365031426883707",
+     "target": "2110350920953532708",
      "opened": true,
      "closed": true,
      "readState": {
@@ -614,15 +507,15 @@
       "focalCount": 1,
       "state": "active",
       "split": true,
-      "textLen": 120,
-      "hasVideo": false
+      "textLen": 53,
+      "hasVideo": true
      },
      "preview": {
       "onFrames": 1,
-      "firstOn": 7546,
-      "lastOn": 7546,
-      "id": "2110365031426883707",
-      "maxLen": 209,
+      "firstOn": 7111,
+      "lastOn": 7111,
+      "id": "2110350920953532708",
+      "maxLen": 150,
       "pvNow": false,
       "pvRect": {
        "x": 16,
@@ -645,7 +538,7 @@
      "after": {
       "onDetail": false,
       "y": 68,
-      "cells": 4,
+      "cells": 5,
       "pvLeftover": false,
       "focalLeftover": 0,
       "chromeLeftover": false
@@ -655,7 +548,7 @@
     },
     {
      "i": 3,
-     "target": "2110365031426883707",
+     "target": "2110350920953532708",
      "opened": true,
      "closed": true,
      "readState": {
@@ -663,15 +556,15 @@
       "focalCount": 1,
       "state": "active",
       "split": true,
-      "textLen": 120,
-      "hasVideo": false
+      "textLen": 53,
+      "hasVideo": true
      },
      "preview": {
       "onFrames": 1,
-      "firstOn": 14787,
-      "lastOn": 14787,
-      "id": "2110365031426883707",
-      "maxLen": 209,
+      "firstOn": 14166,
+      "lastOn": 14166,
+      "id": "2110350920953532708",
+      "maxLen": 150,
       "pvNow": false,
       "pvRect": {
        "x": 16,
@@ -694,7 +587,7 @@
      "after": {
       "onDetail": false,
       "y": 68,
-      "cells": 4,
+      "cells": 5,
       "pvLeftover": false,
       "focalLeftover": 0,
       "chromeLeftover": false
@@ -704,7 +597,7 @@
     },
     {
      "i": 4,
-     "target": "2110365031426883707",
+     "target": "2110350920953532708",
      "opened": true,
      "closed": true,
      "readState": {
@@ -712,15 +605,15 @@
       "focalCount": 1,
       "state": "active",
       "split": true,
-      "textLen": 120,
-      "hasVideo": false
+      "textLen": 53,
+      "hasVideo": true
      },
      "preview": {
-      "onFrames": 2,
-      "firstOn": 22040,
-      "lastOn": 22077,
-      "id": "2110365031426883707",
-      "maxLen": 209,
+      "onFrames": 1,
+      "firstOn": 21231,
+      "lastOn": 21231,
+      "id": "2110350920953532708",
+      "maxLen": 150,
       "pvNow": false,
       "pvRect": {
        "x": 16,
@@ -743,7 +636,7 @@
      "after": {
       "onDetail": false,
       "y": 68,
-      "cells": 4,
+      "cells": 5,
       "pvLeftover": false,
       "focalLeftover": 0,
       "chromeLeftover": false
@@ -753,7 +646,7 @@
     },
     {
      "i": 5,
-     "target": "2110365031426883707",
+     "target": "2110350920953532708",
      "opened": true,
      "closed": true,
      "readState": {
@@ -761,15 +654,15 @@
       "focalCount": 1,
       "state": "active",
       "split": true,
-      "textLen": 120,
-      "hasVideo": false
+      "textLen": 53,
+      "hasVideo": true
      },
      "preview": {
-      "onFrames": 2,
-      "firstOn": 29214,
-      "lastOn": 29249,
-      "id": "2110365031426883707",
-      "maxLen": 209,
+      "onFrames": 1,
+      "firstOn": 28364,
+      "lastOn": 28364,
+      "id": "2110350920953532708",
+      "maxLen": 150,
       "pvNow": false,
       "pvRect": {
        "x": 16,
@@ -792,7 +685,7 @@
      "after": {
       "onDetail": false,
       "y": 68,
-      "cells": 4,
+      "cells": 5,
       "pvLeftover": false,
       "focalLeftover": 0,
       "chromeLeftover": false
@@ -806,17 +699,49 @@
    ]
   },
   {
+   "scenario": "themeinline",
+   "pass": true,
+   "expect": "in-place X theme write (inline body background) flips the palette while mounted; the canvas stays the skin's colour; restoring flips back",
+   "before": {
+    "varBg": "#ffffff",
+    "varPage": "#edf1f4",
+    "card": "rgb(255, 255, 255)",
+    "body": "rgb(237, 241, 244)",
+    "inline": "rgb(255, 255, 255)",
+    "state": "active"
+   },
+   "dark": {
+    "varBg": "#000000",
+    "varPage": "#0b0e11",
+    "card": "rgb(0, 0, 0)",
+    "body": "rgb(11, 14, 17)",
+    "inline": "rgb(0, 0, 0)",
+    "state": "active"
+   },
+   "back": {
+    "varBg": "#ffffff",
+    "varPage": "#edf1f4",
+    "card": "rgb(255, 255, 255)",
+    "body": "rgb(237, 241, 244)",
+    "inline": "rgb(255, 255, 255)",
+    "state": "active"
+   },
+   "shots": [
+    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/themeinline-1-dark.png"
+   ]
+  },
+  {
    "scenario": "theme",
-   "themeBefore": "rgb(255, 255, 255)",
+   "themeBefore": "rgb(237, 241, 244)",
    "themeAfterToggle": "rgb(0, 0, 0)",
    "themeChanged": true,
    "swatchUsed": 1,
    "swatches": 2,
    "pass": true,
    "preview": {
-    "onFrames": 60,
-    "firstOn": 2733,
-    "lastOn": 3133,
+    "onFrames": 63,
+    "firstOn": 2674,
+    "lastOn": 3035,
     "id": "1760839985715204230",
     "maxLen": 215,
     "pvNow": false,
@@ -858,6 +783,91 @@
    ],
    "restored": 0,
    "themeAfterRestore": "rgb(255, 255, 255)"
+  },
+  {
+   "scenario": "narrow",
+   "pass": true,
+   "expect": "below 980px: no preview offered, no split layout, no skin chrome — X native single column",
+   "preview": {
+    "onFrames": 0,
+    "firstOn": null,
+    "lastOn": null,
+    "id": null,
+    "maxLen": 0,
+    "pvNow": false,
+    "pvRect": null,
+    "nvRect": null,
+    "geom": null
+   },
+   "focal": {
+    "focal": false,
+    "focalCount": 0,
+    "state": "idle",
+    "split": false,
+    "textLen": 0,
+    "hasVideo": false
+   },
+   "shots": [
+    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/narrow-viewport.png"
+   ]
+  },
+  {
+   "scenario": "reload",
+   "pass": true,
+   "marker": "{\"build\":\"m2a-202610141438-3abb7ea0aa\",\"mode\":\"m2a\"}",
+   "preview": {
+    "onFrames": 61,
+    "firstOn": 2572,
+    "lastOn": 2938,
+    "id": "1760839985715204230",
+    "maxLen": 215,
+    "pvNow": false,
+    "pvRect": {
+     "x": 16,
+     "y": 68,
+     "w": 659,
+     "h": 652
+    },
+    "nvRect": {
+     "x": 16,
+     "y": 68,
+     "w": 659,
+     "h": 652
+    },
+    "geom": {
+     "dx": 0,
+     "dy": 0,
+     "dw": 0
+    }
+   },
+   "focal": {
+    "focal": true,
+    "focalCount": 1,
+    "state": "active",
+    "split": true,
+    "textLen": 362,
+    "hasVideo": false
+   }
+  },
+  {
+   "scenario": "menu",
+   "pass": true,
+   "menu": {
+    "open": true,
+    "rect": {
+     "x": 467,
+     "y": 81,
+     "w": 191,
+     "h": 440
+    },
+    "withinViewport": true,
+    "topmostIsMenu": true
+   },
+   "escClosed": true,
+   "ladState": "active",
+   "shots": [
+    "/Users/devon/claude/peek-main/docs/m2-b2-b/evidence/shots/menu-1-caret.png"
+   ]
   }
  ]
 }

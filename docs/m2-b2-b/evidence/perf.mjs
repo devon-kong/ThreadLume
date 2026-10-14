@@ -534,7 +534,8 @@ for (let round = 0; round < ROUNDS; round++) {
       // M2-B2-B: which UI is actually being measured (skin chrome present?)
       skin: Boolean(document.getElementById("peek-reader-skin")),
       topbar: Boolean(document.getElementById("peek-reader-topbar")),
-      backdrop: Boolean(document.getElementById("peek-reader-backdrop")),
+      overlayNodeAbsent: document.getElementById("peek-reader-backdrop") === null,
+      canvas: (() => { const b = getComputedStyle(document.body).backgroundColor; const card = document.querySelector("article[data-peek-lad-focal]"); return { body: b, cardBg: card ? getComputedStyle(card).backgroundColor : null }; })(),
       focalRadius: (() => { const a = document.querySelector("article[data-peek-lad-focal]"); return a ? getComputedStyle(a).borderRadius : null; })(),
       hOverflow: document.documentElement.scrollWidth > window.innerWidth + 1,
     })) : null;
