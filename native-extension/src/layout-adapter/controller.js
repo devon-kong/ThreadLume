@@ -42,6 +42,10 @@ import {
 } from "./constants.js";
 import { readTheme } from "../theme-adapter.js";
 import { focalCellByStatusId } from "../focal-extractor.js";
+// M2-B2-A instant reading preview: the controller owns the two lifecycle
+// moments the preview layer must follow — the verified handoff (overlay and
+// split CSS swap in the same task) and every stop path (no handoff is coming).
+import { previewAdapterHandoff, previewAdapterStopped } from "../preview-layer.js";
 
 /* eslint-disable no-undef */ // __PEEK_LAYOUT_ADAPTER__ is an esbuild define
 export const adapterEnabled = () => __PEEK_LAYOUT_ADAPTER__ === true;
@@ -195,6 +199,10 @@ function handleResponse(m) {
     s.everActive = true;
     setStateAttr("active");
     mountLayout();
+    // M2-B2-A: the split is live and the focal article is pinned — release the
+    // preview in this exact task so no intermediate frame shows two readers
+    // (or a blank left pane) between preview and native takeover.
+    previewAdapterHandoff(s.focusUrlId);
     return;
   }
   if (m.type === LAD_UNSUPPORTED) {
@@ -226,19 +234,20 @@ function handleAutonomous(m) {
   // generation. Anything else is cross-talk from an older page state.
   // Correlation is bookkeeping, not authentication (same-origin scripts can
   // fake any message; the harm is bounded to the page they already own).
+  //
+  // M2-B2-A (S6): the gen-continuation ADOPTION branch is GONE. It accepted
+  // any same-focus HEALTH_ACTIVE with a higher gen and adopted that gen —
+  // which a page script could forge to strand the real session's later
+  // HEALTH_ERROR as "foreign" and leak the split CSS. Since the M2-B1-R
+  // remediation, MAIN keeps the generation ACROSS internal re-installs
+  // (adapter-core `continuesSession`), so every legitimate notification of a
+  // continued session carries the SAME gen and matches `ours` exactly; a
+  // higher gen is by definition not this session. Internal re-installs and
+  // health exits are covered by the gen-continuity tests (A10/A11); strict
+  // equality cannot strand them.
   const ours = s && m.focusUrlId === s.focusUrlId &&
     typeof m.gen === "number" && m.gen === s.gen;
-  // Gen continuation: an internal re-install is the SAME installation session
-  // continuing on a new virtualizer instance. MAIN reports it as
-  // HEALTH_ACTIVE carrying a newer generation — accept it while we are active
-  // for the same focus and adopt the new gen, so the continued session's later
-  // notifications (HEALTH_ERROR included) are never orphaned. Belt and braces
-  // for the gen-continuity invariant on the MAIN side.
-  const continuation = !ours && s && s.phase === "active" && s.everActive &&
-    m.type === LAD_HEALTH_ACTIVE && m.focusUrlId === s.focusUrlId &&
-    typeof m.gen === "number" && m.gen > s.gen;
-  if (continuation) { s.gen = m.gen; }
-  if (!ours && !continuation) {
+  if (!ours) {
     // A wrap whose session we no longer hold must be released — but never by
     // clobbering a live ACTIVE session (its own health tick owns it). The
     // UNINSTALL names its focus so MAIN can refuse a mismatched release; the
@@ -282,6 +291,7 @@ function failSession(s, reason) {
   s.failReason = reason;
   session = s; // keep the failed session: dormancy + diagnostics until the route changes
   removeLayout();
+  previewAdapterStopped(reason); // no handoff is coming — the preview must not linger
   setStateAttr("failed");
   try { document.documentElement.setAttribute(FAILED_ATTR, reason); } catch { /* probe only */ }
   // honest, explicit report — never fake a recovery (contract §6/§9)
@@ -296,6 +306,7 @@ function dormantSession(s, reason) {
   s.phase = "dormant";
   session = s;
   removeLayout();
+  previewAdapterStopped(reason); // same rule as failure: no handoff, no preview
   setStateAttr("idle");
 }
 

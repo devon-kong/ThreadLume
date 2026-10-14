@@ -681,8 +681,166 @@ ${article.text}` : article.text;
   var LAD_HEALTH_ACTIVE = "HEALTH_ACTIVE";
   var LAD_MARK_ARTICLE = "data-peek-lad-focal";
   var LAD_INSTALL_ACK_MS = 1200;
-  var LAD_INSTALL_RETRY_MS = 250;
-  var LAD_INSTALL_MAX_ATTEMPTS = 12;
+  var LAD_INSTALL_RETRY_MS = 60;
+  var LAD_INSTALL_MAX_ATTEMPTS = 50;
+
+  // native-extension/src/preview-layer.js
+  var PREVIEW_ROUTE_TIMEOUT_MS = 1200;
+  var PREVIEW_MIN_VIEWPORT_PX = 980;
+  var PREVIEW_ID = "peek-lad-preview";
+  var PREVIEW_STYLE_ID = "peek-lad-preview-style";
+  var PREVIEW_Z_INDEX = 58;
+  var P = null;
+  var genSeq = 0;
+  function captureClickForPreview(event) {
+    const found = extractPreviewTarget(event);
+    if (!found) {
+      if (P) clearPreview("click-elsewhere");
+      return;
+    }
+    const { statusId, data, posterUrl } = found;
+    if (P && P.statusId === statusId && P.phase === "waiting") return;
+    mountPreview(statusId, data, posterUrl);
+  }
+  function extractPreviewTarget(event) {
+    if (statusIdFromPath()) return null;
+    if (window.innerWidth < PREVIEW_MIN_VIEWPORT_PX) return null;
+    const a = event?.target?.closest?.('a[href*="/status/"]');
+    if (!a) return null;
+    const href = a.getAttribute("href") || "";
+    const statusId = (href.match(/\/status\/(\d+)/) || [])[1];
+    if (!statusId) return null;
+    const cell = a.closest?.('[data-testid="cellInnerDiv"]');
+    if (!cell) return null;
+    const ownLink = [...cell.querySelectorAll("a[href] time")].filter((t) => !t.closest('div[role="link"]')).find((t) => (t.closest("a")?.getAttribute("href") || "").includes(`/status/${statusId}`));
+    if (!ownLink) return null;
+    const art = cell.querySelector("article[data-testid='tweet']") || cell.querySelector("article");
+    if (!art) return null;
+    const data = extractFromArticle(art, statusId);
+    if (!data || data.statusId !== statusId) return null;
+    const posterUrl = data.rich.video ? art.querySelector("video")?.getAttribute("poster") || "" : "";
+    return { statusId, data, posterUrl };
+  }
+  function mountPreview(statusId, data, posterUrl) {
+    clearPreview("superseded");
+    const gen2 = ++genSeq;
+    const overlay = document.createElement("div");
+    overlay.id = PREVIEW_ID;
+    overlay.dataset.statusId = statusId;
+    overlay.setAttribute("aria-hidden", "true");
+    overlay.setAttribute("role", "presentation");
+    overlay.innerHTML = previewHtml(data, posterUrl);
+    document.body?.appendChild(overlay);
+    if (!document.getElementById(PREVIEW_STYLE_ID)) {
+      const style = document.createElement("style");
+      style.id = PREVIEW_STYLE_ID;
+      style.textContent = previewCss();
+      document.head?.appendChild(style);
+    }
+    const timer = setTimeout(() => {
+      if (P && P.gen === gen2 && P.phase === "ready") clearPreview("route-timeout");
+    }, PREVIEW_ROUTE_TIMEOUT_MS);
+    P = { statusId, gen: gen2, phase: "ready", overlay, timer, mountedAt: performance.now() };
+  }
+  function previewHtml(data, posterUrl) {
+    const handleAt = data.handle ? "@" + data.handle.replace(/^\//, "") : "";
+    const photos = data.photos.map((u) => `<img class="ppl-photo" src="${ESCAPED(u)}" referrerpolicy="no-referrer" alt="">`).join("");
+    const text = data.textKnown ? `<div class="ppl-text">${ESCAPED(data.text)}</div>` : "";
+    const video = data.rich.video ? `<div class="ppl-video">${posterUrl ? `<img class="ppl-poster" src="${ESCAPED(posterUrl)}" referrerpolicy="no-referrer" alt="">` : ""}<span class="ppl-video-note">\u89C6\u9891/GIF \xB7 \u9759\u6001\u9884\u89C8\uFF0C\u539F\u751F\u64AD\u653E\u5668\u63A5\u7BA1\u540E\u64AD\u653E</span></div>` : "";
+    const poll = data.rich.poll ? `<div class="ppl-rich">\u6295\u7968 \xB7 \u539F\u751F\u7EC4\u4EF6\u63A5\u7BA1\u540E\u663E\u793A</div>` : "";
+    const card = data.rich.card ? `<div class="ppl-rich">\u7F51\u7AD9\u5361\u7247 \xB7 \u539F\u751F\u7EC4\u4EF6\u63A5\u7BA1\u540E\u663E\u793A</div>` : "";
+    const quote = data.quote ? `<div class="ppl-quote"><div class="ppl-quote-author">${ESCAPED(data.quote.author ?? "\u672A\u77E5\u4F5C\u8005")}</div><div>${ESCAPED(data.quote.text || "\uFF08\u5F15\u7528\u6B63\u6587\u672A\u8BC6\u522B\uFF09")}</div></div>` : "";
+    return `
+    <div class="ppl-author">
+      ${data.avatar ? `<img class="ppl-avatar" src="${ESCAPED(data.avatar)}" referrerpolicy="no-referrer" alt="">` : ""}
+      <div><b>${ESCAPED(data.name)}</b><span>${ESCAPED(handleAt)}</span></div>
+    </div>
+    ${text}
+    ${video}
+    ${photos ? `<div class="ppl-photos">${photos}</div>` : ""}
+    ${poll}${card}
+    ${quote}
+    <div class="ppl-counts">\u56DE\u590D ${data.reply.value ?? "\xB7"} \xB7 \u8F6C\u63A8 ${data.retweet.value ?? "\xB7"} \xB7 \u559C\u6B22 ${data.like.value ?? "\xB7"}${data.timeText ? ` \xB7 ${ESCAPED(data.timeText)}` : ""}</div>`;
+  }
+  function previewCss() {
+    const theme = readTheme() === "dark" ? { bg: "#000000", fg: "#e7e9ea", dim: "#71767b", border: "#2f3336" } : { bg: "#ffffff", fg: "#0f1419", dim: "#536471", border: "#eff3f4" };
+    let top = 54;
+    try {
+      const h = document.querySelector('header[role="banner"]')?.getBoundingClientRect().height;
+      if (Number.isFinite(h) && h >= 40 && h <= 80) top = Math.round(h);
+    } catch {
+    }
+    return `
+    #${PREVIEW_ID} {
+      position: fixed; left: 0; top: ${top}px; bottom: 0; width: 52vw;
+      box-sizing: border-box; overflow: hidden; z-index: ${PREVIEW_Z_INDEX};
+      pointer-events: none; background: ${theme.bg}; color: ${theme.fg};
+      border-right: 1px solid ${theme.border}; padding: 16px;
+      font-family: inherit;
+    }
+    #${PREVIEW_ID} .ppl-author { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+    #${PREVIEW_ID} .ppl-avatar { width: 40px; height: 40px; border-radius: 50%; }
+    #${PREVIEW_ID} .ppl-author div { display: flex; flex-direction: column; line-height: 20px; }
+    #${PREVIEW_ID} .ppl-author span { color: ${theme.dim}; font-size: 14px; }
+    #${PREVIEW_ID} .ppl-text { font-size: 15px; line-height: 20px; white-space: pre-wrap; margin-bottom: 10px; }
+    #${PREVIEW_ID} .ppl-photos { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+    #${PREVIEW_ID} .ppl-photo { width: 100%; border-radius: 12px; display: block; }
+    #${PREVIEW_ID} .ppl-video { position: relative; margin-bottom: 10px; border-radius: 12px; overflow: hidden; background: rgba(0,0,0,0.04); }
+    #${PREVIEW_ID} .ppl-poster { width: 100%; display: block; }
+    #${PREVIEW_ID} .ppl-video-note { position: absolute; left: 8px; bottom: 8px; font-size: 12px; line-height: 16px;
+      background: rgba(0,0,0,0.6); color: #fff; border-radius: 4px; padding: 2px 6px; }
+    #${PREVIEW_ID} .ppl-rich { font-size: 13px; line-height: 18px; color: ${theme.dim};
+      border: 1px solid ${theme.border}; border-radius: 12px; padding: 8px 10px; margin-bottom: 10px; }
+    #${PREVIEW_ID} .ppl-quote { border: 1px solid ${theme.border}; border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; font-size: 14px; line-height: 19px; }
+    #${PREVIEW_ID} .ppl-quote-author { color: ${theme.fg}; font-weight: 700; margin-bottom: 2px; }
+    #${PREVIEW_ID} .ppl-counts { font-size: 13px; line-height: 18px; color: ${theme.dim}; }`;
+  }
+  function clearPreview(reason) {
+    if (!P) return;
+    if (P.timer) clearTimeout(P.timer);
+    P.overlay?.remove();
+    document.getElementById(PREVIEW_STYLE_ID)?.remove();
+    P = null;
+    return reason;
+  }
+  function previewOnRouteChange(id) {
+    if (!P) return;
+    if (id === P.statusId) {
+      if (P.phase === "ready") {
+        P.phase = "waiting";
+        if (P.timer) {
+          clearTimeout(P.timer);
+          P.timer = 0;
+        }
+      }
+      return;
+    }
+    if (id || P.phase === "waiting") clearPreview(id ? "route-mismatch" : "route-left");
+  }
+  function previewAdapterHandoff(focusUrlId) {
+    if (!P) return;
+    if (P.statusId !== focusUrlId) {
+      clearPreview("handoff-mismatch");
+      return;
+    }
+    clearPreview("handoff");
+  }
+  function previewAdapterStopped(reason) {
+    if (!P) return;
+    clearPreview(`adapter-${reason}`);
+  }
+  function previewSnapshot() {
+    if (!P) return { active: false, phase: "idle", genSeq };
+    return {
+      active: true,
+      phase: P.phase,
+      statusId: P.statusId,
+      gen: P.gen,
+      overlayConnected: Boolean(P.overlay?.isConnected),
+      timerArmed: P.timer !== 0,
+      mountedAt: P.mountedAt
+    };
+  }
 
   // native-extension/src/layout-adapter/controller.js
   var adapterEnabled = () => true;
@@ -815,6 +973,7 @@ ${article.text}` : article.text;
       s.everActive = true;
       setStateAttr("active");
       mountLayout();
+      previewAdapterHandoff(s.focusUrlId);
       return;
     }
     if (m.type === LAD_UNSUPPORTED) {
@@ -837,11 +996,7 @@ ${article.text}` : article.text;
   function handleAutonomous(m) {
     const s = session;
     const ours = s && m.focusUrlId === s.focusUrlId && typeof m.gen === "number" && m.gen === s.gen;
-    const continuation = !ours && s && s.phase === "active" && s.everActive && m.type === LAD_HEALTH_ACTIVE && m.focusUrlId === s.focusUrlId && typeof m.gen === "number" && m.gen > s.gen;
-    if (continuation) {
-      s.gen = m.gen;
-    }
-    if (!ours && !continuation) {
+    if (!ours) {
       if ((!s || s.phase !== "active") && typeof m.focusUrlId === "string" && m.focusUrlId) {
         sendToMain({ type: LAD_UNINSTALL, nonce: ++nonceSeq, reason: "stale-health-event", focusUrlId: m.focusUrlId });
       }
@@ -870,6 +1025,7 @@ ${article.text}` : article.text;
     s.failReason = reason;
     session = s;
     removeLayout();
+    previewAdapterStopped(reason);
     setStateAttr("failed");
     try {
       document.documentElement.setAttribute(FAILED_ATTR, reason);
@@ -884,6 +1040,7 @@ ${article.text}` : article.text;
     s.phase = "dormant";
     session = s;
     removeLayout();
+    previewAdapterStopped(reason);
     setStateAttr("idle");
   }
   function teardownSession(reason) {
@@ -1186,10 +1343,12 @@ ${article.text}` : article.text;
       const previous = activeStatusId;
       activeStatusId = id;
       if (id) {
+        previewOnRouteChange(id);
         capturePreOpen(id, "route-check");
         removeReader();
         buildReader();
       } else {
+        previewOnRouteChange(null);
         removeReader();
         if (previous && !adapterEnabled()) onReturnToList(previous);
       }
@@ -1229,6 +1388,12 @@ ${article.text}` : article.text;
         }
       }
     } catch {
+    }
+    if (adapterEnabled()) {
+      try {
+        captureClickForPreview(event);
+      } catch {
+      }
     }
     armClickCascade();
   }
@@ -1373,6 +1538,15 @@ ${article.text}` : article.text;
           init: initLayoutAdapter,
           themeDiagnostics
           // P1-C loop-freedom observability
+        },
+        // M2-B2-A preview hook: state machine observability + forced transitions
+        preview: {
+          snapshot: previewSnapshot,
+          clear: () => clearPreview("test-clear"),
+          captureClick: captureClickForPreview,
+          onRouteChange: previewOnRouteChange,
+          handoff: previewAdapterHandoff,
+          stopped: previewAdapterStopped
         }
       };
     }
