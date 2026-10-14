@@ -328,8 +328,9 @@ if (run("lightbox")) {
   const shotLb = `${SHOTS}/lightbox-1-open.png`;
   await page.screenshot({ path: shotLb });
   // the lightbox must paint ABOVE the reader chrome: its own top-left close
-  // control must be the topmost element (skin chrome stays at z 50/51, below
-  // X's layers — a bar above them would swallow the close click)
+  // control must be the topmost element. The skin bar is z-index 1 (above the
+  // sheet contexts) and yields with a CSS-only :has() rule while the lightbox
+  // is open — a bar above it would swallow this close click (measured live).
   const closeProbe = await page.evaluate(() => {
     const b = [...document.querySelectorAll("button,[role=button]")].find((x) => ["关闭", "Close"].includes(x.getAttribute("aria-label") || ""));
     if (!b) return { found: false };

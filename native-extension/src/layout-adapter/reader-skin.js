@@ -19,7 +19,8 @@
 // sampling), and a root-level z-index ≥1 chrome paints over X's #layers and
 // swallows the image lightbox's own close control. So: the canvas (html/body)
 // is dimmed, the card and sheet cells carry their own bright background, and
-// the top bar sits at z-index 0 — above the conversation cells, BELOW #layers.
+// the top bar sits at z-index 1 (above the sheet's stacking contexts) and
+// yields to X's image lightbox via a CSS-only :has() rule while it is open.
 //
 // Two variants share one geometry source:
 //   "floating" (A): inset rounded focal card + dimmed canvas + sheet margins
