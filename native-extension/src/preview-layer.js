@@ -30,6 +30,9 @@
 import { ESCAPED, statusIdFromPath } from "./constants.js";
 import { extractFromArticle } from "./focal-extractor.js";
 import { readTheme } from "./theme-adapter.js";
+// M2-B2-B: preview geometry/palette come from the SAME source as the reader
+// skin, so the handoff swaps content — never layout (pixel-continuous).
+import { skinGeometry, skinPalette } from "./layout-adapter/reader-skin.js";
 
 // The preview waits for X's SPA to commit the navigation it initiated. X
 // commits in the click task itself (first-paint-analysis §Q4); if the URL is
@@ -198,23 +201,24 @@ function previewHtml(data, posterUrl) {
 }
 
 function previewCss() {
-  const theme = readTheme() === "dark"
-    ? { bg: "#000000", fg: "#e7e9ea", dim: "#71767b", border: "#2f3336" }
-    : { bg: "#ffffff", fg: "#0f1419", dim: "#536471", border: "#eff3f4" };
-  // top mirrors the adapter's --peek-lad-top measurement (banner height, 54px
-  // fallback); width matches the fixed focal pane so the handoff moves content,
-  // not layout. pointer-events:none: the preview can never intercept anything.
-  let top = 54;
-  try {
-    const h = document.querySelector('header[role="banner"]')?.getBoundingClientRect().height;
-    if (Number.isFinite(h) && h >= 40 && h <= 80) top = Math.round(h);
-  } catch { /* keep the fallback */ }
+  // M2-B2-B: identical geometry and palette to the skinned focal card —
+  // the overlay IS the card's first face, so the native takeover cannot shift
+  // it by a pixel. pointer-events:none: the preview can never intercept.
+  const theme = skinPalette(readTheme());
+  const g = skinGeometry();
   return `
     #${PREVIEW_ID} {
-      position: fixed; left: 0; top: ${top}px; bottom: 0; width: 52vw;
+      position: fixed;
+      left: ${g.inset}px;
+      top: ${g.topbarH + g.inset}px;
+      bottom: ${g.inset}px;
+      width: calc(52vw - ${g.inset + g.gap}px);
       box-sizing: border-box; overflow: hidden; z-index: ${PREVIEW_Z_INDEX};
-      pointer-events: none; background: ${theme.bg}; color: ${theme.fg};
-      border-right: 1px solid ${theme.border}; padding: 16px;
+      pointer-events: none; background: ${theme.card}; color: ${theme.fg};
+      border: 1px solid ${theme.border};
+      border-radius: ${g.radius}px;
+      box-shadow: ${theme.shadow};
+      padding: 16px;
       font-family: inherit;
     }
     #${PREVIEW_ID} .ppl-author { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }

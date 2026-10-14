@@ -42,6 +42,15 @@ import {
 } from "./constants.js";
 import { readTheme } from "../theme-adapter.js";
 import { focalCellByStatusId } from "../focal-extractor.js";
+import { safeBackTarget } from "../navigation-session.js";
+// M2-B2-B reader skin (visual layer only): floating-card geometry overrides,
+// theme palette for chrome, reader top bar + dim backdrop. Mounted AFTER the
+// functional LAYOUT_CSS so its equal-specificity overrides win; if the skin
+// fails to mount the layout degrades to the verified L4 baseline untouched.
+import {
+  SKIN_THEME_VARS, mountSkinStyle, removeSkinStyle,
+  mountSkinChrome, removeSkinChrome, skinPalette,
+} from "./reader-skin.js";
 // M2-B2-A instant reading preview: the controller owns the two lifecycle
 // moments the preview layer must follow — the verified handoff (overlay and
 // split CSS swap in the same task) and every stop path (no handoff is coming).
@@ -88,8 +97,8 @@ let initialized = false;
 let session = null;
 let nonceSeq = 0;
 let themeObserver = null;
-// P1-C theme bookkeeping
-const THEME_VARS = ["--peek-lad-bg", "--peek-lad-border", "--peek-lad-top"];
+// P1-C theme bookkeeping (M2-B2-B: extended with the skin's chrome palette)
+const THEME_VARS = ["--peek-lad-bg", "--peek-lad-border", "--peek-lad-top", ...SKIN_THEME_VARS];
 let savedInlineVars = null;   // Map var → { value, priority } captured pre-adapter
 let themeSelfWrite = false;   // our own write is being echoed back to the observer
 export const themeStats = { callbacks: 0, writes: 0, skippedWrites: 0, selfEchoDrops: 0 };
@@ -348,13 +357,47 @@ function mountLayout() {
   document.documentElement.setAttribute(HTML_ATTR, "on");
   applyAdapterTheme();
   watchTheme();
+  mountSkin(); // M2-B2-B: visual layer — best-effort, the split works without it
 }
 
 function removeLayout() {
+  removeSkinChrome();
+  removeSkinStyle();
   document.getElementById(STYLE_ID)?.remove();
   document.documentElement.removeAttribute(HTML_ATTR);
   unwatchTheme();
   restoreInlineVars();
+}
+
+// M2-B2-B: the reader skin is a pure visual layer. Style first, chrome second;
+// any failure leaves the functional L4 baseline layout fully intact.
+function mountSkin() {
+  try {
+    mountSkinStyle();
+    mountSkinChrome({ onBack: onSkinBack, onNativeView: releaseToNativeView });
+  } catch {
+    removeSkinChrome();
+    removeSkinStyle();
+  }
+}
+
+// Top bar back: follow session history only when the previous entry is known
+// to be a same-site X page (the R4-verified close rule); otherwise release the
+// enhancement in place — never gamble on an unknown history target.
+function onSkinBack() {
+  try {
+    if (safeBackTarget().back) { history.back(); return; }
+  } catch { /* fall through to the in-place release */ }
+  releaseToNativeView();
+}
+
+// User-facing escape hatch ("原生视图"): release this session's split and skin,
+// leaving X's own single-column detail page. The adapter re-arms on the next
+// navigation (a new detail route starts a fresh session as usual).
+export function releaseToNativeView() {
+  if (!adapterEnabled() || !session) return;
+  teardownSession("native-view");
+  setStateAttr("idle");
 }
 
 // ---------- P1-C: theme mirroring without feedback loops ----------
@@ -401,13 +444,16 @@ function applyAdapterTheme() {
   const theme = readTheme();
   const root = document.documentElement;
   captureInlineVars(); // first write captures the pre-adapter state (values + priorities)
-  if (theme === "dark") {
-    writeRootVar(root, "--peek-lad-bg", "#000000");
-    writeRootVar(root, "--peek-lad-border", "#2f3336");
-  } else {
-    writeRootVar(root, "--peek-lad-bg", "#ffffff");
-    writeRootVar(root, "--peek-lad-border", "#eff3f4");
-  }
+  // one palette source for layout + skin chrome (M2-B2-B); bg/border values
+  // are identical to the pre-skin literals
+  const pal = skinPalette(theme);
+  writeRootVar(root, "--peek-lad-bg", pal.card);
+  writeRootVar(root, "--peek-lad-border", pal.border);
+  writeRootVar(root, "--peek-lad-fg", pal.fg);
+  writeRootVar(root, "--peek-lad-dim", pal.dim);
+  writeRootVar(root, "--peek-lad-hover", pal.hover);
+  writeRootVar(root, "--peek-lad-backdrop", pal.backdrop);
+  writeRootVar(root, "--peek-lad-shadow", pal.shadow);
   // X's own banner height varies slightly by build; measure it, fall back to 54px
   let top = 54;
   try {
