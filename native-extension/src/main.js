@@ -41,6 +41,11 @@ import {
   adapterEnabled, initLayoutAdapter, sessionSnapshot, onDetailRoute, offRoute,
   themeDiagnostics
 } from "./layout-adapter/controller.js";
+// M2-B2-A instant reading preview (lab build only; the default build never calls it)
+import {
+  previewSnapshot, clearPreview, captureClickForPreview,
+  previewOnRouteChange, previewAdapterHandoff, previewAdapterStopped
+} from "./preview-layer.js";
 
 (() => {
   if (window.__peekNativeInstalled) return; // extension-reload idempotency
@@ -98,6 +103,15 @@ import {
         onDetailRoute, offRoute, sessionSnapshot,
         init: initLayoutAdapter,
         themeDiagnostics // P1-C loop-freedom observability
+      },
+      // M2-B2-A preview hook: state machine observability + forced transitions
+      preview: {
+        snapshot: previewSnapshot,
+        clear: () => clearPreview("test-clear"),
+        captureClick: captureClickForPreview,
+        onRouteChange: previewOnRouteChange,
+        handoff: previewAdapterHandoff,
+        stopped: previewAdapterStopped
       }
     };
   }

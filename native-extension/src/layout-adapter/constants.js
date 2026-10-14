@@ -46,5 +46,9 @@ export const LAD_ARTICLE_GONE_MS = 3000;    // article absent longer than this �
 
 // ISOLATED controller timings
 export const LAD_INSTALL_ACK_MS = 1200;     // MAIN world absent/unresponsive → fail, no retry
-export const LAD_INSTALL_RETRY_MS = 250;    // page not ready yet (UNSUPPORTED) → retry
-export const LAD_INSTALL_MAX_ATTEMPTS = 12; // 3s budget per route entry, then dormant
+// M2-B2-A: retries poll for the detail's focal cell, and the split CSS can
+// only mount after it. A 250ms cadence left the unpinned detail visible for up
+// to 250ms before the snap; 60ms bounds that takeover window to ~3 frames.
+// The budget stays 3s (60ms × 50): the detail render itself takes ~1s.
+export const LAD_INSTALL_RETRY_MS = 60;     // page not ready yet (UNSUPPORTED) → retry
+export const LAD_INSTALL_MAX_ATTEMPTS = 50; // 3s budget per route entry, then dormant

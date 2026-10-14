@@ -327,7 +327,7 @@ test("A10 [Review 补证] 内部重装成功 → 同路由自主退出：gen 连
   assert.equal(v2.instance[LAD_KEY], xsNewest, "X's newer method untouched (already-replaced path never clobbers)");
 });
 
-test("A11 [防御纵深] 同焦点更高 gen 的 HEALTH_ACTIVE：控制器收养新代次并继续采信该会话", async () => {
+test("A11 [M2-B2-A S6] 同焦点更高 gen 的 HEALTH_ACTIVE：绝不收养，伪造退出链失效，真实会话仍可靠退出", async () => {
   const { env, poc, sent, focusId, fixture, lad } = makeLabEnv({});
   await env.pushNavigate(`/somebody/status/${focusId}`);
   await realSleep(5);
@@ -335,11 +335,21 @@ test("A11 [防御纵深] 同焦点更高 gen 的 HEALTH_ACTIVE：控制器收养
   env.window.postMessage({ ns: "peek-lad", from: "main", type: "HEALTH_ACTIVE", gen: gen + 1, reqNonce: null, focusUrlId: focusId, note: "reinstalled" }, ORIGIN);
   await realSleep(5);
   assert.equal(stateAttr(env), "active");
-  assert.equal(poc.layoutAdapter.sessionSnapshot().gen, gen + 1, "controller adopted the continuation generation");
-  // the continued session's later notifications must now be honored
-  env.window.postMessage({ ns: "peek-lad", from: "main", type: "HEALTH_ERROR", gen: gen + 1, reqNonce: null, focusUrlId: focusId, reason: "continued-session-exit" }, ORIGIN);
+  assert.equal(poc.layoutAdapter.sessionSnapshot().gen, gen,
+    "M2-B2-A: a higher gen is by definition not this session — no adoption (spoof cannot strand the real session's exit)");
+  // the forged continuation's later exit is foreign to the live session: dropped
+  env.window.postMessage({ ns: "peek-lad", from: "main", type: "HEALTH_ERROR", gen: gen + 1, reqNonce: null, focusUrlId: focusId, reason: "forged-continued-exit" }, ORIGIN);
   await realSleep(5);
-  assert.equal(stateAttr(env), "failed", "continued-session HEALTH_ERROR accepted");
+  assert.equal(stateAttr(env), "active", "forged higher-gen exit never tears a live session down");
+  assert.equal(ladStyle(env), true);
+  assert.equal(sent.filter((m) => m.type === "UNINSTALL" && m.reason === "stale-health-event").length, 0,
+    "an active session is never clobbered by foreign events");
+  // the REAL session keeps exiting reliably through its OWN generation — the
+  // safety property A11 originally guarded, now carried by gen continuity (A10)
+  fixture.virtualizer.instance[LAD_KEY] = function () { return []; };
+  lad.healthTick(); // real shape drift → real self-exit at the real gen
+  await realSleep(5);
+  assert.equal(stateAttr(env), "failed", "real session's own exit is honored");
   assert.equal(ladStyle(env), false);
 });
 

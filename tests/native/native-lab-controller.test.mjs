@@ -157,7 +157,7 @@ test("E4 MAIN world 缺失：ack 超时 → 诚实失败 + 休眠（不再重试
   assert.equal(stateAttr(env), "failed");
 });
 
-test("E5 UNSUPPORTED 有界重试：12 次后休眠，总量有界", async () => {
+test("E5 UNSUPPORTED 有界重试：50 次后休眠，总量有界（M2-B2-A：60ms 节奏收窄接管窗口）", async () => {
   const focusId = makeStatusId();
   const env = makeEnv({ url: `/somebody/status/${focusId}`, src: "lab" });
   const { sent } = installTransport(env);
@@ -165,10 +165,10 @@ test("E5 UNSUPPORTED 有界重试：12 次后休眠，总量有界", async () =>
   env.boot();
   // page never renders the focal cell → every install gets UNSUPPORTED
   await env.pushNavigate(`/somebody/status/${focusId}`);
-  await env.timers.advance(250 * 13);
+  await env.timers.advance(60 * 51);
   await realSleep(5);
   const installs = sent.filter((m) => m.type === "INSTALL");
-  assert.equal(installs.length, 12, "bounded retry budget (contract: 12 attempts)");
+  assert.equal(installs.length, 50, "bounded retry budget (contract: 3s at 60ms)");
   assert.equal(stateAttr(env), "failed");
   assert.equal(failedAttr(env), "focal-cell-not-found");
   assert.equal(ladStyle(env), false);

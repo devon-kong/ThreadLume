@@ -39,6 +39,8 @@ import { buildReader, removeReader, maybeRecover } from "./reader-lifecycle.js";
 // would fight it. Anchor captures stay (inert bookkeeping); restores are gated.
 import { adapterEnabled } from "./layout-adapter/controller.js";
 import { capturePreOpen, onReturnToList, preOpenAnchor } from "./anchor-restore.js";
+// M2-B2-A instant reading preview (lab build only; inert without the adapter)
+import { captureClickForPreview, previewOnRouteChange } from "./preview-layer.js";
 import { applyTheme } from "./theme-adapter.js";
 import { syncRichNote, paneMounted, mountedPane } from "./reader-view.js";
 import * as diagnostics from "./diagnostics.js";
@@ -77,6 +79,7 @@ export function checkRoute() {
     const previous = activeStatusId;
     activeStatusId = id;
     if (id) {
+      previewOnRouteChange(id); // preview confirms its navigation → NATIVE_WAITING
       // entering a detail: cancel any restore still pending from the previous
       // session and re-run the capture as belt-and-braces. capturePreOpen
       // refuses detail-context captures (A2 ownership), so on the committed
@@ -87,6 +90,7 @@ export function checkRoute() {
       removeReader(); // also invalidates any in-flight build for the old post
       buildReader();
     } else {
+      previewOnRouteChange(null); // left the detail a waiting preview pointed at
       removeReader();
       if (previous && !adapterEnabled()) onReturnToList(previous);
     }
@@ -148,6 +152,13 @@ function onCaptureClick(event) {
       }
     }
   } catch { /* anchor capture is best-effort */ }
+  // M2-B2-A: synchronous preview extraction from the clicked cell — runs in
+  // the capture phase, before X's own handler can commit the navigation and
+  // unmount the timeline (the race that made M1-R's fast path a 25% lottery).
+  // Lab build only; the preview never preventDefaults or intercepts.
+  if (adapterEnabled()) {
+    try { captureClickForPreview(event); } catch { /* preview is best-effort */ }
+  }
   armClickCascade();
 }
 
