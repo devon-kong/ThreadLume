@@ -1,6 +1,6 @@
 {
- "generatedAt": "2026-10-14T14:52:30.028Z",
- "buildId": "{\"build\":\"m2a-202610141438-3abb7ea0aa\",\"mode\":\"m2a\"}",
+ "generatedAt": "2026-10-14T15:40:05.563Z",
+ "buildId": "{\"build\":\"m2a-202610141515-3abb7ea0aa\",\"mode\":\"m2a\"}",
  "history": [
   {
    "scenario": "menu",
@@ -8,6 +8,90 @@
    "pass": false,
    "error": "reader was still activating 5s after the direct load (scenario wait, not the product); scenario hardened to poll for the pinned caret and re-run: PASS",
    "at": "2026-10-14T14:43:52.723Z"
+  },
+  {
+   "scenario": "fourposts",
+   "kind": "photos",
+   "pass": false,
+   "error": "did not open with preview",
+   "at": "2026-10-14T15:27:06.513Z"
+  },
+  {
+   "scenario": "fourposts",
+   "kind": "video",
+   "pass": false,
+   "error": "did not open with preview",
+   "at": "2026-10-14T15:27:33.381Z"
+  },
+  {
+   "scenario": "fourposts",
+   "kind": "highcomments",
+   "pass": false,
+   "error": "did not open with preview",
+   "at": "2026-10-14T15:28:24.625Z"
+  },
+  {
+   "scenario": "menu",
+   "kind": null,
+   "pass": false,
+   "error": "menu probe selected a hidden zero-height [role=menu] placeholder (scenario selector artifact, not the product); scenario hardened to poll the VISIBLE menu and now passes",
+   "at": "2026-10-14T15:29:19.813Z"
+  },
+  {
+   "scenario": "fourposts",
+   "kind": "text",
+   "pass": false,
+   "error": "did not open with preview",
+   "at": "2026-10-14T15:34:34.615Z"
+  },
+  {
+   "scenario": "fourposts",
+   "kind": "photos",
+   "pass": false,
+   "error": "did not open with preview",
+   "at": "2026-10-14T15:35:21.261Z"
+  },
+  {
+   "scenario": "fourposts",
+   "kind": "video",
+   "pass": false,
+   "error": "did not open with preview",
+   "at": "2026-10-14T15:35:45.753Z"
+  },
+  {
+   "scenario": "fourposts",
+   "kind": "highcomments",
+   "pass": false,
+   "error": "did not open with preview",
+   "at": "2026-10-14T15:36:35.059Z"
+  },
+  {
+   "scenario": "menu",
+   "kind": null,
+   "pass": false,
+   "error": "menu probe selected a hidden zero-height [role=menu] placeholder (scenario selector artifact, not the product); scenario hardened to poll the VISIBLE menu and now passes",
+   "at": "2026-10-14T15:36:43.995Z"
+  },
+  {
+   "scenario": "fourposts",
+   "kind": "text",
+   "pass": false,
+   "error": "did not open with preview",
+   "at": "2026-10-14T15:38:01.013Z"
+  },
+  {
+   "scenario": "fourposts",
+   "kind": "photos",
+   "pass": false,
+   "error": "did not open with preview",
+   "at": "2026-10-14T15:38:53.187Z"
+  },
+  {
+   "scenario": "fourposts",
+   "kind": "video",
+   "pass": false,
+   "error": "did not open with preview",
+   "at": "2026-10-14T15:39:23.089Z"
   }
  ],
  "records": [
@@ -16,9 +100,9 @@
    "kind": "text",
    "pass": true,
    "preview": {
-    "onFrames": 53,
-    "firstOn": 2698,
-    "lastOn": 3064,
+    "onFrames": 23,
+    "firstOn": 6570,
+    "lastOn": 6701,
     "id": "1760839985715204230",
     "maxLen": 215,
     "pvNow": false,
@@ -205,9 +289,9 @@
    "kind": "highcomments",
    "pass": true,
    "preview": {
-    "onFrames": 44,
-    "firstOn": 2704,
-    "lastOn": 3055,
+    "onFrames": 1,
+    "firstOn": 32902,
+    "lastOn": 32902,
     "id": "2100757389112938573",
     "maxLen": 277,
     "pvNow": false,
@@ -288,7 +372,7 @@
      "exited": true
     },
     "deepScroll": {
-     "ms": 690,
+     "ms": 703,
      "videoStillConnected": true,
      "inFocal": true,
      "timeAdvanced": true,
@@ -328,7 +412,7 @@
   {
    "scenario": "quote",
    "pass": true,
-   "qid": "2110144675705393583",
+   "qid": "2110371840560332855",
    "q": {
     "focal": true,
     "quoteInFocal": true,
@@ -348,7 +432,7 @@
     "onDetail": false,
     "focalLeftover": 0,
     "chromeLeftover": false,
-    "cells": 4
+    "cells": 1
    },
    "pass": true
   },
@@ -450,7 +534,7 @@
    "loops": [
     {
      "i": 1,
-     "target": "2110350920953532708",
+     "target": "2110218024171237413",
      "opened": true,
      "closed": true,
      "readState": {
@@ -458,15 +542,15 @@
       "focalCount": 1,
       "state": "active",
       "split": true,
-      "textLen": 53,
-      "hasVideo": true
+      "textLen": 47,
+      "hasVideo": false
      },
      "preview": {
-      "onFrames": 59,
-      "firstOn": 72,
-      "lastOn": 433,
-      "id": "2110350920953532708",
-      "maxLen": 150,
+      "onFrames": 53,
+      "firstOn": 757,
+      "lastOn": 1050,
+      "id": "2110218024171237413",
+      "maxLen": 126,
       "pvNow": false,
       "pvRect": {
        "x": 16,
@@ -489,7 +573,7 @@
      "after": {
       "onDetail": false,
       "y": 68,
-      "cells": 5,
+      "cells": 4,
       "pvLeftover": false,
       "focalLeftover": 0,
       "chromeLeftover": false
@@ -499,7 +583,7 @@
     },
     {
      "i": 2,
-     "target": "2110350920953532708",
+     "target": "2110218024171237413",
      "opened": true,
      "closed": true,
      "readState": {
@@ -507,15 +591,15 @@
       "focalCount": 1,
       "state": "active",
       "split": true,
-      "textLen": 53,
-      "hasVideo": true
+      "textLen": 47,
+      "hasVideo": false
      },
      "preview": {
       "onFrames": 1,
-      "firstOn": 7111,
-      "lastOn": 7111,
-      "id": "2110350920953532708",
-      "maxLen": 150,
+      "firstOn": 12881,
+      "lastOn": 12881,
+      "id": "2110218024171237413",
+      "maxLen": 126,
       "pvNow": false,
       "pvRect": {
        "x": 16,
@@ -538,7 +622,7 @@
      "after": {
       "onDetail": false,
       "y": 68,
-      "cells": 5,
+      "cells": 4,
       "pvLeftover": false,
       "focalLeftover": 0,
       "chromeLeftover": false
@@ -548,7 +632,7 @@
     },
     {
      "i": 3,
-     "target": "2110350920953532708",
+     "target": "2110218024171237413",
      "opened": true,
      "closed": true,
      "readState": {
@@ -556,15 +640,15 @@
       "focalCount": 1,
       "state": "active",
       "split": true,
-      "textLen": 53,
-      "hasVideo": true
+      "textLen": 47,
+      "hasVideo": false
      },
      "preview": {
       "onFrames": 1,
-      "firstOn": 14166,
-      "lastOn": 14166,
-      "id": "2110350920953532708",
-      "maxLen": 150,
+      "firstOn": 22818,
+      "lastOn": 22818,
+      "id": "2110218024171237413",
+      "maxLen": 126,
       "pvNow": false,
       "pvRect": {
        "x": 16,
@@ -587,7 +671,7 @@
      "after": {
       "onDetail": false,
       "y": 68,
-      "cells": 5,
+      "cells": 4,
       "pvLeftover": false,
       "focalLeftover": 0,
       "chromeLeftover": false
@@ -597,7 +681,7 @@
     },
     {
      "i": 4,
-     "target": "2110350920953532708",
+     "target": "2110218024171237413",
      "opened": true,
      "closed": true,
      "readState": {
@@ -605,15 +689,15 @@
       "focalCount": 1,
       "state": "active",
       "split": true,
-      "textLen": 53,
-      "hasVideo": true
+      "textLen": 47,
+      "hasVideo": false
      },
      "preview": {
       "onFrames": 1,
-      "firstOn": 21231,
-      "lastOn": 21231,
-      "id": "2110350920953532708",
-      "maxLen": 150,
+      "firstOn": 33292,
+      "lastOn": 33292,
+      "id": "2110218024171237413",
+      "maxLen": 126,
       "pvNow": false,
       "pvRect": {
        "x": 16,
@@ -636,7 +720,7 @@
      "after": {
       "onDetail": false,
       "y": 68,
-      "cells": 5,
+      "cells": 4,
       "pvLeftover": false,
       "focalLeftover": 0,
       "chromeLeftover": false
@@ -646,7 +730,7 @@
     },
     {
      "i": 5,
-     "target": "2110350920953532708",
+     "target": "2110218024171237413",
      "opened": true,
      "closed": true,
      "readState": {
@@ -654,15 +738,15 @@
       "focalCount": 1,
       "state": "active",
       "split": true,
-      "textLen": 53,
-      "hasVideo": true
+      "textLen": 47,
+      "hasVideo": false
      },
      "preview": {
       "onFrames": 1,
-      "firstOn": 28364,
-      "lastOn": 28364,
-      "id": "2110350920953532708",
-      "maxLen": 150,
+      "firstOn": 43280,
+      "lastOn": 43280,
+      "id": "2110218024171237413",
+      "maxLen": 126,
       "pvNow": false,
       "pvRect": {
        "x": 16,
@@ -685,7 +769,7 @@
      "after": {
       "onDetail": false,
       "y": 68,
-      "cells": 5,
+      "cells": 4,
       "pvLeftover": false,
       "focalLeftover": 0,
       "chromeLeftover": false
@@ -739,9 +823,9 @@
    "swatches": 2,
    "pass": true,
    "preview": {
-    "onFrames": 63,
-    "firstOn": 2674,
-    "lastOn": 3035,
+    "onFrames": 1,
+    "firstOn": 6620,
+    "lastOn": 6620,
     "id": "1760839985715204230",
     "maxLen": 215,
     "pvNow": false,
@@ -814,11 +898,11 @@
   {
    "scenario": "reload",
    "pass": true,
-   "marker": "{\"build\":\"m2a-202610141438-3abb7ea0aa\",\"mode\":\"m2a\"}",
+   "marker": "{\"build\":\"m2a-202610141515-3abb7ea0aa\",\"mode\":\"m2a\"}",
    "preview": {
-    "onFrames": 61,
-    "firstOn": 2572,
-    "lastOn": 2938,
+    "onFrames": 52,
+    "firstOn": 4090,
+    "lastOn": 4382,
     "id": "1760839985715204230",
     "maxLen": 215,
     "pvNow": false,
@@ -854,9 +938,10 @@
    "pass": true,
    "menu": {
     "open": true,
+    "visibleMenus": 1,
     "rect": {
-     "x": 467,
-     "y": 81,
+     "x": 0,
+     "y": 0,
      "w": 191,
      "h": 440
     },

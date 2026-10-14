@@ -391,19 +391,29 @@ if (run("menu")) {
   let menu = null;
   if (pos) {
     await page.mouse.click(pos.x, pos.y, { label: "打开焦点帖菜单" });
-    await sleep(1500);
-    menu = await page.evaluate(() => {
-      const m = document.querySelector('[role="menu"]');
-      if (!m) return { open: false };
-      const r = m.getBoundingClientRect();
+    // X's DOM can briefly hold a hidden/zero-height [role=menu] placeholder
+    // alongside the real popup — poll for the VISIBLE menu (largest area) and
+    // measure that one.
+    const readMenu = () => page.evaluate(() => {
+      const menus = [...document.querySelectorAll('[role="menu"]')]
+        .map((m) => ({ m, r: m.getBoundingClientRect() }))
+        .filter((x) => x.r.width > 40 && x.r.height > 40);
+      if (!menus.length) return { open: false, menus: document.querySelectorAll('[role="menu"]').length };
+      const best = menus.sort((a, b) => b.r.width * b.r.height - a.r.width * a.r.height)[0];
+      const m = best.m, r = best.r;
       const cx = Math.round(r.x + r.width / 2), cy = Math.round(r.y + r.height / 2);
       const el = document.elementFromPoint(cx, cy);
       return {
-        open: true, rect: { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) },
+        open: true, visibleMenus: menus.length, rect: { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) },
         withinViewport: r.left >= 0 && r.top >= 0 && r.right <= window.innerWidth && r.bottom <= window.innerHeight,
         topmostIsMenu: Boolean(el && (m.contains(el) || el === m)),
       };
     });
+    for (let i = 0; i < 14; i++) {
+      menu = await readMenu();
+      if (menu.open && menu.topmostIsMenu) break;
+      await sleep(400);
+    }
   }
   const shot = `${SHOTS}/menu-1-caret.png`;
   await page.screenshot({ path: shot });
