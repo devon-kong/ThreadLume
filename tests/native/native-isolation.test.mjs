@@ -57,17 +57,21 @@ test("隔离：Native 构建产物目录中不存在 page-bridge.js / vendor/hls
   assert.ok(files.includes("manifest.json"), "manifest.json present");
 });
 
-test("隔离：Native manifest 无 MAIN world 注入、无多余权限、无 web_accessible_resources", () => {
+test("隔离：Native manifest 零多余权限、无 web_accessible_resources、MAIN 注入仅限适配器", () => {
   const manifest = JSON.parse(readFileSync(join(NATIVE_DIST, "manifest.json"), "utf8"));
+  // the ONLY MAIN-world script is the layout adapter (S3 unified build; the
+  // retired M1 contract "no MAIN world at all" no longer applies)
+  const mainEntries = (manifest.content_scripts ?? []).filter((c) => c.world === "MAIN");
+  assert.equal(mainEntries.length, 1, "exactly one MAIN world content script");
+  assert.deepEqual(mainEntries[0].js, ["layout-adapter-main.js"], "MAIN entry is the layout adapter only");
   for (const cs of manifest.content_scripts ?? []) {
-    assert.notEqual(cs.world, "MAIN", "no MAIN world content script");
     assert.ok((cs.js ?? []).every((f) => !/page-bridge/.test(f)), "no page-bridge in the script list");
   }
   assert.ok(!("permissions" in manifest) || (manifest.permissions ?? []).length === 0, "no permissions requested");
   assert.ok(!("host_permissions" in manifest) || (manifest.host_permissions ?? []).length === 0, "no host permissions beyond content-script matches");
   assert.equal(manifest.web_accessible_resources, undefined, "no web accessible resources");
-  assert.equal(manifest.action, undefined, "no popup/action in the M1 native build");
-  assert.equal(manifest.background, undefined, "no service worker in the M1 native build");
+  assert.equal(manifest.action, undefined, "no popup/action in the native build");
+  assert.equal(manifest.background, undefined, "no service worker in the native build");
   assert.ok(manifest.name.includes("Native"), "distinct display name vs Legacy");
   assert.notEqual(manifest.version, "0.8.10", "distinct version vs Legacy");
 });
@@ -104,13 +108,19 @@ test("G9：Native 构建不触碰保留的 Legacy 产物路径（路径守卫）
 test("G9：Native 在缺失 Legacy 桥接全局时功能不失败（离线环境即无桥接）", async () => {
   // Every jsdom boot in this suite runs with NO TuzaiPhosphorIcons, no
   // TuzaiBrandIconDataUrl from the legacy vendor chain (brand icon comes from
-  // the native vendor only, and its absence must be tolerated too).
+  // the native vendor only, and its absence must be tolerated too). In the
+  // unified adapter build the honest behavior is: the adapter session starts,
+  // never touches legacy globals, and — with no MAIN world in this window —
+  // fails closed to X's own single column instead of mounting anything.
   const { makeEnv, makeStatusId, mountCell, buildAuthor, buildTweetText, buildActionBar } = await import("./native-env.mjs");
   const env = makeEnv();
-  env.boot();
+  const poc = env.boot();
+  assert.ok(poc, "boot returns the test hook with zero legacy globals present");
   const id = makeStatusId();
   await env.pushNavigate(`/somebody/status/${id}`);
   mountCell(env, { statusId: id, articleChildren: [buildAuthor(), buildTweetText("正文"), buildActionBar()] });
   await env.timers.advance(1_500);
-  assert.ok(env.pane(), "pane builds with zero legacy globals present");
+  assert.equal(env.pane(), null, "no legacy reading copy and no pane without a MAIN world");
+  assert.equal(env.document.documentElement.getAttribute("data-peek-lad-state"), "failed",
+    "adapter session fails closed honestly (main-unresponsive)");
 });

@@ -51,11 +51,13 @@ test("A1 键盘/程序化导航（无点击无 popstate，Navigation API 静默�
   const before = observedCount(env);
   await env.programmaticNavigate(`/somebody/status/${idA}`); // flush only — no clock advance
   assertInstantNoClock(env, before);
-  // detection is instant; the pane still builds once the DOM hydrates
+  // detection is instant; the adapter session owns the detail route from here
+  // (the M1 reading copy never mounts in the unified build — E1 contract)
   mountCell(env, focalFixture(idA));
   await env.timers.advance(1_500);
-  assert.ok(env.pane(), "reader mounted after late DOM");
-  assert.equal(env.panes(), 1);
+  assert.equal(env.pane(), null, "M1 reading copy never mounts in the unified build");
+  assert.equal(env.document.documentElement.getAttribute("data-peek-lad-state"), "failed",
+    "content-only harness window: the adapter session fails closed honestly");
 });
 
 test("A1 Navigation API 静默时监听器已注册但事件从不到达：title 路径独立兜住", async () => {
@@ -155,7 +157,7 @@ test("A1 Navigation API live（事件可达的未来世界）：事件驱动 + �
   assert.equal(env.navigateListenerCount(), 1);
 });
 
-test("A1 快速 A→B→C 连续切换：单面板、内容跟随最后一次、无重复注册", async () => {
+test("A1 快速 A→B→C 连续切换：观察链唯一、检测持续即时（面板跟随由适配器会话合同覆盖）", async () => {
   const env = makeEnv({ navApi: "silent" });
   const poc = env.boot();
   const [idA, idB, idC] = [makeStatusId(), makeStatusId(), makeStatusId()];
@@ -168,8 +170,7 @@ test("A1 快速 A→B→C 连续切换：单面板、内容跟随最后一次、
   mountCell(env, focalFixture(idC));
   await env.programmaticNavigate(`/third/status/${idC}`);
   await env.timers.advance(1_200);
-  assert.equal(env.panes(), 1, "exactly one pane after rapid switching");
-  assert.equal(env.pane().dataset.statusId, idC, "pane shows the last navigated post");
+  assert.equal(env.pane(), null, "M1 reading copy never mounts in the unified build");
   assert.equal(env.navigateListenerCount(), 1, "navigate listener registered exactly once");
   // title detection still works after the rapid sequence (flush-only, no clock)
   const idD = makeStatusId();
@@ -178,20 +179,24 @@ test("A1 快速 A→B→C 连续切换：单面板、内容跟随最后一次、
   assertInstantNoClock(env, before);
 });
 
-test("A1 路由后 DOM 延迟水合（title 路径）：面板建立一次且不重复", async () => {
+test("A1 路由后 DOM 延迟水合（title 路径）：适配器会话只启动一次，title 杂讯不重触发", async () => {
   const env = makeEnv({ navApi: "silent" });
   env.boot();
   const idA = makeStatusId();
   await env.programmaticNavigate(`/somebody/status/${idA}`);
   await env.timers.advance(3_000);
-  assert.equal(env.panes(), 0, "no pane before the DOM exists");
+  assert.equal(env.pane(), null, "M1 reading copy never mounts in the unified build");
+  assert.equal(env.document.documentElement.getAttribute("data-peek-lad-state"), "failed",
+    "content-only harness window: one honest failed session");
+  // late title churn (X updating unread counts) must not re-run route detection
+  // or restart the adapter session
   mountCell(env, focalFixture(idA));
-  await env.timers.advance(1_500);
-  assert.equal(env.panes(), 1, "exactly one pane after hydration");
-  // late title churn (X updating unread counts) must not remount anything
+  const observedBefore = observedCount(env);
   env.document.querySelector("head > title").textContent = "(2) 某帖 / X";
   await env.timers.advance(1_000);
-  assert.equal(env.panes(), 1, "title churn never double-mounts");
+  assert.equal(observedCount(env), observedBefore, "same-URL title churn is not a route change");
+  assert.equal(env.document.documentElement.getAttribute("data-peek-lad-state"), "failed",
+    "the failed session is not resurrected by title churn");
 });
 
 test("A1 <title> 元素被整体替换：观察者自愈，后续变更仍即时", async () => {

@@ -1,5 +1,5 @@
 // M2-B2-A S1/S2 tests — the instant reading preview, exercised through the
-// REAL built lab artifacts (MAIN + ISOLATED worlds sharing one jsdom window):
+// REAL built artifacts (MAIN + ISOLATED worlds sharing one jsdom window):
 //
 //   S1-C invariants: exactly one preview overlay at any time, identity always
 //   equals the clicked/target status id, handoff removes the overlay in the
@@ -350,17 +350,18 @@ test("P11 视频帖预览：静态海报 + 明确标注，绝不复制 video 节
   assert.equal(env.document.querySelectorAll("video").length, 1, "X's own player untouched");
 });
 
-test("P12 默认构建（M1-R）绝不产生预览", async () => {
+test("P12 统一默认构建就是预览构建（单一产物规则）", async () => {
+  // S3 unification: src:"default" and src:"lab" boot the SAME preview-capable
+  // artifact. The retired M1 contract "default build never previews" inverted.
   const env = makeEnv({ url: "/home", src: "default" });
-  env.boot(); // nativeSource — adapter compiled out
+  env.boot(); // nativeSource — the unified build
   const focusId = makeStatusId();
   const { tsLink } = mountListCell(env, focusId);
 
   clickEl(env, tsLink);
 
-  assert.equal(env.document.getElementById(PREVIEW_ID), null, "no preview in the default build");
-  assert.equal(env.document.getElementById(PREVIEW_STYLE_ID), null);
-  assert.equal(env.poc.preview.snapshot().active, false);
+  assert.ok(env.document.getElementById(PREVIEW_ID), "the default build mounts the preview");
+  assert.equal(env.poc.preview.snapshot().active, true);
 });
 
 test("P13 适配器停止钩子清理 READY 预览（dormant/失败同规则）", async () => {

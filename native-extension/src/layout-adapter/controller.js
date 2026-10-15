@@ -8,8 +8,8 @@
 // reading copy, never retries past its bounded budget, and never mutates
 // body/html overflow (X's virtual scroll position must survive).
 //
-// The whole module is inert unless the build-time experimental flag
-// __PEEK_LAYOUT_ADAPTER__ is true (default build: every entry point no-ops).
+// The whole module is active in the unified build (the build-time define
+// __PEEK_LAYOUT_ADAPTER__ is always true since the S3 unification).
 //
 // M2-B1-R changes:
 //   P0-A  message contract split. Request responses (ACTIVE/UNSUPPORTED/

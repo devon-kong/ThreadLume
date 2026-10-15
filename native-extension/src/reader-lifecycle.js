@@ -20,8 +20,8 @@ import { renderPane, updatePaneInPlace, setRichScanWindow, mountStyle, removePan
 import { watchTheme, unwatchTheme } from "./theme-adapter.js";
 import { cancelRestore } from "./anchor-restore.js";
 import { onAction, clearOwnedTimeouts } from "./native-interaction.js";
-// M2-B1 experimental layout adapter (inert unless the build flag is on):
-// detail routes are handed to the native split instead of the reading copy.
+// Native layout adapter: detail routes are handed to the native split instead
+// of the reading copy (the adapter define is always on in the unified build).
 import { adapterEnabled, onDetailRoute, offRoute } from "./layout-adapter/controller.js";
 import * as diagnostics from "./diagnostics.js";
 
@@ -46,7 +46,7 @@ export const currentGen = () => gen;
 export async function buildReader() {
   const focalId = statusIdFromPath();
   if (!focalId) return;
-  // M2-B1 experimental mode: no reading copy — the native split is the reader.
+  // Adapter mode: no reading copy — the native split is the reader.
   // A failed adapter falls back to X's native single column, never to this pane.
   if (adapterEnabled()) {
     onDetailRoute(focalId);

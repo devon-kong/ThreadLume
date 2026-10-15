@@ -55,14 +55,14 @@ test("B3-live：NAV_API 存在但 navigate 事件不投递（真实 Chrome 行�
   assert.equal(anchor.top, 450);
 });
 
-test("B3-live：点击捕获 → 打开 → 关闭返回 → 一次微调恢复（端到端，NAV_API 配置）", async () => {
+test("B3-live：点击捕获 → 打开 → 返回列表 → 零程序化滚动（端到端，NAV_API 配置）", async () => {
   const { nav } = fakeNavigation({
     entries: ["https://x.com/gefei55", "https://x.com/gefei55/status/1"],
     index: () => 1,
   });
   const env = makeEnv({ url: "/gefei55" });
   env.window.navigation = nav;
-  env.boot();
+  const poc = env.boot();
   const idA = makeStatusId();
   const { cell } = buildCell(focalFixture(idA));
   cell.getBoundingClientRect = () => ({ top: 450, bottom: 650, height: 200 });
@@ -70,25 +70,18 @@ test("B3-live：点击捕获 → 打开 → 关闭返回 → 一次微调恢复�
   await env.clickLink(`/gefei55/status/${idA}`);
   env.location.pathname = `/gefei55/status/${idA}`;
   env.location.href = `https://x.com/gefei55/status/${idA}`;
-  await env.timers.advance(1_200); // route + pane build
-  assert.ok(env.pane(), "pane built");
-  // close: ✕ → entries() says previous is same-site → history.back
-  env.pane().querySelector(".peek-native-close").click();
+  await env.timers.advance(1_200); // route + adapter session start
+  assert.ok(poc.preOpenAnchor(), "anchor captured end-to-end by the click listener");
+  await env.navigate("/gefei55"); // the return to the list
   await env.timers.flushMicrotasks();
-  assert.equal(env.history._backCalls, 1, "navapi-same-site-entry close decision");
-  await env.navigate("/gefei55"); // the browser completes the back
-  await env.timers.flushMicrotasks();
-  // X re-anchors: cell lands 151px off
+  // X re-anchors: cell lands 151px off. The unified build owns NO correction —
+  // X's own scroll restoration owns the list return (restore path dormant).
   env.scroll.y = 2000;
   cell.getBoundingClientRect = () => ({ top: 299, bottom: 499, height: 200 });
-  await env.timers.advance(700); // settle + one adjustment
-  assert.equal(env.scroll.y, 1849, "one scrollBy(0, -151) applied");
-  assert.equal(poc_diag(env).anchor?.applied, true);
+  await env.timers.advance(3_000); // past the would-be settle + restore window
+  assert.equal(env.scroll.y, 2000, "no scrollBy competes with X's own restoration");
+  assert.equal(poc.restoreActive(), false, "no restore armed in adapter mode");
 });
-
-function poc_diag(env) {
-  return env.poc.diag();
-}
 
 test("B3-live：detail→detail 点击不重置锚点（点击捕获仅限列表页发起）", async () => {
   const { nav } = fakeNavigation({

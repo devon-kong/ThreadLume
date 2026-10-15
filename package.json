@@ -5,20 +5,19 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/DoraRabbitYan/peek.git"
+    "url": "https://github.com/devon-kong/peek-exploration.git"
   },
   "bugs": {
-    "url": "https://github.com/DoraRabbitYan/peek/issues"
+    "url": "https://github.com/devon-kong/peek-exploration/issues"
   },
-  "homepage": "https://github.com/DoraRabbitYan/peek#readme",
+  "homepage": "https://github.com/devon-kong/peek-exploration#readme",
   "type": "module",
   "scripts": {
-    "build": "npm run build:current",
-    "build:current": "npm run build:native:lab",
+    "build": "npm run build:native",
+    "build:current": "npm run build:native",
     "build:native": "node scripts/build-extension-native.mjs",
-    "build:native:lab": "PEEK_LAYOUT_ADAPTER=1 node scripts/build-extension-native.mjs",
     "test": "npm run test:native",
-    "test:native": "npm run build:native && npm run build:native:lab && node --test tests/native/*.test.mjs",
+    "test:native": "npm run build && node --test tests/native/*.test.mjs",
     "test:r3-r": "node --test exploration-poc/r3/r3-poc-units.test.mjs exploration-poc/r3-r/tests/*.test.mjs"
   },
   "devDependencies": {

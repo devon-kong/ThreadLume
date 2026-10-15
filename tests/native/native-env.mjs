@@ -1,6 +1,6 @@
-// Shared offline harness for the Peek Native (M1) extension — M1-E test suite.
+// Shared offline harness for the Peek Native extension.
 // Executes the REAL BUILT ARTIFACT (dist-extension-native/content.js, produced
-// by `npm run build:native`) against a jsdom document with:
+// by `npm run build`) against a jsdom document with:
 //   - an innerText approximation (jsdom 30 does not implement innerText;
 //     the polyfill mirrors the layout rule our fixtures rely on: block-level
 //     elements separate lines, inline elements concatenate),
@@ -15,8 +15,12 @@ import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 
 const here = dirname(fileURLToPath(import.meta.url));
+// S3 unification (2026-10-15): ONE product artifact. NATIVE_LAB_DIST and the
+// makeEnv src:"lab" selector remain only as historical aliases that resolve to
+// the same unified dist-extension-native/ build; they must never point anywhere
+// else again.
 export const NATIVE_DIST = resolve(here, "..", "..", "dist-extension-native");
-export const NATIVE_LAB_DIST = resolve(here, "..", "..", "dist-extension-native-lab");
+export const NATIVE_LAB_DIST = NATIVE_DIST;
 
 let bundledSource = null;
 export function nativeSource() {
@@ -24,32 +28,24 @@ export function nativeSource() {
     try {
       bundledSource = readFileSync(join(NATIVE_DIST, "content.js"), "utf8");
     } catch {
-      throw new Error("dist-extension-native/content.js not found — run `npm run build:native` first");
+      throw new Error("dist-extension-native/content.js not found — run `npm run build` first");
     }
   }
   return bundledSource;
 }
 
-// M2-B1 lab artifacts (experimental build; produced by `npm run build:native:lab`)
-let labBundledSource = null;
+// Historical alias: the unified build IS the former lab build (S3).
 export function labSource() {
-  if (!labBundledSource) {
-    try {
-      labBundledSource = readFileSync(join(NATIVE_LAB_DIST, "content.js"), "utf8");
-    } catch {
-      throw new Error("dist-extension-native-lab/content.js not found — run `npm run build:native:lab` first");
-    }
-  }
-  return labBundledSource;
+  return nativeSource();
 }
 
 let mainWorldBundledSource = null;
 export function mainWorldSource() {
   if (!mainWorldBundledSource) {
     try {
-      mainWorldBundledSource = readFileSync(join(NATIVE_LAB_DIST, "layout-adapter-main.js"), "utf8");
+      mainWorldBundledSource = readFileSync(join(NATIVE_DIST, "layout-adapter-main.js"), "utf8");
     } catch {
-      throw new Error("dist-extension-native-lab/layout-adapter-main.js not found — run `npm run build:native:lab` first");
+      throw new Error("dist-extension-native/layout-adapter-main.js not found — run `npm run build` first");
     }
   }
   return mainWorldBundledSource;
@@ -125,6 +121,9 @@ export function makeTimers(clock) {
 //     the close decision exercises its trail fallback, same as live.
 //   - "live": same object; tests may dispatchNavigate() to deliver events.
 export function makeEnv({ url = "/home", html, navApi = "absent", src = "default" } = {}) {
+  // `src` is a historical selector: "default" and "lab" both boot the SAME
+  // unified artifact since the S3 unification. It is kept so existing suites
+  // read naturally; new tests should omit it.
   if (!html) html = '<!doctype html><html><head><title>Home / X</title></head><body></body></html>';
   const dom = new JSDOM(html, { url: "https://x.com" + url });
   const { window } = dom;

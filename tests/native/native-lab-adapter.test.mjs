@@ -1,5 +1,5 @@
 // M2-B1 S2 tests — the MAIN-world layout adapter CORE, executed as the REAL
-// built artifact (dist-extension-native-lab/layout-adapter-main.js).
+// built artifact (dist-extension-native/layout-adapter-main.js).
 // Contract: docs/m2-b1/adapter-contract.md. The fake virtualizer mirrors the
 // probe-verified X shape: method on the prototype, _cells Map keyed by item id,
 // props.list as the source of truth, rendered entries {item, offset, visible}.

@@ -34,12 +34,12 @@ import {
   markPendingTraverse, consumePendingTraverse
 } from "./navigation-session.js";
 import { buildReader, removeReader, maybeRecover } from "./reader-lifecycle.js";
-// M2-B1: in the experimental build the user browses natively (no reader close
+// M2-B1: in the adapter build the user browses natively (no reader close
 // path), so X's own scroll restoration owns list returns — our correction
 // would fight it. Anchor captures stay (inert bookkeeping); restores are gated.
 import { adapterEnabled } from "./layout-adapter/controller.js";
 import { capturePreOpen, onReturnToList, preOpenAnchor } from "./anchor-restore.js";
-// M2-B2-A instant reading preview (lab build only; inert without the adapter)
+// M2-B2-A instant reading preview (wired in every unified build; inert without the adapter)
 import { captureClickForPreview, previewOnRouteChange } from "./preview-layer.js";
 import { applyTheme } from "./theme-adapter.js";
 import { syncRichNote, paneMounted, mountedPane } from "./reader-view.js";
@@ -164,7 +164,7 @@ function onCaptureClick(event) {
   // M2-B2-A: synchronous preview extraction from the clicked cell — runs in
   // the capture phase, before X's own handler can commit the navigation and
   // unmount the timeline (the race that made M1-R's fast path a 25% lottery).
-  // Lab build only; the preview never preventDefaults or intercepts.
+  // The preview never preventDefaults or intercepts.
   if (adapterEnabled()) {
     try { captureClickForPreview(event); } catch { /* preview is best-effort */ }
   }

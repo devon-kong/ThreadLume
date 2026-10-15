@@ -8,8 +8,8 @@
 //   - an array marker (conflict) when a second Peek build injects too,
 //   - absent for "no extension" (native) sampling.
 // These tests pin the prologue semantics AND the built artifacts' identity:
-// the lab build always carries its marker (mode m2a); the default carrier is
-// pristine unless explicitly built with PEEK_BUILD_DIAG=1.
+// the unified build (S3) always carries its marker (mode m2a) — the
+// "pristine default carrier" rule retired together with the M1 carrier.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -85,22 +85,22 @@ test("P6: the built LAB artifact carries its identity marker (mode m2a)", () => 
   assert.match(payload.build, /^m2a-\d{12}-[0-9a-f]{10}$/);
 });
 
-test("P7: the pristine DEFAULT carrier carries no identity marker (test-builds-only rule)", () => {
+test("P7: the unified DEFAULT build carries its identity marker (single-artifact rule)", () => {
   const src = readDefault();
-  // The default build is only allowed a marker when explicitly built as a
-  // measurement copy (PEEK_BUILD_DIAG=1); the committed carrier is pristine.
-  // The source-level diag probes stay as `if (false)` blocks (esbuild inlines
-  // defines but does not dead-code-eliminate unminified output) — runtime
-  // inertness is pinned by P8 and behaviorally by native-preview-mount-failure
-  // test M4.
-  assert.ok(!src.includes("data-peek-artifact"), "default build must not stamp the marker");
-  assert.ok(!src.includes("Artifact identity"), "default build must not run the stamping prologue");
+  // S3 unification: there is no pristine carrier anymore. The one default
+  // build is the measurement-recognizable build (former lab contract). Pinned
+  // via BOTH historical path constants so reintroducing a second, unstamped
+  // default artifact would fail here.
+  assert.ok(src.includes("data-peek-artifact"), "default build must stamp the marker");
+  const match = src.match(/var mark = (\{[^}]+\});/);
+  assert.ok(match, "marker payload literal present");
+  assert.equal(JSON.parse(match[1]).mode, "m2a");
 });
 
-test("P8: diag probes compile out in the default bundle (define inlined, then eliminated)", () => {
+test("P8: the diag define is always inlined, never left as a runtime identifier", () => {
   const src = readDefault();
-  // esbuild inlines `__PEEK_DIAG_STAMPS__` to `false` and drops the dead
-  // blocks; what must never survive is the bare identifier (a runtime
-  // ReferenceError risk) or an armed stamp.
+  // esbuild inlines `__PEEK_DIAG_STAMPS__` (always "true" in the unified
+  // build); what must never survive is the bare identifier (a runtime
+  // ReferenceError risk).
   assert.ok(!/if\s*\(\s*__PEEK_DIAG_STAMPS__/.test(src), "define must be inlined, not left as an identifier");
 });

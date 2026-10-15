@@ -13,8 +13,9 @@
 //   - The marker is diagnostic bookkeeping, never an authentication token:
 //     a page script can trivially rewrite it, so nothing security-relevant
 //     may ever gate on it.
-// Only test builds carry the prologue: lab builds always, the default build
-// only with PEEK_BUILD_DIAG=1 (measurement copies), never a pristine carrier.
+// Only the unified product build carries the prologue (it replaced the lab
+// build in the S3 unification and is always a recognizable measurement
+// target); the build script prepends it before any bundle code runs.
 import { createHash } from "node:crypto";
 
 // Build id: mode tag + build timestamp + content hash of the exact bundle
@@ -25,9 +26,8 @@ export function buildIdFor(mode, bundledContentJs) {
   return `${mode}-${stamp}-${hash}`;
 }
 
-// The exact prologue text prepended to content.js. Kept as one string so the
-// build script and the post-hoc stamping tool (scripts/stamp-artifact.mjs)
-// emit byte-identical markers for the same { buildId, mode }.
+// The exact prologue text prepended to content.js, kept as one string so the
+// build script emits it byte-identically for the same { buildId, mode }.
 export function artifactPrologue(buildId, mode) {
   const payload = JSON.stringify({ build: buildId, mode });
   return `// Peek artifact diagnostics (test builds only): non-sensitive build identity

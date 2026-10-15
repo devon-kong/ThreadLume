@@ -1,4 +1,4 @@
-/* Peek Native (M1) — left reading pane + native replies column.
+/* Peek Native — left reading pane + native replies column.
    Colors come from CSS custom properties set per theme by content.js (applyTheme). */
 #peek-native-pane {
   position: fixed;

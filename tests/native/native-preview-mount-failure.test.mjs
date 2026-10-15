@@ -105,11 +105,14 @@ test("M3: successful mounts stamp data-peek-mount-at (diag build only)", () => {
   assert.equal(env.poc.preview.snapshot().active, true);
 });
 
-test("M4: the default (non-diag) build stamps no probes", () => {
+test("M4: the unified default build stamps the same diag probes (single-artifact rule)", () => {
+  // S3 unification: src:"default" and src:"lab" boot the SAME diag-stamped
+  // artifact. Pinned through the default selector so reintroducing a
+  // second, unstamped default build would fail here.
   const env = makeEnv({ url: "/home", src: "default" });
   env.boot();
   const { tsLink } = mountListCell(env, makeStatusId());
   tsLink.dispatchEvent(new env.window.MouseEvent("click", { bubbles: true, cancelable: true }));
-  assert.equal(env.document.documentElement.getAttribute("data-peek-capture-at"), null,
-    "no capture probe in the default build");
+  assert.ok(env.document.documentElement.getAttribute("data-peek-capture-at"),
+    "the default build IS the diag build — capture probe present");
 });

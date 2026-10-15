@@ -1,6 +1,6 @@
 // Peek M2-B1 — layout adapter shared constants (MAIN + ISOLATED worlds).
-// Contract: docs/m2-b1/adapter-contract.md. Experimental build only
-// (__PEEK_LAYOUT_ADAPTER__ define); the default M1-R build never registers it.
+// Contract: docs/m2-b1/adapter-contract.md. Registered by the unified build
+// (__PEEK_LAYOUT_ADAPTER__ define is always on).
 
 // window.postMessage namespace. BOTH worlds see every message event on the
 // shared window (including their own), so `from` disambiguates direction.

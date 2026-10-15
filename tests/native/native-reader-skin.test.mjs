@@ -2,7 +2,7 @@
 // brand-free top bar, X app-bar tagging, safe-back / native-view release paths,
 // theme palette vars, and preview↔skin geometry-source equality.
 //
-// Both worlds run as REAL built artifacts (dist-extension-native-lab) sharing
+// Both worlds run as REAL built artifacts (dist-extension-native) sharing
 // one jsdom window, exactly like MAIN + ISOLATED content scripts on a page.
 // jsdom has no layout engine: structural facts (nodes, attributes, CSS text,
 // restore) are asserted here; pixel geometry is verified live in S3.

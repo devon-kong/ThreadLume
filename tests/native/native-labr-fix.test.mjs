@@ -1,5 +1,6 @@
 // M2-B1-R targeted regression tests — the four defect classes from the round
-// directive, exercised against the REAL built lab artifacts:
+// directive, exercised against the REAL built artifacts (the unified
+// dist-extension-native build, MAIN + ISOLATED sharing one window):
 //   A  P0-A message protocol: request/response vs autonomous HEALTH_* family,
 //      session correlation { gen, focusUrlId }, ACTIVE integrity check, and
 //      the headline fix: a MAIN-world self-exit MUST reach the ISOLATED

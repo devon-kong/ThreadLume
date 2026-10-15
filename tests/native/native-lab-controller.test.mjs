@@ -1,5 +1,5 @@
 // M2-B1 S2/S3 tests — the ISOLATED controller integrated with the MAIN-world
-// adapter, both as REAL built artifacts (dist-extension-native-lab) sharing one
+// adapter, both as REAL built artifacts (dist-extension-native) sharing one
 // jsdom window, exactly like MAIN + ISOLATED content scripts on a real page.
 //
 // Transport note: jsdom's postMessage leaves event.origin/source empty, so the

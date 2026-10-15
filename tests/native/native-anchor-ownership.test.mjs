@@ -1,22 +1,18 @@
-// M1-R A2 — reading-anchor capture ownership & lifecycle.
+// Reading-anchor capture ownership — S3 adaptation (2026-10-15).
 //
-// M1 left one hole: capturePreOpen overwrote the recorded list anchor on any
-// later call, including route-check calls that run AFTER the URL already
-// committed to a detail page. On a detail page the "cell" found for the focal
-// id is the detail page's own copy — capturing there overwrites the true list
-// origin with a meaningless position (reproducible through a non-status
-// detour like /search: list → A → /search → B, where B's entry re-captures).
-//
-// Ownership rules under test:
-//   - detail-context captures are REFUSED (never overwrite anything);
-//   - only a new legal list-context capture replaces an anchor;
-//   - a restore's terminal state CONSUMES the anchor (no stale reuse);
-//   - a keyboard re-open with no anchor restores nothing (never guesses).
+// The ownership rules are LIVE in the unified C1-R build: capturePreOpen runs
+// on every pre-commit click / route entry, refuses detail-context captures,
+// and lets only a new legal list-context capture replace the stored anchor.
+// What retired with the M1 carrier is the restore EXECUTION and its
+// "terminal state consumes the anchor" bookkeeping (restores are never armed
+// in adapter mode — X's own scroll restoration owns list returns). Those
+// scenarios now assert the unified-build semantics: the anchor survives as
+// inert bookkeeping until a legal capture replaces it, and no return path
+// ever scrolls programmatically.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  makeEnv, makeStatusId, mountCell, buildCell, buildAuthor, buildTweetText,
-  buildActionBar,
+  makeEnv, makeStatusId, buildCell, buildAuthor, buildTweetText, buildActionBar,
 } from "./native-env.mjs";
 
 function focalFixture(statusId, text = "焦点帖正文") {
@@ -29,7 +25,7 @@ async function openFromList(env, statusId, { preTop = 450 } = {}) {
   env.document.body.appendChild(cell);
   await env.pushNavigate(`/somebody/status/${statusId}`);
   await env.timers.advance(1_200);
-  return { pane: env.pane(), cell };
+  return { cell };
 }
 
 test("A2 列表捕获带来源标记：click-precommit", async () => {
@@ -45,36 +41,33 @@ test("A2 列表捕获带来源标记：click-precommit", async () => {
 
 test("A2 复现链 列表→A→/search→B：非 status 中转合法结束会话，B 的详情位置绝不入库", async () => {
   const env = makeEnv();
-  env.boot();
+  const poc = env.boot();
   const idA = makeStatusId();
   const idB = makeStatusId();
   await openFromList(env, idA, { preTop: 450 });
-  assert.equal(env.poc.preOpenAnchor().statusId, idA);
+  assert.equal(poc.preOpenAnchor().statusId, idA);
 
-  // X pushes a non-status route (search): the A session ends; the return-to-
-  // list restore arms and its bounded window terminates (in real X the
-  // timeline is unmounted here; the fixture's remnant cell settles in
-  // threshold — either terminal state consumes the anchor legitimately)
+  // X pushes a non-status route (search). In adapter mode no restore arms and
+  // the list return never scrolls; the anchor stays as inert bookkeeping.
   env.location.pathname = "/search";
   env.location.href = "https://x.com/search";
-  await env.timers.advance(2_100);
-  await env.timers.advance(3_000);
-  assert.equal(env.poc.restoreActive(), false, "restore window closed by itself");
-  assert.equal(env.poc.preOpenAnchor(), null, "session consumed at its terminal state");
+  await env.timers.advance(5_100);
+  assert.equal(poc.restoreActive(), false, "no restore ever arms in adapter mode");
+  assert.equal(env.scroll.y, 0, "no programmatic correction on the search page");
 
-  // a search result opens B. M1's unconditional capture would have STORED
-  // B's detail-page position as a fresh garbage anchor here (repro of the
-  // overwrite mechanism); the ownership rule refuses any detail-context
-  // capture — no anchor is invented for B.
+  // a search result opens B (no click → no pre-commit capture). M1's
+  // unconditional route-check capture would have STORED B's detail-page
+  // position as a fresh garbage anchor here; the ownership rule refuses any
+  // detail-context capture.
   const { cell: cellB } = buildCell(focalFixture(idB));
   cellB.getBoundingClientRect = () => ({ top: 99, bottom: 299, height: 200 }); // detail-position bait
   env.document.body.appendChild(cellB);
   env.location.pathname = `/other/status/${idB}`;
   env.location.href = `https://x.com/other/status/${idB}`;
   await env.timers.advance(2_100);
-  assert.equal(env.poc.preOpenAnchor(), null, "no garbage anchor from the detail page");
+  assert.equal(poc.preOpenAnchor().statusId, idA, "detail-context capture refused — the list anchor survives untouched");
 
-  // closing B returns to /search: nothing to restore → no scrolling at all
+  // closing B back to /search: nothing to restore → no scrolling at all
   env.scroll.y = 1_500;
   await env.timers.advance(3_000);
   assert.equal(env.scroll.y, 1_500, "no guess-based correction on the search page");
@@ -93,119 +86,63 @@ test("A2 详情页直接调用 capturePreOpen（route-check 语义）：绝不�
   assert.equal(refused.top, 450, "refusal keeps the list anchor, not the detail position");
 });
 
-test("A2 浏览器前进直接进入详情（无点击）：无锚点，关闭不做任何滚动猜测", async () => {
+test("A2 浏览器前进直接进入详情（无点击）：无锚点，返回不做任何滚动猜测", async () => {
   const env = makeEnv();
   env.boot();
   const idA = makeStatusId();
   // popstate into a detail (forward button) — no click capture ever ran
   await env.navigate(`/somebody/status/${idA}`);
-  mountCell(env, focalFixture(idA));
   await env.timers.advance(1_500);
   assert.equal(env.poc.preOpenAnchor(), null, "no anchor without a pre-commit capture");
-  env.pane().querySelector(".peek-native-close").click();
-  await env.timers.flushMicrotasks();
+  // returning to a list never arms anything and never scrolls
   await env.navigate("/home");
   env.scroll.y = 800;
   await env.timers.advance(3_000);
   assert.equal(env.scroll.y, 800, "native behavior untouched");
 });
 
-test("A2 restore 终态消费锚点（adjusted）：随后的键盘重开不再复用旧位置", async () => {
-  const env = makeEnv();
-  env.boot();
-  const idA = makeStatusId();
-  const { cell } = await openFromList(env, idA, { preTop: 450 });
-  env.pane().querySelector(".peek-native-close").click();
-  await env.timers.flushMicrotasks();
-  await env.navigate("/home");
-  await env.timers.flushMicrotasks();
-  cell.getBoundingClientRect = () => ({ top: 300, bottom: 500, height: 200 });
-  await env.timers.advance(700);
-  assert.equal(env.scroll.y, -150, "restore applied normally");
-  assert.equal(env.poc.preOpenAnchor(), null, "anchor consumed by the terminal restore");
-
-  // keyboard re-open of the same post (no click → no capture) after the user
-  // scrolled elsewhere: closing restores NOTHING instead of guessing
-  cell.getBoundingClientRect = () => ({ top: 60, bottom: 260, height: 200 });
-  await env.programmaticNavigate(`/somebody/status/${idA}`);
-  await env.timers.advance(1_200);
-  env.pane().querySelector(".peek-native-close").click();
-  await env.timers.flushMicrotasks();
-  await env.navigate("/home");
-  env.scroll.y = 5_000;
-  await env.timers.advance(3_000);
-  assert.equal(env.scroll.y, 5_000, "no stale-anchor correction for a keyboard re-open");
-});
-
-test("A2 restore 终态消费锚点（within-threshold / window-expired / user-input）", async () => {
-  // within-threshold
+test("A2（适配器模式）锚点是惰性记账：无终态消费，仅合法新捕获替换", async () => {
+  // Collapses the retired restore-terminal-consumption scenarios (adjusted /
+  // within-threshold / window-expired / user-input): none of those states can
+  // occur in adapter mode, so the anchor persists until a LEGAL new capture.
   {
     const env = makeEnv();
-    env.boot();
-    const idA = makeStatusId();
-    const { cell } = await openFromList(env, idA, { preTop: 450 });
-    env.pane().querySelector(".peek-native-close").click();
-    await env.timers.flushMicrotasks();
-    await env.navigate("/home");
-    await env.timers.flushMicrotasks();
-    cell.getBoundingClientRect = () => ({ top: 430, bottom: 630, height: 200 }); // 20px off
-    await env.timers.advance(700);
-    assert.equal(env.poc.preOpenAnchor(), null, "within-threshold also consumes");
-  }
-  // window-expired
-  {
-    const env = makeEnv();
-    env.boot();
-    const idA = makeStatusId();
-    const { cell } = await openFromList(env, idA, { preTop: 450 });
-    env.pane().querySelector(".peek-native-close").click();
-    await env.timers.flushMicrotasks();
-    await env.navigate("/home");
-    await env.timers.flushMicrotasks();
-    cell.remove(); // virtualizer dropped the cell — window expires
-    await env.timers.advance(3_000);
-    assert.equal(env.poc.preOpenAnchor(), null, "window-expired consumes");
-  }
-  // user-input cancel
-  {
-    const env = makeEnv();
-    env.boot();
+    const poc = env.boot();
     const idA = makeStatusId();
     await openFromList(env, idA, { preTop: 450 });
-    env.pane().querySelector(".peek-native-close").click();
+    await env.navigate("/home"); // return: no restore, no consumption
     await env.timers.flushMicrotasks();
+    const cell = env.document.querySelector('[data-testid="cellInnerDiv"]');
+    cell.getBoundingClientRect = () => ({ top: 300, bottom: 500, height: 200 });
+    await env.timers.advance(3_000); // past any would-be restore window
+    assert.equal(poc.preOpenAnchor()?.statusId, idA, "anchor survives as inert bookkeeping");
+    assert.equal(env.scroll.y, 0, "no restore-side scrolling");
+    // user input (the old cancel trigger) changes nothing either
+    env.window.dispatchEvent(new env.window.Event("wheel"));
+    await env.timers.advance(500);
+    assert.equal(poc.preOpenAnchor()?.statusId, idA, "no cancel-consumption without a restore session");
+    // a keyboard re-open of the same post (detail-context) still never overwrites
+    await env.programmaticNavigate(`/somebody/status/${idA}`);
+    await env.timers.advance(1_200);
+    assert.equal(poc.preOpenAnchor()?.statusId, idA, "detail-context refusal keeps the anchor");
+  }
+  // a new LEGAL list-context capture is the only thing that replaces it
+  {
+    const env = makeEnv();
+    const poc = env.boot();
+    const idA = makeStatusId();
+    const idB = makeStatusId();
+    await openFromList(env, idA, { preTop: 450 });
     await env.navigate("/home");
     await env.timers.flushMicrotasks();
-    env.window.dispatchEvent(new env.window.Event("wheel")); // the user takes over
-    await env.timers.advance(500);
-    assert.equal(env.poc.preOpenAnchor(), null, "user-input cancel consumes");
+    const { cell: cellB } = buildCell(focalFixture(idB));
+    cellB.getBoundingClientRect = () => ({ top: 260, bottom: 460, height: 200 });
+    env.document.body.appendChild(cellB);
+    await env.pushNavigate(`/other/status/${idB}`);
+    await env.timers.advance(1_200);
+    const anchor = poc.preOpenAnchor();
+    assert.equal(anchor.statusId, idB, "anchor replaced by the new legal session");
+    assert.equal(anchor.top, 260);
+    assert.equal(anchor.source, "click-precommit");
   }
-});
-
-test("A2 恢复窗口中被新会话取代：restore 取消，锚点换新（另一帖）", async () => {
-  const env = makeEnv();
-  env.boot();
-  const idA = makeStatusId();
-  const idB = makeStatusId();
-  const { cell } = await openFromList(env, idA, { preTop: 450 });
-  env.pane().querySelector(".peek-native-close").click();
-  await env.timers.flushMicrotasks();
-  await env.navigate("/home");
-  await env.timers.flushMicrotasks();
-  assert.equal(env.poc.restoreActive(), true, "restore armed");
-  // before the restore completes, the user opens a DIFFERENT post: the new
-  // legal session cancels the pending restore and captures its own anchor
-  cell.getBoundingClientRect = () => ({ top: 300, bottom: 500, height: 200 }); // A remounted off-position
-  await env.timers.advance(200);
-  const { cell: cellB } = buildCell(focalFixture(idB));
-  cellB.getBoundingClientRect = () => ({ top: 260, bottom: 460, height: 200 });
-  env.document.body.appendChild(cellB);
-  await env.pushNavigate(`/other/status/${idB}`);
-  await env.timers.advance(1_200);
-  assert.equal(env.poc.restoreActive(), false, "new open cancelled the pending restore");
-  assert.equal(env.scroll.y, 0, "A's restore never scrolled");
-  const anchor = env.poc.preOpenAnchor();
-  assert.equal(anchor.statusId, idB, "anchor replaced by the new session");
-  assert.equal(anchor.top, 260);
-  assert.equal(anchor.source, "click-precommit");
 });

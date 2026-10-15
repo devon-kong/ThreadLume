@@ -1,5 +1,4 @@
-// Peek Native (M1) — formal engineering carrier of the R4-validated native
-// reader. Isolated-world content script for x.com / twitter.com.
+// Peek Native — isolated-world content script for x.com / twitter.com.
 //
 // Product contract highlights (unchanged from R4):
 //  - zero internal-API calls: no fetch/XHR use, no GraphQL, no webpack probing,
@@ -36,12 +35,13 @@ import * as diagnostics from "./diagnostics.js";
 import {
   safeBackTarget, navTrailState, NAV_API, syncTrailFromLocation, recordNav
 } from "./navigation-session.js";
-// M2-B1 experimental native layout adapter (inert in the default build)
+// Native layout adapter (MAIN-world controller side; the adapter define is
+// always on in the unified build)
 import {
   adapterEnabled, initLayoutAdapter, sessionSnapshot, onDetailRoute, offRoute,
   themeDiagnostics
 } from "./layout-adapter/controller.js";
-// M2-B2-A instant reading preview (lab build only; the default build never calls it)
+// M2-B2-A instant reading preview (unified build always wires it)
 import {
   previewSnapshot, clearPreview, captureClickForPreview,
   previewOnRouteChange, previewAdapterHandoff, previewAdapterStopped
@@ -53,7 +53,7 @@ import {
 
   initNavigationSession();
   startRouteObservation();
-  initLayoutAdapter(); // registers the MAIN-world message bridge only in the lab build
+  initLayoutAdapter(); // registers the MAIN-world message bridge
 
   if (isDetailPath()) {
     setInitialStatusId(statusIdFromPath());
