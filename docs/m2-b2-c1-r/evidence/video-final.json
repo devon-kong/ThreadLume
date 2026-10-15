@@ -1,0 +1,26 @@
+{
+  "before": {
+    "path": "/thinkszyg/status/2109309251533570509",
+    "marker": "{\"build\":\"m2a-202610151032-de549bd02f\",\"mode\":\"m2a\"}",
+    "state": "active",
+    "video": true,
+    "connected": true,
+    "time": 0.214373,
+    "ready": 4
+  },
+  "deep": {
+    "y": 4958.5,
+    "focal": 1,
+    "sameElement": true,
+    "connected": true,
+    "time": 0.877223,
+    "ready": 4,
+    "paused": false,
+    "cells": 40
+  },
+  "later": {
+    "sameElement": true,
+    "time": 1.784459,
+    "paused": false
+  }
+}

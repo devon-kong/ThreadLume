@@ -1,0 +1,207 @@
+{
+  "variant": "c1r",
+  "round": 2,
+  "expectedHash": "de549bd02f",
+  "browser": "152.0.0.0",
+  "viewport": {
+    "width": 1329,
+    "height": 736
+  },
+  "results": [
+    {
+      "sample": "ordinary-video",
+      "targetId": "2109309251533570509",
+      "source": "https://x.com/thinkszyg",
+      "navigation": "OPENED",
+      "target": {
+        "x": 617,
+        "y": 368,
+        "href": "/thinkszyg/status/2109309251533570509",
+        "hit": true
+      },
+      "actualHitBefore": {
+        "tag": "TIME",
+        "href": "/thinkszyg/status/2109309251533570509",
+        "isTarget": true
+      },
+      "t1a": 31.59999990463257,
+      "t1b": 405.2000000476837,
+      "t2a": 1139.2999999523163,
+      "t2b": 1139.2999999523163,
+      "t2bVerified": null,
+      "verifiedReason": "PARENT_UNPROVEN",
+      "identity": {
+        "build": "m2a-202610151029-de549bd02f",
+        "mode": "m2a"
+      },
+      "actualHit": {
+        "tag": "TIME",
+        "href": "/thinkszyg/status/2109309251533570509",
+        "reached": true
+      },
+      "candidates": {
+        "count": 11,
+        "visible": 2,
+        "ids": [
+          "2109469700635988432",
+          "2109794940549300613",
+          "2109796782482088003",
+          "2109471067559596504",
+          "2109473050723004478"
+        ],
+        "excluded": {
+          "beforeFocal": 0,
+          "noBody": 0,
+          "noOwnId": 2,
+          "focal": 0,
+          "ad": 0,
+          "recommendation": 0
+        }
+      },
+      "state": "active",
+      "failed": null,
+      "loadingVisible": true,
+      "noReplyEvidence": false,
+      "nullReason": null,
+      "deepVideo": {
+        "tracked": true,
+        "sameElement": true,
+        "currentTime": 0.4796,
+        "paused": false
+      },
+      "t4a": 56,
+      "t4b": 1211.7999999523163,
+      "returnPath": "/thinkszyg"
+    },
+    {
+      "sample": "high-comment",
+      "targetId": "2100757389112938573",
+      "source": "https://x.com/ruanyf",
+      "navigation": "OPENED",
+      "target": {
+        "x": 520,
+        "y": 368,
+        "href": "/ruanyf/status/2100757389112938573",
+        "hit": true
+      },
+      "actualHitBefore": {
+        "tag": "TIME",
+        "href": "/ruanyf/status/2100757389112938573",
+        "isTarget": true
+      },
+      "t1a": 25.299999952316284,
+      "t1b": 362.09999990463257,
+      "t2a": 1364.5,
+      "t2b": 1364.5,
+      "t2bVerified": null,
+      "verifiedReason": "PARENT_UNPROVEN",
+      "identity": {
+        "build": "m2a-202610151029-de549bd02f",
+        "mode": "m2a"
+      },
+      "actualHit": {
+        "tag": "TIME",
+        "href": "/ruanyf/status/2100757389112938573",
+        "reached": true
+      },
+      "candidates": {
+        "count": 10,
+        "visible": 3,
+        "ids": [
+          "2100789252204490926",
+          "2100778487812682233",
+          "2100783025864987074",
+          "2100810663983718558",
+          "2100773004158631978"
+        ],
+        "excluded": {
+          "beforeFocal": 0,
+          "noBody": 0,
+          "noOwnId": 1,
+          "focal": 0,
+          "ad": 0,
+          "recommendation": 0
+        }
+      },
+      "state": "active",
+      "failed": null,
+      "loadingVisible": true,
+      "noReplyEvidence": false,
+      "nullReason": null,
+      "deepVideo": {
+        "tracked": false,
+        "sameElement": false,
+        "currentTime": null,
+        "paused": null
+      },
+      "t4a": 66.90000009536743,
+      "t4b": 600.4000000953674,
+      "returnPath": "/ruanyf"
+    },
+    {
+      "sample": "multi-level",
+      "targetId": "2100789252204490926",
+      "source": "https://x.com/ruanyf/status/2100757389112938573",
+      "navigation": "OPENED",
+      "target": {
+        "x": 982,
+        "y": 175,
+        "href": "/Maxxxxxx__/status/2100789252204490926",
+        "hit": true
+      },
+      "actualHitBefore": {
+        "tag": "TIME",
+        "href": "/Maxxxxxx__/status/2100789252204490926",
+        "isTarget": true
+      },
+      "t1a": null,
+      "t1b": 67.70000004768372,
+      "t2a": 707.8000001907349,
+      "t2b": 707.8000001907349,
+      "t2bVerified": null,
+      "verifiedReason": "PARENT_UNPROVEN",
+      "identity": {
+        "build": "m2a-202610151029-de549bd02f",
+        "mode": "m2a"
+      },
+      "actualHit": {
+        "tag": "TIME",
+        "href": "/Maxxxxxx__/status/2100789252204490926",
+        "reached": true
+      },
+      "candidates": {
+        "count": 7,
+        "visible": 5,
+        "ids": [
+          "2100882972920672361",
+          "2100795927896449047",
+          "2100838187421872179",
+          "2100843988374986911",
+          "2100838361498022296"
+        ],
+        "excluded": {
+          "beforeFocal": 1,
+          "noBody": 0,
+          "noOwnId": 1,
+          "focal": 0,
+          "ad": 0,
+          "recommendation": 0
+        }
+      },
+      "state": "active",
+      "failed": null,
+      "loadingVisible": true,
+      "noReplyEvidence": false,
+      "nullReason": null,
+      "deepVideo": {
+        "tracked": false,
+        "sameElement": false,
+        "currentTime": null,
+        "paused": null
+      },
+      "t4a": 72.60000014305115,
+      "t4b": 651.1000001430511,
+      "returnPath": "/ruanyf/status/2100757389112938573"
+    }
+  ]
+}

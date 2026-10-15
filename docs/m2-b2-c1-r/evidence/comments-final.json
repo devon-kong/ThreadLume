@@ -1,0 +1,74 @@
+{
+  "marker": "{\"build\":\"m2a-202610151032-de549bd02f\",\"mode\":\"m2a\"}",
+  "browser": "152.0.0.0",
+  "windows": [
+    {
+      "y": 0,
+      "visibleIds": 11,
+      "newIds": 11,
+      "ads": 1,
+      "focal": 1,
+      "state": "active"
+    },
+    {
+      "y": 5343,
+      "visibleIds": 24,
+      "newIds": 23,
+      "ads": 3,
+      "focal": 1,
+      "state": "active"
+    },
+    {
+      "y": 7633.5,
+      "visibleIds": 13,
+      "newIds": 0,
+      "ads": 2,
+      "focal": 1,
+      "state": "active"
+    }
+  ],
+  "network": [
+    {
+      "kind": "REST",
+      "operation": null,
+      "initiator": [
+        "https://abs.twimg.com"
+      ]
+    },
+    {
+      "kind": "REST",
+      "operation": null,
+      "initiator": [
+        "https://abs.twimg.com"
+      ]
+    },
+    {
+      "kind": "REST",
+      "operation": null,
+      "initiator": [
+        "https://abs.twimg.com"
+      ]
+    },
+    {
+      "kind": "REST",
+      "operation": null,
+      "initiator": [
+        "https://abs.twimg.com"
+      ]
+    },
+    {
+      "kind": "GraphQL",
+      "operation": "TweetDetail",
+      "initiator": [
+        "https://abs.twimg.com"
+      ]
+    },
+    {
+      "kind": "REST",
+      "operation": null,
+      "initiator": [
+        "https://abs.twimg.com"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,770 @@
+{
+  "artifact": "{\"build\":\"m2a-202610151021-3abb7ea0aa\",\"mode\":\"m2a\"}",
+  "chrome": "152.0.0.0",
+  "events": [
+    {
+      "ms": 0,
+      "path": "/wlzh/status/2109433207318081885",
+      "y": 10,
+      "left": 0,
+      "cell": 18,
+      "article": 4749,
+      "state": "active",
+      "fail": null,
+      "focal": 1,
+      "skin": true,
+      "layout": true
+    },
+    {
+      "ms": 82,
+      "message": "UNINSTALL",
+      "from": "isolated",
+      "reason": "native-view"
+    },
+    {
+      "ms": 172,
+      "path": "/wlzh/status/2109433207318081885",
+      "y": 17366,
+      "left": null,
+      "cell": 18,
+      "article": 4749,
+      "state": "idle",
+      "fail": null,
+      "focal": 0,
+      "skin": false,
+      "layout": false
+    },
+    {
+      "ms": 172,
+      "message": "UNINSTALLED",
+      "from": "main",
+      "reason": "native-view"
+    },
+    {
+      "ms": 251,
+      "path": "/wlzh/status/2109433207318081885",
+      "y": 16899,
+      "left": null,
+      "cell": 11,
+      "article": 0,
+      "state": "idle",
+      "fail": null,
+      "focal": 0,
+      "skin": false,
+      "layout": false
+    },
+    {
+      "ms": 297,
+      "path": "/wlzh/status/2109433207318081885",
+      "y": 16899,
+      "left": null,
+      "cell": 15,
+      "article": 0,
+      "state": "idle",
+      "fail": null,
+      "focal": 0,
+      "skin": false,
+      "layout": false
+    },
+    {
+      "ms": 366,
+      "path": "/wlzh/status/2109433207318081885",
+      "y": 17006,
+      "left": null,
+      "cell": 17,
+      "article": 0,
+      "state": "idle",
+      "fail": null,
+      "focal": 0,
+      "skin": false,
+      "layout": false
+    },
+    {
+      "ms": 433,
+      "path": "/wlzh/article/2109433207318081885",
+      "y": 0,
+      "left": null,
+      "cell": 0,
+      "article": 0,
+      "state": "idle",
+      "fail": null,
+      "focal": 0,
+      "skin": false,
+      "layout": false
+    },
+    {
+      "ms": 771,
+      "path": "/wlzh/article/2109433207318081885",
+      "y": 0,
+      "left": null,
+      "cell": 0,
+      "article": 4749,
+      "state": "idle",
+      "fail": null,
+      "focal": 0,
+      "skin": false,
+      "layout": false
+    },
+    {
+      "ms": 1452,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 1452,
+      "path": "/wlzh/status/2109433207318081885",
+      "y": 17006,
+      "left": null,
+      "cell": 17,
+      "article": 0,
+      "state": "installing",
+      "fail": null,
+      "focal": 0,
+      "skin": false,
+      "layout": false
+    },
+    {
+      "ms": 1486,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 1546,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 1546,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 1607,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 1607,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 1668,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 1668,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 1812,
+      "path": "/wlzh/status/2109433207318081885",
+      "y": 17006,
+      "left": null,
+      "cell": 43,
+      "article": 0,
+      "state": "installing",
+      "fail": null,
+      "focal": 0,
+      "skin": false,
+      "layout": false
+    },
+    {
+      "ms": 1814,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 1832,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 1846,
+      "path": "/wlzh/status/2109433207318081885",
+      "y": 16445,
+      "left": null,
+      "cell": 43,
+      "article": 0,
+      "state": "installing",
+      "fail": null,
+      "focal": 0,
+      "skin": false,
+      "layout": false
+    },
+    {
+      "ms": 1892,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 1892,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 1954,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 1954,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 2015,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 2015,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 2077,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 2078,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 2139,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 2139,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 2200,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 2200,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 2263,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 2263,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 2324,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 2324,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 2385,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 2385,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 2446,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 2446,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 2507,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 2507,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 2568,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 2568,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 2630,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 2630,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 2691,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 2691,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 2754,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 2754,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 2816,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 2816,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 2877,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 2877,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 2938,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 2938,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 3001,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 3001,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 3063,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 3063,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 3125,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 3125,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 3186,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 3186,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 3251,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 3251,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 3312,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 3312,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 3373,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 3373,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 3434,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 3434,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 3496,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 3496,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 3559,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 3559,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 3621,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 3621,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 3683,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 3683,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 3745,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 3745,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 3807,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 3807,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 3869,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 3869,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 3931,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 3932,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 3992,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 3992,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 4053,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 4053,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 4115,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 4115,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 4177,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 4177,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 4238,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 4238,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 4299,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 4299,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 4361,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 4361,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 4423,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 4423,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 4485,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 4485,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 4548,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 4548,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 4611,
+      "message": "INSTALL",
+      "from": "isolated",
+      "reason": null
+    },
+    {
+      "ms": 4611,
+      "message": "UNSUPPORTED",
+      "from": "main",
+      "reason": "focal-cell-not-found"
+    },
+    {
+      "ms": 4622,
+      "path": "/wlzh/status/2109433207318081885",
+      "y": 16445,
+      "left": null,
+      "cell": 43,
+      "article": 0,
+      "state": "failed",
+      "fail": "focal-cell-not-found",
+      "focal": 0,
+      "skin": false,
+      "layout": false
+    }
+  ],
+  "final": {
+    "path": "/wlzh/status/2109433207318081885",
+    "y": 16444.5,
+    "article": 0,
+    "state": "failed",
+    "fail": "focal-cell-not-found",
+    "layout": false,
+    "skin": false
+  }
+}

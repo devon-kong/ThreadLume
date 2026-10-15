@@ -1,0 +1,48 @@
+{
+  "browser": "152.0.0.0",
+  "start": {
+    "path": "/wlzh/status/2109433207318081885",
+    "y": 10,
+    "height": 19349,
+    "cell": 1,
+    "article": 4749,
+    "peekMarker": null,
+    "peekState": null
+  },
+  "ordinary": {
+    "path": "/wlzh/status/2109433207318081885",
+    "y": 10,
+    "height": 19349,
+    "cell": 1,
+    "article": 4749,
+    "peekMarker": null,
+    "peekState": null
+  },
+  "beforeDeep": {
+    "path": "/wlzh/status/2109433207318081885",
+    "y": 8180,
+    "height": 9016,
+    "cell": 2,
+    "article": 4749,
+    "peekMarker": null,
+    "peekState": null
+  },
+  "deep": {
+    "path": "/wlzh/status/2109433207318081885",
+    "y": 8180,
+    "height": 19353,
+    "cell": 11,
+    "article": 4749,
+    "peekMarker": null,
+    "peekState": null
+  },
+  "recovered": {
+    "path": "/wlzh/status/2109433207318081885",
+    "y": 0,
+    "height": 19353,
+    "cell": 1,
+    "article": 4749,
+    "peekMarker": null,
+    "peekState": null
+  }
+}

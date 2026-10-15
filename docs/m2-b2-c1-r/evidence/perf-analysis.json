@@ -1,0 +1,482 @@
+{
+  "protocol": "one browser, 3 preregistered public samples, AB/BA, monitor-before-click, no pre-T2b deep scroll",
+  "sampledBuilds": {
+    "b2b": "3abb7ea0aa",
+    "c1r": "de549bd02f"
+  },
+  "metrics": {
+    "t1a": {
+      "pairedN": 4,
+      "attemptedPairs": 6,
+      "pairedRate": 0.6666666666666666,
+      "b2bMedian": 27.85,
+      "c1rMedian": 28.450000000000003,
+      "medianPairedDelta": 0.25,
+      "slowestValid": 34.9,
+      "raw": [
+        {
+          "round": 1,
+          "sample": "ordinary-video",
+          "b2b": 34.3,
+          "c1r": 34.9,
+          "delta": 0.6,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 1,
+          "sample": "high-comment",
+          "b2b": 23.7,
+          "c1r": 22.6,
+          "delta": -1.1,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 1,
+          "sample": "multi-level",
+          "b2b": null,
+          "c1r": null,
+          "delta": null,
+          "invalid": {
+            "b2b": "NOT_APPLICABLE",
+            "c1r": "NOT_APPLICABLE"
+          }
+        },
+        {
+          "round": 2,
+          "sample": "ordinary-video",
+          "b2b": 30.3,
+          "c1r": 31.6,
+          "delta": 1.3,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 2,
+          "sample": "high-comment",
+          "b2b": 25.4,
+          "c1r": 25.3,
+          "delta": -0.1,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 2,
+          "sample": "multi-level",
+          "b2b": null,
+          "c1r": null,
+          "delta": null,
+          "invalid": {
+            "b2b": "NOT_APPLICABLE",
+            "c1r": "NOT_APPLICABLE"
+          }
+        }
+      ]
+    },
+    "t1b": {
+      "pairedN": 6,
+      "attemptedPairs": 6,
+      "pairedRate": 1,
+      "b2bMedian": 365,
+      "c1rMedian": 364.25,
+      "medianPairedDelta": 2.55,
+      "slowestValid": 405.2,
+      "raw": [
+        {
+          "round": 1,
+          "sample": "ordinary-video",
+          "b2b": 380.6,
+          "c1r": 390.2,
+          "delta": 9.6,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 1,
+          "sample": "high-comment",
+          "b2b": 365,
+          "c1r": 366.4,
+          "delta": 1.4,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 1,
+          "sample": "multi-level",
+          "b2b": 76.5,
+          "c1r": 80.2,
+          "delta": 3.7,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 2,
+          "sample": "ordinary-video",
+          "b2b": 383.8,
+          "c1r": 405.2,
+          "delta": 21.4,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 2,
+          "sample": "high-comment",
+          "b2b": 365,
+          "c1r": 362.1,
+          "delta": -2.9,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 2,
+          "sample": "multi-level",
+          "b2b": 69.8,
+          "c1r": 67.7,
+          "delta": -2.1,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        }
+      ]
+    },
+    "t2a": {
+      "pairedN": 6,
+      "attemptedPairs": 6,
+      "pairedRate": 1,
+      "b2bMedian": 1205.55,
+      "c1rMedian": 1251.9,
+      "medianPairedDelta": 118.05,
+      "slowestValid": 1904.6,
+      "raw": [
+        {
+          "round": 1,
+          "sample": "ordinary-video",
+          "b2b": 1362.4,
+          "c1r": 1904.6,
+          "delta": 542.2,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 1,
+          "sample": "high-comment",
+          "b2b": 1246.8,
+          "c1r": 1463,
+          "delta": 216.2,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 1,
+          "sample": "multi-level",
+          "b2b": 666.8,
+          "c1r": 852.8,
+          "delta": 186,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 2,
+          "sample": "ordinary-video",
+          "b2b": 1164.3,
+          "c1r": 1139.3,
+          "delta": -25,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 2,
+          "sample": "high-comment",
+          "b2b": 1314.4,
+          "c1r": 1364.5,
+          "delta": 50.1,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 2,
+          "sample": "multi-level",
+          "b2b": 720.1,
+          "c1r": 707.8,
+          "delta": -12.3,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        }
+      ]
+    },
+    "t2b": {
+      "pairedN": 6,
+      "attemptedPairs": 6,
+      "pairedRate": 1,
+      "b2bMedian": 1205.55,
+      "c1rMedian": 1251.9,
+      "medianPairedDelta": 118.05,
+      "slowestValid": 1904.6,
+      "raw": [
+        {
+          "round": 1,
+          "sample": "ordinary-video",
+          "b2b": 1362.4,
+          "c1r": 1904.6,
+          "delta": 542.2,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 1,
+          "sample": "high-comment",
+          "b2b": 1246.8,
+          "c1r": 1463,
+          "delta": 216.2,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 1,
+          "sample": "multi-level",
+          "b2b": 666.8,
+          "c1r": 852.8,
+          "delta": 186,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 2,
+          "sample": "ordinary-video",
+          "b2b": 1164.3,
+          "c1r": 1139.3,
+          "delta": -25,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 2,
+          "sample": "high-comment",
+          "b2b": 1314.4,
+          "c1r": 1364.5,
+          "delta": 50.1,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 2,
+          "sample": "multi-level",
+          "b2b": 720.1,
+          "c1r": 707.8,
+          "delta": -12.3,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        }
+      ]
+    },
+    "t4a": {
+      "pairedN": 6,
+      "attemptedPairs": 6,
+      "pairedRate": 1,
+      "b2bMedian": 73.35,
+      "c1rMedian": 69.75,
+      "medianPairedDelta": -0.45,
+      "slowestValid": 85.1,
+      "raw": [
+        {
+          "round": 1,
+          "sample": "ordinary-video",
+          "b2b": 77.7,
+          "c1r": 76.9,
+          "delta": -0.8,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 1,
+          "sample": "high-comment",
+          "b2b": 58,
+          "c1r": 63.5,
+          "delta": 5.5,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 1,
+          "sample": "multi-level",
+          "b2b": 71,
+          "c1r": 84.5,
+          "delta": 13.5,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 2,
+          "sample": "ordinary-video",
+          "b2b": 85.1,
+          "c1r": 56,
+          "delta": -29.1,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 2,
+          "sample": "high-comment",
+          "b2b": 74,
+          "c1r": 66.9,
+          "delta": -7.1,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 2,
+          "sample": "multi-level",
+          "b2b": 72.7,
+          "c1r": 72.6,
+          "delta": -0.1,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        }
+      ]
+    },
+    "t4b": {
+      "pairedN": 6,
+      "attemptedPairs": 6,
+      "pairedRate": 1,
+      "b2bMedian": 748,
+      "c1rMedian": 655.05,
+      "medianPairedDelta": 0.9999999999999998,
+      "slowestValid": 1230.4,
+      "raw": [
+        {
+          "round": 1,
+          "sample": "ordinary-video",
+          "b2b": 1230.4,
+          "c1r": 885,
+          "delta": -345.4,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 1,
+          "sample": "high-comment",
+          "b2b": 592,
+          "c1r": 596.1,
+          "delta": 4.1,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 1,
+          "sample": "multi-level",
+          "b2b": 855.2,
+          "c1r": 659,
+          "delta": -196.2,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 2,
+          "sample": "ordinary-video",
+          "b2b": 866.9,
+          "c1r": 1211.8,
+          "delta": 344.9,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 2,
+          "sample": "high-comment",
+          "b2b": 602.5,
+          "c1r": 600.4,
+          "delta": -2.1,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        },
+        {
+          "round": 2,
+          "sample": "multi-level",
+          "b2b": 640.8,
+          "c1r": 651.1,
+          "delta": 10.3,
+          "invalid": {
+            "b2b": null,
+            "c1r": null
+          }
+        }
+      ]
+    }
+  },
+  "gates": {
+    "t1aCandidate": true,
+    "t1b": true,
+    "t2bCandidate": true,
+    "t4b": true
+  },
+  "t2bVerified": {
+    "n": 0,
+    "reason": "X public DOM did not expose stable parent identity"
+  },
+  "videoIdentityInPerf": "immediate deep-scroll check only; separate settled same-element test required"
+}

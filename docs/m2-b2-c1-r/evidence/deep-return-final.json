@@ -1,0 +1,85 @@
+{
+  "variant": "c1r-final",
+  "artifact": "{\"build\":\"m2a-202610151032-de549bd02f\",\"mode\":\"m2a\"}",
+  "browser": "152.0.0.0",
+  "viewport": {
+    "width": 1329,
+    "height": 736
+  },
+  "results": [
+    {
+      "id": "2110226552957149518",
+      "pick": {
+        "scrollY": 7212.5,
+        "anchorY": 358
+      },
+      "hit": {
+        "tag": "DIV",
+        "href": null,
+        "target": false
+      },
+      "actual": {
+        "tag": "TIME",
+        "href": "/gefei55/status/2110226552957149518",
+        "reachedTarget": true,
+        "pathAtCapture": "/gefei55"
+      },
+      "detail": {
+        "path": "/gefei55/status/2110226552957149518",
+        "state": "installing",
+        "scrollY": 0
+      },
+      "returned": {
+        "path": "/gefei55",
+        "scrollY": 7181.5,
+        "anchorY": 389,
+        "state": "idle"
+      },
+      "anchorDeltaY": 31,
+      "userScroll": {
+        "immediateY": 7540,
+        "settledY": 7581.5,
+        "accepted": true,
+        "correctedBackwards": false
+      },
+      "outcome": "OPENED_AND_RETURNED"
+    },
+    {
+      "id": "2110193769618575536",
+      "pick": {
+        "scrollY": 7537.5,
+        "anchorY": 358
+      },
+      "hit": {
+        "tag": "DIV",
+        "href": null,
+        "target": false
+      },
+      "actual": {
+        "tag": "TIME",
+        "href": "/gefei55/status/2110193769618575536",
+        "reachedTarget": true,
+        "pathAtCapture": "/gefei55"
+      },
+      "detail": {
+        "path": "/gefei55/status/2110193769618575536",
+        "state": "installing",
+        "scrollY": 0
+      },
+      "returned": {
+        "path": "/gefei55",
+        "scrollY": 7506.5,
+        "anchorY": 389,
+        "state": "idle"
+      },
+      "anchorDeltaY": 31,
+      "userScroll": {
+        "immediateY": 7865,
+        "settledY": 7906.5,
+        "accepted": true,
+        "correctedBackwards": false
+      },
+      "outcome": "OPENED_AND_RETURNED"
+    }
+  ]
+}

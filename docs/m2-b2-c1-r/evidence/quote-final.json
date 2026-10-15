@@ -1,0 +1,20 @@
+{
+  "before": {
+    "path": "/wangray/status/2109869791431508001",
+    "build": "{\"build\":\"m2a-202610151032-de549bd02f\",\"mode\":\"m2a\"}",
+    "state": "active",
+    "focusCount": 1,
+    "focusOwnId": "/wangray/status/2109869791431508001",
+    "mainPhotos": 2,
+    "quotePhotos": 1,
+    "quoteTextLength": 227,
+    "mainTextLength": 383,
+    "quotePresent": true
+  },
+  "after": {
+    "path": "/wangray/status/2109860553657328047",
+    "state": "active",
+    "focusCount": 1,
+    "focusOwnId": "/wangray/status/2109860553657328047"
+  }
+}

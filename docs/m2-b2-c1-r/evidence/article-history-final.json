@@ -1,0 +1,20 @@
+{
+  "afterExit": {
+    "path": "/wlzh/status/2109433207318081885",
+    "state": "active",
+    "body": 4749
+  },
+  "back": {
+    "path": "blank",
+    "state": null,
+    "body": 0
+  },
+  "forward": {
+    "path": "/wlzh/status/2109433207318081885",
+    "state": "active",
+    "body": 4749,
+    "focal": 1,
+    "style": true
+  },
+  "build": "{\"build\":\"m2a-202610151032-de549bd02f\",\"mode\":\"m2a\"}"
+}
