@@ -174,6 +174,38 @@ test("E5 UNSUPPORTED 有界重试：50 次后休眠，总量有界（M2-B2-A：6
   assert.equal(ladStyle(env), false);
 });
 
+test("C1-R Article 专注模式深位置返回：焦点未渲染时完整清理并停止安装", async () => {
+  const { env, sent, focusId, fixture, lad } = makeLabEnv({});
+  await env.pushNavigate(`/somebody/status/${focusId}`);
+  await realSleep(5);
+  assert.equal(stateAttr(env), "active");
+
+  // X leaves the status route for its own Article focus view. On return, its
+  // virtual list can be restored at a deep scroll position without the focal
+  // cell. This is the browser-observed condition, not a simulated new adapter
+  // shape or an instruction to alter React internals.
+  await env.pushNavigate(`/somebody/article/${focusId}`);
+  await realSleep(5);
+  assert.equal(stateAttr(env), "idle");
+  assert.equal(Object.getOwnPropertyDescriptor(fixture.v.instance, LAD_KEY), undefined);
+  fixture.cell.remove();
+  await env.pushNavigate(`/somebody/status/${focusId}`);
+  await env.timers.advance(60 * 51);
+  await realSleep(5);
+  assert.equal(stateAttr(env), "failed");
+  assert.equal(failedAttr(env), "focal-cell-not-found");
+  assert.equal(ladStyle(env), false);
+  assert.equal(htmlAttr(env), null);
+  assert.equal(env.document.getElementById("peek-reader-skin"), null);
+  assert.equal(env.document.getElementById("peek-reader-topbar"), null);
+  assert.equal(env.document.getElementById("peek-lad-preview"), null);
+  assert.equal(lad.query().phase, "idle", "MAIN has no retained wrapper after a missing-cell refusal");
+  const installsAtFail = sent.filter((m) => m.type === "INSTALL").length;
+  await env.timers.advance(5000);
+  assert.equal(sent.filter((m) => m.type === "INSTALL").length, installsAtFail,
+    "later route polls must not start an install loop");
+});
+
 test("E6 失败后迟到的包装：迟到 INSTALL 原子地包装又被释放，布局绝不挂载", async () => {
   const focusId = makeStatusId();
   const env = makeEnv({ url: `/somebody/status/${focusId}`, src: "lab" });
