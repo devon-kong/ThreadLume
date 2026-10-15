@@ -1,0 +1,28 @@
+{
+  "path": "/gefei55/status/1760839985715204230",
+  "state": "active",
+  "artifact": "{\"build\":\"m2a-202610150341-cec9a4db35\",\"mode\":\"m2a\"}",
+  "body": "rgb(11, 14, 17)",
+  "card": "rgb(0, 0, 0)",
+  "n": 37,
+  "minContrast": 17.241452840364612,
+  "maxContrast": 17.241452840364612,
+  "samples": [
+    {
+      "at": 1590,
+      "state": "active",
+      "fg": "rgb(231, 233, 234)",
+      "bg": "rgb(0, 0, 0)",
+      "contrast": 17.241452840364612,
+      "topbar": "rgb(11, 14, 17)"
+    },
+    {
+      "at": 2390,
+      "state": "active",
+      "fg": "rgb(231, 233, 234)",
+      "bg": "rgb(0, 0, 0)",
+      "contrast": 17.241452840364612,
+      "topbar": "rgb(11, 14, 17)"
+    }
+  ]
+}

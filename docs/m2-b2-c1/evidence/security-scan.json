@@ -1,0 +1,47 @@
+{
+  "files": {
+    "content.js": {
+      "sha256": "a7d94523029384ddd877ff4cba0d9660af870ef10ef6a1e222354a641d2257b4",
+      "bytes": 73604,
+      "counts": {
+        "fetchCall": 0,
+        "xhr": 0,
+        "queryId": 0,
+        "authorization": 0,
+        "csrf": 0,
+        "cookieRead": 0,
+        "privateApiPath": 0,
+        "legacyBridge": 0,
+        "webpackProbe": 0
+      }
+    },
+    "layout-adapter-main.js": {
+      "sha256": "27461cfc5cbd76b61915dc1ebe8ce80f499bb964fc0288fbd5384134bf54ecf2",
+      "bytes": 20082,
+      "counts": {
+        "fetchCall": 0,
+        "xhr": 0,
+        "queryId": 0,
+        "authorization": 0,
+        "csrf": 0,
+        "cookieRead": 0,
+        "privateApiPath": 0,
+        "legacyBridge": 0,
+        "webpackProbe": 0
+      }
+    }
+  },
+  "manifest": {
+    "manifest_version": 3,
+    "permissions": [],
+    "host_permissions": [],
+    "background": null,
+    "matches": [
+      "https://x.com/*",
+      "https://twitter.com/*",
+      "https://x.com/*",
+      "https://twitter.com/*"
+    ]
+  },
+  "pass": true
+}

@@ -1,0 +1,34 @@
+{
+  "variant": "baseline",
+  "artifact": "{\"build\":\"m2a-202610150352-3abb7ea0aa\",\"mode\":\"m2a\"}",
+  "viewport": {
+    "width": 1329,
+    "height": 736
+  },
+  "results": [
+    {
+      "id": "2110226552957149518",
+      "skipped": "target link not safely hit",
+      "pick": {
+        "id": "2110226552957149518",
+        "scrollY": 5631,
+        "anchorY": 358,
+        "x": 527.078125,
+        "y": 368.171875,
+        "hit": false
+      }
+    },
+    {
+      "id": "2110193769618575536",
+      "skipped": "target link not safely hit",
+      "pick": {
+        "id": "2110193769618575536",
+        "scrollY": 4928,
+        "anchorY": 358,
+        "x": 534.390625,
+        "y": 368.171875,
+        "hit": false
+      }
+    }
+  ]
+}

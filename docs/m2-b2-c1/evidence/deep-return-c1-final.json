@@ -1,0 +1,53 @@
+{
+  "variant": "c1-final",
+  "artifact": "{\"build\":\"m2a-202610150341-cec9a4db35\",\"mode\":\"m2a\"}",
+  "viewport": {
+    "width": 1329,
+    "height": 736
+  },
+  "results": [
+    {
+      "id": "2110226552957149518",
+      "pick": {
+        "id": "2110226552957149518",
+        "scrollY": 5737,
+        "anchorY": 252
+      },
+      "detail": {
+        "path": "/gefei55/status/2110226552957149518",
+        "state": "active",
+        "scrollY": 0
+      },
+      "returned": {
+        "path": "/gefei55",
+        "scrollY": 5654,
+        "anchorY": 335,
+        "state": "idle"
+      },
+      "anchorDeltaY": 83,
+      "userScroll": {
+        "immediateY": 6012.5,
+        "settledY": 6054,
+        "accepted": true,
+        "correctedBackwards": false
+      }
+    },
+    {
+      "id": "2110193769618575536",
+      "pick": {
+        "id": "2110193769618575536",
+        "scrollY": 5679,
+        "anchorY": 252,
+        "x": 534.390625,
+        "y": 262.171875,
+        "hit": true
+      },
+      "detail": {
+        "path": "/gefei55",
+        "state": "idle",
+        "scrollY": 6021
+      },
+      "skipped": "adapter not active"
+    }
+  ]
+}

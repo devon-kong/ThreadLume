@@ -1,0 +1,21 @@
+{
+  "path": "/wlzh/status/2109433207318081885",
+  "artifact": "{\"build\":\"m2a-202610150341-cec9a4db35\",\"mode\":\"m2a\"}",
+  "state": "installing",
+  "failure": null,
+  "focalCount": 0,
+  "richInFocal": false,
+  "bodyLength": 4466,
+  "hasTitle": true,
+  "tags": {
+    "A": 21,
+    "BLOCKQUOTE": 3,
+    "H2": 9,
+    "OL": 4,
+    "LI": 19,
+    "UL": 1
+  },
+  "focusMode": true,
+  "scrollHeight": 18895,
+  "clientHeight": 736
+}

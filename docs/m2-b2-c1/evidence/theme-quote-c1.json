@@ -1,0 +1,34 @@
+{
+  "state": "active",
+  "body": "rgb(11, 14, 17)",
+  "card": {
+    "color": "rgb(231, 233, 234)",
+    "bg": "rgb(0, 0, 0)",
+    "fill": "rgb(0, 0, 0)"
+  },
+  "tweet": {
+    "color": "rgb(231, 233, 234)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "fill": "rgb(0, 0, 0)"
+  },
+  "quote": {
+    "color": "rgb(231, 233, 234)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "fill": "rgb(0, 0, 0)"
+  },
+  "link": {
+    "color": "rgb(29, 155, 240)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "fill": "rgb(0, 0, 0)"
+  },
+  "topbar": {
+    "color": "rgb(231, 233, 234)",
+    "bg": "rgb(11, 14, 17)",
+    "fill": "rgb(0, 0, 0)"
+  },
+  "action": {
+    "color": "rgb(113, 118, 123)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "fill": "rgb(113, 118, 123)"
+  }
+}

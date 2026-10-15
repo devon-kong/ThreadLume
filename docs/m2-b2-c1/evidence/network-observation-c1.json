@@ -1,0 +1,145 @@
+{
+  "artifact": "{\"build\":\"m2a-202610150341-cec9a4db35\",\"mode\":\"m2a\"}",
+  "sample": "ruanyf/status/2100757389112938573",
+  "windows": [
+    {
+      "index": 0,
+      "before": {
+        "scrollY": 10,
+        "idCount": 14
+      },
+      "after": {
+        "scrollY": 4644,
+        "idCount": 18
+      },
+      "newVisibleIds": [
+        "2100777184118124877",
+        "2100780367745868033",
+        "2100758778299773336",
+        "2100773487736738136",
+        "2100782332399772095",
+        "2100779747106332698",
+        "2100803242112479723",
+        "2100784242032840918",
+        "2100826493509402658",
+        "2100796458928865447",
+        "2100788404007079995",
+        "2100777205387432400",
+        "2107506769371238706",
+        "2102769446238732389",
+        "2107507777577132182",
+        "2107505561424236716",
+        "2104023168872812793"
+      ],
+      "operations": {
+        "image": 25,
+        "REST-1.1": 10,
+        "GraphQL:getAltTextPromptPreference": 1,
+        "other": 22,
+        "video": 37,
+        "X-API-other": 1
+      },
+      "initiators": {
+        "image|other": 25,
+        "REST-1.1|https://abs.twimg.com": 10,
+        "GraphQL:getAltTextPromptPreference|https://abs.twimg.com": 1,
+        "other|https://x.com": 21,
+        "video|https://abs.twimg.com": 37,
+        "other|https://abs.twimg.com": 1,
+        "X-API-other|https://abs.twimg.com": 1
+      }
+    },
+    {
+      "index": 1,
+      "before": {
+        "scrollY": 4644,
+        "idCount": 18
+      },
+      "after": {
+        "scrollY": 7972,
+        "idCount": 21
+      },
+      "newVisibleIds": [
+        "2101399833781371200",
+        "2105596148006461781",
+        "2100855415089004946",
+        "2100977332580430200",
+        "2100777219153100919",
+        "2100865783673020475",
+        "2100899310628143339",
+        "2100991847154008315",
+        "2101000537483493700",
+        "2100816861143376100",
+        "2100836417442402658",
+        "2100814813144473971",
+        "2100931256565612896",
+        "2100781767049593218",
+        "2100893835283087449",
+        "2101089299605393610",
+        "2100828032147845314"
+      ],
+      "operations": {
+        "video": 23,
+        "image": 25,
+        "other": 4,
+        "GraphQL:TweetDetail": 1,
+        "X-API-other": 1,
+        "REST-1.1": 1
+      },
+      "initiators": {
+        "video|https://abs.twimg.com": 23,
+        "image|other": 25,
+        "other|other": 1,
+        "GraphQL:TweetDetail|https://abs.twimg.com": 1,
+        "other|https://abs.twimg.com": 1,
+        "other|https://x.com": 2,
+        "X-API-other|https://abs.twimg.com": 1,
+        "REST-1.1|https://abs.twimg.com": 1
+      }
+    },
+    {
+      "index": 2,
+      "before": {
+        "scrollY": 7972,
+        "idCount": 21
+      },
+      "after": {
+        "scrollY": 12259,
+        "idCount": 15
+      },
+      "newVisibleIds": [
+        "2101009050658033733",
+        "2100823548596220003",
+        "2100762175132610991",
+        "2100780729504510006",
+        "2100787216838496636",
+        "2100858979488526522",
+        "2101117444438044804",
+        "2100935040507195392",
+        "2100843089220743209",
+        "2100873437191487593",
+        "2101178452275507522",
+        "2100796523638583747",
+        "2101245410761154825",
+        "2100835238230503846"
+      ],
+      "operations": {
+        "REST-1.1": 3,
+        "video": 9,
+        "image": 14,
+        "GraphQL:TweetDetail": 1,
+        "other": 1,
+        "X-API-other": 1
+      },
+      "initiators": {
+        "REST-1.1|https://abs.twimg.com": 3,
+        "video|https://abs.twimg.com": 9,
+        "image|other": 14,
+        "GraphQL:TweetDetail|https://abs.twimg.com": 1,
+        "other|https://abs.twimg.com": 1,
+        "X-API-other|https://abs.twimg.com": 1
+      }
+    }
+  ],
+  "note": "Sanitized Network.requestWillBeSent events: GraphQL operation name and initiator origin only. No query IDs, URLs, headers, bodies, content or credentials retained. New visible IDs are X native list entries, not proven direct replies."
+}

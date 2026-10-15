@@ -1,0 +1,10 @@
+{
+  "variant": "c1-final",
+  "artifact": "m2a-202610150341-cec9a4db35",
+  "sample": "gefei55/status/2110193769618575536",
+  "method": "Same profile and target as paired protocol; after an unsuccessful click with unconfirmed cause, used Ego's semantic click on the target time element. Not included in same-script paired gate.",
+  "before": { "scrollY": 5730, "anchorY": 358 },
+  "detail": { "path": "/gefei55/status/2110193769618575536", "stateAtFirstRead": "installing" },
+  "returned": { "path": "/gefei55", "scrollY": 5647, "anchorY": 441 },
+  "anchorDeltaY": 83
+}

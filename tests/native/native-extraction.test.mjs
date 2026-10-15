@@ -175,6 +175,90 @@ test("提取：视频/投票富媒体标记", () => {
   assert.equal(d2.rich.poll, true);
 });
 
+test("提取：当前 X radiogroup/radio 投票进入即时预览标记", () => {
+  const { poc } = loadPoc();
+  const id = makeStatusId();
+  // X's current poll markup has a radiogroup containing role="radio"
+  // choices, but no poll/vote testid. The preview must announce it.
+  const group = doc.createElement("div");
+  group.setAttribute("role", "radiogroup");
+  const option = doc.createElement("div");
+  option.setAttribute("role", "radio");
+  group.appendChild(option);
+  const { art: art3 } = buildCell(mainPostFixture(id, "投票帖", [group]));
+  const d3 = poc.extractFromArticle(art3, id);
+  assert.equal(d3.rich.poll, true);
+});
+
+test("提取：引用卡内投票不归属主帖", () => {
+  const { poc } = loadPoc();
+  const id = makeStatusId();
+  const quote = buildQuote({ withPhoto: false });
+  const group = doc.createElement("div");
+  group.setAttribute("role", "radiogroup");
+  const option = doc.createElement("div");
+  option.setAttribute("role", "radio");
+  group.appendChild(option);
+  quote.appendChild(group);
+  const { art } = buildCell(mainPostFixture(id, "主帖正文", [quote]));
+  const data = poc.extractFromArticle(art, id);
+  assert.equal(data.rich.poll, false, "quoted poll must not appear as a focal-post poll");
+  assert.equal(data.quote.text, "引用的正文");
+});
+
+test("提取：引用卡内视频和 Article 不归属主帖", () => {
+  const { poc } = loadPoc();
+  const id = makeStatusId();
+  const quote = buildQuote({ withPhoto: false });
+  const player = doc.createElement("div");
+  player.setAttribute("data-testid", "videoPlayer");
+  quote.appendChild(player);
+  const title = doc.createElement("div");
+  title.setAttribute("data-testid", "twitter-article-title");
+  title.textContent = "引用文章标题";
+  const body = doc.createElement("div");
+  body.setAttribute("data-testid", "twitterArticleRichTextView");
+  body.textContent = "引用文章正文";
+  quote.append(title, body);
+  const { art } = buildCell(mainPostFixture(id, "主帖正文", [quote]));
+  const data = poc.extractFromArticle(art, id);
+  assert.equal(data.rich.video, false);
+  assert.equal(data.rich.article, false);
+  assert.equal(data.text, "主帖正文");
+  assert.equal(data.quote.text, "引用的正文");
+});
+
+test("提取：含网站卡的语义引用仍是引用，不提升其媒体和 Article", () => {
+  const { poc } = loadPoc();
+  const id = makeStatusId();
+  const quote = buildQuote({ withPhoto: false });
+  const card = doc.createElement("div");
+  card.setAttribute("data-testid", "card.wrapper");
+  quote.appendChild(card);
+  const title = doc.createElement("div");
+  title.setAttribute("data-testid", "twitter-article-title");
+  title.textContent = "引用文章标题";
+  const body = doc.createElement("div");
+  body.setAttribute("data-testid", "twitterArticleRichTextView");
+  body.textContent = "引用文章正文";
+  const player = doc.createElement("div");
+  player.setAttribute("data-testid", "videoPlayer");
+  const group = doc.createElement("div");
+  group.setAttribute("role", "radiogroup");
+  const option = doc.createElement("div");
+  option.setAttribute("role", "radio");
+  group.appendChild(option);
+  quote.append(title, body, player, group);
+  const { art } = buildCell(mainPostFixture(id, "主帖正文", [quote]));
+  const data = poc.extractFromArticle(art, id);
+  assert.equal(data.text, "主帖正文");
+  assert.equal(data.quote?.text, "引用的正文");
+  assert.equal(data.rich.article, false);
+  assert.equal(data.rich.video, false);
+  assert.equal(data.rich.poll, false);
+  assert.equal(data.rich.card, false);
+});
+
 test("提取：半水合图片（无 src）跳过，不渲染空字符串", () => {
   const { poc } = loadPoc();
   const id = makeStatusId();
