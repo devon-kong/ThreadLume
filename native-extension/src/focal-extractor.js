@@ -49,11 +49,12 @@ export function photoUrlsIn(scope, ...excludes) {
   return [...new Set(urls)];
 }
 
-// Quote cards are div[role="link"]; so are website cards. A quote card nests
-// the quoted author or text (or is the last role=link after media/cards —
-// X renders quotes at the bottom), and never contains card.wrapper.
+// Quote cards are div[role="link"]; so are website cards. A quote card may
+// itself contain a website card, so a nested card.wrapper cannot by itself
+// disqualify the containing semantic quote.
 export function findQuoteNode(art) {
-  const isCard = (n) => n.getAttribute("data-testid") === "card.wrapper" || Boolean(n.querySelector('[data-testid="card.wrapper"]'));
+  const isCard = (n) => n.getAttribute("data-testid") === "card.wrapper"
+    || (Boolean(n.querySelector('[data-testid="card.wrapper"]')) && !n.querySelector('[data-testid="User-Name"]'));
   const candidates = [...art.querySelectorAll('div[role="link"]')].filter((n) => !isCard(n));
   return candidates.find((n) => n.querySelector('[data-testid="tweetText"], [data-testid="User-Name"]'))
     || candidates[candidates.length - 1]
@@ -61,9 +62,13 @@ export function findQuoteNode(art) {
 }
 
 // X Articles render title/body in dedicated containers (not tweetText).
-export function extractArticle(art) {
-  const title = art.querySelector('[data-testid="twitter-article-title"]')?.innerText?.trim() || null;
-  const body = art.querySelector('[data-testid="twitterArticleRichTextView"]');
+function queryOutside(root, selector, excluded) {
+  return [...root.querySelectorAll(selector)].find((node) => !excluded?.contains(node)) || null;
+}
+
+export function extractArticle(art, quoteNode = null) {
+  const title = queryOutside(art, '[data-testid="twitter-article-title"]', quoteNode)?.innerText?.trim() || null;
+  const body = queryOutside(art, '[data-testid="twitterArticleRichTextView"]', quoteNode);
   if (!body) return null;
   return { title, text: body.innerText || "", photos: photoUrlsIn(body) };
 }
@@ -132,24 +137,27 @@ export function extractFromArticle(art, focalId) {
     .map((a) => a.getAttribute("href"))
     .find((h) => /^\/[^/]+$/.test(h));
   const nameNode = art.querySelector('[data-testid="User-Name"]');
-  // rich media the pane mirrors but never hides — the native cell stays visible
-  const video = Boolean(art.querySelector('[data-testid="videoPlayer"]')) || Boolean(art.querySelector("video"));
-  const poll = Boolean(art.querySelector('[data-testid="poll"], [role="group"] [data-testid="vote"]'));
-  const cardNode = art.querySelector('[data-testid="card.wrapper"]');
   const quoteNode = findQuoteNode(art);
+  // rich media the pane mirrors but never hides — the native cell stays visible
+  const video = Boolean(queryOutside(art, '[data-testid="videoPlayer"], video', quoteNode));
+  // Current X polls expose role="radio" choices in a radiogroup and may omit
+  // the older poll/vote testids. Exclude a nested quote: the label is shared
+  // by the instant preview and the default reader, while X owns voting state.
+  const poll = Boolean(queryOutside(art, '[data-testid="poll"], [role="group"] [data-testid="vote"], [role="radiogroup"] [role="radio"]', quoteNode));
+  const cardNode = queryOutside(art, '[data-testid="card.wrapper"]', quoteNode);
   const quoteAuthorNode = quoteNode?.querySelector('[data-testid="User-Name"]');
   const quoteAuthor = quoteAuthorNode?.innerText.split("\n")[0] || null;
   let quoteText = quoteNode?.querySelector('[data-testid="tweetText"]')?.innerText || "";
   if (quoteAuthor && quoteText.trim().startsWith(quoteAuthor.trim())) {
     quoteText = quoteText.trim().slice(quoteAuthor.trim().length).replace(/^\s+/, "");
   }
-  const article = extractArticle(art);
+  const article = extractArticle(art, quoteNode);
   let text, textSource;
   if (article) {
     text = article.title ? `${article.title}\n\n${article.text}` : article.text;
     textSource = "article";
   } else {
-    const textNode = art.querySelector('[data-testid="tweetText"]');
+    const textNode = queryOutside(art, '[data-testid="tweetText"]', quoteNode);
     text = textNode ? textNode.innerText : "";
     textSource = "tweetText";
     if (!textNode) {
