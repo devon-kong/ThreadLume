@@ -15,8 +15,8 @@
 // in any form. Bundles are scanned for forbidden markers at build time and the
 // build fails loudly if any appear; tests/native re-verifies independently.
 //
-// Bundle: esbuild (provided by the existing vite toolchain — no new runtime
-// dependency), IIFE, unminified so reviewers and tests can read the artifact.
+// Bundle: esbuild (a direct devDependency), IIFE, unminified so reviewers and
+// tests can read the artifact.
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -50,7 +50,7 @@ let build;
 try {
   ({ build } = await import("esbuild"));
 } catch {
-  throw new Error("esbuild not found — run `npm install` first (esbuild ships with the vite toolchain)");
+  throw new Error("esbuild not found — run `npm install` first (esbuild is a direct devDependency)");
 }
 
 rmSync(dist, { recursive: true, force: true });

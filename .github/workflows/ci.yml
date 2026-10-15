@@ -10,8 +10,8 @@ permissions:
   contents: read
 
 jobs:
-  legacy:
-    name: Legacy (原版扩展 + 站点 demo)
+  native:
+    name: Native (当前产品：C1-R 原生双栏阅读器)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,10 +20,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm test
+      - run: npm run build
+      - run: npm run test:native
 
   exploration:
-    name: Exploration (R3/R3-R/R4 实验套件)
+    name: Exploration (R3/R3-R PoC 回归套件)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,15 +34,3 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run test:r3-r
-
-  native:
-    name: Native (M1 工程底座)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run test:native

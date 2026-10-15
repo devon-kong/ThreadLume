@@ -1,10 +1,12 @@
 // M1-A2 build-isolation verification: the Native build must not carry any
-// Legacy private-API bridge path, and both build outputs must stay
-// independently installable. All checks run against the real build artifacts
-// (and the Legacy source manifest, which must remain untouched on disk).
+// Legacy private-API bridge path, and the build outputs must stay independently
+// installable. All checks run against the real build artifacts. (The Legacy
+// source tree was archived from the worktree in S2-20261015; the legacy
+// *path* stays reserved, and the historic manifest assertions live in
+// archive/peek-before-source-prune-20261015.)
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { nativeSource, NATIVE_DIST } from "./native-env.mjs";
@@ -86,30 +88,13 @@ test("隔离：无 fetch/XHR 的动态调用形态（eval/new Function/Function 
   assert.equal(/\beval\s*\(/.test(src), false, "no eval");
 });
 
-// ---------- Legacy build stays intact and independently installable ----------
+// ---------- The reserved Legacy path stays unreachable ----------
 
-test("G1：Legacy 源 manifest 仍声明 MAIN world page-bridge（原样保留）", () => {
-  const manifest = JSON.parse(readFileSync(join(repoRoot, "extension", "manifest.json"), "utf8"));
-  const main = (manifest.content_scripts ?? []).find((cs) => cs.world === "MAIN");
-  assert.ok(main, "Legacy keeps its MAIN world entry");
-  assert.ok(main.js.includes("page-bridge.js"), "Legacy keeps page-bridge.js");
-  assert.equal(manifest.permissions.includes("storage"), true, "Legacy keeps its permissions");
-});
-
-test("G1：Legacy 源文件存在且未被删除（page-bridge.js / content.js / core.js）", () => {
-  assert.equal(existsSync(join(repoRoot, "extension", "page-bridge.js")), true);
-  assert.equal(existsSync(join(repoRoot, "extension", "content.js")), true);
-  assert.equal(existsSync(join(repoRoot, "extension", "core.js")), true);
-});
-
-test("G9：两个构建产物互不覆盖（Native 构建后 Legacy 产物路径独立）", () => {
+test("G9：Native 构建不触碰保留的 Legacy 产物路径（路径守卫）", () => {
   // The native build must never write outside dist-extension-native; verify
-  // by asserting the two dist dirs resolve to distinct paths.
+  // by asserting the reserved legacy dist dir resolves to a distinct path.
   const legacyDist = join(repoRoot, "dist-extension");
   assert.notEqual(resolve(NATIVE_DIST), resolve(legacyDist));
-  // Legacy build pipeline still targets its own directory:
-  const buildScript = readFileSync(join(repoRoot, "scripts", "build-extension.mjs"), "utf8");
-  assert.match(buildScript, /dist-extension/);
   const nativeScript = readFileSync(join(repoRoot, "scripts", "build-extension-native.mjs"), "utf8");
   assert.match(nativeScript, /dist-extension-native/);
   // and the native build keeps a hard guard against targeting the legacy path

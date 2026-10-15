@@ -1,6 +1,6 @@
 {
   "name": "tuzai-x-popover",
-  "version": "0.8.10",
+  "version": "0.10.0",
   "private": true,
   "license": "MIT",
   "repository": {
@@ -13,28 +13,16 @@
   "homepage": "https://github.com/DoraRabbitYan/peek#readme",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "npm run build:preview && npm run build:extension",
-    "build:preview": "vite build && node scripts/prepare-sites-build.mjs",
-    "build:extension": "node scripts/build-extension.mjs",
+    "build": "npm run build:current",
+    "build:current": "npm run build:native:lab",
     "build:native": "node scripts/build-extension-native.mjs",
-    "preview": "vite preview",
-    "test": "npm run build:preview && npm run build:extension && node --test tests/extension-core.test.mjs tests/follow.test.mjs tests/sites-worker.test.mjs tests/acceptance-mentions.test.mjs tests/acceptance-subreplies.test.mjs tests/acceptance-polls.test.mjs tests/acceptance-media.test.mjs tests/acceptance-reload.test.mjs tests/bookmark-folders.test.mjs",
-    "test:sites": "node --test tests/sites-worker.test.mjs",
+    "build:native:lab": "PEEK_LAYOUT_ADAPTER=1 node scripts/build-extension-native.mjs",
+    "test": "npm run test:native",
     "test:native": "npm run build:native && npm run build:native:lab && node --test tests/native/*.test.mjs",
-    "test:r3-r": "node --test exploration-poc/r3/r3-poc-units.test.mjs exploration-poc/r3-r/tests/*.test.mjs",
-    "build:native:lab": "PEEK_LAYOUT_ADAPTER=1 node scripts/build-extension-native.mjs"
-  },
-  "dependencies": {
-    "@phosphor-icons/web": "^2.1.2",
-    "@vitejs/plugin-react": "5.0.4",
-    "hls.js": "^1.7.0",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "vite": "6.4.3"
+    "test:r3-r": "node --test exploration-poc/r3/r3-poc-units.test.mjs exploration-poc/r3-r/tests/*.test.mjs"
   },
   "devDependencies": {
-    "@phosphor-icons/core": "^2.1.1",
+    "esbuild": "^0.25.12",
     "jsdom": "^30.1.2",
     "sharp": "^0.35.3"
   }
