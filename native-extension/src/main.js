@@ -14,6 +14,8 @@
 // guard. All module top-level code is state-only; the guard below runs before
 // any listener is registered, so a double injection cannot double-bind.
 
+import { initAIReader } from "./ai/controller.js";
+
 import { NS, PANE_ID, statusIdFromPath, isDetailPath } from "./constants.js";
 import { initNavigationSession } from "./navigation-session.js";
 import { startRouteObservation, checkRoute, setInitialStatusId } from "./route-observer.js";
@@ -54,6 +56,7 @@ import {
   initNavigationSession();
   startRouteObservation();
   initLayoutAdapter(); // registers the MAIN-world message bridge
+  initAIReader(); // async AI work starts after native layout activation
 
   if (isDetailPath()) {
     setInitialStatusId(statusIdFromPath());

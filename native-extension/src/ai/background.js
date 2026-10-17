@@ -1,0 +1,166 @@
+import {AIService,allowedSender,validateParams,PARAM_KEYS} from './service.js';
+import {AIError,fail,parseSSE,completionOptions} from './protocol.js';
+const BASE='https://www.doubao.com';
+const PATHS=new Set(['/samantha/aireader/resource_content/create','/samantha/chat/completion']);
+let checkTask=null,autoRestoring=null,autoStarting=null,setupOpening=null;
+const stats={workerStartedAt:Date.now(),requests:0,stages:[]};
+async function transport(path,body,signal,params){
+ if(!PATHS.has(path))fail('UNSUPPORTED_OPERATION');
+ if(!await chrome.permissions.contains({origins:[BASE+'/*']}))fail('PERMISSION_REQUIRED');
+ const keys=validateParams(params),requestId=crypto.randomUUID(),started=Date.now();stats.requests++;
+ const record={requestId,operation:path.endsWith('/create')?'upload':body.messages?.[0]?.content_type,started};
+ stats.stages.push(record);stats.stages=stats.stages.slice(-40);
+ try{
+  const response=await fetch(BASE+path+'?'+new URLSearchParams(keys),{method:'POST',credentials:'include',redirect:'error',headers:{'Content-Type':'application/json','Agw-Js-Conv':'str'},body:JSON.stringify(body),signal:AbortSignal.any([signal,AbortSignal.timeout(120000)])});
+  record.httpStatus=response.status;
+  if(!response.ok)fail(response.status===401?'LOGIN_REQUIRED':response.status===429?'RATE_LIMITED':response.status===403?'ACCESS_REJECTED':'SERVER_ERROR');
+  const text=await response.text();if(text.length>2000000)fail('RESPONSE_LIMIT');record.elapsedMs=Date.now()-started;
+  if(path.endsWith('/completion')){record.fin=/"event_type"\s*:\s*2003/.test(text);record.err=/"event_type"\s*:\s*2005/.test(text);}
+  return text;
+ }catch(e){const code=e instanceof AIError?e.code:e.name==='TimeoutError'?'TIMEOUT':signal.aborted?'CANCELLED':'NETWORK_ERROR';record.error=code;throw new AIError(code);}
+}
+const service=new AIService({storage:chrome.storage,request:transport});
+const ready=(async()=>{await chrome.storage.session.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'});await service.init();})();
+chrome.action.onClicked.addListener(()=>chrome.runtime.openOptionsPage());
+function safeError(e){return {ok:false,error:e.name==='AbortError'?'CANCELLED':e instanceof AIError?e.code:'INTERNAL_ERROR'};}
+async function status(){
+ const connection=await service.status();
+ const permission=await chrome.permissions.contains({origins:[BASE+'/*']});
+ const themeMemory=await chrome.storage.session.get('aiXTheme');
+ const setup=(await chrome.storage.session.get('aiSetup')).aiSetup;
+ const tab=Number.isInteger(setup)?await chrome.tabs.get(setup).catch(()=>null):null;
+ const setupOpen=!!tab?.url?.startsWith(BASE+'/');
+ if(Number.isInteger(setup)&&!setupOpen)await chrome.storage.session.remove('aiSetup');
+ return {...connection,...(!permission?{state:'PERMISSION_REQUIRED'}:{}),setupOpen,xTheme:themeMemory.aiXTheme,checking:!!checkTask,diagnostics:stats};
+}
+async function auditVisibleBoundary(){
+ if(!service.context)return;
+ const owned=(await chrome.storage.session.get('aiSetup')).aiSetup;
+ const pages=await chrome.tabs.query({url:BASE+'/*'});
+ if(pages.some(t=>!t.discarded&&t.id!==owned))await service.invalidateContext();
+}
+async function observeVisibleBoundary(tab){
+ if(!service.context||!tab?.url?.startsWith(BASE+'/')||tab.discarded)return;
+ const epoch=service.epoch,context=service.context;
+ const owned=(await chrome.storage.session.get('aiSetup')).aiSetup;
+ // The event already established this page existed. A later query may miss a
+ // page that immediately navigated away or closed; keep the observed boundary.
+ if(tab.id!==owned&&epoch===service.epoch&&context===service.context)await service.invalidateContext();
+}
+function openSetup(){
+ return setupOpening??=(async()=>{
+ if(!await chrome.permissions.contains({origins:[BASE+'/*']}))fail('PERMISSION_REQUIRED');
+ const old=(await chrome.storage.session.get('aiSetup')).aiSetup;
+ if(Number.isInteger(old)){
+  try{const t=await chrome.tabs.get(old);if(t.url?.startsWith(BASE+'/')){await chrome.tabs.update(old,{active:true});return status();}}catch{/* closed */}
+ }
+ const tab=await chrome.tabs.create({url:BASE+'/chat/',active:true});await chrome.storage.session.set({aiSetup:tab.id});return status();
+ })().finally(()=>{setupOpening=null;});
+}
+function maybeAutoRestore(){
+ return autoStarting??=(async()=>{
+ await ready;
+ const preferences=await service.preferences();
+ if((!preferences.summary&&!preferences.mindmap)||service.context||!service.connection.enabled||!await chrome.permissions.contains({origins:[BASE+'/*']}))return;
+ const memory=await chrome.storage.session.get(['aiAutoAttempted','aiAutoRestore']);
+ if(memory.aiAutoAttempted)return;
+ await chrome.storage.session.set({aiAutoAttempted:true,aiAutoRestore:true});
+ await openSetup();
+ const id=(await chrome.storage.session.get('aiSetup')).aiSetup;
+ const tab=Number.isInteger(id)?await chrome.tabs.get(id).catch(()=>null):null;
+ if(tab?.status==='complete')await finishAutoRestore();
+ })().finally(()=>{autoStarting=null;});
+}
+async function finishAutoRestore(){
+ if(autoRestoring)return autoRestoring;
+ if(!(await chrome.storage.session.get('aiAutoRestore')).aiAutoRestore)return;
+ autoRestoring=check({capture:true}).catch(()=>{}).finally(async()=>{await chrome.storage.session.remove('aiAutoRestore');autoRestoring=null;});return autoRestoring;
+}
+async function captureParams(){
+ const id=(await chrome.storage.session.get('aiSetup')).aiSetup;if(!Number.isInteger(id))fail('NEEDS_INITIALIZATION');
+ const tab=await chrome.tabs.get(id).catch(()=>null);if(!tab||!tab.url?.startsWith(BASE+'/'))fail('SETUP_PAGE_CHANGED');
+ const results=await chrome.scripting.executeScript({target:{tabId:id},world:'MAIN',func:async(keys)=>{
+  if(location.origin!=='https://www.doubao.com')return {error:'WRONG_ORIGIN'};
+  const latest=()=>performance.getEntriesByType('resource').filter(e=>{try{const u=new URL(e.name);return u.origin===location.origin&&u.pathname==='/samantha/notice/info';}catch{return false;}}).at(-1);
+  let entry=latest();
+  if(!entry)entry=await new Promise(resolve=>{
+   const observer=new PerformanceObserver(()=>{const value=latest();if(value){clearTimeout(timer);observer.disconnect();resolve(value);}});
+   const timer=setTimeout(()=>{observer.disconnect();resolve(null);},15000);observer.observe({type:'resource',buffered:true});
+  });
+  if(!entry)return {error:'NORMAL_CLIENT_REQUEST_NOT_OBSERVED'};
+  const source=new URL(entry.name),params={};for(const key of keys){const value=source.searchParams.get(key);if(value!==null)params[key]=value;}
+  return {params};
+ },args:[PARAM_KEYS]});
+ const result=results[0]?.result;if(!result?.params)fail(result?.error||'PARAMETERS_UNAVAILABLE');
+ return {params:validateParams(result.params),tabId:id};
+}
+async function probe(params,signal){
+ const body={messages:[{content_type:2001,content:JSON.stringify({text:'请只回复 OK'}),attachments:[],references:[]}],completion_option:completionOptions(),reply_id:'0',conversation_id:'0',section_id:'0',local_message_id:crypto.randomUUID(),local_conversation_id:'0'};
+ const text=await transport('/samantha/chat/completion',body,signal,params),parsed=parseSSE(text);
+ if(parsed.text.trim()!=='OK')fail('PROBE_OUTPUT_UNEXPECTED');
+ return parsed;
+}
+async function check({capture=false}={}){
+ if(checkTask)return checkTask.promise;
+ const abort=new AbortController();
+ checkTask={abort,promise:null};const current=checkTask,epoch=service.epoch,context=service.context;
+ current.promise=(async()=>{
+  try{
+   let params,tabId;
+   if(capture){({params,tabId}=await captureParams());}
+   else {if(!service.context)fail('NEEDS_INITIALIZATION');params=service.context.params;}
+   if(abort.signal.aborted||epoch!==service.epoch||context!==service.context)fail('CANCELLED');
+   await probe(params,abort.signal);if(abort.signal.aborted||epoch!==service.epoch||context!==service.context)fail('CANCELLED');
+   await service.connect(params); // A successful explicit check establishes a new connection partition.
+   // Close only the exact, still-Doubao tab created by this connection.
+   if(Number.isInteger(tabId)){
+    const tab=await chrome.tabs.get(tabId).catch(()=>null);
+    if(tab?.url?.startsWith(BASE+'/'))await chrome.tabs.remove(tabId);
+    await chrome.storage.session.remove('aiSetup');
+   }
+   return status();
+  }catch(e){if(!abort.signal.aborted&&epoch===service.epoch&&context===service.context&&e.code!=='CANCELLED')service.error=e.code||'NETWORK_ERROR';throw e;}
+  finally{if(checkTask===current)checkTask=null;}
+ })();return current.promise;
+}
+chrome.permissions.onRemoved.addListener(()=>{checkTask?.abort.abort();service.disconnect().catch(()=>{});});
+chrome.runtime.onMessage.addListener((m,sender,respond)=>{
+ if(!m||m.ns!=='peek-ai-v7'||typeof m.action!=='string'||!allowedSender(sender,chrome.runtime.id,m.action))return false;
+ const owner=`${sender.tab?.id??'settings'}:${sender.documentId??sender.frameId}:${String(m.instance||'').slice(0,100)}`;
+ const dispatch=async()=>{
+  await ready;
+  switch(m.action){
+   case 'status':if(sender.tab&&['light','dark'].includes(m.xTheme))await chrome.storage.session.set({aiXTheme:m.xTheme});return status();
+   case 'preferences':return service.preferences();
+   case 'savePreferences':return service.savePreferences(m.preferences);
+   case 'openSettings':await chrome.runtime.openOptionsPage();return null;
+   case 'openSetup':return openSetup();
+   case 'connect':return service.context?check():openSetup();
+   case 'capture':return check({capture:true});
+   case 'check':return check();
+   case 'cancelCheck':checkTask?.abort.abort();return null;
+   case 'disconnect':checkTask?.abort.abort();return service.disconnect();
+   case 'cancel':service.cancel(owner);return null;
+   case 'cached':
+   case 'generate':{
+    await auditVisibleBoundary();
+    if(typeof m.instance!=='string'||!/^[\w-]{1,100}$/.test(m.instance))fail('INVALID_INSTANCE');
+    const u=new URL(sender.url),s=u.pathname.match(/^\/[^/]+\/status\/(\d+)/);if(s?.[1]!==m.input?.focusId)fail('FOCUS_MISMATCH');
+    if(typeof m.connectionId!=='string'||m.connectionId!==service.connection.partition)fail('CONNECTION_CHANGED');
+    return m.action==='cached'?service.cached(m.input,m.mode):service.generate(owner,m.input,m.mode);
+   }
+   default:fail('INVALID_MESSAGE');
+  }
+ };
+ dispatch().then(value=>respond({ok:true,value})).catch(e=>respond(safeError(e)));return true;
+});
+chrome.tabs.onRemoved.addListener(tabId=>{for(const job of service.jobs.values())for(const owner of [...job.owners])if(owner.startsWith(tabId+':'))service.cancel(owner);});
+
+// Merely observe public tab lifecycle; never wake or inject a user-owned tab.
+chrome.tabs.onActivated.addListener(async({tabId})=>{await ready;const t=await chrome.tabs.get(tabId).catch(()=>null);await observeVisibleBoundary(t);});
+chrome.tabs.onUpdated.addListener(async(tabId,change,tab)=>{if((change.url||change.status==='complete')&&tab.url?.startsWith(BASE+'/')){await ready;await observeVisibleBoundary(tab);if(change.status==='complete')await finishAutoRestore();}});
+
+// A single visible initialization attempt per browser memory cycle; no retry
+// timer, alarms, panel polling or hidden documents keep the worker alive.
+chrome.runtime.onStartup.addListener(()=>maybeAutoRestore().catch(()=>{}));
+ready.then(()=>maybeAutoRestore()).catch(()=>{});

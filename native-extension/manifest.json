@@ -1,19 +1,33 @@
 {
   "manifest_version": 3,
   "name": "Peek Native",
-  "version": "0.10.0",
-  "description": "Peek 原生双栏阅读器：详情页焦点帖原生固定在左栏，评论与互动由 X 原生承载于右栏；时间线点击即时预览，进入后由局部 React 布局适配接管。零私有接口桥接、零构造请求、零代点击、零额外权限。",
+  "version": "0.11.0",
+  "description": "Peek 原生双栏阅读器：保留 X 原生视频与评论；按需连接豆包，为可用字幕视频生成摘要、时间轴和脑图，为完整长文生成摘要。",
   "content_scripts": [
     {
-      "matches": ["https://x.com/*", "https://twitter.com/*"],
-      "js": ["layout-adapter-main.js"],
+      "matches": [
+        "https://x.com/*",
+        "https://twitter.com/*"
+      ],
+      "js": [
+        "layout-adapter-main.js"
+      ],
       "run_at": "document_start",
       "world": "MAIN"
     },
     {
-      "matches": ["https://x.com/*", "https://twitter.com/*"],
-      "js": ["vendor/brand/icon.js", "content.js"],
-      "css": ["content.css"],
+      "matches": [
+        "https://x.com/*",
+        "https://twitter.com/*"
+      ],
+      "js": [
+        "vendor/brand/icon.js",
+        "content.js"
+      ],
+      "css": [
+        "content.css",
+        "ai.css"
+      ],
       "run_at": "document_idle"
     }
   ],
@@ -22,5 +36,22 @@
     "32": "icons/icon32.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "storage",
+    "scripting"
+  ],
+  "optional_host_permissions": [
+    "https://www.doubao.com/*"
+  ],
+  "background": {
+    "service_worker": "ai-background.js"
+  },
+  "options_ui": {
+    "page": "settings.html",
+    "open_in_tab": true
+  },
+  "action": {
+    "default_title": "Peek 设置"
   }
 }

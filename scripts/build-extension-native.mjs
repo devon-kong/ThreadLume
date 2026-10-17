@@ -106,6 +106,11 @@ await build({
   banner: { js: "// Peek Native — MAIN-world layout adapter. Source: native-extension/src/layout-adapter/*" },
 });
 
+// AI background and settings are separate bundles. Neither is imported by MAIN.
+for (const [entry, output] of [["background.js", "ai-background.js"], ["settings.js", "ai-settings.js"]]) {
+  await build({ ...COMMON, entryPoints: [path.join(source, "src", "ai", entry)], outfile: path.join(dist, output) });
+}
+
 // Build-time isolation gate: no artifact may carry any Legacy-bridge marker.
 // Keep this list in sync with tests/native/native-isolation.test.mjs.
 const FORBIDDEN = [
@@ -134,18 +139,31 @@ for (const file of ["content.js", "layout-adapter-main.js"]) {
 
 // Manifest: copied verbatim from the source and validated — the source
 // manifest IS the product manifest (MAIN-world adapter first at
-// document_start, ISOLATED carrier at document_idle, zero extra powers).
+// document_start, ISOLATED carrier at document_idle, AI optional-domain boundary).
 const manifest = JSON.parse(readFileSync(path.join(source, "manifest.json"), "utf8"));
 const mainEntry = (manifest.content_scripts ?? []).find((c) => c.world === "MAIN");
 if (!mainEntry || !mainEntry.js?.includes("layout-adapter-main.js") || mainEntry.run_at !== "document_start") {
   throw new Error("native-extension/manifest.json must register layout-adapter-main.js as a document_start MAIN-world content script");
 }
-if ((manifest.permissions?.length ?? 0) + (manifest.host_permissions?.length ?? 0) > 0 || manifest.background) {
-  throw new Error("native-extension/manifest.json must stay zero-permission with no background worker");
+if (JSON.stringify(manifest.permissions) !== JSON.stringify(["storage", "scripting"]) ||
+    JSON.stringify(manifest.optional_host_permissions) !== JSON.stringify(["https://www.doubao.com/*"]) ||
+    manifest.host_permissions || manifest.optional_permissions || manifest.background?.service_worker !== "ai-background.js" || manifest.web_accessible_resources) {
+  throw new Error("Native AI permission boundary violated");
+}
+const aiWorker = readFileSync(path.join(dist, "ai-background.js"), "utf8");
+const aiSettings = readFileSync(path.join(dist, "ai-settings.js"), "utf8");
+for (const [file, code] of [["ai-background.js", aiWorker], ["ai-settings.js", aiSettings]]) {
+  const rules = FORBIDDEN.filter(re => !/fetch|scripting/.test(re.source));
+  if (file === "ai-settings.js") rules.push(/\bfetch\s*\(/, /chrome\.(tabs|scripting)/);
+  else rules.push(/chrome\.(cookies|webRequest|declarativeNetRequest)/);
+  const offenders = rules.filter(re => re.test(code));
+  if (offenders.length) throw new Error(`${file} violated AI isolation: ${offenders}`);
 }
 cpSync(path.join(source, "manifest.json"), path.join(dist, "manifest.json"));
 
 cpSync(path.join(source, "content.css"), path.join(dist, "content.css"));
+cpSync(path.join(source, "ai.css"), path.join(dist, "ai.css"));
+cpSync(path.join(source, "settings.html"), path.join(dist, "settings.html"));
 
 // Brand icon: same inline data-URL approach as the Legacy build, generated
 // locally before content.js so an extension reload never depends on an
