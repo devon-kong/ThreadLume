@@ -44,3 +44,57 @@ test('切帖拒绝旧焦点、seek 保留暂停且限制有效时点',async()=>{
 test('用户 CC 显示再隐藏：即使结束仍hidden，不能恢复覆盖新选择',async()=>{
  const d=video();const p=collectCaptions(d.v,{timeoutMs:15});d.list.dispatchEvent(new d.Event('change'));d.track.mode='showing';d.list.dispatchEvent(new d.Event('change'));d.track.mode='hidden';d.list.dispatchEvent(new d.Event('change'));await p;assert.equal(d.track.mode,'hidden');
 });
+
+test('字幕：排队/其他轨change不冒充用户改变选中轨，仍恢复disabled',async()=>{
+ const d=video('disabled',[{startTime:0,endTime:1,text:'native caption'}]);
+ const other={kind:'captions',language:'fr',mode:'disabled',cues:[]};d.list[1]=other;d.list.length=2;
+ const pending=collectCaptions(d.v,{timeoutMs:100,settleMs:5});
+ // A queued notification and another track's mode change can arrive while
+ // the selected track still has our temporary hidden mode.
+ d.list.dispatchEvent(new d.Event('change'));
+ other.mode='showing';d.list.dispatchEvent(new d.Event('change'));
+ const result=await pending;
+ assert.equal(result.cues[0].text,'native caption');
+ assert.equal(d.track.mode,'disabled');assert.equal(other.mode,'showing');
+ assert.equal(d.v.paused,true);assert.equal(d.v.currentTime,0);
+});
+
+test('字幕：取消后重入不被旧读取排队的mode通知阻止恢复',async()=>{
+ const d=video('disabled',[{startTime:0,endTime:1,text:'native caption'}]);
+ let mode='disabled';
+ Object.defineProperty(d.track,'mode',{get:()=>mode,set:value=>{
+   if(value===mode)return;mode=value;
+   setTimeout(()=>d.list.dispatchEvent(new d.Event('change')),0);
+ }});
+ const abort=new AbortController();
+ const first=collectCaptions(d.v,{signal:abort.signal,settleMs:15});
+ abort.abort();
+ const second=collectCaptions(d.v,{settleMs:15});
+ await assert.rejects(first,{name:'AbortError'});
+ assert.equal((await second).cues.length,1);
+ assert.equal(d.track.mode,'disabled');
+ assert.equal(d.v.paused,true);assert.equal(d.v.currentTime,0);
+});
+
+test('字幕：暂停的非活跃区间异步填入cues无cuechange也可取得',async()=>{
+ const d=video();
+ const pending=collectCaptions(d.v,{timeoutMs:350,settleMs:5});
+ // TextTrack cues are not observable mutations; adding cues outside the
+ // current active range need not produce cuechange or a track-element load.
+ setTimeout(()=>{d.track.cues=[{startTime:24.3,endTime:110.433,text:'all native cues'}];},15);
+ const result=await pending;
+ assert.equal(result?.cues.length,1);assert.equal(d.track.mode,'disabled');
+ assert.equal(d.v.paused,true);assert.equal(d.v.currentTime,0);
+});
+
+test('字幕：用户原生CC点击即使仍为hidden也释放临时模式所有权',async()=>{
+ for(const [target,expected] of [['captions','hidden'],['play','disabled']]){
+  const d=video('disabled',[{startTime:0,endTime:1,text:'native captions'}]);
+  const controls=new JSDOM('<div data-testid="videoPlayer"><button data-testid="captions">CC</button><button data-testid="play">Play</button></div>').window.document;
+  d.v.closest=()=>controls.querySelector('[data-testid="videoPlayer"]');
+  const pending=collectCaptions(d.v,{timeoutMs:100,settleMs:15});
+  controls.querySelector('[data-testid="'+target+'"]').click();
+  await pending;assert.equal(d.track.mode,expected);
+  assert.equal(d.v.paused,true);assert.equal(d.v.currentTime,0);
+ }
+});

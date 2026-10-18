@@ -1,7 +1,7 @@
 import {send,errorText} from './client.js';
 import {DEFAULTS,normalizePreferences} from './preferences.js';
 import {el,button} from './dom.js';
-const d=document,root=d.getElementById('peek-settings');let prefs={...DEFAULTS},connection={state:'DISCONNECTED'},busy=false,notice='',undo=null,lastFailed=null,saveQueue=Promise.resolve(),autoCaptured=false,saveRevision=0,pendingSaves=0,confirmedPrefs={...DEFAULTS};
+const d=document,root=d.getElementById('peek-settings');let prefs={...DEFAULTS},connection={state:'DISCONNECTED'},busy=false,notice='',undo=null,lastFailed=null,saveQueue=Promise.resolve(),autoCaptured=false,saveRevision=0,pendingSaves=0,refreshRevision=0,confirmedPrefs={...DEFAULTS};
 function applyTheme(){d.documentElement.dataset.peekAiTheme=prefs.theme==='system'?(connection.xTheme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')):prefs.theme;}
 function toggle(name,label,description,disabled=false){
  const input=el(d,'input',{type:'checkbox',id:'pk-pref-'+name,'aria-label':label,...(disabled?{disabled:true}:{})});input.checked=prefs[name];input.addEventListener('change',()=>save({...prefs,[name]:input.checked}));
@@ -9,7 +9,7 @@ function toggle(name,label,description,disabled=false){
 }
 function segmented(name,options){const group=el(d,'div',{class:'pk-segment','role':'group','aria-label':name==='theme'?'外观':'视频优先展示'});for(const [value,label] of options){const b=button(d,label,()=>save({...prefs,[name]:value}));b.setAttribute('aria-pressed',String(prefs[name]===value));group.append(b);}return group;}
 async function save(next){
- const revision=++saveRevision;pendingSaves++;prefs=normalizePreferences(next);notice='正在保存…';applyTheme();render();
+ ++refreshRevision;const revision=++saveRevision;pendingSaves++;prefs=normalizePreferences(next);notice='正在保存…';applyTheme();render();
  saveQueue=saveQueue.then(async()=>{
   try{const saved=await send('savePreferences',{preferences:next});confirmedPrefs=saved;if(revision===saveRevision){prefs=saved;notice='更改已自动保存';lastFailed=null;}}
   catch{if(revision===saveRevision){prefs={...confirmedPrefs};notice=errorText('SAVE_FAILED');lastFailed=next;}}
@@ -17,7 +17,7 @@ async function save(next){
  });return saveQueue;
 }
 async function connectionAction(action){
- if(busy)return;busy=true;notice='';render();
+ if(busy)return;++refreshRevision;busy=true;notice='';render();
  try{
   if(action==='connect'){
    const granted=await chrome.permissions.request({origins:['https://www.doubao.com/*']});if(!granted)throw Error('PERMISSION_REQUIRED');
@@ -30,7 +30,7 @@ function render(){
  const active=d.activeElement?.id;root.replaceChildren();
  root.append(el(d,'h1',{text:'设置'}),el(d,'p',{class:'pk-ai-muted',text:'让 Peek 按你的习惯阅读'}));
  const state=busy?'CHECKING':connection.state,ready=state==='ready';
- const stateLabel=ready?'✓ 已连接':state==='CHECKING'?'◌ 检测中':['DISCONNECTED','PERMISSION_REQUIRED'].includes(state)?'○ 未连接':state==='LOGIN_REQUIRED'?'需要登录':state==='VERIFICATION_REQUIRED'?'需要验证':state==='NEEDS_INITIALIZATION'?'需要初始化':'连接中断';
+ const stateLabel=ready?'✓ 已连接':state==='CHECKING'?'◌ 检测中':['DISCONNECTED','PERMISSION_REQUIRED'].includes(state)?'○ 未连接':state==='LOGIN_REQUIRED'?'需要登录':state==='VERIFICATION_REQUIRED'?'请求被拒绝':state==='NEEDS_INITIALIZATION'?'需要初始化':'连接中断';
  const details=el(d,'div',{class:'pk-connection-name'},el(d,'div',{},el(d,'strong',{text:'豆包'}),el(d,'span',{class:ready?'pk-connected':'pk-connection-state',text:stateLabel})),el(d,'small',{text:ready?'使用当前浏览器的登录状态，无需常驻豆包网页':state==='CHECKING'?'正在确认连接与生成响应…':'连接浏览器已登录的豆包，自动生成摘要与脑图'}));
  const row=el(d,'div',{class:'pk-connection-row'},el(d,'span',{class:'pk-connection-icon',text:'↗','aria-hidden':true}),details);
  let primary;
@@ -56,6 +56,6 @@ function render(){
  const diagnostics=el(d,'details',{class:'pk-settings-diagnostics'},el(d,'summary',{text:'验收信息（不保活）'}),el(d,'pre',{text:JSON.stringify({version:chrome.runtime.getManifest().version,state:connection.state,diagnostics:connection.diagnostics},null,2)}));root.append(diagnostics);
  if(active)d.getElementById(active)?.focus();
 }
-async function refresh(){try{const [saved,state]=await Promise.all([send('preferences'),send('status')]);connection=state;if(!pendingSaves){prefs=saved;confirmedPrefs={...saved};}applyTheme();render();if(connection.setupOpen&&!busy&&!autoCaptured){autoCaptured=true;await connectionAction('capture');autoCaptured=true;}}catch(e){notice=errorText(e.message);render();}}
+async function refresh(){if(busy||pendingSaves)return;const revision=++refreshRevision;try{const [saved,state]=await Promise.all([send('preferences'),send('status')]);if(revision!==refreshRevision||busy)return;connection=state;if(!pendingSaves){prefs=saved;confirmedPrefs={...saved};}applyTheme();render();if(connection.setupOpen&&!['LOGIN_REQUIRED','VERIFICATION_REQUIRED'].includes(connection.state)&&!busy&&!autoCaptured){autoCaptured=true;await connectionAction('capture');autoCaptured=true;}}catch(e){if(revision!==refreshRevision||busy)return;notice=errorText(e.message);render();}}
 window.addEventListener('focus',refresh);matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme);
 refresh();

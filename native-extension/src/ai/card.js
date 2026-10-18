@@ -63,7 +63,12 @@ export function createCard({document,input,preferences,onRetry,onSettings,onClos
   const tools=el(document,'div',{class:'pk-ai-map-tools'},button(document,'缩小',()=>apply(.1*-1)),zoom,button(document,'放大',()=>apply(.1)),button(document,'适应',()=>{const graph=canvas.firstElementChild;const width=graph.getBoundingClientRect().width/scale,height=graph.getBoundingClientRect().height/scale;scale=Math.min(1,(canvas.clientWidth-36)/width,(innerHeight*.58)/height);apply(0);}));
   const apply=delta=>{scale=Math.max(.15,Math.min(2,scale+delta));canvas.firstElementChild.style.zoom=String(scale);zoom.textContent=Math.round(scale*100)+'%';};
   modal.append(el(document,'header',{},el(document,'h2',{text:input.title}),close),canvas,tools);document.body.append(modal);
-  modal.addEventListener('close',()=>{modal.remove();modal=null;prior?.focus();},{once:true});modal.showModal();close.focus();
+  const dialog=modal,view=document.defaultView;
+  // X consumes Escape before the native dialog cancel default can run.
+  // Own the key only while this dialog is open; the reader stays active.
+  const escape=event=>{if(event.key!=='Escape'||!dialog.isConnected||!dialog.open)return;event.preventDefault();event.stopImmediatePropagation();dialog.close();};
+  view.addEventListener('keydown',escape,true);
+  dialog.addEventListener('close',()=>{view.removeEventListener('keydown',escape,true);dialog.remove();if(modal===dialog)modal=null;if(prior?.isConnected)prior.focus();},{once:true});dialog.showModal();close.focus();
  }
  select(view);
  return {root,set(mode,state,value){states[mode]=state;if(state==='success'){results[mode]=value;delete errors[mode];}if(state==='error')errors[mode]=value;draw();},updatePreferences(value){prefs=value;draw();},destroy(){modal?.close();root.remove();onClose?.();},snapshot:()=>({view,states:{...states},results:{...results}})};

@@ -46,6 +46,20 @@ export function classifyBusiness(code){
  if([401,403,1001,1003].includes(Number(code)))return 'LOGIN_REQUIRED';
  return 'SERVICE_REJECTED';
 }
+// Intentionally export only bounded numeric metadata and fixed classes. Never
+// return response text, error_detail, challenge payloads or request parameters.
+export function businessDiagnostics(text){
+ try{for(const block of text.split(/\r?\n\r?\n/)){
+  const raw=block.split(/\r?\n/).filter(x=>x.startsWith('data:')).map(x=>x.slice(5).trimStart()).join('\n');if(!raw)continue;
+  const e=JSON.parse(raw),data=typeof e.event_data==='string'?JSON.parse(e.event_data):e.event_data;
+  if(e.event_type!==2005&&!(!e.event_type&&e.code))continue;
+  const code=Number(data?.code||e.code),message=data?.error_detail?.message||data?.message||e.message;
+  const value=typeof message==='string'?message:'';
+  const messageClass=/验证|校验|verify|captcha/i.test(value)?'verification':/额度|限流|频率|quota|rate.limit/i.test(value)?'limit':/登录|login|sign.in/i.test(value)?'login':/服务.*问题|服务.*异常|开小差|something went wrong/i.test(value)?'service_problem':'unclassified';
+  return {businessEvent:e.event_type===2005?2005:0,...(Number.isSafeInteger(code)&&code>=0&&code<1e10?{businessCode:code}:{}),messageClass};
+ }}catch{/* Diagnostics must not change transport/parser behavior. */}
+ return {};
+}
 export function parseSSE(text,mode='article',duration=Infinity){
  let finished=false,output='';const events=[],sections=new Map(),timeline=new Map();
  try{

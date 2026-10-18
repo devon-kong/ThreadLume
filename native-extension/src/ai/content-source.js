@@ -16,7 +16,7 @@ export function seekNative(video, milliseconds) {
 export function collectCaptions(video,{signal,timeoutMs=8000,settleMs=500,isCurrent=()=>true}={}) {
   return new Promise((resolve,reject)=>{
     if(signal?.aborted)return reject(abortError());
-    let selected=null,changed=false,userChanged=false,done=false,stableTimer=null,signature='',ownChangePending=true;
+    let selected=null,changed=false,userChanged=false,done=false,stableTimer=null,signature='';
     const list=video.textTracks, cleanups=[];
     const listen=(node,event,fn)=>{node?.addEventListener?.(event,fn);cleanups.push(()=>node?.removeEventListener?.(event,fn));};
     const finish=(value,error)=>{
@@ -50,9 +50,19 @@ export function collectCaptions(video,{signal,timeoutMs=8000,settleMs=500,isCurr
         finish({cues:latest,language:selected.language||'',duration:video.duration,completion:element?.readyState===2?'native-loaded':'available-cues-snapshot'});
       },element?.readyState===2?0:settleMs);
     };
-    const onChange=()=>{if(selected&&changed){if(ownChangePending&&selected.mode==='hidden')ownChangePending=false;else userChanged=true;}check();};
+    // List notifications may be queued by a cancelled reader or another track.
+    // Only an observed departure from our hidden mode relinquishes ownership;
+    // keep that decision if the user later switches back to hidden.
+    const onChange=()=>{if(selected&&changed&&selected.mode!=='hidden')userChanged=true;check();};
     const timer=setTimeout(()=>finish(null),timeoutMs);
+    // X may append non-active cues without cuechange or a <track> load event.
+    // Sample only during this bounded foreground read; finish always clears it.
+    const sampleTimer=setInterval(check,100);cleanups.push(()=>clearInterval(sampleTimer));
     listen(list,'addtrack',check);listen(list,'change',onChange);listen(list,'removetrack',()=>finish(null));
+    // X renders its own captions with mode=hidden too. A native CC click is
+    // therefore user intent even if the standard mode never changes value.
+    const captionButton=video.closest?.('[data-testid="videoPlayer"]')?.querySelector('[data-testid="captions"]');
+    listen(captionButton,'click',()=>{if(changed)userChanged=true;});
     for(const event of ['loadedmetadata','loadeddata','durationchange'])listen(video,event,check);
     for(const element of video.querySelectorAll?.('track')||[])listen(element,'load',check);
     listen(signal,'abort',()=>finish(null,abortError()));

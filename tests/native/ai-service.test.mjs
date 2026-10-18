@@ -51,3 +51,37 @@ test('结果缓存写入失败不丢成功内容、不伪造已缓存',async()=>
  const s=setup();await s.service.init();await s.service.connect({aid:'497858'});const old=s.storage.local.set;s.storage.local.set=async value=>{if(value.aiCache)throw Error('quota');return old(value);};
  const r=await s.service.generate('owner',input,'article');assert.equal(r.text,'done');assert.equal(r.cacheWarning,true);assert.equal(await s.service.cached(input,'article'),null);
 });
+
+test('验证/登录阻断跨Worker重建保留且不落盘，新连接清理旧阻断',async()=>{
+ for(const code of [710022004,401]){
+  const storage={local:area(),session:area()};let calls=0;
+  const request=async path=>{calls++;return path.endsWith('/create')?JSON.stringify({code:0,data:{id:'r'}}):'data: '+JSON.stringify({event_type:2005,event_data:{code}})+'\n\n';};
+  const first=new AIService({storage,request});await first.connect({aid:'497858'});
+  const expected=code===401?'LOGIN_REQUIRED':'VERIFICATION_REQUIRED';
+  await assert.rejects(first.generate('first',input,'article'),e=>e.code===expected);assert.equal(calls,2);
+  const restored=new AIService({storage,request});assert.equal((await restored.status()).state,expected);
+  await assert.rejects(restored.generate('new',{...input,text:'Uncached after restart'},'article'),e=>e.code===expected);assert.equal(calls,2);
+  assert.equal(JSON.stringify(await storage.local.get()).includes(expected),false);
+  await restored.connect({aid:'497858'});assert.equal((await restored.status()).state,'ready');
+  const clean=new AIService({storage,request});assert.equal((await clean.status()).state,'ready');
+ }
+});
+
+test('登录阻断仅属于当前分区；断开和上下文作废清理session阻断',async()=>{
+ const s=setup();await s.service.connect({aid:'497858'});
+ await s.storage.session.set({aiBlock:{partition:'other',code:'VERIFICATION_REQUIRED'}});
+ const unrelated=new AIService({storage:s.storage,request:s.request});assert.equal((await unrelated.status()).state,'ready');
+ await unrelated.setError('LOGIN_REQUIRED');await unrelated.disconnect();
+ assert.equal((await s.storage.session.get('aiBlock')).aiBlock,undefined);
+ await unrelated.connect({aid:'497858'});await unrelated.setError('VERIFICATION_REQUIRED');await unrelated.invalidateContext();
+ assert.equal((await s.storage.session.get('aiBlock')).aiBlock,undefined);assert.equal((await unrelated.status()).state,'CONTEXT_CHANGED');
+});
+
+test('旧登录阻断存储写入完成后不能覆盖重连状态',async()=>{
+ const s=setup();await s.service.connect({aid:'497858'});let release,started;
+ const waiting=new Promise(r=>started=r),gate=new Promise(r=>release=r),set=s.storage.session.set;
+ s.storage.session.set=async value=>{if(value.aiBlock){started();await gate;}return set(value);};
+ const blocked=s.service.setError('VERIFICATION_REQUIRED');await waiting;
+ const connecting=s.service.connect({aid:'497858'});release();await Promise.all([blocked,connecting]);
+ const restored=new AIService({storage:s.storage,request:s.request});assert.equal((await restored.status()).state,'ready');assert.equal((await s.storage.session.get('aiBlock')).aiBlock,undefined);
+});

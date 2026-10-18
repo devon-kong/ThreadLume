@@ -20,3 +20,12 @@ test('脑图安全结构、有界节点，禁止把危险源当 HTML；输入严
  assert.throws(()=>parseMindmap('no fenced map'),/INVALID_MINDMAP/);assert.throws(()=>parseMindmap('```mindmap\n'+ '- a\n'.repeat(501)+'```'),/MINDMAP_LIMIT/);
  assert.equal(validateInput(input).focusId,'123');assert.throws(()=>validateInput({...input,url:'https://evil.test/123'}),/INVALID_INPUT/);assert.throws(()=>validateInput({...input,focusId:'999'}),/INVALID_INPUT/);
 });
+
+test('业务诊断只返回数字码和固定类别，不复制服务端验证材料或原始报文',async()=>{
+ const protocol=await import('../../native-extension/src/ai/protocol.js');assert.equal(typeof protocol.businessDiagnostics,'function');
+ const text=event(2005,{code:710022004,error_detail:{message:'请完成验证 https://example.test/challenge?secret=do-not-export',challenge:'do-not-export'}})+event(2003,{});
+ assert.deepEqual(protocol.businessDiagnostics(text),{businessEvent:2005,businessCode:710022004,messageClass:'verification'});
+ assert.equal(JSON.stringify(protocol.businessDiagnostics(text)).includes('do-not-export'),false);
+ assert.deepEqual(protocol.businessDiagnostics(event(2005,{code:710022002,message:'服务遇到了一些问题'})),{businessEvent:2005,businessCode:710022002,messageClass:'service_problem'});
+ assert.deepEqual(protocol.businessDiagnostics(event(2003,{})),{});assert.deepEqual(protocol.businessDiagnostics('not-json'),{});
+});

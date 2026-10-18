@@ -4,9 +4,15 @@ import {send} from './client.js';
 import {modesFor} from './preferences.js';
 import {button} from './dom.js';
 import {readTheme} from '../theme-adapter.js';
-let current=null,scheduled=false,lastPrefs=null;
+let current=null,scheduled=false,lastPrefs=null,syncRevision=0;
 export function initAIReader(){
  if(!globalThis.chrome?.runtime?.id)return;
+ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
+  if(sender.id!==chrome.runtime.id||sender.tab||m?.ns!=='peek-ai-v7'||m.action!=='confirmFocus')return false;
+  const s=current;
+  respond(document.documentElement.getAttribute('data-peek-lad-state')==='active'&&innerWidth>=980&&s?.valid?.()&&s.instance===m.instance&&s.card?.root.isConnected?{focusId:s.focusId,instance:s.instance,url:s.input.url}:null);
+  return false;
+ });
  const schedule=()=>{if(scheduled)return;scheduled=true;setTimeout(()=>{scheduled=false;sync();},0);};
  new MutationObserver(schedule).observe(document.documentElement,{attributes:true,attributeFilter:['data-peek-lad','data-peek-lad-state']});
  const themeObserver=new MutationObserver(()=>{if(lastPrefs&&document.documentElement.getAttribute('data-peek-lad')==='on')applyTheme(lastPrefs);});
@@ -22,15 +28,17 @@ function stop(){
 }
 async function sync(refresh=false){
  const root=document.documentElement,focusId=location.pathname.match(/^\/[^/]+\/status\/(\d+)/)?.[1];
- if(root.getAttribute('data-peek-lad')!=='on'||root.getAttribute('data-peek-lad-state')!=='active'||innerWidth<980||!focusId){stop();return;}
+ if(root.getAttribute('data-peek-lad')!=='on'||root.getAttribute('data-peek-lad-state')!=='active'||innerWidth<980||!focusId){++syncRevision;stop();return;}
  const bar=document.getElementById('peek-reader-topbar');
  if(bar&&!bar.querySelector('[data-peek-ai-settings]')){const b=button(document,'⚙',()=>send('openSettings').catch(()=>{}),'pk-tb-btn');b.setAttribute('aria-label','Peek 设置');b.setAttribute('data-peek-ai-settings','');bar.insertBefore(b,bar.querySelector('.pk-tb-native'));}
  if(current?.focusId===focusId&&!refresh){applyTheme(current.prefs);return;}
+ const revision=++syncRevision;
  let prefs,connection;try{[prefs,connection]=await Promise.all([send('preferences'),send('status',{xTheme:readTheme()})]);}catch{return;}
  connection=connection||{};
- if(location.pathname.match(/\/status\/(\d+)/)?.[1]!==focusId||root.getAttribute('data-peek-lad')!=='on')return;
+ if(revision!==syncRevision||location.pathname.match(/\/status\/(\d+)/)?.[1]!==focusId||root.getAttribute('data-peek-lad')!=='on'||root.getAttribute('data-peek-lad-state')!=='active'||innerWidth<980)return;
  if(current?.focusId===focusId&&JSON.stringify(prefs)===JSON.stringify(lastPrefs)&&current.connectionId===connection.connectionId){
-  if(refresh&&current.card)for(const mode of modesFor(current.input,prefs))if(current.card.snapshot().states[mode]==='error')generate(current,mode);
+  // A tab focus is a state read, not consent to retry a failed model call.
+  // A new connection partition below still automatically resumes generation.
   return;
  }
  stop();lastPrefs=prefs;applyTheme(prefs);ensureActions(focusId);if(!prefs.summary&&!prefs.mindmap)return;
