@@ -41,6 +41,8 @@ const FORBIDDEN_IN_ARTIFACT = [
   [/__peekPoc/, "无 PoC 测试钩子残留"]
 ];
 
+// Content receives sanitized runtime notifications; no storage API exception.
+
 test("隔离：Native 产物不包含任何 Legacy 桥接/私有接口标记", () => {
   const src = nativeSource();
   const offenders = FORBIDDEN_IN_ARTIFACT.filter(([re]) => re.test(src));
@@ -57,7 +59,7 @@ test("隔离：Native 构建产物目录中不存在 page-bridge.js / vendor/hls
   assert.ok(files.includes("manifest.json"), "manifest.json present");
 });
 
-test("隔离：Native manifest 豆包按需窄权限、无 web_accessible_resources、MAIN 仅适配器", () => {
+test("隔离：Native manifest 自定义 HTTPS 可选上限及运行时窄授权、无 web_accessible_resources、MAIN 仅适配器", () => {
   const manifest = JSON.parse(readFileSync(join(NATIVE_DIST, "manifest.json"), "utf8"));
   // the ONLY MAIN-world script is the layout adapter (S3 unified build; the
   // retired M1 contract "no MAIN world at all" no longer applies)
@@ -70,7 +72,7 @@ test("隔离：Native manifest 豆包按需窄权限、无 web_accessible_resour
   assert.deepEqual(manifest.permissions, ["storage", "scripting"], "only AI storage/scripting");
   assert.equal(manifest.host_permissions, undefined);
   assert.equal(manifest.optional_permissions, undefined);
-  assert.deepEqual(manifest.optional_host_permissions, ["https://www.doubao.com/*"]);
+  assert.deepEqual(manifest.optional_host_permissions, ["https://*/*"]);
   assert.equal(manifest.web_accessible_resources, undefined, "no web accessible resources");
   assert.equal(manifest.action.default_popup, undefined, "no popup");
   assert.deepEqual(manifest.background, {service_worker:"ai-background.js"});
@@ -81,13 +83,27 @@ test("隔离：Native manifest 豆包按需窄权限、无 web_accessible_resour
 test("隔离：Native 源码目录同样不包含禁止标记（纵深防御）", () => {
   const srcDir = join(repoRoot, "native-extension");
   for (const file of walk(srcDir).filter((f) => f.endsWith(".js") || f.endsWith(".json"))) {
-    const src = readFileSync(file, "utf8");
+    const raw = readFileSync(file, "utf8");
+    const src = raw;
     const aiBackground = file.endsWith("/ai/background.js");
+    const customTransport = file.endsWith("/ai/custom-transport.js");
     const aiSettings = file.endsWith("/ai/settings.js");
-    for (const [re, label] of FORBIDDEN_IN_ARTIFACT.filter(([re]) => !(aiBackground && /fetch|chrome/.test(re.source)) && !(aiSettings && /chrome/.test(re.source)))) {
+    for (const [re, label] of FORBIDDEN_IN_ARTIFACT.filter(([re]) => !((aiBackground || customTransport) && /fetch|chrome/.test(re.source)) && !(aiSettings && /chrome/.test(re.source)))) {
       assert.equal(re.test(src), false, `${label} — in ${file}`);
     }
   }
+});
+
+test('隔离：内容侧无存储API，后台密钥传输限定专用适配器', () => {
+  const content = nativeSource();
+  assert.equal(/chrome\.storage/.test(content), false);
+  const worker = readFileSync(join(NATIVE_DIST, 'ai-background.js'), 'utf8');
+  const settings = readFileSync(join(NATIVE_DIST, 'ai-settings.js'), 'utf8');
+  assert.equal(/document\.cookie|chrome\.cookies|chrome\.storage\.sync/.test(worker + settings), false);
+  assert.equal(/\bfetch\s*\(|globalThis\.fetch/.test(settings), false);
+  assert.match(worker, /credentials: ["']omit["']/);
+  assert.match(worker, /redirect: ["']error["']/);
+  assert.match(worker, /TRUSTED_CONTEXTS/);
 });
 
 test("隔离：无 fetch/XHR 的动态调用形态（eval/new Function/Function 构造器）", () => {

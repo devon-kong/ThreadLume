@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Peek Native",
   "version": "0.11.0",
-  "description": "Peek 原生双栏阅读器：保留 X 原生视频与评论；按需连接豆包，为可用字幕视频生成摘要、时间轴和脑图，为完整长文生成摘要。",
+  "description": "Peek 原生双栏阅读器：保留 X 原生视频与评论；按需连接豆包或自定义 AI 服务，为可用字幕与完整长文生成摘要、时间轴和脑图。",
   "content_scripts": [
     {
       "matches": [
@@ -42,7 +42,7 @@
     "scripting"
   ],
   "optional_host_permissions": [
-    "https://www.doubao.com/*"
+    "https://*/*"
   ],
   "background": {
     "service_worker": "ai-background.js"

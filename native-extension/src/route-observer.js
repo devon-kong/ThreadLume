@@ -34,11 +34,10 @@ import {
   markPendingTraverse, consumePendingTraverse
 } from "./navigation-session.js";
 import { buildReader, removeReader, maybeRecover } from "./reader-lifecycle.js";
-// M2-B1: in the adapter build the user browses natively (no reader close
-// path), so X's own scroll restoration owns list returns — our correction
-// would fight it. Anchor captures stay (inert bookkeeping); restores are gated.
+// Native/browser navigation retains X's own scroll restoration. Only an
+// explicit Peek Back can request the existing bounded, one-shot correction.
 import { adapterEnabled } from "./layout-adapter/controller.js";
-import { capturePreOpen, onReturnToList, preOpenAnchor } from "./anchor-restore.js";
+import { capturePreOpen, onReturnToList, preOpenAnchor, consumeListReturnRestore } from "./anchor-restore.js";
 // M2-B2-A instant reading preview (wired in every unified build; inert without the adapter)
 import { captureClickForPreview, previewOnRouteChange } from "./preview-layer.js";
 import { applyTheme } from "./theme-adapter.js";
@@ -77,6 +76,7 @@ export function checkRoute() {
       try { document.documentElement.setAttribute(`data-${NS}-route-change-at`, String(lastRouteChangeAt)); } catch { /* probe only */ }
     }
     const previous = activeStatusId;
+    const restoreRequested = consumeListReturnRestore(previous);
     activeStatusId = id;
     if (id) {
       previewOnRouteChange(id); // preview confirms its navigation → NATIVE_WAITING
@@ -92,7 +92,7 @@ export function checkRoute() {
     } else {
       previewOnRouteChange(null); // left the detail a waiting preview pointed at
       removeReader();
-      if (previous && !adapterEnabled()) onReturnToList(previous);
+      if (previous && (!adapterEnabled() || restoreRequested)) onReturnToList(previous);
     }
   } else if (id) {
     const pane = mountedPane();

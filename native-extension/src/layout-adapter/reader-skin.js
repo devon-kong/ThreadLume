@@ -30,7 +30,7 @@
 
 export const SKIN_VARIANT = "floating"; // "floating" | "flush"
 
-const GEOM_FLOATING = { topbarH: 52, inset: 16, gap: 16, radius: 16 };
+const GEOM_FLOATING = { topbarH: 52, inset: 16, gap: 8, radius: 16 };
 const GEOM_FLUSH = { topbarH: 52, inset: 0, gap: 0, radius: 0 };
 
 export function skinGeometry() {

@@ -25,3 +25,16 @@ test('展开脑图：Esc 在 X 的 document 快捷键前只关弹窗，销毁移
  }
  c.destroy();d.body.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));assert.equal(xKeys,1);w.close();
 });
+
+test('视图合同：另一模式开始/成功/失败不重建当前脑图，切换保留节点/滚动，重试只影响目标',()=>{
+ const dom=new JSDOM('<!doctype html><html><body></body></html>'),d=dom.window.document;
+ try{
+  const c=createCard({document:d,input:{kind:'video',title:'Fixture'},preferences:{...DEFAULTS,defaultView:'mindmap'},onRetry(){}});d.body.append(c.root);
+  c.set('mindmap','success',{text:'Map',tree:[{text:'Root',children:[{text:'Child',children:[]}]}]});const branch=d.querySelector('button.pk-ai-node'),body=d.querySelector('.pk-ai-body');branch.click();branch.focus();body.scrollTop=73;body.scrollLeft=45;
+  for(const [state,value] of [['loading',undefined],['success',{text:'Summary',highlights:[]}],['error','NETWORK_ERROR']]){c.set('summary',state,value);assert.equal(d.querySelector('button.pk-ai-node'),branch);assert.equal(branch.getAttribute('aria-expanded'),'false');assert.equal(d.activeElement,branch);assert.equal(body.scrollTop,73);assert.equal(body.scrollLeft,45);}
+  const tabs=[...d.querySelectorAll('[role=tab]')];tabs[0].click();body.scrollTop=31;body.scrollLeft=5;tabs[1].click();assert.equal(body.scrollTop,73);assert.equal(body.scrollLeft,45);assert.equal(d.querySelector('button.pk-ai-node'),branch);assert.equal(branch.getAttribute('aria-expanded'),'false');tabs[0].click();assert.equal(body.scrollTop,31);assert.equal(body.scrollLeft,5);
+  c.set('mindmap','loading');assert.ok(d.body.textContent.includes('重试摘要'));c.destroy();const fresh=createCard({document:d,input:{kind:'video',title:'Another'},preferences:{...DEFAULTS,defaultView:'mindmap'},onRetry(){}});d.body.append(fresh.root);fresh.set('mindmap','success',{text:'Map',tree:[{text:'Root',children:[{text:'Child',children:[]}]}]});assert.equal(d.querySelector('button.pk-ai-node').getAttribute('aria-expanded'),'true');assert.equal(d.querySelector('.pk-ai-body').scrollTop,0);fresh.destroy();
+ }finally{dom.window.close();}
+});
+
+test('结果来源：按实际视图显示服务名称，安全文本，旧缓存标为豆包',()=>{const w=new JSDOM('<body></body>').window,d=w.document,c=createCard({document:d,input:{kind:'video',title:'fixture'},preferences:DEFAULTS,onRetry(){}});try{d.body.append(c.root);c.set('summary','success',{text:'Summary',highlights:[],providerId:'custom-a',providerName:'<img src=x> 自定义'});assert.equal(d.querySelector('img'),null);assert.ok(c.root.querySelector('footer').textContent.includes('<img src=x> 自定义'));c.set('mindmap','success',{text:'Map',tree:[{text:'Root',children:[]}]});d.getElementById('pk-ai-tab-mindmap').click();assert.ok(c.root.querySelector('footer').textContent.includes('豆包'));d.getElementById('pk-ai-tab-summary').click();assert.ok(c.root.querySelector('footer').textContent.includes('自定义'));}finally{c.destroy();w.close();}});

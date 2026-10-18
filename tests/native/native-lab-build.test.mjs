@@ -27,13 +27,13 @@ test("P1 统一构建：manifest 注册 document_start MAIN 入口，MAIN 产物
   assert.equal(manifest.content_scripts.indexOf(mainEntry), 0, "MAIN entry runs first (document_start)");
 });
 
-test("P2 统一构建 manifest 身份：Peek Native / 0.11.0 / 豆包窄权限", () => {
+test("P2 统一构建 manifest 身份：Peek Native / 0.11.0 / HTTPS 可选权限上限", () => {
   const manifest = readJson(join(NATIVE_DIST, "manifest.json"));
   assert.equal(manifest.name, "Peek Native");
   assert.equal(manifest.version, "0.11.0");
   assert.deepEqual(manifest.permissions, ["storage", "scripting"]);
   assert.equal(manifest.host_permissions, undefined);
-  assert.deepEqual(manifest.optional_host_permissions, ["https://www.doubao.com/*"]);
+  assert.deepEqual(manifest.optional_host_permissions, ["https://*/*"]);
   assert.deepEqual(manifest.background, {service_worker:"ai-background.js"});
   assert.equal(manifest.web_accessible_resources, undefined);
   // S3 alias rule: both historical dist constants resolve to the same build

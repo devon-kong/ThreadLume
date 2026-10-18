@@ -163,6 +163,30 @@ test("K4 路由离开：皮肤样式与全部自有节点清理，焦点标记�
 
 // ---------- close semantics ----------
 
+test("K5a 原生视图释放：只纠正一次延后布局漂移，用户滚动与导航优先", async () => {
+  for (const interruption of [null, "wheel", "route"]) {
+    const { env, focusId } = makeSkinEnv({});
+    await env.pushNavigate(`/somebody/status/${focusId}`);
+    await realSleep(5);
+    env.scroll.y = 270;
+    const writes = [];
+    env.window.scrollTo = (x, y) => { env.scroll.y = typeof x === "object" ? x.top : y; writes.push(env.scroll.y); };
+    topbar(env).querySelector(".pk-tb-native").click();
+    // Native virtual-list remeasurement happens after the style release.
+    // jsdom has no layout engine: model only this externally observed drift.
+    env.scroll.y = 4708;
+    if (interruption === "wheel") env.window.dispatchEvent(new env.window.Event("wheel"));
+    if (interruption === "route") await env.navigate("/home");
+    await env.timers.advance(32);
+    assert.equal(env.scroll.y, interruption ? 4708 : 270);
+    assert.equal(writes.length, interruption ? 0 : 1);
+    env.scroll.y = 300; // Later native/user movement must never be fought.
+    await env.timers.advance(1000);
+    assert.equal(env.scroll.y, 300);
+    env.window.close();
+  }
+});
+
 test("K5 直接进入（无安全历史）：顶栏返回不得调用 history.back，原地释放为 X 原生单栏", async () => {
   const { env, focusId } = makeSkinEnv({}); // direct entry: trail has only the initial entry
   await env.pushNavigate(`/somebody/status/${focusId}`);
@@ -184,6 +208,25 @@ test("K6 从列表进入（存在同站历史）：顶栏返回走 history.back 
   topbar(env).querySelector('[aria-label="返回"]').click();
   await realSleep(10);
   assert.equal(env.history._backCalls, 1, "same-site predecessor → real back navigation");
+});
+
+test("K6a 显式返回列表：复用已捕获锚点，原生列表稳定后只修正一次", async () => {
+  const { env, focusId, fixture } = makeSkinEnv({ url: "/home" });
+  let top = 384;
+  fixture.cell.getBoundingClientRect = () => ({ top, bottom: top + 100, height: 100 });
+  fixture.cell.querySelector("time").closest("a").click();
+  await env.pushNavigate(`/somebody/status/${focusId}`);
+  await realSleep(5);
+  topbar(env).querySelector('[aria-label="返回"]').click();
+  await env.navigate("/home");
+  env.scroll.y = 469;
+  top = 315; // Same list height; native return displaced the anchor by -69px.
+  await env.timers.advance(1000);
+  assert.equal(env.scroll.y, 400);
+  env.scroll.y = 420;
+  await env.timers.advance(2500);
+  assert.equal(env.scroll.y, 420, "restoration finished, never competes with later input");
+  env.window.close();
 });
 
 test("K7 「原生视图」释放：会话释放、split 与皮肤下线；UNINSTALL 命名焦点", async () => {

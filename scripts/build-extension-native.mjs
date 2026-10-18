@@ -146,19 +146,23 @@ if (!mainEntry || !mainEntry.js?.includes("layout-adapter-main.js") || mainEntry
   throw new Error("native-extension/manifest.json must register layout-adapter-main.js as a document_start MAIN-world content script");
 }
 if (JSON.stringify(manifest.permissions) !== JSON.stringify(["storage", "scripting"]) ||
-    JSON.stringify(manifest.optional_host_permissions) !== JSON.stringify(["https://www.doubao.com/*"]) ||
+    JSON.stringify(manifest.optional_host_permissions) !== JSON.stringify(["https://*/*"]) ||
     manifest.host_permissions || manifest.optional_permissions || manifest.background?.service_worker !== "ai-background.js" || manifest.web_accessible_resources) {
   throw new Error("Native AI permission boundary violated");
 }
 const aiWorker = readFileSync(path.join(dist, "ai-background.js"), "utf8");
 const aiSettings = readFileSync(path.join(dist, "ai-settings.js"), "utf8");
 for (const [file, code] of [["ai-background.js", aiWorker], ["ai-settings.js", aiSettings]]) {
-  const rules = FORBIDDEN.filter(re => !/fetch|scripting/.test(re.source));
+  const rules = FORBIDDEN.filter(re => !/fetch|scripting/.test(re.source) && !(file === "ai-background.js" && /authorization/.test(re.source)));
   if (file === "ai-settings.js") rules.push(/\bfetch\s*\(/, /chrome\.(tabs|scripting)/);
   else rules.push(/chrome\.(cookies|webRequest|declarativeNetRequest)/);
   const offenders = rules.filter(re => re.test(code));
   if (offenders.length) throw new Error(`${file} violated AI isolation: ${offenders}`);
 }
+// Authorization is permitted only in the custom worker transport. X remains
+// covered by the unmodified forbidden list above; settings cannot fetch.
+if (!/credentials: ["']omit["']/.test(aiWorker) || !/redirect: ["']error["']/.test(aiWorker) ||
+    !aiWorker.includes('TRUSTED_CONTEXTS')) throw new Error("Custom provider transport/storage boundary violated");
 cpSync(path.join(source, "manifest.json"), path.join(dist, "manifest.json"));
 
 cpSync(path.join(source, "content.css"), path.join(dist, "content.css"));

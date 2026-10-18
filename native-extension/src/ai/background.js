@@ -1,12 +1,18 @@
 import {AIService,allowedSender,validateParams,PARAM_KEYS} from './service.js';
 import {AIError,fail,parseSSE,completionOptions,validateInput,businessDiagnostics} from './protocol.js';
+import {ProviderStore} from './provider-store.js';
+import {createCustomTransport} from './custom-transport.js';
+import {normalizeEndpoint} from './custom-provider.js';
 const BASE='https://www.doubao.com';
 const PATHS=new Set(['/samantha/aireader/resource_content/create','/samantha/chat/completion']);
-let checkTask=null,autoRestoring=null,autoStarting=null,setupOpening=null;
+let checkTask=null,autoFlow=null,setupOpening=null,connectionGeneration=0,setupWrite=Promise.resolve();
+// Exact pages created by this worker; tokens prevent stale cleanup after reuse.
+const ownedPages=new Map();
 const stats={workerStartedAt:Date.now(),requests:0,stages:[],focusChecks:[]};
 async function transport(path,body,signal,params){
  if(!PATHS.has(path))fail('UNSUPPORTED_OPERATION');
  if(!await chrome.permissions.contains({origins:[BASE+'/*']}))fail('PERMISSION_REQUIRED');
+ if(signal.aborted)fail('CANCELLED');
  const keys=validateParams(params),requestId=crypto.randomUUID(),started=Date.now();stats.requests++;
  const record={requestId,operation:path.endsWith('/create')?'upload':body.messages?.[0]?.content_type,started};
  stats.stages.push(record);stats.stages=stats.stages.slice(-40);
@@ -19,7 +25,26 @@ async function transport(path,body,signal,params){
   return text;
  }catch(e){const code=e instanceof AIError?e.code:e.name==='TimeoutError'?'TIMEOUT':signal.aborted?'CANCELLED':'NETWORK_ERROR';record.error=code;throw new AIError(code);}
 }
-const service=new AIService({storage:chrome.storage,request:transport});
+const customTransport=createCustomTransport({hasPermission:permission=>chrome.permissions.contains({origins:[permission]})});
+let service,providerCheck=null;
+const providers=new ProviderStore({storage:chrome.storage,probe:customTransport.probe,verifyPermission:config=>chrome.permissions.contains({origins:[config?normalizeEndpoint(config.baseURL).permission:BASE+'/*']}),onChange:change=>{if(change.invalidate){service.providerChanged();if(providerCheck)cancelConnectionWork();}notifyState({connectionChanged:change.invalidate});}});
+service=new AIService({storage:chrome.storage,request:transport,providers,requestCustom:customTransport.generate});
+async function notifyState(extra={}){
+ try{
+  const preferences=await service.preferences();
+  const message={ns:'peek-ai-v7',action:'stateChanged',preferences,...extra};
+  // Static content-script matches do not grant privileged Tab.url access.
+  // Enumerate IDs only; tabs.sendMessage addresses our already-injected scripts,
+  // never another extension, a website handler, or a new injection.
+  const tabs=await chrome.tabs.query({});
+  await Promise.all(tabs.filter(t=>Number.isInteger(t.id)).map(t=>chrome.tabs.sendMessage(t.id,message,{frameId:0}).catch(()=>{})));
+ }catch{/* Closed documents do not own state. No retry/poll. */}
+}
+async function checkProvider(operation,config){
+ if(providerCheck||checkTask||autoFlow||setupOpening)fail('CUSTOM_CHECK_IN_PROGRESS');
+ const task={abort:new AbortController(),permission:config?normalizeEndpoint(config.baseURL).permission:null};providerCheck=task;
+ try{return await operation(task.abort.signal);}finally{if(providerCheck===task)providerCheck=null;}
+}
 // Register ownership before any await, including requests not yet in jobs.
 // Full document navigation does not reliably run content-script cleanup.
 const tabRequests=new Map();
@@ -29,62 +54,120 @@ function sameFocus(source,target){
 function cancelTabRequests(tabId,nextUrl){
  for(const record of tabRequests.get(tabId)||[])if(!nextUrl||!sameFocus(record.url,nextUrl))service.cancel(record.owner);
 }
-const ready=(async()=>{await chrome.storage.session.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'});await service.init();})();
+const ready=(async()=>{await chrome.storage.local.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'});await chrome.storage.session.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'});await service.init();})();
 chrome.action.onClicked.addListener(()=>chrome.runtime.openOptionsPage());
 function safeError(e){return {ok:false,error:e.name==='AbortError'?'CANCELLED':e instanceof AIError?e.code:'INTERNAL_ERROR'};}
 async function status(){
  const connection=await service.status();
- const permission=await chrome.permissions.contains({origins:[BASE+'/*']});
+ const custom=providers.active();
+ const permission=await chrome.permissions.contains({origins:[custom?normalizeEndpoint(custom.baseURL).permission:BASE+'/*']});
  const themeMemory=await chrome.storage.session.get('aiXTheme');
  const setup=(await chrome.storage.session.get('aiSetup')).aiSetup;
  const tab=Number.isInteger(setup)?await chrome.tabs.get(setup).catch(()=>null):null;
  const setupOpen=!!(tab?.pendingUrl||tab?.url)?.startsWith(BASE+'/');
- if(Number.isInteger(setup)&&!setupOpen)await chrome.storage.session.remove('aiSetup');
- return {...connection,...(!permission?{state:'PERMISSION_REQUIRED'}:{}),setupOpen,xTheme:themeMemory.aiXTheme,checking:!!checkTask,diagnostics:stats};
+ if(Number.isInteger(setup)&&!setupOpen)await clearSetup(setup);
+ return {...connection,...(!permission?{state:'PERMISSION_REQUIRED'}:{}),setupOpen,xTheme:themeMemory.aiXTheme,checking:!!(checkTask||providerCheck),diagnostics:stats};
 }
+function currentSetupPage(){return [...ownedPages.values()].find(page=>page.generation===connectionGeneration&&!page.closing);}
+function isCurrentSetup(id,marker){return id===marker||ownedPages.get(id)?.generation===connectionGeneration;}
 async function auditVisibleBoundary(){
- if(!service.context)return;
+ if(providers.active()||!service.context)return;
+ // A known cancelled page may still be awaiting Chrome's tab lookup/removal.
+ // Finish that exact cleanup before auditing the remaining visible pages.
+ await Promise.all([...ownedPages.values()].filter(page=>page.generation!==connectionGeneration&&page.closing).map(page=>page.closing.catch(()=>{})));
+ if(providers.active()||!service.context)return;
  const owned=(await chrome.storage.session.get('aiSetup')).aiSetup;
  const pages=await chrome.tabs.query({url:BASE+'/*'});
- if(pages.some(t=>!t.discarded&&t.id!==owned))await service.invalidateContext();
+ if(pages.some(t=>!t.discarded&&!isCurrentSetup(t.id,owned))){await service.invalidateContext();notifyState({connectionChanged:true});}
 }
 async function observeVisibleBoundary(tab){
- if(!service.context||!tab?.url?.startsWith(BASE+'/')||tab.discarded)return;
+ if(providers.active()||!service.context||!tab?.url?.startsWith(BASE+'/')||tab.discarded)return;
+ const retiring=ownedPages.get(tab.id);
+ if(retiring?.generation!==connectionGeneration&&retiring?.closing){await retiring.closing.catch(()=>{});if(retiring.closed)return;}
  const epoch=service.epoch,context=service.context;
  const owned=(await chrome.storage.session.get('aiSetup')).aiSetup;
  // The event already established this page existed. A later query may miss a
  // page that immediately navigated away or closed; keep the observed boundary.
- if(tab.id!==owned&&epoch===service.epoch&&context===service.context)await service.invalidateContext();
+ if(!isCurrentSetup(tab.id,owned)&&epoch===service.epoch&&context===service.context){await service.invalidateContext();notifyState({connectionChanged:true});}
 }
-function openSetup(){
- return setupOpening??=(async()=>{
- if(!await chrome.permissions.contains({origins:[BASE+'/*']}))fail('PERMISSION_REQUIRED');
- const old=(await chrome.storage.session.get('aiSetup')).aiSetup;
- if(Number.isInteger(old)){
-  try{const t=await chrome.tabs.get(old);if((t.pendingUrl||t.url)?.startsWith(BASE+'/')){await chrome.tabs.update(old,{active:true});return status();}}catch{/* closed */}
- }
- const tab=await chrome.tabs.create({url:BASE+'/chat/',active:true});await chrome.storage.session.set({aiSetup:tab.id});return status();
- })().finally(()=>{setupOpening=null;});
+// Cancellation starts before any asynchronous setup work, not at probe time.
+function cancelConnectionWork(){
+ ++connectionGeneration;
+ autoFlow?.abort.abort();autoFlow=null;
+ setupOpening?.abort.abort();setupOpening=null;
+ checkTask?.abort.abort();checkTask=null;
+ // Do not lose ownership when a capture/probe is still awaiting an API result.
+ // Cleanup is independent of that un-cancellable result and may be adopted only
+ // through the exact session marker while the old clear is still pending.
+ return Promise.all([...ownedPages.values()].map(page=>closeOwnedPage(page).catch(()=>{})));
+}
+function assertWork(task){if(task.abort.signal.aborted||task.generation!==connectionGeneration)fail('CANCELLED');}
+function writeSetup(operation){return setupWrite=setupWrite.catch(()=>{}).then(operation);}
+function clearSetup(id){return writeSetup(async()=>{if((await chrome.storage.session.get('aiSetup')).aiSetup===id)await chrome.storage.session.remove('aiSetup');});}
+function ownPage(id,task){const page={id,generation:task.generation};ownedPages.set(id,page);task.page=page;task.tabId=id;return page;}
+function closeOwnedPage(page){
+ if(!page||ownedPages.get(page.id)!==page)return Promise.resolve();
+ if(page.closing)return page.closing;
+ page.closing=(async()=>{
+  await clearSetup(page.id);
+  const tab=await chrome.tabs.get(page.id).catch(()=>null);
+  // Clearing the marker can await Chrome storage. A newer explicit setup may
+  // have reused this exact owned page in the meantime; its token wins.
+  if(ownedPages.get(page.id)!==page)return;
+  if((tab?.pendingUrl||tab?.url)?.startsWith(BASE+'/')){page.removing=true;await chrome.tabs.remove(page.id);page.closed=true;}
+  if(ownedPages.get(page.id)===page)ownedPages.delete(page.id);
+ })();return page.closing;
+}
+function openSetup(flow){
+ if(setupOpening)return setupOpening.promise;
+ const task=flow||{abort:new AbortController(),generation:connectionGeneration};
+ setupOpening=task;
+ task.openPromise=(async()=>{
+ let createdPage;
+ try{
+  assertWork(task);
+  const permission=await chrome.permissions.contains({origins:[BASE+'/*']});assertWork(task);if(!permission)fail('PERMISSION_REQUIRED');
+  const old=(await chrome.storage.session.get('aiSetup')).aiSetup;assertWork(task);
+  if(Number.isInteger(old)){
+   const tab=await chrome.tabs.get(old).catch(()=>null);assertWork(task);
+   const previous=ownedPages.get(old);
+   const marked=previous||(await chrome.storage.session.get('aiSetup')).aiSetup===old;assertWork(task);
+   if((tab?.pendingUrl||tab?.url)?.startsWith(BASE+'/')&&marked&&!previous?.removing){
+    const page=ownPage(old,task);
+    // If a cancelled clear is pending, publish the adopted marker after it.
+    // Do not block opening on the old un-cancellable storage operation.
+    if(previous?.closing)writeSetup(async()=>{if(ownedPages.get(old)===page){assertWork(task);await chrome.storage.session.set({aiSetup:old});}}).catch(()=>{});
+    await chrome.tabs.update(old,{active:true});assertWork(task);return status();
+   }
+  }
+  const tab=await chrome.tabs.create({url:BASE+'/chat/',active:true});createdPage=ownPage(tab.id,task);assertWork(task);
+  await writeSetup(async()=>{assertWork(task);await chrome.storage.session.set({aiSetup:tab.id});});assertWork(task);
+  return status();
+ }catch(e){
+  // tabs.create cannot be aborted. Reclaim only the exact page it created,
+  // never a page looked up through a newer flow's session marker.
+  if(task.abort.signal.aborted)await closeOwnedPage(createdPage||task.page).catch(()=>{});
+  throw e;
+ }finally{if(setupOpening===task)setupOpening=null;}
+ })();
+ // Keep auto flow's full lifetime distinct from the opening subtask promise.
+ return task.promise=task.openPromise;
 }
 function maybeAutoRestore(){
- return autoStarting??=(async()=>{
- await ready;
- const preferences=await service.preferences();
- if(['LOGIN_REQUIRED','VERIFICATION_REQUIRED'].includes(service.error))return;
- if((!preferences.summary&&!preferences.mindmap)||service.context||!service.connection.enabled||!await chrome.permissions.contains({origins:[BASE+'/*']}))return;
- const memory=await chrome.storage.session.get(['aiAutoAttempted','aiAutoRestore']);
- if(memory.aiAutoAttempted)return;
- await chrome.storage.session.set({aiAutoAttempted:true,aiAutoRestore:true});
- await openSetup();
- const id=(await chrome.storage.session.get('aiSetup')).aiSetup;
- const tab=Number.isInteger(id)?await chrome.tabs.get(id).catch(()=>null):null;
- if(tab?.status==='complete')await finishAutoRestore();
- })().finally(()=>{autoStarting=null;});
-}
-async function finishAutoRestore(){
- if(autoRestoring)return autoRestoring;
- if(!(await chrome.storage.session.get('aiAutoRestore')).aiAutoRestore)return;
- autoRestoring=check({capture:true}).catch(()=>{}).finally(async()=>{await chrome.storage.session.remove('aiAutoRestore');autoRestoring=null;});return autoRestoring;
+ if(autoFlow)return autoFlow.restorePromise;
+ const flow={abort:new AbortController(),generation:connectionGeneration};autoFlow=flow;
+ flow.restorePromise=(async()=>{
+  await ready;assertWork(flow);if(providers.active())return;const epoch=service.epoch;
+  const active=()=>{assertWork(flow);if(epoch!==service.epoch)fail('CANCELLED');};
+  const preferences=await service.preferences();active();
+  if(['LOGIN_REQUIRED','VERIFICATION_REQUIRED'].includes(service.error))return;
+  const permission=await chrome.permissions.contains({origins:[BASE+'/*']});active();
+  if((!preferences.summary&&!preferences.mindmap)||service.context||!service.connection.enabled||!permission)return;
+  const memory=await chrome.storage.session.get('aiAutoAttempted');active();if(memory.aiAutoAttempted)return;
+  await chrome.storage.session.set({aiAutoAttempted:true});active();
+  await openSetup(flow);active();
+  await check({capture:true,flow});
+ })().finally(()=>{if(autoFlow===flow)autoFlow=null;});return flow.restorePromise;
 }
 function waitForSetupPage(id,signal){
  return new Promise((resolve,reject)=>{
@@ -105,9 +188,9 @@ function waitForSetupPage(id,signal){
   chrome.tabs.get(id).then(examine,()=>finish(null,'SETUP_PAGE_CHANGED'));
  });
 }
-async function captureParams(signal){
- const id=(await chrome.storage.session.get('aiSetup')).aiSetup;if(!Number.isInteger(id))fail('NEEDS_INITIALIZATION');
- await waitForSetupPage(id,signal);
+async function captureParams(signal,ownedId){
+ const id=ownedId??(await chrome.storage.session.get('aiSetup')).aiSetup;if(signal.aborted)fail('CANCELLED');if(!Number.isInteger(id))fail('NEEDS_INITIALIZATION');
+ await waitForSetupPage(id,signal);if(signal.aborted)fail('CANCELLED');
  const results=await chrome.scripting.executeScript({target:{tabId:id},world:'MAIN',func:async(keys)=>{
   if(location.origin!=='https://www.doubao.com')return {error:'WRONG_ORIGIN'};
   const latest=()=>performance.getEntriesByType('resource').filter(e=>{try{const u=new URL(e.name);return u.origin===location.origin&&u.pathname==='/samantha/notice/info';}catch{return false;}}).at(-1);
@@ -120,6 +203,7 @@ async function captureParams(signal){
   const source=new URL(entry.name),params={};for(const key of keys){const value=source.searchParams.get(key);if(value!==null)params[key]=value;}
   return {params};
  },args:[PARAM_KEYS]});
+ if(signal.aborted)fail('CANCELLED');
  const result=results[0]?.result;if(!result?.params)fail(result?.error||'PARAMETERS_UNAVAILABLE');
  return {params:validateParams(result.params),tabId:id};
 }
@@ -129,30 +213,45 @@ async function probe(params,signal){
  if(parsed.text.trim()!=='OK')fail('PROBE_OUTPUT_UNEXPECTED');
  return parsed;
 }
-async function check({capture=false}={}){
+async function check({capture=false,flow}={}){
+ if(flow)assertWork(flow);
  if(checkTask)return checkTask.promise;
- const abort=new AbortController();
- checkTask={abort,promise:null};const current=checkTask,epoch=service.epoch,context=service.context;
+ const abort=flow?.abort||new AbortController();
+ checkTask={abort,generation:flow?.generation??connectionGeneration,promise:null};const current=checkTask,epoch=service.epoch,context=service.context,errorRevision=service.errorRevision,switching=!!providers.active();
  current.promise=(async()=>{
   try{
    let params,tabId;
-   if(capture){({params,tabId}=await captureParams(abort.signal));}
-   else {if(!service.context)fail('NEEDS_INITIALIZATION');params=service.context.params;}
-   if(abort.signal.aborted||epoch!==service.epoch||context!==service.context)fail('CANCELLED');
-   await probe(params,abort.signal);if(abort.signal.aborted||epoch!==service.epoch||context!==service.context)fail('CANCELLED');
-   await service.connect(params); // A successful explicit check establishes a new connection partition.
-   // Close only the exact, still-Doubao tab created by this connection.
-   if(Number.isInteger(tabId)){
-    const tab=await chrome.tabs.get(tabId).catch(()=>null);
-    if(tab?.url?.startsWith(BASE+'/'))await chrome.tabs.remove(tabId);
-    await chrome.storage.session.remove('aiSetup');
+   assertWork(current);
+   if(capture){
+    const id=flow?.tabId??currentSetupPage()?.id??(await chrome.storage.session.get('aiSetup')).aiSetup;assertWork(current);
+    if(Number.isInteger(id))current.page=ownedPages.get(id)||ownPage(id,current);
+    ({params,tabId}=await captureParams(abort.signal,id));
    }
-   return status();
-  }catch(e){if(!abort.signal.aborted&&e.code!=='CANCELLED')await service.setError(e.code||'NETWORK_ERROR',epoch,context);throw e;}
+   else {if(!service.context)fail('NEEDS_INITIALIZATION');params=service.context.params;}
+   assertWork(current);if(epoch!==service.epoch||context!==service.context)fail('CANCELLED');
+   await probe(params,abort.signal);assertWork(current);if(epoch!==service.epoch||context!==service.context)fail('CANCELLED');
+   // Cleanup is still cancellable preparation. Never select a provider before
+   // an uncancellable tabs/storage cleanup that can later return CANCELLED.
+   if(switching&&Number.isInteger(tabId))await closeOwnedPage(current.page);
+   assertWork(current);if(epoch!==service.epoch||context!==service.context)fail('CANCELLED');
+   if(capture)await service.connect(params,{signal:abort.signal});
+   else await service.recheck(context,epoch,errorRevision);
+   if(switching){assertWork(current);await providers.selectDoubao({signal:abort.signal});}
+   // Current-Doubao rechecks have committed successfully. Late cancellation or
+   // cleanup failure cannot relabel that committed outcome as a failed switch.
+   if(!switching&&Number.isInteger(tabId))await closeOwnedPage(current.page).catch(()=>{});
+   notifyState({connectionChanged:true});return status();
+  }catch(e){if(!abort.signal.aborted&&e.name!=='AbortError'&&e.code!=='CANCELLED')await service.setError(e.code||'NETWORK_ERROR',epoch,context);throw e;}
   finally{if(checkTask===current)checkTask=null;}
  })();return current.promise;
 }
-chrome.permissions.onRemoved.addListener(()=>{checkTask?.abort.abort();service.disconnect().catch(()=>{});});
+chrome.permissions.onRemoved.addListener(async()=>{
+ await ready;
+ const pending=providerCheck;if(pending?.permission&&!await chrome.permissions.contains({origins:[pending.permission]}))pending.abort.abort();
+ const custom=providers.active();
+ if(custom){if(!await chrome.permissions.contains({origins:[normalizeEndpoint(custom.baseURL).permission]})){providerCheck?.abort.abort();service.providerChanged();notifyState({connectionChanged:true});}}
+ else if(!await chrome.permissions.contains({origins:[BASE+'/*']})){const disconnected=service.disconnect();cancelConnectionWork();await disconnected;notifyState({connectionChanged:true});}
+});
 async function confirmFocus(sender,m,input){
  const record={inputFocusId:input.focusId,documentFocusId:new URL(sender.url).pathname.match(/^\/[^/]+\/status\/(\d+)/)?.[1]||null,accepted:false};
  stats.focusChecks.push(record);stats.focusChecks=stats.focusChecks.slice(-20);
@@ -173,24 +272,36 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
  const release=()=>{if(!record)return;const pending=tabRequests.get(sender.tab.id);pending?.delete(record);if(!pending?.size)tabRequests.delete(sender.tab.id);};
  const dispatch=async()=>{
   await ready;
+  const fields={status:['xTheme'],preferences:[],savePreferences:['preferences'],providers:[],saveProvider:['config','key'],activateProvider:['id'],cancelProviderCheck:[],generate:['connectionId','input','mode','instance'],cached:['connectionId','input','mode','instance'],cancel:['instance'],openSettings:[],openSetup:[],connect:[],capture:[],check:[],cancelCheck:[],disconnect:[]};
+  if(!sender.url?.startsWith('chrome-extension://')&&Object.keys(m).some(key=>!['ns','action',...(fields[m.action]||[])].includes(key)))fail('INVALID_MESSAGE');
+  if(providerCheck&&['connect','openSetup','capture','check'].includes(m.action))fail('CUSTOM_CHECK_IN_PROGRESS');
   switch(m.action){
    case 'status':if(sender.tab&&['light','dark'].includes(m.xTheme))await chrome.storage.session.set({aiXTheme:m.xTheme});return status();
    case 'preferences':return service.preferences();
-   case 'savePreferences':return service.savePreferences(m.preferences);
+   case 'savePreferences':{const value=await service.savePreferences(m.preferences);notifyState();return value;}
+   case 'providers':return providers.list();
+   case 'saveProvider':{if(Object.keys(m).some(k=>!['ns','action','config','key'].includes(k)))fail('INVALID_MESSAGE');return checkProvider(signal=>providers.save(m.config,m.key,{signal}),m.config);}
+   case 'activateProvider':{if(Object.keys(m).some(k=>!['ns','action','id'].includes(k)))fail('INVALID_MESSAGE');return checkProvider(signal=>providers.activate(m.id,{signal}),providers.registry.services.find(s=>s.id===m.id));}
+   case 'cancelProviderCheck':{
+    // Aborted fetch/body reads need not settle immediately. Relinquish this
+    // check now so retry works; its finally is identity-guarded, and the store
+    // checks the aborted signal before any late result can commit.
+    const cancelled=providerCheck;providerCheck=null;cancelled?.abort.abort();return null;
+   }
    case 'openSettings':await chrome.runtime.openOptionsPage();return null;
    case 'openSetup':return openSetup();
-   case 'connect':return service.context?check():openSetup();
+   case 'connect':return !providers.active()&&service.context?check():openSetup();
    case 'capture':return check({capture:true});
-   case 'check':return check();
-   case 'cancelCheck':checkTask?.abort.abort();return null;
-   case 'disconnect':checkTask?.abort.abort();return service.disconnect();
+   case 'check':return providers.active()?openSetup():check();
+   case 'cancelCheck':cancelConnectionWork();return null;
+   case 'disconnect':{providerCheck?.abort.abort();const disconnected=service.disconnect();await cancelConnectionWork();const result=await disconnected;notifyState({connectionChanged:true});return result;}
    case 'cancel':service.cancel(owner);return null;
    case 'cached':
    case 'generate':{
     await auditVisibleBoundary();
     if(typeof m.instance!=='string'||!/^[\w-]{1,100}$/.test(m.instance))fail('INVALID_INSTANCE');
     const input=validateInput(m.input);await confirmFocus(sender,m,input);
-    if(typeof m.connectionId!=='string'||m.connectionId!==service.connection.partition)fail('CONNECTION_CHANGED');
+    if(typeof m.connectionId!=='string'||m.connectionId!==service.activeIdentity())fail('CONNECTION_CHANGED');
     return m.action==='cached'?service.cached(input,m.mode):service.generate(owner,input,m.mode);
    }
    default:fail('INVALID_MESSAGE');
@@ -203,7 +314,7 @@ chrome.tabs.onUpdated.addListener((tabId,change)=>{if(change.status==='loading')
 
 // Merely observe public tab lifecycle; never wake or inject a user-owned tab.
 chrome.tabs.onActivated.addListener(async({tabId})=>{await ready;const t=await chrome.tabs.get(tabId).catch(()=>null);await observeVisibleBoundary(t);});
-chrome.tabs.onUpdated.addListener(async(tabId,change,tab)=>{if((change.url||change.status==='complete')&&tab.url?.startsWith(BASE+'/')){await ready;await observeVisibleBoundary(tab);if(change.status==='complete')await finishAutoRestore();}});
+chrome.tabs.onUpdated.addListener(async(tabId,change,tab)=>{if((change.url||change.status==='complete')&&tab.url?.startsWith(BASE+'/')){await ready;await observeVisibleBoundary(tab);}});
 
 // A single visible initialization attempt per browser memory cycle; no retry
 // timer, alarms, panel polling or hidden documents keep the worker alive.

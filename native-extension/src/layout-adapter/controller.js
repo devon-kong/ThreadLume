@@ -55,6 +55,8 @@ import {
 // moments the preview layer must follow — the verified handoff (overlay and
 // split CSS swap in the same task) and every stop path (no handoff is coming).
 import { previewAdapterHandoff, previewAdapterStopped } from "../preview-layer.js";
+import { releasePreservingScroll } from "./view-scroll.js";
+import { requestListReturnRestore } from "../anchor-restore.js";
 
 /* eslint-disable no-undef */ // __PEEK_LAYOUT_ADAPTER__ is an esbuild define
 export const adapterEnabled = () => __PEEK_LAYOUT_ADAPTER__ === true;
@@ -386,7 +388,10 @@ function mountSkin() {
 // enhancement in place — never gamble on an unknown history target.
 function onSkinBack() {
   try {
-    if (safeBackTarget().back) { history.back(); return; }
+    if (safeBackTarget().back) {
+      requestListReturnRestore(session?.focusUrlId);
+      history.back(); return;
+    }
   } catch { /* fall through to the in-place release */ }
   releaseToNativeView();
 }
@@ -396,8 +401,10 @@ function onSkinBack() {
 // navigation (a new detail route starts a fresh session as usual).
 export function releaseToNativeView() {
   if (!adapterEnabled() || !session) return;
-  teardownSession("native-view");
-  setStateAttr("idle");
+  releasePreservingScroll(() => {
+    teardownSession("native-view");
+    setStateAttr("idle");
+  });
 }
 
 // ---------- P1-C: theme mirroring without feedback loops ----------

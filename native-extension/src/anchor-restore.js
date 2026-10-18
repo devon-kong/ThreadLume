@@ -41,6 +41,21 @@ let preOpen = null;   // { statusId, top, source } viewport Y of the focal cell 
 let active = false;
 let timers = [];
 let stopActivity = null;
+let requestedReturn = null;
+
+// Only an explicit Peek Back owns a correction in the native adapter. Ordinary
+// X/browser navigation keeps native restoration. A request expires or is
+// consumed by the very next route change, including a detail-to-detail back.
+export function requestListReturnRestore(statusId) {
+  requestedReturn = preOpen?.statusId === statusId
+    ? { statusId, expires: Date.now() + RESTORE_WINDOW_MS } : null;
+}
+
+export function consumeListReturnRestore(fromStatusId) {
+  const request = requestedReturn;
+  requestedReturn = null;
+  return !!request && request.statusId === fromStatusId && Date.now() <= request.expires;
+}
 
 export function preOpenAnchor() {
   return preOpen ? { ...preOpen } : null;
