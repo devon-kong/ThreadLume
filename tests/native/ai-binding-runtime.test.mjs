@@ -6,11 +6,11 @@ import {createNetworkRuleManager,RULE_ID} from '../../native-extension/src/ai/ne
 import {ORIGIN_ENDPOINT} from '../../native-extension/src/ai/transport-policy.js';
 const cfg={name:'Own name',protocol:'chat-completions',baseURL:ORIGIN_ENDPOINT,model:'user-model',rememberKey:false};
 const area=()=>{const data={};return {data,get:async k=>typeof k==='string'?{[k]:structuredClone(data[k])}:structuredClone(data),set:async v=>Object.assign(data,structuredClone(v)),remove:async k=>{delete data[k];}};};
-function fixture(){const rules=new Map(),updates=[],calls=[],storage={local:area(),session:area()};let allow=true,reply;
+function fixture({operationTimeoutMs}={}){const rules=new Map(),updates=[],calls=[],storage={local:area(),session:area()};let allow=true,reply;
  const hasPermission=async()=>allow;
  const dnr={getSessionRules:async()=>[...rules.values()],updateSessionRules:async v=>{updates.push(v);for(const id of v.removeRuleIds||[])rules.delete(id);for(const r of v.addRules||[])rules.set(r.id,r);}};
  const transport=createCustomTransport({hasPermission,fetchImpl:async(url,o)=>{calls.push({url,o});if(reply)return reply(url,o);const probe=JSON.parse(o.body).messages[0].content==='Reply exactly OK.';return {ok:true,status:200,text:async()=>JSON.stringify({choices:[{finish_reason:'stop',message:{role:'assistant',content:probe?'OK':'{"text":"Summary"}'}}]})};}});
- const manager=createNetworkRuleManager({extensionId:'ours',dnr,hasPermission}),runtime=createBindingRuntime({transport,rules:manager,hasPermission});
+ const manager=createNetworkRuleManager({extensionId:'ours',dnr,hasPermission,operationTimeoutMs}),runtime=createBindingRuntime({transport,rules:manager,hasPermission});
  const store=new ProviderStore({storage,bindings:runtime,verifyPermission:c=>hasPermission(c)});
  return {store,runtime,rules,updates,calls,storage,manager,dnr,setAllow:v=>allow=v,setReply:v=>reply=v,transport,hasPermission};
 }
@@ -43,4 +43,18 @@ test('cancel while adding a special rule after standard binding leaves no unowne
  const f=fixture();await f.store.save({...cfg,baseURL:'https://ordinary.example.test/v1'},'old-key');const current=f.runtime.current(),update=f.dnr.updateSessionRules;let resume;
  f.dnr.updateSessionRules=async change=>{if(change.addRules)await new Promise(r=>resume=r);return update(change);};
  const stop=new AbortController(),pending=f.store.save(cfg,'candidate-key',{signal:stop.signal});while(!resume)await new Promise(r=>setTimeout(r,0));stop.abort();resume();await assert.rejects(pending,/CANCELLED/);assert.equal(f.runtime.current(),current);assert.equal(f.rules.has(RULE_ID),false);assert.equal(f.runtime.state(),'ready');
+});
+
+
+test('stalled rule installation returns failure without probe, Key overwrite or replacing the active service',async()=>{
+ const f=fixture({operationTimeoutMs:15});
+ await f.store.save({...cfg,baseURL:'https://ordinary.example.test/v1'},'old-key');
+ const current=f.runtime.current(),active=f.store.active(),calls=f.calls.length;
+ f.dnr.updateSessionRules=()=>new Promise(()=>{});
+ await assert.rejects(f.store.save(cfg,'candidate-key'),/CUSTOM_RULE_TIMEOUT/);
+ assert.equal(f.runtime.current(),current);assert.equal(f.store.active(),active);
+ assert.equal(f.store.keyFor(active),'old-key');assert.equal(f.calls.length,calls);
+ assert.equal(f.store.list().services.length,1);
+ await assert.rejects(f.store.save(cfg,'retry-key'),/CUSTOM_RULE_TIMEOUT/);
+ assert.equal(f.calls.length,calls);
 });

@@ -17,3 +17,32 @@ test('reconcile preserves matching session rules, restores missing, removes only
  const orphan=fixture([makeOriginRule('ours'),{id:99}]);await orphan.manager.reconcile(null);assert.deepEqual([...orphan.rules.keys()],[99]);
  const conflict=fixture([{id:RULE_ID}]);await assert.rejects(conflict.manager.reconcile(descriptor),/CUSTOM_RULE_CONFLICT/);assert.equal(conflict.updates.length,0);
 });
+
+// A never-settling Chrome mutation must fail visibly without advancing the
+// underlying mutation queue. Otherwise a retry or late add can own stale rules.
+test('hung Chrome update fails bounded, blocks retries, and cleans a late unowned add',async()=>{
+ const rules=new Map();let finish,updates=0;
+ const manager=createNetworkRuleManager({extensionId:'ours',hasPermission:async()=>true,operationTimeoutMs:15,dnr:{
+  getSessionRules:async()=>[...rules.values()],
+  updateSessionRules:change=>{updates++;if(change.addRules)return new Promise(resolve=>{finish=()=>{for(const r of change.addRules)rules.set(r.id,r);resolve();};});for(const id of change.removeRuleIds||[])rules.delete(id);return Promise.resolve();}
+ }});
+ const pending=manager.acquire(descriptor);
+ const result=await Promise.race([pending.then(()=> 'resolved',e=>e.code),new Promise(r=>setTimeout(()=>r('still pending'),100))]);
+ assert.equal(result,'CUSTOM_RULE_TIMEOUT');
+ await assert.rejects(manager.acquire(descriptor),/CUSTOM_RULE_TIMEOUT/);
+ assert.equal(updates,1);
+ finish();
+ for(let i=0;i<20&&rules.has(RULE_ID);i++)await new Promise(r=>setTimeout(r,0));
+ assert.equal(rules.has(RULE_ID),false);
+ assert.equal(updates,2);
+ await assert.rejects(manager.acquire(descriptor),/CUSTOM_RULE_TIMEOUT/);
+});
+
+test('hung rule read cannot start a late mutation or block ordinary no-rule leases',async()=>{
+ let finish,updates=0;
+ const manager=createNetworkRuleManager({extensionId:'ours',hasPermission:async()=>true,operationTimeoutMs:15,dnr:{getSessionRules:()=>new Promise(r=>finish=r),updateSessionRules:async()=>{updates++;}}});
+ const result=await Promise.race([manager.acquire(descriptor).then(()=> 'resolved',e=>e.code),new Promise(r=>setTimeout(()=>r('still pending'),100))]);
+ assert.equal(result,'CUSTOM_RULE_TIMEOUT');finish([]);
+ await new Promise(r=>setTimeout(r,0));assert.equal(updates,0);
+ const ordinary=await manager.acquire({...descriptor,policyId:'standard'});await ordinary.release();
+});
