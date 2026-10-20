@@ -65,8 +65,8 @@ test('stream events are source/request/connection/sequence guarded and keep text
   await until(()=>r.pending.length===1);const job=r.pending[0];
   r.progress(job,'EVIL',{}, {id:'other'});r.progress(job,'WRONG',{requestId:'wrong'});r.progress(job,'OLD',{connectionId:'old'});
   assert.equal(w.document.body.textContent.includes('EVIL'),false);assert.equal(w.document.body.textContent.includes('WRONG'),false);
-  r.progress(job,'draft one');const node=w.document.querySelector('.pk-ai-draft');assert.ok(node);const body=w.document.querySelector('.pk-ai-body');body.scrollTop=52;
-  w.document.getElementById('comment').focus();r.progress(job,'draft two',{sequence:2});
+  r.progress(job,'draft one');await wait(25);const node=w.document.querySelector('.pk-ai-draft');assert.ok(node);const body=w.document.querySelector('.pk-ai-body');body.scrollTop=52;
+  w.document.getElementById('comment').focus();r.progress(job,'draft two',{sequence:2});await wait(25);
   assert.equal(w.document.querySelector('.pk-ai-draft'),node);assert.equal(body.scrollTop,52);assert.equal(w.document.activeElement.id,'comment');
   r.progress(job,'OLD ORDER',{sequence:1});assert.equal(node.textContent,'draft two');
   job.resolve({ok:false,error:'CUSTOM_TIMEOUT'});await wait(30);assert.ok(w.document.body.textContent.includes('未完成'));assert.ok(w.document.body.textContent.includes('draft two'));
@@ -102,7 +102,7 @@ test('first visible fragment is not counted as first readable sentence',async()=
  const r=reader(),{w}=r;try{
   await until(()=>r.pending.length===1);const job=r.pending[0];
   r.progress(job,'首字');await wait(30);
-  const first=r.calls.filter(m=>m.action==='displayed');assert.equal(first.length,1);assert.equal(typeof first[0].firstVisibleMs,'number');assert.equal(first[0].firstReadableMs,undefined);
+  const first=r.calls.filter(m=>m.action==='displayed'&&m.firstVisibleMs!==undefined);assert.equal(first.length,1);assert.equal(typeof first[0].firstVisibleMs,'number');assert.equal(first[0].firstReadableMs,undefined);
   r.progress(job,'这是一句可供阅读的摘要。'.repeat(5),{sequence:2});await wait(30);
   const readable=r.calls.filter(m=>m.action==='displayed').at(-1);assert.equal(typeof readable.firstReadableMs,'number');assert.ok(readable.firstReadableMs>=readable.firstVisibleMs);
  }finally{w.close();}
@@ -115,4 +115,28 @@ test('finishing or failing a readable stream preserves the user reading position
   card.set('article',outcome,outcome==='success'?{text:'A long final\n'.repeat(100),highlights:[]}:'CUSTOM_TIMEOUT');
   assert.equal(body.scrollTop,90);
  }}finally{card.destroy();w.close();}
+});
+test('switch language cancels old ownership, reads language cache and generates only current view; late old result stays hidden',async()=>{
+ const r=reader(),{w}=r;try{
+  await until(()=>r.pending.length===1);const old=r.pending[0];w.document.getElementById('pk-ai-language').click();w.document.getElementById('pk-ai-language-en').click();await until(()=>r.pending.length===2);
+  const next=r.pending[1];assert.equal(next.m.outputLanguage,'en');assert.equal(next.m.mode,'summary');assert.notEqual(next.m.instance,old.m.instance);assert.ok(r.calls.some(m=>m.action==='cancel'&&m.instance===old.m.instance));
+  old.resolve({ok:true,value:{text:'OLD CHINESE',highlights:[]}});r.progress(old,'OLD PARTIAL');next.resolve({ok:true,value:{text:'English result',highlights:[]}});await wait(30);assert.equal(w.document.body.textContent.includes('OLD CHINESE'),false);assert.ok(w.document.body.textContent.includes('English result'));
+ }finally{w.close();}
+});
+test('English selection survives source rebuild and accepts English request stage',async()=>{
+ const r=reader(),{w}=r;try{
+  await until(()=>r.pending.length===1);w.document.getElementById('pk-ai-language').click();w.document.getElementById('pk-ai-language-en').click();await until(()=>r.pending.length===2);const english=r.pending[1];r.progress(english,'',{stage:'request',outputLanguage:'en'});assert.match(w.document.querySelector('.pk-ai-progress').textContent,/正在生成/);
+  w.document.querySelector('[data-testid="tweetText"]').textContent='Changed title';await until(()=>r.pending.length===3);const fresh=r.pending[2];assert.equal(fresh.m.outputLanguage,'en');assert.equal(w.document.getElementById('pk-ai-language').getAttribute('aria-label'),'输出语言：English');
+  r.progress(fresh,'English node',{outputLanguage:'en',preview:{version:1,outputLanguage:'en',text:'English node',tree:[],highlights:[]}});await wait(25);assert.match(w.document.querySelector('.pk-ai-draft').textContent,/English node/);
+ }finally{w.close();}
+});
+test('mindmap timing ignores hidden summary text and starts only when a visible node arrives',async()=>{
+ const r=reader(),{w}=r;try{
+  await until(()=>r.pending.length===1);w.document.getElementById('pk-ai-tab-mindmap').click();await until(()=>r.pending.length===2);const map=r.pending[1],text='Hidden prose. '.repeat(20);
+  r.progress(map,text,{preview:{version:1,outputLanguage:'zh-CN',text,tree:[],highlights:[]}});await wait(30);w.dispatchEvent(new w.Event('focus'));await wait(20);
+  assert.equal(r.calls.filter(m=>m.action==='displayed'&&m.requestId===map.m.requestId&&m.firstVisibleMs!==undefined).length,0);
+  assert.equal(r.calls.filter(m=>m.action==='displayed'&&m.requestId===map.m.requestId&&m.renderMs!==undefined).length,0);
+  r.progress(map,text,{sequence:2,preview:{version:1,outputLanguage:'zh-CN',text,tree:[{id:'0',text:'主题',children:[]}],highlights:[]}});await wait(30);
+  const visible=r.calls.find(m=>m.action==='displayed'&&m.requestId===map.m.requestId&&m.firstReadableMs!==undefined);assert.ok(visible);assert.ok(w.document.querySelector('.pk-ai-node'));
+ }finally{w.close();}
 });

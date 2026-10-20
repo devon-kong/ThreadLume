@@ -5,6 +5,11 @@ import {normalizeEndpoint,validateProviderConfig} from './custom-provider.js';
 import {providerPermissions} from './transport-policy.js';
 const d=document,root=d.getElementById('peek-settings');let prefs={...DEFAULTS},connection={state:'DISCONNECTED'},busy=false,notice='',undo=null,lastFailed=null,saveQueue=Promise.resolve(),saveRevision=0,pendingSaves=0,refreshRevision=0,confirmedPrefs={...DEFAULTS},providers={activeId:'doubao',services:[]},providerBusy=false,providerRevision=0,providerDialog=null;
 const providerDrafts=new Map();
+let setupOperation=null,setupStage='';
+const SETUP_LABELS={permission:'正在请求域名授权…',background:'正在准备后台…',rules:'正在准备网络规则…',model:'正在检测模型…',commit:'正在保存配置…'};
+function beginSetup(){setupOperation=crypto.randomUUID();showSetup('permission');return setupOperation;}
+function showSetup(stage){setupStage=SETUP_LABELS[stage]||'';const node=d.getElementById('pk-provider-phase');if(node)node.textContent=setupStage;const submit=d.getElementById('pk-provider-submit');if(submit?.disabled)submit.textContent=setupStage||'正在检测…';}
+chrome.runtime.onMessage?.addListener((m,sender)=>{if(sender.id!==chrome.runtime.id||sender.tab||m?.ns!=='peek-ai-v7'||m.action!=='providerProgress'||m.operationId!==setupOperation||!Object.hasOwn(SETUP_LABELS,m.stage))return;showSetup(m.stage);});
 function applyTheme(){d.documentElement.dataset.peekAiTheme=prefs.theme==='system'?(connection.xTheme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')):prefs.theme;}
 function toggle(name,label,description,disabled=false){
  const input=el(d,'input',{type:'checkbox',id:'pk-pref-'+name,'aria-label':label,...(disabled?{disabled:true}:{})});input.checked=prefs[name];input.addEventListener('change',()=>save({...prefs,[name]:input.checked}));
@@ -62,8 +67,8 @@ function providerSection(){
  else more.append(identified(button(d,'断开连接',()=>connectionAction('disconnect')),'pk-disconnect'));
  row.append(more);
  const blocked=custom&&!ready&&state!=='CHECKING';
- const foot=providerBusy?'等待服务响应。取消后保留原连接与本次草稿。':blocked?errorText(state)+(state==='CUSTOM_KEY_REQUIRED'?' 请编辑服务，重新输入后检测。':''):custom?new URL(custom.baseURL).host+' · '+(custom.rememberKey?'密钥已保存在此设备':'密钥仅在本次浏览器会话保存'):'当前字幕或正文会发送至豆包。切换服务会保留此连接。';
- return el(d,'section',{id:'pk-connection-card',class:'pk-settings-card'},selector,row,...(custom&&connection.setupOpen?[el(d,'p',{class:'pk-ai-muted',text:'豆包连接页已打开。完成登录或验证后，请点击「完成后检测」；成功前继续使用当前服务。'})]:[]),el(d,'div',{class:'pk-connection-foot'},el(d,'span',{text:foot}),el(d,'span',{text:connection.checkedAt?'最近检测：'+new Date(connection.checkedAt).toLocaleString():''})));
+ const foot=providerBusy?(setupStage||'等待服务响应。')+' 取消后保留原连接与本次草稿。':blocked?errorText(state)+(state==='CUSTOM_KEY_REQUIRED'?' 请编辑服务，重新输入后检测。':''):custom?new URL(custom.baseURL).host+' · '+(custom.rememberKey?'密钥已保存在此设备':'密钥仅在本次浏览器会话保存'):'当前字幕或正文会发送至豆包。切换服务会保留此连接。';
+ return el(d,'section',{id:'pk-connection-card',class:'pk-settings-card'},selector,row,...(custom&&connection.setupOpen?[el(d,'p',{class:'pk-ai-muted',text:'豆包连接页已打开。完成登录或验证后，请点击「完成后检测」；成功前继续使用当前服务。'})]:[]),el(d,'div',{class:'pk-connection-foot'},el(d,'span',{id:providerBusy?'pk-provider-phase':undefined,text:foot}),el(d,'span',{text:connection.checkedAt?'最近检测：'+new Date(connection.checkedAt).toLocaleString():''})));
 }
 // The atomic save/activate ACK is the final success boundary. Later read-only
 // status requests cannot re-open cancellation or turn a committed success red.
@@ -85,12 +90,12 @@ function requestProviderPermission(baseURL){
  return chrome.permissions.request(request);
 }
 async function activateProvider(id){
- if(providerBusy||busy)return;const revision=++providerRevision;++refreshRevision;providerBusy=true;notice='';render();
- try{const service=providers.services.find(s=>s.id===id);const permission=requestProviderPermission(service.baseURL);if(!await permission)throw Error('CUSTOM_PERMISSION_REQUIRED');if(revision!==providerRevision)return;const list=await send('activateProvider',{id});if(revision!==providerRevision)return;acceptProviderList(list);providerBusy=false;notice='连接成功，已启用服务';render();refreshCommittedStatus();}
+ if(providerBusy||busy)return;const operationId=beginSetup(),revision=++providerRevision;++refreshRevision;providerBusy=true;notice='';render();
+ try{const service=providers.services.find(s=>s.id===id);const permission=requestProviderPermission(service.baseURL);if(!await permission)throw Error('CUSTOM_PERMISSION_REQUIRED');if(revision!==providerRevision)return;const list=await send('activateProvider',{id,operationId});if(revision!==providerRevision)return;acceptProviderList(list);providerBusy=false;notice='连接成功，已启用服务';render();refreshCommittedStatus();}
  catch(e){if(revision===providerRevision)notice=errorText(e.message);}
  finally{if(revision===providerRevision){providerBusy=false;render();}}
 }
-function cancelProviderCheck(){++providerRevision;providerBusy=false;notice='已取消检测，保留原服务与草稿。';send('cancelProviderCheck').catch(()=>{});render();}
+function cancelProviderCheck(){setupOperation=null;++providerRevision;providerBusy=false;notice='已取消检测，保留原服务与草稿。';send('cancelProviderCheck').catch(()=>{});render();}
 function openProviderDialog(service){
  if(providerDialog||providerBusy||busy)return;++refreshRevision;
  const draftId=service?.id||'new',prior=d.activeElement,draft=providerDrafts.get(draftId)||{name:service?.name||'',baseURL:service?.baseURL||'',model:service?.model||'',key:'',rememberKey:service?.rememberKey!==false,stream:service?.stream===true};
@@ -106,23 +111,23 @@ function openProviderDialog(service){
  form.append(key.wrap);
  const remember=el(d,'input',{id:'pk-provider-rememberKey',type:'checkbox'});remember.checked=draft.rememberKey;
  form.append(el(d,'label',{class:'pk-provider-remember',for:remember.id},remember,el(d,'span',{text:'记住在此设备'})),el(d,'small',{class:'pk-ai-muted',text:'保存在浏览器本地存储，并非系统钥匙串加密。关闭后，Key 只在本次浏览器会话内保存。'}),el(d,'p',{class:'pk-ai-muted',text:'保存时会请求访问此 API 域名，并发送一条最小测试请求，不发送当前文章。连接成功后，当前字幕或正文仅发送至你选择的服务。'}));
- const stream=el(d,'input',{id:'pk-provider-stream',type:'checkbox'});stream.checked=draft.stream===true;form.append(el(d,'label',{class:'pk-provider-remember',for:stream.id},stream,el(d,'span',{text:'渐进显示摘要（流式）'})),el(d,'small',{class:'pk-ai-muted',text:'更早开始阅读；保存时验证服务的流式兼容性。失败不自动重发，关闭后恢复完整结果方式。'}));
+ const stream=el(d,'input',{id:'pk-provider-stream',type:'checkbox'});stream.checked=draft.stream===true;form.append(el(d,'label',{class:'pk-provider-remember',for:stream.id},stream,el(d,'span',{text:'渐进显示摘要与脑图（流式）'})),el(d,'small',{class:'pk-ai-muted',text:'更早开始阅读；保存时验证服务的流式兼容性。失败不自动重发，关闭后恢复完整结果方式。'}));
  const error=el(d,'p',{id:'pk-provider-error',class:'pk-provider-error',role:'alert'}),cancel=identified(button(d,'取消',()=>dismiss()),'pk-provider-cancel'),submit=el(d,'button',{id:'pk-provider-submit',type:'submit',class:'pk-provider-primary',text:'保存、检测并启用'});form.append(error,el(d,'footer',{},cancel,submit));dialog.append(form);d.body.append(dialog);
  const capture=()=>{const value={name:name.input.value,baseURL:url.input.value,model:model.input.value,key:key.input.value,rememberKey:remember.checked,stream:stream.checked};providerDrafts.set(draftId,value);return value;};
  const preview=()=>{capture();try{endpoint.textContent='请求地址：'+normalizeEndpoint(url.input.value).endpoint+(providerPermissions(url.input.value).permissions?'。此服务需额外网络规则权限，仅在该准确 API 地址移除 Origin 请求头。':'');}catch{endpoint.textContent=url.input.value?'仅支持 HTTPS Base URL，不含账号、查询参数或片段。':'填写服务商提供的 Base URL；请求路径会自动规范化。';}};
  form.addEventListener('input',preview);form.addEventListener('change',capture);preview();
  let checking=false,revision=0;
  const setChecking=value=>{checking=value;for(const node of form.querySelectorAll('input,button[type=submit]'))node.disabled=value;submit.textContent=value?'正在检测…':'保存、检测并启用';cancel.textContent=value?'取消检测':'取消';};
- function dismiss(){capture();++revision;if(checking)send('cancelProviderCheck').catch(()=>{});dialog.close();}
+ function dismiss(){capture();setupOperation=null;++revision;if(checking)send('cancelProviderCheck').catch(()=>{});dialog.close();}
  const keydown=event=>{if(!dialog.open)return;if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();dismiss();}else if(event.key==='Tab'){const nodes=[...dialog.querySelectorAll('button,input')].filter(n=>!n.disabled),first=nodes[0],last=nodes.at(-1);if(event.shiftKey&&d.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&d.activeElement===last){event.preventDefault();first.focus();}}};
  window.addEventListener('keydown',keydown,true);dialog.addEventListener('cancel',e=>{e.preventDefault();dismiss();});dialog.addEventListener('close',()=>{window.removeEventListener('keydown',keydown,true);dialog.remove();providerDialog=null;if(prior?.isConnected)prior.focus({preventScroll:true});},{once:true});
  form.addEventListener('submit',async event=>{
   event.preventDefault();if(checking)return;const value=capture();let config,normalized;
   try{config=validateProviderConfig({...(service?{id:service.id}:{}),name:value.name,protocol:'chat-completions',baseURL:value.baseURL,model:value.model,rememberKey:value.rememberKey,stream:value.stream});normalized=normalizeEndpoint(value.baseURL);if(!value.key&&!service?.hasKey)throw Error('CUSTOM_KEY_REQUIRED');}
   catch(e){error.textContent=errorText(e.code||e.message);return;}
-  const token=++revision;setChecking(true);error.textContent='';
+  const token=++revision;setChecking(true);const operationId=beginSetup();error.textContent='';
   // This call must remain before the first await, within the submit gesture.
-  try{const permission=requestProviderPermission(config.baseURL);const granted=await permission;if(token!==revision)return;if(!granted)throw Error('CUSTOM_PERMISSION_REQUIRED');const list=await send('saveProvider',{config,...(value.key?{key:value.key}:{})});if(token!==revision)return;acceptProviderList(list);providerDrafts.delete(draftId);key.input.value='';checking=false;notice='连接成功，已启用服务';dialog.close();render();refreshCommittedStatus();}
+  try{const permission=requestProviderPermission(config.baseURL);const granted=await permission;if(token!==revision)return;if(!granted)throw Error('CUSTOM_PERMISSION_REQUIRED');const list=await send('saveProvider',{config,operationId,...(value.key?{key:value.key}:{})});if(token!==revision)return;acceptProviderList(list);providerDrafts.delete(draftId);key.input.value='';checking=false;notice='连接成功，已启用服务';dialog.close();render();refreshCommittedStatus();}
   catch(e){if(token===revision)error.textContent=errorText(e.message);}
   finally{if(token===revision&&dialog.isConnected)setChecking(false);}
  });

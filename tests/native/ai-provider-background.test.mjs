@@ -6,12 +6,13 @@ const evt=()=>{const handlers=[];return {handlers,addListener:f=>handlers.push(f
 const area=seed=>{const data=structuredClone(seed||{}),access=[];return {data,access,get:async k=>typeof k==='string'?{[k]:data[k]}:structuredClone(data),set:async v=>Object.assign(data,structuredClone(v)),remove:async k=>delete data[k],setAccessLevel:async v=>access.push(v)};};
 const cfg={name:'用户服务',protocol:'chat-completions',baseURL:'https://api.example.test/v1',model:'model-user',rememberKey:true};
 const input={kind:'article',focusId:'123',url:'https://x.com/a/status/123',title:'Title',text:'Full body'};
-const fixture=async({current=false,read,permission=true,seed,dnr,urlClass=URL,startupPreferencesGate,startupAttemptGate,startupCreateGate}={})=>{
+const fixture=async({current=false,read,permission=true,seed,dnr,urlClass=URL,startupPreferencesGate,startupAttemptGate,startupCreateGate,storageGate}={})=>{
  const saved={...cfg,id:'custom-one',version:'version-one',checkedAt:1,keyRef:'key-one'};saved.binding=createBindingDescriptor(saved,saved.keyRef);const storage={local:area({aiConnection:{enabled:true,partition:'bean'},...(current?{aiProvidersV8:{schema:2,activeId:saved.id,services:[saved]},['aiProviderKeyV9:'+saved.keyRef]:{providerId:saved.id,configVersion:saved.version,keyRef:saved.keyRef,keyLocation:'local',secret:'synthetic-key'}}:{})}),session:area()},calls=[],created=[],notified=[],progress=[];
  if(seed){storage.local=area(seed.local);storage.session=area(seed.session);}
+ if(storageGate){const access=storage.local.setAccessLevel;storage.local.setAccessLevel=async v=>{await storageGate;return access(v);};}
  if(startupPreferencesGate){const get=storage.local.get;storage.local.get=async key=>{if(key==='aiPreferences')await startupPreferencesGate;return get(key);};}
  if(startupAttemptGate){const set=storage.session.set;storage.session.set=async value=>{if(value.aiAutoAttempted)await startupAttemptGate;return set(value);};}
- const chrome={...(dnr?{declarativeNetRequest:dnr}:{}),storage,runtime:{id:'ours',onMessage:evt(),onStartup:evt(),openOptionsPage:async()=>{}},action:{onClicked:evt()},permissions:{contains:async()=>permission,onRemoved:evt(),onAdded:evt()},tabs:{onUpdated:evt(),onRemoved:evt(),onActivated:evt(),query:async()=>[{id:1,url:input.url}],get:async()=>null,create:async options=>{created.push(options);return {id:9,url:options.url,status:'complete'};},remove:async()=>{},sendMessage:async(id,m,options)=>{if(m.action==='generationProgress'){progress.push({id,m,options});return null;}if(m.action==='stateChanged'){notified.push(m);return null;}return {focusId:'123',url:input.url,instance:m.instance};}},scripting:{executeScript:async()=>[]}};
+ const chrome={...(dnr?{declarativeNetRequest:dnr}:{}),storage,runtime:{id:'ours',onMessage:evt(),sendMessage:async m=>progress.push({m}),onStartup:evt(),openOptionsPage:async()=>{}},action:{onClicked:evt()},permissions:{contains:async()=>permission,onRemoved:evt(),onAdded:evt()},tabs:{onUpdated:evt(),onRemoved:evt(),onActivated:evt(),query:async()=>[{id:1,url:input.url}],get:async()=>null,create:async options=>{created.push(options);return {id:9,url:options.url,status:'complete'};},remove:async()=>{},sendMessage:async(id,m,options)=>{if(m.action==='generationProgress'){progress.push({id,m,options});return null;}if(m.action==='stateChanged'){notified.push(m);return null;}return {focusId:'123',url:input.url,instance:m.instance};}},scripting:{executeScript:async()=>[]}};
  if(startupCreateGate){const create=chrome.tabs.create;chrome.tabs.create=async options=>{await startupCreateGate;return create(options);};}
  // Avoid unrelated Doubao startup when no custom has yet been saved.
  if(!current&&!seed)storage.local.data.aiConnection.enabled=false;
@@ -213,4 +214,24 @@ test('实际worker可选DNR动态授权：启动时API不可用，重授后无�
  assert.equal(granted.rules.has(891020),true);assert.equal(w.calls.length,0,'permission recovery must not probe');
  assert.equal((await w.send({action:'activateProvider',id:initial.storage.local.data.aiProvidersV8.activeId})).ok,true);
  assert.equal(w.calls.length,1,'only the explicit recheck probes');
+});
+
+ test('cancel during worker preparation acknowledges immediately and prevents a queued save from starting',async()=>{
+ let resume;const storageGate=new Promise(r=>resume=r);const w=await fixture({storageGate});
+ const pending=w.send({action:'saveProvider',config:cfg,key:'synthetic-key'});
+ const cancel=w.send({action:'cancelProviderCheck'});
+ const result=await Promise.race([cancel,new Promise(r=>setTimeout(()=>r({blocked:true}),40))]);
+ resume();await cancel;const saved=await pending;
+ assert.equal(result.blocked,undefined,'cancellation must not wait for worker initialization');
+ assert.equal(saved.error,'CANCELLED');assert.equal(w.calls.length,0);
+ });
+
+test('configuration phases are operation-scoped and diagnostics never include credentials or raw responses',async()=>{
+ const w=await fixture();const saved=await w.send({action:'saveProvider',operationId:'operation-one',config:cfg,key:'synthetic-key'});assert.equal(saved.ok,true);
+ const events=w.progress.filter(p=>p.m.action==='providerProgress').map(p=>p.m);assert.deepEqual([...new Set(events.map(e=>e.stage))],['background','rules','model','commit']);assert.ok(events.every(e=>e.operationId==='operation-one'&&Number.isFinite(e.elapsedMs)));assert.equal(JSON.stringify(events).includes('synthetic-key'),false);
+});
+test('every English request progress frame carries the validated language',async()=>{
+ const w=await fixture({current:true}),state=(await w.send({action:'status'})).value;
+ const result=await w.send({action:'generate',instance:'english',requestId:'english-request',connectionId:state.connectionId,input,mode:'article',outputLanguage:'en'},w.x);assert.equal(result.ok,true);
+ const frames=w.progress.filter(p=>p.m.action==='generationProgress');assert.ok(frames.some(p=>p.m.stage==='request'));assert.ok(frames.every(p=>p.m.outputLanguage==='en'));
 });

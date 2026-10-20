@@ -1,5 +1,6 @@
+import {validPreview} from './preview.js';
 import {AIService,allowedSender,validateParams,PARAM_KEYS} from './service.js';
-import {AIError,fail,parseSSE,completionOptions,validateInput,businessDiagnostics} from './protocol.js';
+import {AIError,fail,parseSSE,completionOptions,validateInput,businessDiagnostics,validateLanguage,previewSSE} from './protocol.js';
 import {ProviderStore} from './provider-store.js';
 import {createCustomTransport} from './custom-transport.js';
 import {normalizeEndpoint} from './custom-provider.js';
@@ -11,7 +12,7 @@ const PATHS=new Set(['/samantha/aireader/resource_content/create','/samantha/cha
 let checkTask=null,autoFlow=null,setupOpening=null,connectionGeneration=0,setupWrite=Promise.resolve();
 // Exact pages created by this worker; tokens prevent stale cleanup after reuse.
 const ownedPages=new Map();
-const stats={workerStartedAt:Date.now(),requests:0,stages:[],focusChecks:[],bindingStages:[]};
+const stats={workerStartedAt:Date.now(),requests:0,stages:[],focusChecks:[],bindingStages:[],configuration:[]};
 const BINDING_STAGES=new Set(['store_init','store_ready','prepare','probe','probe_ok','commit','binding_permission','rules_acquire','rules_reconcile','executor','rule_read','rule_install','rule_remove','transport_permission','request','response']);
 const bindingStage=stage=>{if(BINDING_STAGES.has(stage)){stats.bindingStages.push({stage,at:Date.now()});stats.bindingStages=stats.bindingStages.slice(-40);}};
 async function transport(path,body,signal,params,onEvent=()=>{}){
@@ -26,7 +27,13 @@ async function transport(path,body,signal,params,onEvent=()=>{}){
   onEvent({stage:'response'});
   record.httpStatus=response.status;
   if(!response.ok)fail(response.status===401?'LOGIN_REQUIRED':response.status===429?'RATE_LIMITED':response.status===403?'ACCESS_REJECTED':'SERVER_ERROR');
-  const text=await response.text();if(text.length>2000000)fail('RESPONSE_LIMIT');record.elapsedMs=Date.now()-started;
+  let text='';
+  if(path.endsWith('/completion')&&response.body?.getReader){
+   const reader=response.body.getReader(),decoder=new TextDecoder('utf-8',{fatal:true});let bytes=0,first=true;
+   const cancel=()=>{reader.cancel().catch(()=>{});};signal.addEventListener('abort',cancel,{once:true});
+   try{while(true){if(signal.aborted)fail('CANCELLED');const chunk=await reader.read();if(signal.aborted)fail('CANCELLED');if(chunk.done){text+=decoder.decode();break;}bytes+=chunk.value.byteLength;if(bytes>2000000)fail('RESPONSE_LIMIT');if(first){first=false;onEvent({stage:'firstByte'});}text+=decoder.decode(chunk.value,{stream:true});onEvent({stage:'sse',text});}}
+   finally{signal.removeEventListener('abort',cancel);reader.cancel().catch(()=>{});reader.releaseLock();}
+  }else text=await response.text();if(text.length>2000000)fail('RESPONSE_LIMIT');record.elapsedMs=Date.now()-started;
   if(path.endsWith('/completion')){record.fin=/"event_type"\s*:\s*2003/.test(text);record.err=/"event_type"\s*:\s*2005/.test(text);Object.assign(record,businessDiagnostics(text));}
   return text;
  }catch(e){const code=e instanceof AIError?e.code:e.name==='TimeoutError'?'TIMEOUT':signal.aborted?'CANCELLED':'NETWORK_ERROR';record.error=code;throw new AIError(code);}
@@ -35,10 +42,10 @@ const hasPermission=request=>chrome.permissions.contains(request);
 const customTransport=createCustomTransport({onStage:bindingStage,hasPermission:(permission,descriptor)=>hasPermission(descriptor?.policyId?descriptorPermissions(descriptor):{origins:[permission]})});
 const networkRules=createNetworkRuleManager({onStage:bindingStage,extensionId:chrome.runtime.id,getDnr:()=>chrome.declarativeNetRequest,hasPermission});
 const bindings=createBindingRuntime({onStage:bindingStage,transport:customTransport,rules:networkRules,hasPermission});
-let bindingRevision=0;
+let bindingRevision=0,providerAdmission=0;
 let service,providerCheck=null;
 const providers=new ProviderStore({onStage:bindingStage,storage:chrome.storage,bindings,verifyPermission:config=>hasPermission(config?descriptorPermissions(config.binding):{origins:[BASE+'/*']}),onChange:change=>{if(change.invalidate||change.bindingChanged){service.providerChanged();if(providerCheck)cancelConnectionWork();}notifyState({connectionChanged:change.invalidate||change.bindingChanged});}});
-service=new AIService({storage:chrome.storage,request:transport,providers,requestCustom:(provider,key,input,mode,signal,binding,onEvent)=>{if(!binding||binding!==bindings.current()||binding.descriptor.configVersion!==provider.version||binding.descriptor.keyRef!==provider.keyRef)fail('CONNECTION_CHANGED');return binding.executor.generate(key,input,mode,signal,onEvent);}});
+service=new AIService({storage:chrome.storage,request:transport,providers,requestCustom:(provider,key,input,mode,signal,binding,onEvent,outputLanguage)=>{if(!binding||binding!==bindings.current()||binding.descriptor.configVersion!==provider.version||binding.descriptor.keyRef!==provider.keyRef)fail('CONNECTION_CHANGED');return binding.executor.generate(key,input,mode,signal,onEvent,outputLanguage);}});
 async function notifyState(extra={}){
  try{
   const preferences=await service.preferences();
@@ -288,21 +295,36 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
  let progressTimer=null,latestProgress=null,progressClosed=false,progressSequence=0;
  const deliverProgress=()=>{progressTimer=null;if(progressClosed||!latestProgress)return;
   const event=latestProgress;latestProgress=null;
-  chrome.tabs.sendMessage(sender.tab.id,{ns:'peek-ai-v7',action:'generationProgress',instance:m.instance,requestId:m.requestId,mode:m.mode,connectionId:m.connectionId,sequence:++progressSequence,...event},{documentId:sender.documentId,frameId:0}).catch(()=>{});
+  chrome.tabs.sendMessage(sender.tab.id,{ns:'peek-ai-v7',action:'generationProgress',instance:m.instance,requestId:m.requestId,mode:m.mode,connectionId:m.connectionId,outputLanguage:m.outputLanguage||'zh-CN',sequence:++progressSequence,...event},{documentId:sender.documentId,frameId:0}).catch(()=>{});
  };
  const progress=event=>{
   if(progressClosed||!m.requestId||!Number.isInteger(sender.tab?.id))return;
   if(event.stage==='partial'&&typeof event.text==='string'&&event.text.length<=12000){
-   latestProgress={stage:'partial',text:event.text};if(!progressTimer)progressTimer=setTimeout(deliverProgress,80);
+   latestProgress={stage:'partial',text:event.text,...(validPreview(event.preview,m.outputLanguage||'zh-CN')?{preview:event.preview}:{}),outputLanguage:m.outputLanguage||'zh-CN'};if(!progressTimer)progressTimer=setTimeout(deliverProgress,80);
   }else if(['request','uploadStart'].includes(event.stage)){
    latestProgress={stage:'request'};deliverProgress();
   }
  };
  const release=()=>{progressClosed=true;clearTimeout(progressTimer);latestProgress=null;if(!record)return;const pending=tabRequests.get(sender.tab.id);pending?.delete(record);if(!pending?.size)tabRequests.delete(sender.tab.id);};
- const admission=bindingRevision;
+ const admission=bindingRevision,checkAdmission=providerAdmission,operationStarted=performance.now();
+ const operationId=typeof m.operationId==='string'&&/^[\w-]{1,100}$/.test(m.operationId)?m.operationId:crypto.randomUUID();
+ const setupStage=stage=>{
+  if(!['background','rules','model','commit'].includes(stage)||checkAdmission!==providerAdmission)return;
+  const event={ns:'peek-ai-v7',action:'providerProgress',operationId,stage,elapsedMs:Math.round(performance.now()-operationStarted)};
+  stats.configuration.push({operationId,stage,elapsedMs:event.elapsedMs});stats.configuration=stats.configuration.slice(-40);
+  chrome.runtime.sendMessage?.(event)?.catch(()=>{});
+ };
+ const storeStage=stage=>{const phase={prepare:'rules',probe:'model',commit:'commit'}[stage];if(phase)setupStage(phase);};
  const dispatch=async()=>{
+  // Cancellation is admitted before storage/rule restoration. A save already
+  // waiting for initialization must never start after its UI was dismissed.
+  if(m.action==='cancelProviderCheck'){
+   ++providerAdmission;const cancelled=providerCheck;providerCheck=null;cancelled?.abort.abort();return null;
+  }
+  if(['saveProvider','activateProvider'].includes(m.action)){if(m.operationId!==undefined&&(typeof m.operationId!=='string'||!/^[-\w]{1,100}$/.test(m.operationId)))fail('INVALID_MESSAGE');setupStage('background');}
   await ready;
-  const fields={status:['xTheme'],preferences:[],savePreferences:['preferences'],providers:[],saveProvider:['config','key'],activateProvider:['id'],cancelProviderCheck:[],generate:['connectionId','input','mode','instance','requestId','contentMs'],cached:['connectionId','input','mode','instance','requestId','contentMs'],cancel:['instance'],displayed:['instance','requestId','displayMs','firstVisibleMs','firstReadableMs','visibilityInterrupted'],openSettings:[],openSetup:[],connect:[],capture:[],check:[],cancelCheck:[],disconnect:[]};
+  if(['saveProvider','activateProvider'].includes(m.action)&&checkAdmission!==providerAdmission)fail('CANCELLED');
+  const fields={status:['xTheme'],preferences:[],savePreferences:['preferences'],providers:[],saveProvider:['config','key','operationId'],activateProvider:['id','operationId'],cancelProviderCheck:[],generate:['connectionId','input','mode','instance','requestId','contentMs','outputLanguage'],cached:['connectionId','input','mode','instance','requestId','contentMs','outputLanguage'],cancel:['instance'],displayed:['instance','requestId','displayMs','firstVisibleMs','firstReadableMs','renderMs','visibilityInterrupted'],openSettings:[],openSetup:[],connect:[],capture:[],check:[],cancelCheck:[],disconnect:[]};
   if(!sender.url?.startsWith('chrome-extension://')&&Object.keys(m).some(key=>!['ns','action',...(fields[m.action]||[])].includes(key)))fail('INVALID_MESSAGE');
   if(providerCheck&&['connect','openSetup','capture','check'].includes(m.action))fail('CUSTOM_CHECK_IN_PROGRESS');
   switch(m.action){
@@ -310,8 +332,8 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
    case 'preferences':return service.preferences();
    case 'savePreferences':{const value=await service.savePreferences(m.preferences);notifyState();return value;}
    case 'providers':return providers.list();
-   case 'saveProvider':{if(Object.keys(m).some(k=>!['ns','action','config','key'].includes(k)))fail('INVALID_MESSAGE');return checkProvider(signal=>providers.save(m.config,m.key,{signal}),m.config);}
-   case 'activateProvider':{if(Object.keys(m).some(k=>!['ns','action','id'].includes(k)))fail('INVALID_MESSAGE');return checkProvider(signal=>providers.activate(m.id,{signal}),providers.registry.services.find(s=>s.id===m.id));}
+   case 'saveProvider':{if(Object.keys(m).some(k=>!['ns','action','config','key','operationId'].includes(k)))fail('INVALID_MESSAGE');return checkProvider(signal=>providers.save(m.config,m.key,{signal,onStage:storeStage}),m.config);}
+   case 'activateProvider':{if(Object.keys(m).some(k=>!['ns','action','id','operationId'].includes(k)))fail('INVALID_MESSAGE');return checkProvider(signal=>providers.activate(m.id,{signal,onStage:storeStage}),providers.registry.services.find(s=>s.id===m.id));}
    case 'cancelProviderCheck':{
     // Aborted fetch/body reads need not settle immediately. Relinquish this
     // check now so retry works; its finally is identity-guarded, and the store
@@ -326,17 +348,17 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
    case 'cancelCheck':cancelConnectionWork();return null;
    case 'disconnect':{providerCheck?.abort.abort();const disconnected=service.disconnect();await cancelConnectionWork();const result=await disconnected;notifyState({connectionChanged:true});return result;}
    case 'cancel':service.cancel(owner);return null;
-   case 'displayed':return service.recordDisplay(owner,m.requestId,{visibilityInterrupted:m.visibilityInterrupted,displayMs:m.displayMs,firstVisibleMs:m.firstVisibleMs,firstReadableMs:m.firstReadableMs});
+   case 'displayed':return service.recordDisplay(owner,m.requestId,{visibilityInterrupted:m.visibilityInterrupted,displayMs:m.displayMs,firstVisibleMs:m.firstVisibleMs,firstReadableMs:m.firstReadableMs,renderMs:m.renderMs});
    case 'cached':
    case 'generate':{
     await auditVisibleBoundary();
     if(typeof m.instance!=='string'||!/^[\w-]{1,100}$/.test(m.instance))fail('INVALID_INSTANCE');
-    const input=validateInput(m.input);await confirmFocus(sender,m,input);
+    const outputLanguage=validateLanguage(m.outputLanguage);const input=validateInput(m.input);await confirmFocus(sender,m,input);
     if(admission!==bindingRevision)fail('CONNECTION_CHANGED');
     if(typeof m.connectionId!=='string'||m.connectionId!==service.activeIdentity())fail('CONNECTION_CHANGED');
     if(m.requestId!==undefined&&(typeof m.requestId!=='string'||!/^[\w-]{1,100}$/.test(m.requestId)))fail('INVALID_MESSAGE');
     if(m.contentMs!==undefined&&(typeof m.contentMs!=='number'||!Number.isFinite(m.contentMs)||m.contentMs<0||m.contentMs>600000))fail('INVALID_MESSAGE');
-    return m.action==='cached'?service.cachedMeasured(owner,input,m.mode,{requestId:m.requestId,contentMs:m.contentMs}):service.generate(owner,input,m.mode,{requestId:m.requestId,contentMs:m.contentMs,onProgress:progress});
+    return m.action==='cached'?service.cachedMeasured(owner,input,m.mode,{requestId:m.requestId,contentMs:m.contentMs,outputLanguage}):service.generate(owner,input,m.mode,{requestId:m.requestId,contentMs:m.contentMs,outputLanguage,onProgress:progress});
    }
    default:fail('INVALID_MESSAGE');
   }

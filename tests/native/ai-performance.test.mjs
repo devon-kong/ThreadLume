@@ -6,14 +6,14 @@ import {createMetrics} from '../../native-extension/src/ai/metrics.js';
 test('presentation-qualified measurements use v3 without relabeling persisted v2 samples',()=>{
  const m=createMetrics();
  m.start('owner','new',{kind:'article',mode:'article',provider:'custom'});
- assert.equal(m.snapshot()[0].measurementVersion,3);
+ assert.equal(m.snapshot()[0].measurementVersion,4);
  m.restore([{owner:'owner',row:{measurementVersion:2,requestId:'old',kind:'article',mode:'article',provider:'custom',operation:'cache',cache:'hit',visibilityInterrupted:false,firstReadableMs:24}}]);
  assert.equal(m.snapshot()[1].measurementVersion,2);
  assert.equal(m.snapshot()[1].firstReadableMs,24);
  m.display('owner','new',{displayMs:10,visibilityInterrupted:true});
  m.display('owner','new',{displayMs:20,visibilityInterrupted:false});
  const next=createMetrics();next.restore([{owner:'owner',row:m.snapshot()[0]}]);
- assert.equal(next.snapshot()[0].measurementVersion,3);
+ assert.equal(next.snapshot()[0].measurementVersion,4);
  assert.equal(next.snapshot()[0].visibilityInterrupted,true);
  assert.equal(next.snapshot()[0].displayMs,10);
 });

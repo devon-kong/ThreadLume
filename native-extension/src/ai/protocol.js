@@ -1,3 +1,4 @@
+import {identifyTree,validPreview} from './preview.js';
 // Protocol adapted from the handoff's independently verified adapter.
 // This module has no transport and never accepts arbitrary endpoint metadata.
 export class AIError extends Error {constructor(code){super(code);this.code=code;}}
@@ -32,11 +33,13 @@ export function buildResource(input){
  const bytes=new TextEncoder().encode(input.text);let binary='';for(const b of bytes)binary+=String.fromCharCode(b);
  return {resource_content:{type:input.kind==='video'?2:1,title:input.title,fingerprint:md5(input.text),uri:'',extra:{origin_url:input.url}},base64_data:btoa(binary)};
 }
-export function buildRequest(resourceId,mode,input){
+export const RESULT_VERSION='reading-v13';
+export function validateLanguage(value='zh-CN'){if(!['zh-CN','en'].includes(value))fail('INVALID_LANGUAGE');return value;}
+export function buildRequest(resourceId,mode,input,outputLanguage='zh-CN'){
  if(!resourceId||!['summary','mindmap','article'].includes(mode))fail('INVALID_MODE');
- const {title,url}=input,language='zh';
+ const {title,url}=input,language=validateLanguage(outputLanguage)==='en'?'en':'zh';
  const content=mode==='summary'?{text:url,language,scene_id:0,title,url,with_tag:false,resource_id:resourceId,need_timeline:true}
-  :mode==='mindmap'?{text:'根据所给字幕生成中文思维导图，保留主要主题和关键细节。',language,resource_id:resourceId,scene_id:0}
+  :mode==='mindmap'?{text:language==='en'?'Create an English mindmap of the supplied content, preserving main themes and details.':'根据所给内容生成简体中文思维导图，保留主要主题和关键细节。',language,resource_id:resourceId,scene_id:0}
   :{text:'',language,url,title,scene_id:15,resource_id:resourceId};
  return {messages:[{content_type:mode==='summary'?2508:mode==='mindmap'?2540:2502,content:JSON.stringify(content),attachments:[],references:[]}],completion_option:completionOptions(),reply_id:'0',conversation_id:'0',section_id:'0',local_message_id:crypto.randomUUID(),local_conversation_id:'0'};
 }
@@ -49,7 +52,7 @@ export function classifyBusiness(code){
 // Intentionally export only bounded numeric metadata and fixed classes. Never
 // return response text, error_detail, challenge payloads or request parameters.
 export function businessDiagnostics(text){
- try{for(const block of text.split(/\r?\n\r?\n/)){
+ try{for(const block of text.replace(/\r\n?/g,'\n').split(/\n\n/)){
   const raw=block.split(/\r?\n/).filter(x=>x.startsWith('data:')).map(x=>x.slice(5).trimStart()).join('\n');if(!raw)continue;
   const e=JSON.parse(raw),data=typeof e.event_data==='string'?JSON.parse(e.event_data):e.event_data;
   if(e.event_type!==2005&&!(!e.event_type&&e.code))continue;
@@ -60,10 +63,10 @@ export function businessDiagnostics(text){
  }}catch{/* Diagnostics must not change transport/parser behavior. */}
  return {};
 }
-export function parseSSE(text,mode='article',duration=Infinity){
+export function parseSSE(text,mode='article',duration=Infinity,{partial=false}={}){
  let finished=false,output='';const events=[],sections=new Map(),timeline=new Map();
  try{
-  for(const block of text.split(/\r?\n\r?\n/)){
+  for(const block of text.replace(/\r\n?/g,'\n').split(/\n\n/)){
    const raw=block.split(/\r?\n/).filter(x=>x.startsWith('data:')).map(x=>x.slice(5).trimStart()).join('\n');if(!raw)continue;
    const e=JSON.parse(raw),data=typeof e.event_data==='string'?JSON.parse(e.event_data):e.event_data;
    if(e.event_type===2005||(!e.event_type&&e.code))fail(classifyBusiness(data?.code||e.code));
@@ -77,15 +80,18 @@ export function parseSSE(text,mode='article',duration=Infinity){
    }
   }
  }catch(e){if(e instanceof AIError)throw e;fail('INVALID_STREAM');}
- if(!finished)fail('NO_FIN');if(!output.trim()||output.length>200000)fail('EMPTY_OUTPUT');
+ if(!finished&&!partial)fail('NO_FIN');if(!partial&&(!output.trim()||output.length>200000))fail('EMPTY_OUTPUT');
  const highlights=[...sections].sort(([a],[b])=>a-b).map(([index,s])=>({...s,...timeline.get(index)}));
- if(mode==='summary')for(const h of highlights){for(const point of [h,...(h.bullet_points||[])])if(!Number.isFinite(point.timestamp)||point.timestamp<0||point.timestamp>duration*1000)fail('INVALID_TIMELINE');}
+ if(mode==='summary'&&!partial)for(const h of highlights){for(const point of [h,...(h.bullet_points||[])])if(!Number.isFinite(point.timestamp)||point.timestamp<0||point.timestamp>duration*1000)fail('INVALID_TIMELINE');}
  const result={finished,eventTypes:[...new Set(events)],text:output,highlights,timestampUnit:'milliseconds'};
- if(mode==='mindmap')result.tree=parseMindmap(output);
+ if(mode==='mindmap')result.tree=parseMindmap(output,{partial});
  return result;
 }
-export function parseMindmap(text){
- const source=text.match(/```mindmap\s*([\s\S]*?)```/i)?.[1]?.trim();if(!source)fail('INVALID_MINDMAP');
+export function parseMindmap(text,{partial=false}={}){
+ let source=text.match(/```mindmap[^\S\n]*\n([\s\S]*?)(?:```|$)/i)?.[1];
+ if(!partial)source=text.match(/```mindmap\s*([\s\S]*?)```/i)?.[1]?.trim();
+ else if(source)source=source.slice(0,source.lastIndexOf('\n')+1);
+ if(!source){if(partial)return [];fail('INVALID_MINDMAP');}
  const roots=[],stack=[];let count=0;
  for(const line of source.split('\n')){
   if(!line.trim()||/^\s*mindmap\s*$/i.test(line))continue;
@@ -97,4 +103,19 @@ export function parseMindmap(text){
   (stack.length?stack.at(-1).node.children:roots).push(node);stack.push({node,depth});
  }
  if(!roots.length)fail('INVALID_MINDMAP');return roots;
+}
+
+export function previewSSE(text,mode,input,outputLanguage='zh-CN'){
+ const empty={version:1,outputLanguage,text:'',highlights:[],tree:[]};
+ try{
+  const normalized=text.replace(/\r\n?/g,'\n'),boundary=normalized.lastIndexOf('\n\n');if(boundary<0)return empty;
+  const data=parseSSE(normalized.slice(0,boundary+2),mode,input?.duration,{partial:true});
+  const preview={...empty,text:mode==='mindmap'?'':data.text.slice(0,12000),tree:identifyTree(data.tree||[]),highlights:[]};
+  if(mode==='summary')for(const h of data.highlights){
+   const valid=p=>Number.isFinite(p.timestamp)&&p.timestamp>=0&&p.timestamp<=(input?.duration||0)*1000;
+   if(!valid(h)||typeof (h.chapter||h.title)!=='string')continue;
+   preview.highlights.push({timestamp:h.timestamp,chapter:h.chapter||h.title,bullet_points:(h.bullet_points||[]).filter(p=>valid(p)&&typeof (p.point||p.text)==='string').map(p=>({timestamp:p.timestamp,point:p.point||p.text}))});
+  }
+  return validPreview(preview,outputLanguage)?preview:empty;
+ }catch{return empty;}
 }

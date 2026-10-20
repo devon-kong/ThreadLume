@@ -18,7 +18,7 @@ export function trackReaderInteraction(document) {
       last = { pane: 'left', video: video && focal.contains(video) ? video : null };
       return;
     }
-    const card = target.closest('#peek-ai-card, .pk-ai-map-dialog');
+    const card = target.closest('#peek-ai-card, .pk-ai-map-dialog, #peek-comment-scrollbar');
     // The existing error card's settings link has no data marker. Exclude its
     // fixed, current UI label as well as the marked top-bar settings control.
     const button = target.closest('button');

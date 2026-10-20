@@ -75,3 +75,62 @@ html[data-peek-lad="on"][data-peek-ai-theme] article[data-peek-lad-focal] div[ro
  html[data-peek-ai-card="on"][data-peek-lad="on"]:not(:has([data-testid="swipe-to-dismiss"]))::-webkit-scrollbar-track{margin-top:var(--peek-comments-track-top,0px);margin-bottom:16px;background:var(--peek-lad-page,#edf1f4)}
  html[data-peek-ai-card="on"][data-peek-lad="on"]:not(:has([data-testid="swipe-to-dismiss"]))::-webkit-scrollbar-thumb{background:var(--peek-lad-dim,#687887);border:3px solid var(--peek-lad-page,#edf1f4);border-radius:9px}
 }
+/* v13: changes are confined to the AI card and its own controls. */
+#peek-ai-card{height:min(320px,calc(100vh - 252px));padding:12px 16px}
+#peek-ai-card .pk-ai-toolbar{display:flex;align-items:center;gap:4px;flex:none;min-height:44px}
+.pk-ai-heading{flex:1;min-width:0;color:var(--pk-dim);font-size:12px;white-space:nowrap}
+#peek-ai-card .pk-ai-tool{display:flex;align-items:center;justify-content:center;min-width:44px;width:44px;height:44px;padding:0;background:transparent;border-radius:12px}
+#peek-ai-card .pk-ai-tool:hover{background:var(--pk-soft)}
+#peek-ai-card .pk-ai-tabs{display:flex;flex-wrap:nowrap;gap:0;padding:0;min-height:44px;border:0;border-radius:24px;background:var(--pk-soft)}
+#peek-ai-card .pk-ai-tab{display:flex;align-items:center;justify-content:center;gap:8px;min-width:48px;height:44px;padding:0 12px;background:transparent;border-radius:24px;color:var(--pk-dim);font-size:14px}
+#peek-ai-card .pk-ai-tab[aria-selected=true]{background:var(--pk-bg);color:var(--pk-fg);box-shadow:inset 0 0 0 1px var(--pk-line),0 1px 3px #0001;font-weight:600}
+.pk-ai-tab[aria-selected=false] .pk-ai-tab-label{display:none}
+.pk-ai-progress{display:flex;align-items:center;min-height:26px;flex:none;font-size:11px;color:var(--pk-dim)}.pk-ai-progress>[role=status]{flex:1}
+#peek-ai-card .pk-ai-progress button{min-height:44px}
+#peek-ai-card .pk-ai-body{padding:8px 0}
+.pk-ai-language-panel{display:flex;align-items:center;flex-wrap:wrap;gap:4px;padding:4px 0;flex:none;border-bottom:1px solid var(--pk-line)}
+.pk-ai-language-panel small{width:100%;color:var(--pk-dim);padding:4px}
+#peek-ai-card .pk-ai-language-panel [aria-pressed=true]{background:var(--pk-tint);color:var(--pk-blue)}
+.pk-ai-search-panel{max-height:180px;overflow:auto;flex:none;border-bottom:1px solid var(--pk-line);padding:8px 0}
+.pk-ai-search-row{display:flex;gap:4px}.pk-ai-search-row input{flex:1;min-width:0;min-height:44px;border:1px solid var(--pk-line);border-radius:10px;padding:8px;color:var(--pk-fg);background:var(--pk-soft);font:inherit}
+.pk-ai-search-panel>[role=status]{color:var(--pk-dim);font-size:12px}
+#peek-ai-card .pk-ai-search-result{display:block;background:transparent;text-align:left;width:100%;font-size:12px}
+::highlight(peek-source-match){background:#ffe39a;color:#111}
+.pk-ai-footer>span{flex:1;min-width:0}.pk-ai-footer{gap:4px}
+.pk-ai-collapsed .pk-ai-progress,.pk-ai-collapsed .pk-ai-search-panel,.pk-ai-collapsed .pk-ai-language-panel{display:none!important}
+#peek-ai-card.pk-ai-collapsed footer{display:flex;position:absolute;right:16px;top:12px;border:0;background:var(--pk-bg);padding:0}
+#peek-ai-card.pk-ai-collapsed footer>:not(#pk-ai-fold){display:none}
+#peek-ai-card.pk-ai-collapsed .pk-ai-toolbar{padding-right:88px}
+#peek-ai-card.pk-ai-collapsed .pk-ai-heading{display:none}
+.pk-ai-map{height:260px;min-height:160px;position:relative;overflow:hidden;touch-action:none;border-radius:10px;background:var(--pk-bg);cursor:grab}
+.pk-ai-map:active{cursor:grabbing}.pk-ai-map-layer{position:absolute;transform-origin:0 0}.pk-ai-map-layer>svg{position:absolute;overflow:visible;pointer-events:none}
+.pk-ai-map-layer>svg path{stroke:var(--pk-blue);stroke-width:1.4;fill:none;opacity:.6}
+#peek-ai-card .pk-ai-map .pk-ai-node,.pk-ai-map-dialog .pk-ai-map .pk-ai-node{position:absolute;display:block;min-width:0;max-width:none;overflow:auto;min-height:44px;padding:10px 12px;line-height:19px;font-size:13px;cursor:pointer;border:1px solid var(--pk-line);background:var(--pk-soft)}
+.pk-ai-map .pk-ai-node[data-branch="1"]{border-left:3px solid #638e78!important}.pk-ai-map .pk-ai-node[data-branch="2"]{border-left:3px solid #9f7b53!important}.pk-ai-map .pk-ai-node[data-branch="3"]{border-left:3px solid #8b78a9!important}
+.pk-ai-map-inline-tools{display:flex;align-items:center;justify-content:flex-end;gap:4px}
+#peek-ai-card .pk-ai-map-inline-tools button{background:transparent;font-size:12px}
+.pk-ai-map-dialog>.pk-ai-map{height:60vh}
+.pk-ai-chapter[aria-current=true]{box-shadow:inset 3px 0 var(--pk-blue)}
+/* Reserve the native scrollbar gutter; make only its duplicate paint transparent. */
+@media(min-width:980px){
+ html[data-peek-internal-scrollbar]{scrollbar-color:transparent transparent!important}
+ html[data-peek-internal-scrollbar]::-webkit-scrollbar-thumb,html[data-peek-internal-scrollbar]::-webkit-scrollbar-track{background:transparent!important;border-color:transparent!important}
+ #peek-comment-scrollbar{position:fixed;width:12px;border-radius:6px;z-index:3;touch-action:none;cursor:pointer;background:var(--peek-lad-hover,#f5f7f9)}
+ #peek-comment-scrollbar .pk-comment-thumb{position:absolute;top:0;left:3px;width:6px;border-radius:4px;background:var(--peek-lad-dim,#687887);pointer-events:auto}
+ #peek-comment-scrollbar:focus-visible{outline:2px solid var(--peek-lad-accent,#006bbe);outline-offset:1px}
+ html:has([data-testid="swipe-to-dismiss"]) #peek-comment-scrollbar{display:none}
+}
+.pk-ai-map-dialog [hidden]{display:none!important}
+#pk-ai-view-mindmap:not([hidden]){display:flex;flex-direction:column;height:100%;min-height:0}
+#pk-ai-view-mindmap>.pk-ai-map{flex:1;height:auto;min-height:70px}
+#pk-ai-view-mindmap>.pk-ai-map-inline-tools{flex:none}
+#peek-ai-card .pk-ai-body:has(#pk-ai-view-mindmap:not([hidden])){overflow:hidden}
+#pk-ai-view-mindmap>.pk-ai-muted{flex:none;margin:0 0 4px}
+
+/* Recovery stays reachable above a partial map, within the existing card. */
+#pk-ai-view-mindmap[data-state="error"]:not([hidden]){display:block;height:auto}
+#pk-ai-view-mindmap[data-state="error"]>.pk-ai-map{height:180px;min-height:0}
+#peek-ai-card .pk-ai-body:has(#pk-ai-view-mindmap[data-state="error"]:not([hidden])){overflow:auto}
+#pk-ai-view-mindmap[data-state="error"]>.pk-ai-error{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px}
+#pk-ai-view-mindmap[data-state="error"]>.pk-ai-error p{flex:1;margin:0}
+#pk-ai-view-mindmap[data-state="error"]>.pk-ai-error button{flex:none}

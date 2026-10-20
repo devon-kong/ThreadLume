@@ -1,4 +1,4 @@
-import {AIError,fail,validateInput,md5,buildResource,buildRequest,parseSSE,classifyBusiness} from './protocol.js';
+import {AIError,fail,validateInput,md5,buildResource,buildRequest,parseSSE,classifyBusiness,validateLanguage,RESULT_VERSION,previewSSE} from './protocol.js';
 import {PROMPT_VERSION} from './custom-provider.js';
 import {DEFAULTS,normalizePreferences} from './preferences.js';
 import {createMetrics} from './metrics.js';
@@ -112,8 +112,8 @@ export class AIService {
  }
  async invalidateContext(){await this.init();this.pendingConnection?.abort.abort();this.clearJobs();this.epoch++;this.context=null;this.error='CONTEXT_CHANGED';this.errorRevision++;this.resources.clear();this.connection={enabled:this.connection.enabled,partition:crypto.randomUUID()};await this.writeBlock(null);await this.writeContext(null);await this.writeConnection();}
  async disconnect(){await this.init();this.pendingConnection?.abort.abort();this.clearJobs();this.epoch++;this.context=null;this.error=null;this.errorRevision++;this.resources.clear();this.connection.enabled=false;await this.writeBlock(null);await this.writeContext(null);await this.writeConnection();return this.status();}
- key(input,mode){const provider=this.providers?.active(),partition=provider?`${provider.id}:${provider.version}:${provider.model}:${PROMPT_VERSION}${provider.binding&&(provider.binding.policyId!=='standard'||provider.binding.policyVersion!==1)?':'+provider.binding.policyId+':'+provider.binding.policyVersion:''}`:this.connection.partition;return `${partition}:${md5(JSON.stringify([input.kind,input.url,input.title,input.text,input.duration||0,input.cues||null]))}:${mode}`;}
- async cached(raw,mode){const epoch=this.epoch;await this.init();if(epoch!==this.epoch)throw aborted();const input=validateInput(raw);if((input.kind==='article'&&mode!=='article')||(input.kind==='video'&&!['summary','mindmap'].includes(mode)))fail('INVALID_MODE');const provider=this.providers?.active();if(provider){const state=this.providers.bindingState(provider)!=='ready'?this.providers.bindingState(provider):(this.providers.bindings?.state()||'ready');if(state!=='ready')fail(state);}const entry=this.cache[this.key(input,mode)];return entry&&Date.now()-entry.at<TTL?entry.result:null;}
+ key(input,mode,outputLanguage='zh-CN'){validateLanguage(outputLanguage);const provider=this.providers?.active(),partition=provider?`${provider.id}:${provider.version}:${provider.model}:${PROMPT_VERSION}${provider.binding&&(provider.binding.policyId!=='standard'||provider.binding.policyVersion!==1)?':'+provider.binding.policyId+':'+provider.binding.policyVersion:''}`:this.connection.partition;return `${partition}:${RESULT_VERSION}:${outputLanguage}:${md5(JSON.stringify([input.kind,input.url,input.title,input.text,input.duration||0,input.cues||null]))}:${mode}`;}
+ async cached(raw,mode,outputLanguage='zh-CN'){validateLanguage(outputLanguage);const epoch=this.epoch;await this.init();if(epoch!==this.epoch)throw aborted();const input=validateInput(raw);if((input.kind==='article'&&!['article','mindmap'].includes(mode))||(input.kind==='video'&&!['summary','mindmap'].includes(mode)))fail('INVALID_MODE');const provider=this.providers?.active();if(provider){const state=this.providers.bindingState(provider)!=='ready'?this.providers.bindingState(provider):(this.providers.bindings?.state()||'ready');if(state!=='ready')fail(state);}const entry=this.cache[this.key(input,mode,outputLanguage)];return entry&&Date.now()-entry.at<TTL?entry.result:null;}
  cancel(owner){this.cancelledOwners.set(owner,Date.now());for(const [id,at] of this.cancelledOwners)if(Date.now()-at>300000)this.cancelledOwners.delete(id);for(const job of this.jobs.values())if(job.owners.has(owner)){job.owners.delete(owner);for(const reject of job.rejects.get(owner)||[])reject(aborted());job.rejects.delete(owner);if(!job.owners.size)job.abort.abort();}}
  clearJobs(){for(const job of this.jobs.values())this.abortJob(job);this.jobs.clear();}
  performanceSnapshot(){return this.metrics.snapshot();}
@@ -124,28 +124,29 @@ export class AIService {
   });
  }
  recordDisplay(owner,requestId,timing){return this.metrics.display(owner,requestId,timing);}
- async cachedMeasured(owner,raw,mode,{requestId=crypto.randomUUID(),contentMs}={}){
+ async cachedMeasured(owner,raw,mode,{requestId=crypto.randomUUID(),contentMs,outputLanguage='zh-CN'}={}){
   const epoch=this.epoch;await this.init();if(epoch!==this.epoch)throw aborted();
   const trace=this.metrics.start(owner,requestId,{kind:raw?.kind==='video'?'video':'article',mode:['article','summary','mindmap'].includes(mode)?mode:'unknown',provider:this.providers?.active()?'custom':'doubao',providerId:this.providers?.active()?.id||'doubao',configVersion:this.providers?.active()?.version,contentMs,inputCharacters:typeof raw?.text==='string'?raw.text.length:undefined,operation:'cache'});trace.mark('admitted');
-  try{const result=await this.cached(raw,mode);trace.cache(result?'hit':'miss');if(result)trace.output(outputCharacters(result));trace.finish('success');return result;}
+  try{const result=await this.cached(raw,mode,outputLanguage);trace.cache(result?'hit':'miss');if(result)trace.output(outputCharacters(result));trace.finish('success');return result;}
   catch(e){trace.finish('error');throw e;}
  }
- async generate(owner,raw,mode,{requestId=crypto.randomUUID(),contentMs,onProgress=()=>{}}={}){
+ async generate(owner,raw,mode,{requestId=crypto.randomUUID(),contentMs,onProgress=()=>{},outputLanguage='zh-CN'}={}){
+  validateLanguage(outputLanguage);
   const epoch=this.epoch,flag=mode==='mindmap'?'mindmap':'summary',modeRevision=this.modeRevision[flag];
   await this.init();if(epoch!==this.epoch||modeRevision!==this.modeRevision[flag]||this.cancelledOwners.has(owner))throw aborted();
   const trace=this.metrics.start(owner,requestId,{kind:raw?.kind==='video'?'video':'article',mode:['article','summary','mindmap'].includes(mode)?mode:'unknown',provider:this.providers?.active()?'custom':'doubao',providerId:this.providers?.active()?.id||'doubao',configVersion:this.providers?.active()?.version,contentMs,inputCharacters:typeof raw?.text==='string'?raw.text.length:undefined});
   trace.mark('admitted');
-  try{const result=await this.generateMeasured(owner,raw,mode,trace,onProgress);trace.output(outputCharacters(result));trace.finish('success');return result;}
+  try{const result=await this.generateMeasured(owner,raw,mode,trace,onProgress,outputLanguage);trace.output(outputCharacters(result));trace.finish('success');return result;}
   catch(e){trace.finish(e.name==='AbortError'||e.code==='CANCELLED'?'cancelled':'error');throw e;}
  }
- async generateMeasured(owner,raw,mode,trace,onProgress){
+ async generateMeasured(owner,raw,mode,trace,onProgress,outputLanguage){
   const requestEpoch=this.epoch,flag=mode==='mindmap'?'mindmap':'summary',modeRevision=this.modeRevision[flag];const ownerCheck=()=>{if(this.cancelledOwners.has(owner)||requestEpoch!==this.epoch||modeRevision!==this.modeRevision[flag])throw aborted();};ownerCheck();
   await this.init();ownerCheck();const input=validateInput(raw);
-  if((input.kind==='article'&&mode!=='article')||(input.kind==='video'&&!['summary','mindmap'].includes(mode)))fail('INVALID_MODE');
+  if((input.kind==='article'&&!['article','mindmap'].includes(mode))||(input.kind==='video'&&!['summary','mindmap'].includes(mode)))fail('INVALID_MODE');
   const prefs=await this.preferences();ownerCheck();if(!this.modeEnabled(mode,prefs))fail('GENERATION_DISABLED');
-  const cached=await this.cached(input,mode);ownerCheck();if(cached){trace.cache('hit');return {...cached,cached:true};}
+  const cached=await this.cached(input,mode,outputLanguage);ownerCheck();if(cached){trace.cache('hit');return {...cached,cached:true};}
   const status=await this.status();ownerCheck();if(status.state!=='ready')fail(status.state);
-  const key=this.key(input,mode);let job=this.jobs.get(key);
+  const key=this.key(input,mode,outputLanguage);let job=this.jobs.get(key);
   if(job?.abort.signal.aborted){this.jobs.delete(key);job=null;}
   trace.mark('queued');
   if(job)trace.cache('shared');
@@ -154,7 +155,7 @@ export class AIService {
    const emit=event=>{
     if(job.abort.signal.aborted||epoch!==this.epoch||identity!==this.activeIdentity())return;
     for(const o of job.observers)if(job.owners.has(o.owner)){
-     o.trace.mark(event.stage);
+     o.trace.mark(event.stage);if(event.stage==='partial'){if(event.text||event.preview?.tree.length||event.preview?.highlights.length)o.trace.mark('firstContent');if(event.preview?.tree.length)o.trace.mark('firstNode');if(event.preview?.highlights.length)o.trace.mark('firstChapter');}
      try{o.progress(event);}catch{/* A closed recipient cannot fail another owner's request. */}
     }
    };
@@ -164,16 +165,16 @@ export class AIService {
     emit({stage:'executing'});await permit();check();
     if(!provider&&this.error)fail(this.error);
     let parsed;
-    if(provider){const secret=this.providers.keyFor(provider);if(!secret)fail('CUSTOM_KEY_REQUIRED');parsed=await this.requestCustom(provider,secret,input,mode,signal,binding,emit);check();}
+    if(provider){const secret=this.providers.keyFor(provider);if(!secret)fail('CUSTOM_KEY_REQUIRED');parsed=await this.requestCustom(provider,secret,input,mode,signal,binding,emit,outputLanguage);check();}
     else {
     const resourceKey=this.key(input,'resource');let resource=this.resources.get(resourceKey);
     if(!resource){let response;emit({stage:'uploadStart'});try{response=JSON.parse(await this.request('/samantha/aireader/resource_content/create',buildResource(input),signal,context.params));}catch(e){if(e instanceof AIError||e.name==='AbortError')throw e;fail('INVALID_RESPONSE');}check();emit({stage:'uploadDone'});
      if(response.code!==0||!response.data?.id)fail(classifyBusiness(response.code));resource=response.data.id;this.resources.set(resourceKey,resource);
     }
-    await permit();check();emit({stage:'request'});const text=await this.request('/samantha/chat/completion',buildRequest(resource,mode,input),signal,context.params,emit);check();
+    await permit();check();emit({stage:'request'});const text=await this.request('/samantha/chat/completion',buildRequest(resource,mode,input,outputLanguage),signal,context.params,event=>{if(event.stage==='sse'){const preview=previewSSE(event.text,mode,input,outputLanguage);if(preview.text||preview.tree.length||preview.highlights.length)emit({stage:'partial',text:preview.text,preview});}else emit(event);});check();
     parsed=parseSSE(text,mode,input.duration);
     }
-    emit({stage:'parsed'});const result={...parsed,mode,createdAt:Date.now(),providerId:provider?.id||'doubao',providerName:provider?.name||'豆包'};
+    emit({stage:'parsed'});const result={...parsed,mode,outputLanguage,resultVersion:RESULT_VERSION,createdAt:Date.now(),providerId:provider?.id||'doubao',providerName:provider?.name||'豆包'};
     const entries=Object.entries({...this.cache,[key]:{at:Date.now(),result}}).filter(([,v])=>Date.now()-v.at<TTL).sort(([,a],[,b])=>b.at-a.at);
     const candidate={};let bytes=0;for(const [k,v] of entries){const size=new TextEncoder().encode(JSON.stringify([k,v])).length;if(Object.keys(candidate).length>=30||bytes+size>4*1024*1024)continue;candidate[k]=v;bytes+=size;}
     emit({stage:'cacheStart'});try{await this.storage.local.set({aiCache:candidate});

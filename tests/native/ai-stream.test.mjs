@@ -1,3 +1,4 @@
+import {readChatStream} from '../../native-extension/src/ai/chat-stream.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createCustomTransport} from '../../native-extension/src/ai/custom-transport.js';
@@ -69,4 +70,11 @@ test('valid DONE completes without waiting for the server to close its socket',a
  const t=createCustomTransport({hasPermission:async()=>true,fetchImpl:async()=>new Response(body,{headers:{'content-type':'text/event-stream'}})});
  const pending=t.generate(config,'key',input,'article');pending.catch(()=>{});
  const result=await Promise.race([pending,new Promise(r=>setTimeout(()=>r('STALLED'),100))]);assert.equal(result.text,'done');
+});
+test('all split points preserve closed Chinese map nodes and reject erroneous terminal events',async()=>{
+ const input={kind:'article',focusId:'123',url:'https://x.com/a/status/123',title:'标题',text:'正文'};
+ const content='{"text":"概述","tree":[{"text":"根","children":[{"text":"子\\u4e2d","children":[]}]}]}';
+ const event=(text,finish=null)=>'data: '+JSON.stringify({choices:[{index:0,delta:text===null?{}:{content:text},finish_reason:finish}]})+'\n\n';
+ const payload=event(content.slice(0,-4))+event(content.slice(-4))+event(null,'stop')+'data: [DONE]\n\n',bytes=new TextEncoder().encode(payload);
+ for(let at=1;at<bytes.length;at++){const events=[];const response=new Response(new ReadableStream({start(c){c.enqueue(bytes.slice(0,at));c.enqueue(bytes.slice(at));c.close();}}),{headers:{'content-type':'text/event-stream'}});const result=await readChatStream(response,{mode:'mindmap',input,onEvent:e=>events.push(e)});assert.equal(result.choices[0].message.content,content);assert.ok(events.some(e=>e.preview?.tree.length));}
 });

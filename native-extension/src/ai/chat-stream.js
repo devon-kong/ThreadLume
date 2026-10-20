@@ -1,4 +1,5 @@
 import {fail} from './protocol.js';
+import {validPreview} from './preview.js';
 // Decode only a leading top-level text string. The preview remains provisional;
 // the normal schema validator alone may accept a finished result.
 export function previewText(content){
@@ -21,7 +22,53 @@ export function previewText(content){
  // Do not expose a split surrogate or unbounded draft.
  return out.replace(/[\uD800-\uDBFF]$/,'').slice(0,12000);
 }
-export async function readChatStream(response,{signal,onEvent=()=>{},mode}={}){
+// Parse actual closed JSON objects only. An unfinished parent never gets
+// synthetic closing delimiters: its closed descendants may appear as a forest.
+export function structuredPreview(content,mode,input,outputLanguage='zh-CN'){
+ const result={version:1,outputLanguage,text:previewText(content),highlights:[],tree:[]};
+ if(typeof content!=='string'||content.length>60000)return result;
+ const closed=[];let i=0;
+ const skip=()=>{while(/\s/.test(content[i]||'x'))i++;};
+ const incomplete=()=>{throw 0;};
+ function string(){const start=i++;while(i<content.length){if(content[i]==='\\'){i+=2;continue;}if(content[i++]==='"')return JSON.parse(content.slice(start,i));}incomplete();}
+ function value(path,depth){
+  if(depth>24)throw 0;skip();const start=i,c=content[i];
+  if(c==='"')return string();
+  if(c==='{'||c==='['){
+   i++;skip();const array=c==='[',end=array?']':'}',out=array?[]:{};let index=0;const seen=new Set();
+   if(content[i]===end){i++;if(!array)closed.push({path,value:out});return out;}
+   while(i<content.length){
+    skip();let key=index++;
+    if(!array){if(content[i]!=='"')throw 0;key=string();if(seen.has(key)||['__proto__','constructor','prototype'].includes(key))throw 0;seen.add(key);skip();if(content[i++]!==':')throw 0;}
+    out[key]=value([...path,key],depth+1);skip();
+    if(content[i]===end){i++;if(!array)closed.push({path,value:out});return out;}
+    if(content[i++]!==',')throw 0;
+   }incomplete();
+  }
+  const match=content.slice(i).match(/^(?:true|false|null|-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?)(?=[\s,}\]])/);if(!match)throw 0;i+=match[0].length;return JSON.parse(match[0]);
+ }
+ try{value([],0);}catch{/* Incomplete prefix is never promoted to a final result. */}
+ const exact=(o,keys)=>o&&typeof o==='object'&&!Array.isArray(o)&&Object.keys(o).length===keys.length&&keys.every(k=>Object.hasOwn(o,k));
+ const label=value=>{if(typeof value!=='string'||!value.trim()||value.length>1000)throw 0;return value.trim();};
+ const timestamp=cue=>{if(!Number.isInteger(cue)||cue<1||cue>(input?.cues?.length||0))throw 0;return Math.round(input.cues[cue-1].start*1000);};
+ if(input)for(const entry of closed){
+  const path=entry.path;
+  try{
+   if(mode==='mindmap'&&path[0]==='tree'&&path.length%2===0&&path.every((p,j)=>j%2?Number.isInteger(p):p===(j===0?'tree':'children'))){
+    const id=path.filter((_,j)=>j%2).join('.');let count=0;
+    const node=(n,key,depth)=>{if(depth>8||++count>200||!exact(n,['text','children'])||!Array.isArray(n.children))throw 0;return {id:key,text:label(n.text),children:n.children.map((c,j)=>node(c,key+'.'+j,depth+1))};};
+    const parsed=node(entry.value,id,id.split('.').length);
+    result.tree=result.tree.filter(n=>!n.id.startsWith(id+'.'));result.tree.push(parsed);
+   }else if(mode==='summary'&&path[0]==='highlights'&&path.length===2){
+    const h=entry.value;if(!exact(h,['cue','chapter','bullet_points'])||!Array.isArray(h.bullet_points)||h.bullet_points.length>20)throw 0;
+    result.highlights.push({timestamp:timestamp(h.cue),chapter:label(h.chapter),bullet_points:h.bullet_points.map(p=>{if(!exact(p,['cue','point']))throw 0;return {timestamp:timestamp(p.cue),point:label(p.point)};})});
+   }
+  }catch{/* Closed but schema-invalid objects stay invisible. */}
+ }
+ if(!validPreview(result,outputLanguage))return {version:1,outputLanguage,text:result.text,highlights:[],tree:[]};
+ return result;
+}
+export async function readChatStream(response,{signal,onEvent=()=>{},mode,input,outputLanguage='zh-CN'}={}){
  if(!response.headers?.get('content-type')?.toLowerCase().includes('text/event-stream')||!response.body?.getReader)fail('CUSTOM_STREAM_UNSUPPORTED');
  const reader=response.body.getReader(),decoder=new TextDecoder('utf-8',{fatal:true});
  const decode=(value,options)=>{try{return decoder.decode(value,options);}catch{fail('CUSTOM_INVALID_RESPONSE');}};
@@ -43,8 +90,8 @@ export async function readChatStream(response,{signal,onEvent=()=>{},mode}={}){
   if(d.content!==undefined&&d.content!==null){
    if(typeof d.content!=='string')fail('CUSTOM_INVALID_RESPONSE');
    content+=d.content;if(content.length>60000)fail('CUSTOM_INVALID_RESPONSE');
-   if(mode!=='mindmap'&&mode!=='probe'){
-    const text=previewText(content);if(text&&text!==preview){preview=text;onEvent({stage:'partial',text});}
+   if(mode!=='probe'){
+    const data=structuredPreview(content,mode,input,outputLanguage),signature=JSON.stringify(data);if(signature!==preview&&(data.text||data.tree.length||data.highlights.length)){preview=signature;onEvent({stage:'partial',text:data.text,preview:data});}
    }
   }
   if(c.finish_reason!==null&&c.finish_reason!==undefined){

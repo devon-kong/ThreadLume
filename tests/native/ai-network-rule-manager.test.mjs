@@ -46,3 +46,6 @@ test('hung rule read cannot start a late mutation or block ordinary no-rule leas
  await new Promise(r=>setTimeout(r,0));assert.equal(updates,0);
  const ordinary=await manager.acquire({...descriptor,policyId:'standard'});await ordinary.release();
 });
+test('ordinary first binding without rule permission never reads or writes DNR',async()=>{
+ let calls=0;const manager=createNetworkRuleManager({extensionId:'ours',hasPermission:async p=>!p.permissions?.length,dnr:{getSessionRules:()=>{calls++;throw Error('must not use rules');},updateSessionRules:()=>{calls++;throw Error('must not use rules');}}});await manager.reconcile(null);const lease=await manager.acquire({...descriptor,policyId:'standard'});await manager.reconcile(null);await lease.release();assert.equal(calls,0);
+});

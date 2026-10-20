@@ -1,7 +1,7 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import {JSDOM} from 'jsdom';
 import {createCard} from '../../native-extension/src/ai/card.js';import {DEFAULTS,modesFor,normalizePreferences} from '../../native-extension/src/ai/preferences.js';
-test('设置依赖：全关不生成，文章无脑图，Summary 关闭只脑图且保留时间轴偏好',()=>{
- const p={...DEFAULTS,summary:false};assert.equal(p.timeline,true);assert.deepEqual(modesFor({kind:'video'},p),['mindmap']);assert.deepEqual(modesFor({kind:'article'},p),[]);assert.deepEqual(modesFor({kind:'video'},{...p,mindmap:false}),[]);assert.equal(normalizePreferences({theme:'evil'}).theme,'system');
+test('设置依赖：全关不生成，长文支持脑图，Summary 关闭只脑图且保留时间轴偏好',()=>{
+ const p={...DEFAULTS,summary:false};assert.equal(p.timeline,true);assert.deepEqual(modesFor({kind:'video'},p),['mindmap']);assert.deepEqual(modesFor({kind:'article'},p),['mindmap']);assert.deepEqual(modesFor({kind:'video'},{...p,mindmap:false}),[]);assert.equal(normalizePreferences({theme:'evil'}).theme,'system');
 });
 test('安全文本/脑图、固定切换不请求、局部重试不丢成功摘要',()=>{
  const d=new JSDOM('<!doctype html>').window.document;let retries=[];

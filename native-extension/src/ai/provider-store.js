@@ -70,8 +70,9 @@ export class ProviderStore {
   this.cleanupError=null;
   }catch{this.cleanupError='CUSTOM_KEY_CLEANUP_REQUIRED';}
  }
- async save(raw,key,{signal}={}){
-  this.onStage('store_init');await this.init();this.onStage('store_ready');const check=()=>{if(signal?.aborted)cancelled();};check();
+ async save(raw,key,{signal,onStage=()=>{}}={}){
+  const stage=name=>{this.onStage(name);if(!signal?.aborted)onStage(name);};
+  stage('store_init');await this.init();stage('store_ready');const check=()=>{if(signal?.aborted)cancelled();};check();
   const config=validateProviderConfig(raw),before=this.registry,old=config.id?before.services.find(s=>s.id===config.id):null;
   if(config.id&&!old)fail('CUSTOM_INVALID_CONFIG');if(!old&&before.services.length>=MAX_SERVICES)fail('CUSTOM_CONFIG_LIMIT');
   if(key!==undefined&&!this.validKey(key))fail('CUSTOM_KEY_REQUIRED');
@@ -87,9 +88,9 @@ export class ProviderStore {
   this.descriptorStates.set(candidate,'ready');
   let prepared,published=false;
   try{
-   this.onStage('prepare');prepared=await this.bindings?.prepare(candidate,{signal});check();
-   this.onStage('probe');await (prepared?prepared.executor.probe(secret,signal):this.probe(candidate,secret,signal));check();this.onStage('probe_ok');
-   this.onStage('commit');return await this.commit(async()=>{
+   stage('prepare');prepared=await this.bindings?.prepare(candidate,{signal});check();
+   stage('probe');await (prepared?prepared.executor.probe(secret,signal):this.probe(candidate,secret,signal));check();stage('probe_ok');
+   stage('commit');return await this.commit(async()=>{
     check();if(this.registry!==before)cancelled();if(!await this.verifyPermission(candidate))fail('PERMISSION_REQUIRED');check();
     const registry={schema:2,activeId:candidate.id,services:[...before.services.filter(s=>s.id!==candidate.id),candidate]};
     // Staged records have unique refs, so old bound requests cannot see them.

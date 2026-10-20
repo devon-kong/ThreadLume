@@ -1,3 +1,5 @@
+import {attachCommentScrollbar} from './comment-scrollbar.js';
+import {validPreview} from './preview.js';
 import {readFocalContent,inspectFocal,focalArticle} from './content-source.js';
 import {createCard} from './card.js';
 import {send} from './client.js';
@@ -7,13 +9,14 @@ import {readTheme} from '../theme-adapter.js';
 let current=null,scheduled=false,lastPrefs=null,syncRevision=0;
 export function initAIReader(){
  if(!globalThis.chrome?.runtime?.id)return;
+ attachCommentScrollbar(document);
  chrome.runtime.onMessage.addListener((m,sender,respond)=>{
   if(sender.id!==chrome.runtime.id||sender.tab||m?.ns!=='peek-ai-v7')return false;
   if(m.action==='generationProgress'){
    const s=current,job=s?.progress?.get(m.mode);
-   if(!job||!s.valid()||s.stopped||m.instance!==s.instance||m.connectionId!==s.connectionId||m.requestId!==job.id||!Number.isSafeInteger(m.sequence)||m.sequence<=job.sequence||!modesFor(s.input,s.prefs).includes(m.mode))return false;
-   job.sequence=m.sequence;
-   if(m.stage==='partial'&&typeof m.text==='string'&&m.text.length<=12000){job.text=m.text;s.card.progress(m.mode,m.text);recordVisible(s,m.mode,job,false,m.text);}
+   if(!job||!s.valid()||s.stopped||(m.outputLanguage||'zh-CN')!==s.outputLanguage||m.instance!==s.instance||m.connectionId!==s.connectionId||m.requestId!==job.id||!Number.isSafeInteger(m.sequence)||m.sequence<=job.sequence||!modesFor(s.input,s.prefs).includes(m.mode))return false;
+   if(m.preview&&!validPreview(m.preview,s.outputLanguage))return false;job.sequence=m.sequence;
+   if(m.stage==='partial'&&typeof m.text==='string'&&m.text.length<=12000){job.previewReadable=!!(m.mode==='mindmap'?m.preview?.tree.length:m.preview?.highlights.length);job.text=m.mode==='mindmap'?(m.preview?.tree||[]).map(node=>node.text).join('\n'):m.text;s.card.progress(m.mode,m.text,m.preview);recordVisible(s,m.mode,job,false,job.text);}
    else if(m.stage==='request'&&s.card.snapshot().states[m.mode]==='queued')s.card.set(m.mode,'loading');
    return false;
   }
@@ -59,8 +62,8 @@ async function sync(refresh=false){
    endConnectionWait(current);}
   updateCurrentPreferences(prefs);return;
  }
- stop();lastPrefs=prefs;applyTheme(prefs);ensureActions(focusId);if(!prefs.summary&&!prefs.mindmap)return;
- const s={focusId,prefs,runs:new Map(),cacheReads:new Map(),progress:new Map(),displayJobs:new Map(),stopped:false,connectionRevision:0,connectionState:connection.state,connectionId:connection.connectionId,instance:crypto.randomUUID(),abort:new AbortController(),card:null,input:null,observer:null,extracting:false,hydrationEnded:false,sourceStamp:null};current=s;
+ const outputLanguage=current?.focusId===focusId?current.outputLanguage:'zh-CN';stop();lastPrefs=prefs;applyTheme(prefs);ensureActions(focusId);if(!prefs.summary&&!prefs.mindmap)return;
+ const s={focusId,prefs,outputLanguage,runs:new Map(),cacheReads:new Map(),progress:new Map(),displayJobs:new Map(),stopped:false,connectionRevision:0,connectionState:connection.state,connectionId:connection.connectionId,instance:crypto.randomUUID(),abort:new AbortController(),card:null,input:null,observer:null,extracting:false,hydrationEnded:false,sourceStamp:null};current=s;
  const stampOf=source=>!source?null:source.kind==='video'?JSON.stringify([source.kind,source.title,source.video.currentSrc]):source.text;
  const valid=()=>current===s&&!s.abort.signal.aborted&&location.pathname.match(/\/status\/(\d+)/)?.[1]===focusId&&root.getAttribute('data-peek-lad')==='on'&&root.getAttribute('data-peek-lad-state')==='active'&&innerWidth>=980;s.valid=valid;
  async function attempt(){
@@ -76,11 +79,11 @@ async function sync(refresh=false){
    if(s.card){s.card.destroy();send('cancel',{instance:s.instance}).catch(()=>{});}
    s.instance=crypto.randomUUID();
    s.input=input;s.sourceStamp=stamp;s.cacheReads=new Map();s.progress.clear();s.displayJobs.clear();s.stopped=false;s.contentMs=performance.now()-contentStarted;
-   s.card=createCard({document,input,preferences:s.prefs,onRetry:mode=>{s.stopped=false;generate(s,mode);},onSelect:mode=>generate(s,mode,true),onPresentationChange:()=>presentationChanged(s),onStop:()=>stopGeneration(s),onSettings:()=>send('openSettings').catch(()=>{})});
-   s.card.root.dataset.kind=input.kind;s.card.root.dataset.focusId=focusId;
+   s.card=createCard({document,input,preferences:s.prefs,onRetry:mode=>{s.stopped=false;generate(s,mode);},onSelect:mode=>generate(s,mode,true),onPresentationChange:()=>presentationChanged(s),onStop:()=>stopGeneration(s),onSettings:()=>send('openSettings').catch(()=>{}),onLanguage:value=>changeLanguage(s,value),onRender:(renderMs,mode)=>{const job=s.progress.get(mode);if(job)send('displayed',{instance:s.instance,requestId:job.id,renderMs}).catch(()=>{});}});
+   s.card.resetLanguage(s.outputLanguage);s.card.root.dataset.kind=input.kind;s.card.root.dataset.focusId=focusId;
    if(input.cues){s.card.root.dataset.cueCount=input.cues.length;s.card.root.dataset.firstCue=input.cues[0].start;s.card.root.dataset.lastCue=input.cues.at(-1).end;s.card.root.dataset.completion=input.completion;}
    if(s.connectionRevision>0&&s.connectionState!=='ready')endConnectionWait(s);
-   document.body.append(s.card.root);root.setAttribute('data-peek-ai-card','on');root.style.setProperty('--peek-ai-space','calc(min(44vh, 420px) + var(--peek-reader-gap, 8px))');applyTheme(prefs);
+   document.body.append(s.card.root);root.setAttribute('data-peek-ai-card','on');applyTheme(prefs);
    // Cache reads are independent of the serial model queue.
    for(const mode of modes)readCached(s,mode);
    generate(s,s.card.snapshot().view,true);
@@ -137,6 +140,14 @@ function stopGeneration(s){
  s.progress.clear();s.displayJobs.clear();s.cacheReads.clear();for(const mode of s.runs.keys())s.runs.set(mode,s.runs.get(mode)+1);
  send('cancel',{instance:old}).catch(()=>{});s.card.stop();
 }
+function changeLanguage(s,value){
+ if(!s.valid()||!['zh-CN','en'].includes(value)||value===s.outputLanguage)return;
+ const old=s.instance;s.instance=crypto.randomUUID();s.outputLanguage=value;s.stopped=false;
+ s.cacheReads.clear();s.progress.clear();s.displayJobs.clear();for(const mode of s.runs.keys())s.runs.set(mode,s.runs.get(mode)+1);
+ send('cancel',{instance:old}).catch(()=>{});
+ for(const mode of modesFor(s.input,s.prefs))readCached(s,mode);
+ generate(s,s.card.snapshot().view,true);
+}
 function presentationVisible(s,mode){return !document.hidden&&s.card?.snapshot().view===mode&&!s.card.root.classList.contains('pk-ai-collapsed');}
 function displayJob(s,mode){
  const job={id:crypto.randomUUID(),instance:s.instance,mode,sequence:0,started:performance.now(),visibilityInterrupted:!presentationVisible(s,mode)};
@@ -150,11 +161,12 @@ function presentationChanged(s){
  for(const job of s.displayJobs.values()){
   if(!presentationVisible(s,job.mode)){
    if(!job.visibilityInterrupted){job.visibilityInterrupted=true;send('displayed',{instance:job.instance,requestId:job.id,visibilityInterrupted:true}).catch(()=>{});}
-  }else if(job.complete||job.text)recordVisible(s,job.mode,job,job.complete===true,job.text);
+  }else if(job.complete||job.text||job.previewReadable)recordVisible(s,job.mode,job,job.complete===true,job.text);
  }
 }
 function recordVisible(s,mode,job,complete,text=''){
- const readable=complete||text.trim().length>=80||text.trim().length>=40&&/[。！？.!?]/.test(text);
+ if(!complete&&!text.trim()&&!job.previewReadable)return;
+ const readable=complete||job.previewReadable||text.trim().length>=80||text.trim().length>=40&&/[。！？.!?]/.test(text);
  if(!complete&&job.firstVisibleMs!==undefined&&(!readable||job.firstReadableMs!==undefined))return;
  const frame=window.requestAnimationFrame||((fn)=>setTimeout(fn,16));
  frame(()=>{
@@ -176,7 +188,7 @@ function readCached(s,mode){
  const active=()=>s.valid()&&s.card===card&&s.input===input&&s.instance===instance&&s.connectionId===connectionId&&s.connectionRevision===connectionRevision&&s.runs.get(mode)===run&&modesFor(input,s.prefs).includes(mode);
  const pending=(async()=>{
   const job=displayJob(s,mode);
-  try{const result=await send('cached',{instance,connectionId,input:requestInput(input),mode,requestId:job.id,contentMs:s.contentMs});if(result&&active()){job.complete=true;card.set(mode,'success',result);recordVisible(s,mode,job,true);}}
+  try{const result=await send('cached',{instance,connectionId,input:requestInput(input),mode,requestId:job.id,contentMs:s.contentMs,outputLanguage:s.outputLanguage});if(result&&active()){job.complete=true;card.set(mode,'success',result);recordVisible(s,mode,job,true);}}
   catch{/* Cache lookup failure must not block the normal generation path. */}
   finally{if(!job.complete)s.displayJobs.delete(job.id);}
  })();s.cacheReads.set(mode,pending);return pending;
@@ -188,8 +200,8 @@ async function generate(s,mode,automatic=false){
  const state=s.card.snapshot().states[mode];if(['queued','loading','streaming'].includes(state)||automatic&&(['success','error'].includes(state)||s.stopped))return;
  const run=(s.runs.get(mode)||0)+1;s.runs.set(mode,run);
  const card=s.card;card.set(mode,'queued');const job=displayJob(s,mode);s.progress.set(mode,job);
- const active=()=>s.valid()&&s.card===card&&s.connectionRevision===connectionRevision&&s.runs.get(mode)===run&&modesFor(s.input,s.prefs).includes(mode);
- try{const result=await send('generate',{instance,connectionId:s.connectionId,input:requestInput(s.input),mode,requestId:job.id,contentMs:s.contentMs});if(active()){job.complete=true;card.set(mode,'success',result);recordVisible(s,mode,job,true);}}
+ const active=()=>s.valid()&&s.instance===instance&&s.card===card&&s.connectionRevision===connectionRevision&&s.runs.get(mode)===run&&modesFor(s.input,s.prefs).includes(mode);
+ try{const result=await send('generate',{instance,connectionId:s.connectionId,input:requestInput(s.input),mode,requestId:job.id,contentMs:s.contentMs,outputLanguage:s.outputLanguage});if(active()){job.complete=true;card.set(mode,'success',result);recordVisible(s,mode,job,true);}}
  catch(e){if(active())card.set(mode,'error',e.message);}
  finally{if(s.progress.get(mode)===job)s.progress.delete(mode);if(!job.complete)s.displayJobs.delete(job.id);}
 }

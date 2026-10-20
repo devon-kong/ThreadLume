@@ -59,3 +59,6 @@ test('inactive layout and detached event target cannot choose a pane', () => {
   f.document.documentElement.setAttribute('data-peek-lad', 'on'); const target = f.document.querySelector('#comment p'); target.remove();
   f.callbacks.get('pointerdown')({ type: 'pointerdown', target, isTrusted: true }); assert.equal(f.tracker.snapshot().pane, 'left'); f.close();
 });
+test('trusted internal scrollbar input selects right-pane recovery without changing video ownership on automatic updates',()=>{
+ const f=fixture(),bar=f.document.createElement('div');bar.id='peek-comment-scrollbar';bar.tabIndex=0;f.document.body.append(bar);f.send('pointerdown','#peek-comment-scrollbar');assert.equal(f.tracker.snapshot().pane,'right');f.send('pointerdown','video');f.send('pointerdown','#peek-comment-scrollbar',{isTrusted:false});assert.equal(f.tracker.snapshot().pane,'left');bar.focus();f.send('keydown','body',{key:'PageDown'});assert.equal(f.tracker.snapshot().pane,'right');f.close();
+});

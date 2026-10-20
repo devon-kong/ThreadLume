@@ -1,12 +1,12 @@
 // Session-only numeric diagnostics. Never accept arbitrary metadata or text.
-const STAGES=new Set(['admitted','queued','executing','request','response','firstByte','uploadStart','uploadDone','parsed','cacheStart','cacheSaved','done']);
+const STAGES=new Set(['invalidStream','invalidEnvelope','invalidJSON','invalidSchema','firstContent','firstChapter','firstNode','admitted','queued','executing','request','response','firstByte','uploadStart','uploadDone','parsed','cacheStart','cacheSaved','done']);
 export const elapsedNumber=value=>typeof value==='number'&&Number.isFinite(value)&&value>=0&&value<=600000?Math.round(value*10)/10:undefined;
 export function createMetrics({clock=()=>performance.now(),limit=60,onChange=()=>{}}={}){
  const rows=[];
  const exportRows=()=>rows.map(({owner,row})=>({owner,row:{...row,stages:{...row.stages}}}));
  const changed=()=>onChange(exportRows());
  function start(owner,requestId,{kind,mode,provider,providerId,configVersion,contentMs,inputCharacters,operation='generate'}={}){
-  const row={measurementVersion:3,requestId,kind,mode,provider,operation,cache:'miss',stages:{}},started=clock();
+  const row={measurementVersion:4,requestId,kind,mode,provider,operation,cache:'miss',stages:{}},started=clock();
   const entry={owner,row};rows.push(entry);if(rows.length>limit)rows.shift();
   if(elapsedNumber(contentMs)!==undefined)row.contentMs=elapsedNumber(contentMs);
   if(Number.isSafeInteger(inputCharacters)&&inputCharacters>=0)row.inputCharacters=inputCharacters;
@@ -24,8 +24,8 @@ export function createMetrics({clock=()=>performance.now(),limit=60,onChange=()=
    for(const entry of saved.slice(-limit)){
     const r=entry?.row;
     if(typeof entry?.owner!=='string'||entry.owner.length>250||!r||typeof r.requestId!=='string'||!/^[\w-]{1,100}$/.test(r.requestId)||!['video','article'].includes(r.kind)||!['article','summary','mindmap'].includes(r.mode)||!['custom','doubao'].includes(r.provider)||!['cache','generate'].includes(r.operation)||!['hit','miss','shared'].includes(r.cache))continue;
-    const row={measurementVersion:[2,3].includes(r.measurementVersion)?r.measurementVersion:1,requestId:r.requestId,kind:r.kind,mode:r.mode,provider:r.provider,operation:r.operation,cache:r.cache,stages:{},outcome:['success','error','cancelled'].includes(r.outcome)?r.outcome:'interrupted'};
-    for(const key of ['contentMs','displayMs','firstVisibleMs','firstReadableMs','inputCharacters','outputCharacters'])if(elapsedNumber(r[key])!==undefined)row[key]=elapsedNumber(r[key]);
+    const row={measurementVersion:[2,3,4].includes(r.measurementVersion)?r.measurementVersion:1,requestId:r.requestId,kind:r.kind,mode:r.mode,provider:r.provider,operation:r.operation,cache:r.cache,stages:{},outcome:['success','error','cancelled'].includes(r.outcome)?r.outcome:'interrupted'};
+    for(const key of ['renderMs','contentMs','displayMs','firstVisibleMs','firstReadableMs','inputCharacters','outputCharacters'])if(elapsedNumber(r[key])!==undefined)row[key]=elapsedNumber(r[key]);
     if(row.measurementVersion===1&&row.firstReadableMs!==undefined){row.firstVisibleMs=row.firstReadableMs;delete row.firstReadableMs;}
     if(typeof r.visibilityInterrupted==='boolean')row.visibilityInterrupted=r.visibilityInterrupted;
     if(typeof r.jobId==='string'&&/^[\w-]{1,100}$/.test(r.jobId))row.jobId=r.jobId;
@@ -36,7 +36,7 @@ export function createMetrics({clock=()=>performance.now(),limit=60,onChange=()=
    if(rows.length>limit)rows.splice(0,rows.length-limit);
   },
   display(owner,id,value){const entry=rows.findLast(e=>e.owner===owner&&e.row.requestId===id);if(!entry)return false;
-   let dirty=false;for(const key of ['displayMs','firstVisibleMs','firstReadableMs'])if(elapsedNumber(value?.[key])!==undefined&&entry.row[key]===undefined){entry.row[key]=elapsedNumber(value[key]);dirty=true;}
+   let dirty=false;for(const key of ['renderMs','displayMs','firstVisibleMs','firstReadableMs'])if(elapsedNumber(value?.[key])!==undefined&&entry.row[key]===undefined){entry.row[key]=elapsedNumber(value[key]);dirty=true;}
    if(typeof value?.visibilityInterrupted==='boolean'&&entry.row.visibilityInterrupted!==true&&entry.row.visibilityInterrupted!==value.visibilityInterrupted){entry.row.visibilityInterrupted=value.visibilityInterrupted;dirty=true;}
    if(dirty)changed();return true;}};
 }
