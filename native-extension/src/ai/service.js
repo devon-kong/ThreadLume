@@ -38,7 +38,7 @@ export class AIService {
  providerChanged(){this.pendingConnection?.abort.abort();this.clearJobs();this.epoch++;this.resources.clear();}
  activeIdentity(){const provider=this.providers?.active();return provider?`custom:${provider.id}:${provider.version}`:this.connection.partition;}
  async status(){await this.init();
-  const provider=this.providers?.active();if(provider)return {state:this.providers.keyFor(provider)?'ready':'CUSTOM_KEY_REQUIRED',checkedAt:provider.checkedAt,connectionId:this.activeIdentity(),providerId:provider.id,providerName:provider.name};
+  const provider=this.providers?.active();if(provider)return {state:this.providers.bindingState(provider)!=='ready'?this.providers.bindingState(provider):(this.providers.bindings?.state()||'ready'),checkedAt:provider.checkedAt,connectionId:this.activeIdentity(),providerId:provider.id,providerName:provider.name};
   // A storage change can be observed before connect's final publication.
   // Wait for that transaction (or cancellation), never start a probe/poll.
   for(let p=this.pendingConnection;p&&!p.signal.aborted&&p.epoch===this.epoch;p=this.pendingConnection){
@@ -105,8 +105,8 @@ export class AIService {
  }
  async invalidateContext(){await this.init();this.pendingConnection?.abort.abort();this.clearJobs();this.epoch++;this.context=null;this.error='CONTEXT_CHANGED';this.errorRevision++;this.resources.clear();this.connection={enabled:this.connection.enabled,partition:crypto.randomUUID()};await this.writeBlock(null);await this.writeContext(null);await this.writeConnection();}
  async disconnect(){await this.init();this.pendingConnection?.abort.abort();this.clearJobs();this.epoch++;this.context=null;this.error=null;this.errorRevision++;this.resources.clear();this.connection.enabled=false;await this.writeBlock(null);await this.writeContext(null);await this.writeConnection();return this.status();}
- key(input,mode){const provider=this.providers?.active(),partition=provider?`${provider.id}:${provider.version}:${provider.model}:${PROMPT_VERSION}`:this.connection.partition;return `${partition}:${md5(JSON.stringify([input.kind,input.url,input.title,input.text,input.duration||0,input.cues||null]))}:${mode}`;}
- async cached(raw,mode){const epoch=this.epoch;await this.init();if(epoch!==this.epoch)throw aborted();const input=validateInput(raw);if((input.kind==='article'&&mode!=='article')||(input.kind==='video'&&!['summary','mindmap'].includes(mode)))fail('INVALID_MODE');const entry=this.cache[this.key(input,mode)];return entry&&Date.now()-entry.at<TTL?entry.result:null;}
+ key(input,mode){const provider=this.providers?.active(),partition=provider?`${provider.id}:${provider.version}:${provider.model}:${PROMPT_VERSION}${provider.binding&&(provider.binding.policyId!=='standard'||provider.binding.policyVersion!==1)?':'+provider.binding.policyId+':'+provider.binding.policyVersion:''}`:this.connection.partition;return `${partition}:${md5(JSON.stringify([input.kind,input.url,input.title,input.text,input.duration||0,input.cues||null]))}:${mode}`;}
+ async cached(raw,mode){const epoch=this.epoch;await this.init();if(epoch!==this.epoch)throw aborted();const input=validateInput(raw);if((input.kind==='article'&&mode!=='article')||(input.kind==='video'&&!['summary','mindmap'].includes(mode)))fail('INVALID_MODE');const provider=this.providers?.active();if(provider){const state=this.providers.bindingState(provider)!=='ready'?this.providers.bindingState(provider):(this.providers.bindings?.state()||'ready');if(state!=='ready')fail(state);}const entry=this.cache[this.key(input,mode)];return entry&&Date.now()-entry.at<TTL?entry.result:null;}
  cancel(owner){this.cancelledOwners.set(owner,Date.now());for(const [id,at] of this.cancelledOwners)if(Date.now()-at>300000)this.cancelledOwners.delete(id);for(const job of this.jobs.values())if(job.owners.has(owner)){job.owners.delete(owner);for(const reject of job.rejects.get(owner)||[])reject(aborted());job.rejects.delete(owner);if(!job.owners.size)job.abort.abort();}}
  clearJobs(){for(const job of this.jobs.values())this.abortJob(job);this.jobs.clear();}
  async generate(owner,raw,mode){
@@ -119,14 +119,14 @@ export class AIService {
   const key=this.key(input,mode);let job=this.jobs.get(key);
   if(job?.abort.signal.aborted){this.jobs.delete(key);job=null;}
   if(!job){
-   job={mode,abort:new AbortController(),owners:new Set(),rejects:new Map()};const epoch=this.epoch,context=this.context,provider=this.providers?.active(),identity=this.activeIdentity();
+   job={mode,abort:new AbortController(),owners:new Set(),rejects:new Map()};const epoch=this.epoch,context=this.context,provider=this.providers?.active(),binding=this.providers?.bindings?.current(),identity=this.activeIdentity();
    const execute=async()=>{
     const signal=job.abort.signal,isStale=()=>signal.aborted||epoch!==this.epoch||identity!==this.activeIdentity()||(!provider&&context!==this.context),check=()=>{if(isStale())throw aborted();};check();
     const permit=async()=>{const p=await this.preferences();check();if(!this.modeEnabled(mode,p))fail('GENERATION_DISABLED');if(!provider&&this.error)fail(this.error);};
     await permit();check();
     if(!provider&&this.error)fail(this.error);
     let parsed;
-    if(provider){const secret=this.providers.keyFor(provider);if(!secret)fail('CUSTOM_KEY_REQUIRED');parsed=await this.requestCustom(provider,secret,input,mode,signal);check();}
+    if(provider){const secret=this.providers.keyFor(provider);if(!secret)fail('CUSTOM_KEY_REQUIRED');parsed=await this.requestCustom(provider,secret,input,mode,signal,binding);check();}
     else {
     const resourceKey=this.key(input,'resource');let resource=this.resources.get(resourceKey);
     if(!resource){let response;try{response=JSON.parse(await this.request('/samantha/aireader/resource_content/create',buildResource(input),signal,context.params));}catch(e){if(e instanceof AIError||e.name==='AbortError')throw e;fail('INVALID_RESPONSE');}check();

@@ -33,8 +33,8 @@ test('保存缺失Key/未知配置ID拒绝，设置重复检测不增加版本',
  const f=fixture();await assert.rejects(f.store.save(config),/CUSTOM_KEY_REQUIRED/);await assert.rejects(f.store.save({...config,id:'unknown'},'key'),/CUSTOM_INVALID_CONFIG/);
  await f.store.save(config,'key');const id=f.store.active().id,version=f.store.active().version;await f.store.save({...config,id});assert.equal(f.store.active().version,version);
 });
-test('仅改变记住方式不轮换生成版本，已排队配置引用仍取当前可信Key',async()=>{
- const f=fixture();await f.store.save(config,'same-key');const captured=f.store.active();await f.store.save({...config,id:captured.id,rememberKey:false});assert.equal(f.store.active().version,captured.version);assert.equal(f.store.keyFor(captured),'same-key');assert.equal(JSON.stringify(f.storage.local.data).includes('same-key'),false);
+test('仅改变记住方式不轮换生成版本，旧Key引用失效而新绑定仅取其版本条目',async()=>{
+ const f=fixture();await f.store.save(config,'same-key');const captured=f.store.active();await f.store.save({...config,id:captured.id,rememberKey:false});assert.equal(f.store.active().version,captured.version);assert.equal(f.store.keyFor(captured),null);assert.equal(f.store.keyFor(f.store.active()),'same-key');assert.equal(JSON.stringify(f.storage.local.data).includes('same-key'),false);
 });
 test('候选权限在探测后或存储等待中被撤销时不启用，恢复原服务及密钥',async()=>{
  for(const duringWrite of [false,true]){

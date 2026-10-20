@@ -33,6 +33,7 @@ test("P2 统一构建 manifest 身份：Peek Native / 0.11.0 / HTTPS 可选权�
   assert.equal(manifest.version, "0.11.0");
   assert.deepEqual(manifest.permissions, ["storage", "scripting"]);
   assert.equal(manifest.host_permissions, undefined);
+  assert.deepEqual(manifest.optional_permissions, ["declarativeNetRequestWithHostAccess"]);
   assert.deepEqual(manifest.optional_host_permissions, ["https://*/*"]);
   assert.deepEqual(manifest.background, {service_worker:"ai-background.js"});
   assert.equal(manifest.web_accessible_resources, undefined);

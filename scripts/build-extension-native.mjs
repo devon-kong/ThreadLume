@@ -147,15 +147,15 @@ if (!mainEntry || !mainEntry.js?.includes("layout-adapter-main.js") || mainEntry
 }
 if (JSON.stringify(manifest.permissions) !== JSON.stringify(["storage", "scripting"]) ||
     JSON.stringify(manifest.optional_host_permissions) !== JSON.stringify(["https://*/*"]) ||
-    manifest.host_permissions || manifest.optional_permissions || manifest.background?.service_worker !== "ai-background.js" || manifest.web_accessible_resources) {
+    manifest.host_permissions || JSON.stringify(manifest.optional_permissions) !== JSON.stringify(["declarativeNetRequestWithHostAccess"]) || manifest.background?.service_worker !== "ai-background.js" || manifest.web_accessible_resources) {
   throw new Error("Native AI permission boundary violated");
 }
 const aiWorker = readFileSync(path.join(dist, "ai-background.js"), "utf8");
 const aiSettings = readFileSync(path.join(dist, "ai-settings.js"), "utf8");
 for (const [file, code] of [["ai-background.js", aiWorker], ["ai-settings.js", aiSettings]]) {
   const rules = FORBIDDEN.filter(re => !/fetch|scripting/.test(re.source) && !(file === "ai-background.js" && /authorization/.test(re.source)));
-  if (file === "ai-settings.js") rules.push(/\bfetch\s*\(/, /chrome\.(tabs|scripting)/);
-  else rules.push(/chrome\.(cookies|webRequest|declarativeNetRequest)/);
+  if (file === "ai-settings.js") rules.push(/\bfetch\s*\(/, /chrome\.(tabs|scripting|declarativeNetRequest)/);
+  else rules.push(/chrome\.(cookies|webRequest)/, /(?:updateDynamicRules|updateEnabledRulesets|webRequest)\s*\(/);
   const offenders = rules.filter(re => re.test(code));
   if (offenders.length) throw new Error(`${file} violated AI isolation: ${offenders}`);
 }
@@ -187,3 +187,12 @@ for (const size of [16, 32, 48, 128]) {
 }
 
 console.log(`Built unpacked Peek Native extension: ${dist}`);
+
+// DNR is worker-owned and limited to session rules; X scans above are unchanged.
+for (const method of aiWorker.matchAll(/\bdnr\.([A-Za-z]+)\s*\(/g)) {
+  if (!["getSessionRules", "updateSessionRules"].includes(method[1])) throw new Error("Unapproved DNR method");
+}
+for (const name of ["origin-probe.html", "origin-probe-page.js"]) {
+  if (existsSync(path.join(dist,name))) throw new Error("Experiment page in product artifact");
+}
+if (/peek-yuanjing-probe|yuanjing-origin-probe/.test(aiWorker)) throw new Error("Experiment message in product artifact");

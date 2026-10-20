@@ -2,6 +2,7 @@ import {send,errorText} from './client.js';
 import {DEFAULTS,normalizePreferences} from './preferences.js';
 import {el,button} from './dom.js';
 import {normalizeEndpoint,validateProviderConfig} from './custom-provider.js';
+import {providerPermissions} from './transport-policy.js';
 const d=document,root=d.getElementById('peek-settings');let prefs={...DEFAULTS},connection={state:'DISCONNECTED'},busy=false,notice='',undo=null,lastFailed=null,saveQueue=Promise.resolve(),saveRevision=0,pendingSaves=0,refreshRevision=0,confirmedPrefs={...DEFAULTS},providers={activeId:'doubao',services:[]},providerBusy=false,providerRevision=0,providerDialog=null;
 const providerDrafts=new Map();
 function applyTheme(){d.documentElement.dataset.peekAiTheme=prefs.theme==='system'?(connection.xTheme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')):prefs.theme;}
@@ -60,7 +61,8 @@ function providerSection(){
  if(custom)more.append(identified(button(d,'编辑服务',()=>openProviderDialog(providers.services.find(s=>s.id===providers.activeId))),'pk-provider-edit'));
  else more.append(identified(button(d,'断开连接',()=>connectionAction('disconnect')),'pk-disconnect'));
  row.append(more);
- const foot=providerBusy?'等待服务响应。取消后保留原连接与本次草稿。':custom?new URL(custom.baseURL).host+' · '+(custom.rememberKey?'密钥已保存在此设备':'密钥仅在本次浏览器会话保存'):'当前字幕或正文会发送至豆包。切换服务会保留此连接。';
+ const blocked=custom&&!ready&&state!=='CHECKING';
+ const foot=providerBusy?'等待服务响应。取消后保留原连接与本次草稿。':blocked?errorText(state)+(state==='CUSTOM_KEY_REQUIRED'?' 请编辑服务，重新输入后检测。':''):custom?new URL(custom.baseURL).host+' · '+(custom.rememberKey?'密钥已保存在此设备':'密钥仅在本次浏览器会话保存'):'当前字幕或正文会发送至豆包。切换服务会保留此连接。';
  return el(d,'section',{id:'pk-connection-card',class:'pk-settings-card'},selector,row,...(custom&&connection.setupOpen?[el(d,'p',{class:'pk-ai-muted',text:'豆包连接页已打开。完成登录或验证后，请点击「完成后检测」；成功前继续使用当前服务。'})]:[]),el(d,'div',{class:'pk-connection-foot'},el(d,'span',{text:foot}),el(d,'span',{text:connection.checkedAt?'最近检测：'+new Date(connection.checkedAt).toLocaleString():''})));
 }
 // The atomic save/activate ACK is the final success boundary. Later read-only
@@ -75,14 +77,16 @@ function refreshCommittedStatus(){
 }
 // Updating unpacked files does not reload Chrome's in-memory Manifest. Check
 // before the gesture-bound request so a stale grant ceiling has a clear remedy.
-function requestProviderPermission(permission){
+function requestProviderPermission(baseURL){
+ const request=providerPermissions(baseURL),permission=request.origins[0];
  const hosts=chrome.runtime.getManifest().optional_host_permissions||[];
  if(!hosts.includes('https://*/*')&&!hosts.includes(permission))throw Error('CUSTOM_EXTENSION_RELOAD_REQUIRED');
- return chrome.permissions.request({origins:[permission]});
+ if(request.permissions?.some(p=>!chrome.runtime.getManifest().optional_permissions?.includes(p)))throw Error('CUSTOM_EXTENSION_RELOAD_REQUIRED');
+ return chrome.permissions.request(request);
 }
 async function activateProvider(id){
  if(providerBusy||busy)return;const revision=++providerRevision;++refreshRevision;providerBusy=true;notice='';render();
- try{const service=providers.services.find(s=>s.id===id);const permission=requestProviderPermission(normalizeEndpoint(service.baseURL).permission);if(!await permission)throw Error('CUSTOM_PERMISSION_REQUIRED');if(revision!==providerRevision)return;const list=await send('activateProvider',{id});if(revision!==providerRevision)return;acceptProviderList(list);providerBusy=false;notice='连接成功，已启用服务';render();refreshCommittedStatus();}
+ try{const service=providers.services.find(s=>s.id===id);const permission=requestProviderPermission(service.baseURL);if(!await permission)throw Error('CUSTOM_PERMISSION_REQUIRED');if(revision!==providerRevision)return;const list=await send('activateProvider',{id});if(revision!==providerRevision)return;acceptProviderList(list);providerBusy=false;notice='连接成功，已启用服务';render();refreshCommittedStatus();}
  catch(e){if(revision===providerRevision)notice=errorText(e.message);}
  finally{if(revision===providerRevision){providerBusy=false;render();}}
 }
@@ -104,7 +108,7 @@ function openProviderDialog(service){
  form.append(el(d,'label',{class:'pk-provider-remember',for:remember.id},remember,el(d,'span',{text:'记住在此设备'})),el(d,'small',{class:'pk-ai-muted',text:'保存在浏览器本地存储，并非系统钥匙串加密。关闭后，Key 只在本次浏览器会话内保存。'}),el(d,'p',{class:'pk-ai-muted',text:'保存时会请求访问此 API 域名，并发送一条最小测试请求，不发送当前文章。连接成功后，当前字幕或正文仅发送至你选择的服务。'}));
  const error=el(d,'p',{id:'pk-provider-error',class:'pk-provider-error',role:'alert'}),cancel=identified(button(d,'取消',()=>dismiss()),'pk-provider-cancel'),submit=el(d,'button',{id:'pk-provider-submit',type:'submit',class:'pk-provider-primary',text:'保存、检测并启用'});form.append(error,el(d,'footer',{},cancel,submit));dialog.append(form);d.body.append(dialog);
  const capture=()=>{const value={name:name.input.value,baseURL:url.input.value,model:model.input.value,key:key.input.value,rememberKey:remember.checked};providerDrafts.set(draftId,value);return value;};
- const preview=()=>{capture();try{endpoint.textContent='请求地址：'+normalizeEndpoint(url.input.value).endpoint;}catch{endpoint.textContent=url.input.value?'仅支持 HTTPS Base URL，不含账号、查询参数或片段。':'填写服务商提供的 Base URL；请求路径会自动规范化。';}};
+ const preview=()=>{capture();try{endpoint.textContent='请求地址：'+normalizeEndpoint(url.input.value).endpoint+(providerPermissions(url.input.value).permissions?'。此服务需额外网络规则权限，仅在该准确 API 地址移除 Origin 请求头。':'');}catch{endpoint.textContent=url.input.value?'仅支持 HTTPS Base URL，不含账号、查询参数或片段。':'填写服务商提供的 Base URL；请求路径会自动规范化。';}};
  form.addEventListener('input',preview);form.addEventListener('change',capture);preview();
  let checking=false,revision=0;
  const setChecking=value=>{checking=value;for(const node of form.querySelectorAll('input,button[type=submit]'))node.disabled=value;submit.textContent=value?'正在检测…':'保存、检测并启用';cancel.textContent=value?'取消检测':'取消';};
@@ -117,7 +121,7 @@ function openProviderDialog(service){
   catch(e){error.textContent=errorText(e.code||e.message);return;}
   const token=++revision;setChecking(true);error.textContent='';
   // This call must remain before the first await, within the submit gesture.
-  try{const permission=requestProviderPermission(normalized.permission);const granted=await permission;if(token!==revision)return;if(!granted)throw Error('CUSTOM_PERMISSION_REQUIRED');const list=await send('saveProvider',{config,...(value.key?{key:value.key}:{})});if(token!==revision)return;acceptProviderList(list);providerDrafts.delete(draftId);key.input.value='';checking=false;notice='连接成功，已启用服务';dialog.close();render();refreshCommittedStatus();}
+  try{const permission=requestProviderPermission(config.baseURL);const granted=await permission;if(token!==revision)return;if(!granted)throw Error('CUSTOM_PERMISSION_REQUIRED');const list=await send('saveProvider',{config,...(value.key?{key:value.key}:{})});if(token!==revision)return;acceptProviderList(list);providerDrafts.delete(draftId);key.input.value='';checking=false;notice='连接成功，已启用服务';dialog.close();render();refreshCommittedStatus();}
   catch(e){if(token===revision)error.textContent=errorText(e.message);}
   finally{if(token===revision&&dialog.isConnected)setChecking(false);}
  });

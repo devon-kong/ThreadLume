@@ -3,12 +3,17 @@ import {AIError,fail,parseSSE,completionOptions,validateInput,businessDiagnostic
 import {ProviderStore} from './provider-store.js';
 import {createCustomTransport} from './custom-transport.js';
 import {normalizeEndpoint} from './custom-provider.js';
+import {descriptorPermissions,providerPermissions} from './transport-policy.js';
+import {createNetworkRuleManager} from './network-rule-manager.js';
+import {createBindingRuntime} from './binding-runtime.js';
 const BASE='https://www.doubao.com';
 const PATHS=new Set(['/samantha/aireader/resource_content/create','/samantha/chat/completion']);
 let checkTask=null,autoFlow=null,setupOpening=null,connectionGeneration=0,setupWrite=Promise.resolve();
 // Exact pages created by this worker; tokens prevent stale cleanup after reuse.
 const ownedPages=new Map();
-const stats={workerStartedAt:Date.now(),requests:0,stages:[],focusChecks:[]};
+const stats={workerStartedAt:Date.now(),requests:0,stages:[],focusChecks:[],bindingStages:[]};
+const BINDING_STAGES=new Set(['store_init','store_ready','prepare','probe','probe_ok','commit','binding_permission','rules_acquire','rules_reconcile','executor','rule_read','rule_install','rule_remove','transport_permission','request','response']);
+const bindingStage=stage=>{if(BINDING_STAGES.has(stage)){stats.bindingStages.push({stage,at:Date.now()});stats.bindingStages=stats.bindingStages.slice(-40);}};
 async function transport(path,body,signal,params){
  if(!PATHS.has(path))fail('UNSUPPORTED_OPERATION');
  if(!await chrome.permissions.contains({origins:[BASE+'/*']}))fail('PERMISSION_REQUIRED');
@@ -25,10 +30,14 @@ async function transport(path,body,signal,params){
   return text;
  }catch(e){const code=e instanceof AIError?e.code:e.name==='TimeoutError'?'TIMEOUT':signal.aborted?'CANCELLED':'NETWORK_ERROR';record.error=code;throw new AIError(code);}
 }
-const customTransport=createCustomTransport({hasPermission:permission=>chrome.permissions.contains({origins:[permission]})});
+const hasPermission=request=>chrome.permissions.contains(request);
+const customTransport=createCustomTransport({onStage:bindingStage,hasPermission:(permission,descriptor)=>hasPermission(descriptor?.policyId?descriptorPermissions(descriptor):{origins:[permission]})});
+const networkRules=createNetworkRuleManager({onStage:bindingStage,extensionId:chrome.runtime.id,getDnr:()=>chrome.declarativeNetRequest,hasPermission});
+const bindings=createBindingRuntime({onStage:bindingStage,transport:customTransport,rules:networkRules,hasPermission});
+let bindingRevision=0;
 let service,providerCheck=null;
-const providers=new ProviderStore({storage:chrome.storage,probe:customTransport.probe,verifyPermission:config=>chrome.permissions.contains({origins:[config?normalizeEndpoint(config.baseURL).permission:BASE+'/*']}),onChange:change=>{if(change.invalidate){service.providerChanged();if(providerCheck)cancelConnectionWork();}notifyState({connectionChanged:change.invalidate});}});
-service=new AIService({storage:chrome.storage,request:transport,providers,requestCustom:customTransport.generate});
+const providers=new ProviderStore({onStage:bindingStage,storage:chrome.storage,bindings,verifyPermission:config=>hasPermission(config?descriptorPermissions(config.binding):{origins:[BASE+'/*']}),onChange:change=>{if(change.invalidate||change.bindingChanged){service.providerChanged();if(providerCheck)cancelConnectionWork();}notifyState({connectionChanged:change.invalidate||change.bindingChanged});}});
+service=new AIService({storage:chrome.storage,request:transport,providers,requestCustom:(provider,key,input,mode,signal,binding)=>{if(!binding||binding!==bindings.current()||binding.descriptor.configVersion!==provider.version||binding.descriptor.keyRef!==provider.keyRef)fail('CONNECTION_CHANGED');return binding.executor.generate(key,input,mode,signal);}});
 async function notifyState(extra={}){
  try{
   const preferences=await service.preferences();
@@ -41,8 +50,11 @@ async function notifyState(extra={}){
  }catch{/* Closed documents do not own state. No retry/poll. */}
 }
 async function checkProvider(operation,config){
+ // A waking worker's read-only Doubao eligibility check is not a connection
+ // transaction. Explicit custom binding preempts it before it can open a page.
+ if(autoFlow?.phase==='preflight'){const previous=autoFlow;autoFlow=null;previous.abort.abort();}
  if(providerCheck||checkTask||autoFlow||setupOpening)fail('CUSTOM_CHECK_IN_PROGRESS');
- const task={abort:new AbortController(),permission:config?normalizeEndpoint(config.baseURL).permission:null};providerCheck=task;
+ ++bindingRevision;const task={abort:new AbortController(),permission:config?providerPermissions(config.baseURL):null};providerCheck=task;
  try{return await operation(task.abort.signal);}finally{if(providerCheck===task)providerCheck=null;}
 }
 // Register ownership before any await, including requests not yet in jobs.
@@ -54,13 +66,13 @@ function sameFocus(source,target){
 function cancelTabRequests(tabId,nextUrl){
  for(const record of tabRequests.get(tabId)||[])if(!nextUrl||!sameFocus(record.url,nextUrl))service.cancel(record.owner);
 }
-const ready=(async()=>{await chrome.storage.local.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'});await chrome.storage.session.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'});await service.init();})();
+const ready=(async()=>{await chrome.storage.local.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'});await chrome.storage.session.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'});await service.init();await bindings.restore(providers.active(),providers.bindingState());})();
 chrome.action.onClicked.addListener(()=>chrome.runtime.openOptionsPage());
 function safeError(e){return {ok:false,error:e.name==='AbortError'?'CANCELLED':e instanceof AIError?e.code:'INTERNAL_ERROR'};}
 async function status(){
  const connection=await service.status();
  const custom=providers.active();
- const permission=await chrome.permissions.contains({origins:[custom?normalizeEndpoint(custom.baseURL).permission:BASE+'/*']});
+ const permission=custom&&providers.bindingState(custom)!=='ready'?true:await hasPermission(custom&&custom.binding?descriptorPermissions(custom.binding):{origins:[custom?normalizeEndpoint(custom.baseURL).permission:BASE+'/*']});
  const themeMemory=await chrome.storage.session.get('aiXTheme');
  const setup=(await chrome.storage.session.get('aiSetup')).aiSetup;
  const tab=Number.isInteger(setup)?await chrome.tabs.get(setup).catch(()=>null):null;
@@ -155,7 +167,7 @@ function openSetup(flow){
 }
 function maybeAutoRestore(){
  if(autoFlow)return autoFlow.restorePromise;
- const flow={abort:new AbortController(),generation:connectionGeneration};autoFlow=flow;
+ const flow={abort:new AbortController(),generation:connectionGeneration,phase:'preflight'};autoFlow=flow;
  flow.restorePromise=(async()=>{
   await ready;assertWork(flow);if(providers.active())return;const epoch=service.epoch;
   const active=()=>{assertWork(flow);if(epoch!==service.epoch)fail('CANCELLED');};
@@ -164,6 +176,9 @@ function maybeAutoRestore(){
   const permission=await chrome.permissions.contains({origins:[BASE+'/*']});active();
   if((!preferences.summary&&!preferences.mindmap)||service.context||!service.connection.enabled||!permission)return;
   const memory=await chrome.storage.session.get('aiAutoAttempted');active();if(memory.aiAutoAttempted)return;
+  // Chrome storage writes cannot be cancelled. Claim the transaction before
+  // its first side effect so a custom check cannot strand the attempted flag.
+  flow.phase='connecting';
   await chrome.storage.session.set({aiAutoAttempted:true});active();
   await openSetup(flow);active();
   await check({capture:true,flow});
@@ -247,9 +262,9 @@ async function check({capture=false,flow}={}){
 }
 chrome.permissions.onRemoved.addListener(async()=>{
  await ready;
- const pending=providerCheck;if(pending?.permission&&!await chrome.permissions.contains({origins:[pending.permission]}))pending.abort.abort();
+ const pending=providerCheck;if(pending?.permission&&!await hasPermission(pending.permission))pending.abort.abort();
  const custom=providers.active();
- if(custom){if(!await chrome.permissions.contains({origins:[normalizeEndpoint(custom.baseURL).permission]})){providerCheck?.abort.abort();service.providerChanged();notifyState({connectionChanged:true});}}
+ if(custom){if(providers.bindingState(custom)!=='ready'||!await hasPermission(descriptorPermissions(custom.binding))){++bindingRevision;providerCheck?.abort.abort();service.providerChanged();await bindings.restore(custom,providers.bindingState());notifyState({connectionChanged:true});}}
  else if(!await chrome.permissions.contains({origins:[BASE+'/*']})){const disconnected=service.disconnect();cancelConnectionWork();await disconnected;notifyState({connectionChanged:true});}
 });
 async function confirmFocus(sender,m,input){
@@ -270,6 +285,7 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
  const record=m.action==='generate'&&Number.isInteger(sender.tab?.id)?{owner,url:typeof m.input?.url==='string'?m.input.url:sender.url}:null;
  if(record){const pending=tabRequests.get(sender.tab.id)||new Set();pending.add(record);tabRequests.set(sender.tab.id,pending);}
  const release=()=>{if(!record)return;const pending=tabRequests.get(sender.tab.id);pending?.delete(record);if(!pending?.size)tabRequests.delete(sender.tab.id);};
+ const admission=bindingRevision;
  const dispatch=async()=>{
   await ready;
   const fields={status:['xTheme'],preferences:[],savePreferences:['preferences'],providers:[],saveProvider:['config','key'],activateProvider:['id'],cancelProviderCheck:[],generate:['connectionId','input','mode','instance'],cached:['connectionId','input','mode','instance'],cancel:['instance'],openSettings:[],openSetup:[],connect:[],capture:[],check:[],cancelCheck:[],disconnect:[]};
@@ -301,6 +317,7 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
     await auditVisibleBoundary();
     if(typeof m.instance!=='string'||!/^[\w-]{1,100}$/.test(m.instance))fail('INVALID_INSTANCE');
     const input=validateInput(m.input);await confirmFocus(sender,m,input);
+    if(admission!==bindingRevision)fail('CONNECTION_CHANGED');
     if(typeof m.connectionId!=='string'||m.connectionId!==service.activeIdentity())fail('CONNECTION_CHANGED');
     return m.action==='cached'?service.cached(input,m.mode):service.generate(owner,input,m.mode);
    }
@@ -320,3 +337,5 @@ chrome.tabs.onUpdated.addListener(async(tabId,change,tab)=>{if((change.url||chan
 // timer, alarms, panel polling or hidden documents keep the worker alive.
 chrome.runtime.onStartup.addListener(()=>maybeAutoRestore().catch(()=>{}));
 ready.then(()=>maybeAutoRestore()).catch(()=>{});
+
+chrome.permissions.onAdded?.addListener(async()=>{await ready;if(providerCheck)return;await bindings.restore(providers.active(),providers.bindingState());notifyState({connectionChanged:true});});

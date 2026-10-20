@@ -1,17 +1,22 @@
 // Executes the actual worker bundle with browser I/O doubles. No credentials/network.
 import {test} from 'node:test';import assert from 'node:assert/strict';import vm from 'node:vm';import {build} from 'esbuild';
+import {createBindingDescriptor} from '../../native-extension/src/ai/transport-policy.js';
 const source=(await build({entryPoints:['native-extension/src/ai/background.js'],bundle:true,write:false,format:'iife'})).outputFiles[0].text;
 const evt=()=>{const handlers=[];return {handlers,addListener:f=>handlers.push(f),removeListener:f=>{const n=handlers.indexOf(f);if(n>=0)handlers.splice(n,1);},fire:async(...args)=>{for(const f of [...handlers])await f(...args);}};};
 const area=seed=>{const data=structuredClone(seed||{}),access=[];return {data,access,get:async k=>typeof k==='string'?{[k]:data[k]}:structuredClone(data),set:async v=>Object.assign(data,structuredClone(v)),remove:async k=>delete data[k],setAccessLevel:async v=>access.push(v)};};
 const cfg={name:'用户服务',protocol:'chat-completions',baseURL:'https://api.example.test/v1',model:'model-user',rememberKey:true};
 const input={kind:'article',focusId:'123',url:'https://x.com/a/status/123',title:'Title',text:'Full body'};
-const fixture=async({current=false,read,permission=true}={})=>{
- const saved={...cfg,id:'custom-one',version:'version-one',checkedAt:1},storage={local:area({aiConnection:{enabled:true,partition:'bean'},...(current?{aiProvidersV8:{schema:1,activeId:saved.id,services:[saved]},aiProviderKeysV8:{[saved.id]:'synthetic-key'}}:{})}),session:area()},calls=[],created=[],notified=[];
- const chrome={storage,runtime:{id:'ours',onMessage:evt(),onStartup:evt(),openOptionsPage:async()=>{}},action:{onClicked:evt()},permissions:{contains:async()=>permission,onRemoved:evt()},tabs:{onUpdated:evt(),onRemoved:evt(),onActivated:evt(),query:async()=>[{id:1,url:input.url}],get:async()=>null,create:async options=>{created.push(options);return {id:9,url:options.url,status:'complete'};},remove:async()=>{},sendMessage:async(id,m)=>{if(m.action==='stateChanged'){notified.push(m);return null;}return {focusId:'123',url:input.url,instance:m.instance};}},scripting:{executeScript:async()=>[]}};
+const fixture=async({current=false,read,permission=true,seed,dnr,urlClass=URL,startupPreferencesGate,startupAttemptGate,startupCreateGate}={})=>{
+ const saved={...cfg,id:'custom-one',version:'version-one',checkedAt:1,keyRef:'key-one'};saved.binding=createBindingDescriptor(saved,saved.keyRef);const storage={local:area({aiConnection:{enabled:true,partition:'bean'},...(current?{aiProvidersV8:{schema:2,activeId:saved.id,services:[saved]},['aiProviderKeyV9:'+saved.keyRef]:{providerId:saved.id,configVersion:saved.version,keyRef:saved.keyRef,keyLocation:'local',secret:'synthetic-key'}}:{})}),session:area()},calls=[],created=[],notified=[];
+ if(seed){storage.local=area(seed.local);storage.session=area(seed.session);}
+ if(startupPreferencesGate){const get=storage.local.get;storage.local.get=async key=>{if(key==='aiPreferences')await startupPreferencesGate;return get(key);};}
+ if(startupAttemptGate){const set=storage.session.set;storage.session.set=async value=>{if(value.aiAutoAttempted)await startupAttemptGate;return set(value);};}
+ const chrome={...(dnr?{declarativeNetRequest:dnr}:{}),storage,runtime:{id:'ours',onMessage:evt(),onStartup:evt(),openOptionsPage:async()=>{}},action:{onClicked:evt()},permissions:{contains:async()=>permission,onRemoved:evt(),onAdded:evt()},tabs:{onUpdated:evt(),onRemoved:evt(),onActivated:evt(),query:async()=>[{id:1,url:input.url}],get:async()=>null,create:async options=>{created.push(options);return {id:9,url:options.url,status:'complete'};},remove:async()=>{},sendMessage:async(id,m)=>{if(m.action==='stateChanged'){notified.push(m);return null;}return {focusId:'123',url:input.url,instance:m.instance};}},scripting:{executeScript:async()=>[]}};
+ if(startupCreateGate){const create=chrome.tabs.create;chrome.tabs.create=async options=>{await startupCreateGate;return create(options);};}
  // Avoid unrelated Doubao startup when no custom has yet been saved.
- if(!current)storage.local.data.aiConnection.enabled=false;
+ if(!current&&!seed)storage.local.data.aiConnection.enabled=false;
  const fetch=async(url,options)=>{calls.push({url,options});if(read)return read(url,options);const probe=JSON.parse(options.body).messages.at(-1).content==='Reply exactly OK.';return {ok:true,status:200,text:async()=>JSON.stringify({choices:[{finish_reason:'stop',message:{role:'assistant',content:probe?'OK':'{"text":"结果"}'}}]})};};
- const context=vm.createContext({chrome,fetch,crypto,URL,URLSearchParams,AbortSignal,AbortController,DOMException,TextEncoder,btoa,setTimeout,clearTimeout});vm.runInContext(source,context);const wire=vm.runInContext('JSON.parse',context);await new Promise(r=>setTimeout(r,10));
+ const context=vm.createContext({chrome,fetch,crypto,URL:urlClass,URLSearchParams,AbortSignal,AbortController,DOMException,TextEncoder,btoa,setTimeout,clearTimeout});vm.runInContext(source,context);const wire=vm.runInContext('JSON.parse',context);await new Promise(r=>setTimeout(r,10));
  const settings={id:'ours',url:'chrome-extension://ours/settings.html'},x={id:'ours',url:input.url,tab:{id:1},documentId:'doc',frameId:0};
  const send=(m,sender=settings)=>new Promise(resolve=>{if(!chrome.runtime.onMessage.handlers[0](wire(JSON.stringify({ns:'peek-ai-v7',...m})),sender,resolve))resolve({rejected:true});});
  return {chrome,storage,calls,created,notified,settings,x,send};
@@ -66,4 +71,124 @@ test('实际后台：豆包/自定义检测互斥，旧检测不能覆盖较新�
 });
 test('实际后台：无tabs权限及Tab.url字段仍通知自有内容脚本，不依赖URL筛选',async()=>{
  const w=await fixture({current:true});w.chrome.tabs.query=async options=>options.url?[]:[{id:1},{id:2}];const before=w.notified.length;await w.send({action:'savePreferences',preferences:{summary:false,mindmap:false}});await new Promise(r=>setTimeout(r,10));assert.equal(w.notified.length-before,2);for(const message of w.notified.slice(before)){assert.equal(message.action,'stateChanged');assert.equal(message.preferences.summary,false);assert.equal(JSON.stringify(message).includes('synthetic-key'),false);}
+});
+
+const originConfig={...cfg,baseURL:'https://maas-api.ai-yuanjing.com/openapi/compatible-mode/v1'};
+const ruleFixture=()=>{const rules=new Map([[99,{id:99}]]),updates=[];return {rules,updates,dnr:{getSessionRules:async()=>[...rules.values()],updateSessionRules:async v=>{updates.push(v);for(const id of v.removeRuleIds||[])rules.delete(id);for(const r of v.addRules||[])rules.set(r.id,r);}}};};
+test('实际worker绑定：等待focus的旧请求不能跨过绑定准备边界；原服务仍可用于新请求',async()=>{
+ const f=await fixture({current:true});let releaseFocus,releaseProbe;
+ const send=f.chrome.tabs.sendMessage;f.chrome.tabs.sendMessage=async(id,m,...rest)=>m.action==='confirmFocus'?new Promise(r=>releaseFocus=()=>r({focusId:input.focusId,url:input.url,instance:m.instance})):send(id,m,...rest);
+ const status=(await f.send({action:'status'})).value;
+ const pending=f.send({action:'generate',instance:'pending',connectionId:status.connectionId,input,mode:'article'},f.x);
+ while(!releaseFocus)await new Promise(r=>setTimeout(r,0));
+ const fetchCount=f.calls.length;
+ // Recheck the same version: checking connectionId alone is insufficient.
+ const set=f.storage.local.set;f.storage.local.set=async v=>{if(v.aiProvidersV8)await new Promise(r=>releaseProbe=r);return set(v);};
+ const recheck=f.send({action:'activateProvider',id:'custom-one'});while(!releaseProbe)await new Promise(r=>setTimeout(r,0));
+ releaseFocus();const old=await pending;assert.equal(old.error,'CONNECTION_CHANGED');assert.equal(f.calls.length,fetchCount+1,'only explicit probe');releaseProbe();assert.equal((await recheck).ok,true);
+});
+test('实际worker：元景正式绑定及恢复不重复probe；损坏版本Key/描述禁止网络，不能fallback',async()=>{
+ const r=ruleFixture(),first=await fixture({dnr:r.dnr});const saved=await first.send({action:'saveProvider',config:originConfig,key:'synthetic-key'});assert.equal(saved.ok,true);assert.equal(r.rules.has(891020),true);assert.equal(first.calls.length,1);
+ const seed={local:structuredClone(first.storage.local.data),session:structuredClone(first.storage.session.data)},updates=r.updates.length;
+ const restored=await fixture({seed,dnr:r.dnr});assert.equal((await restored.send({action:'status'})).value.state,'ready');assert.equal(restored.calls.length,0);assert.equal(r.updates.length,updates);
+ const c=seed.local.aiProvidersV8.services[0];c.binding.configVersion='wrong';const bad=await fixture({seed,dnr:r.dnr});const status=(await bad.send({action:'status'})).value;assert.equal(status.state,'CUSTOM_BINDING_INVALID');const got=await bad.send({action:'generate',instance:'one',connectionId:status.connectionId,input,mode:'article'},bad.x);assert.equal(got.error,'CUSTOM_BINDING_INVALID');assert.equal(bad.calls.length,0);assert.equal(r.rules.has(99),true);assert.equal(r.rules.has(891020),false);
+});
+
+test('实际worker热路径：连续生成/缓存没有端点解析、DNR更新或额外probe',async()=>{
+ let parses=0;class CountURL extends URL{constructor(...args){super(...args);if(String(args[0]).startsWith('https://maas-api.ai-yuanjing.com'))parses++;}}
+ const r=ruleFixture(),w=await fixture({dnr:r.dnr,urlClass:CountURL});assert.equal((await w.send({action:'saveProvider',config:originConfig,key:'synthetic-key'})).ok,true);
+ const status=(await w.send({action:'status'})).value,afterBind=parses,updates=r.updates.length;
+ for(let i=0;i<5;i++){const result=await w.send({action:'generate',instance:'owned',connectionId:status.connectionId,input:{...input,text:'Full body '+i},mode:'article'},w.x);assert.equal(result.ok,true);}
+ assert.equal(parses,afterBind);assert.equal(r.updates.length,updates);assert.equal(w.calls.length,6);const hit=await w.send({action:'generate',instance:'owned',connectionId:status.connectionId,input:{...input,text:'Full body 0'},mode:'article'},w.x);assert.equal(hit.value.cached,true);assert.equal(w.calls.length,6);
+});
+
+test('实际worker逐持久化边界终止：不运行旧finally，四种Key记住切换恢复只用一致版本',async()=>{
+ for(const from of [true,false])for(const to of [true,false]){
+  const initialRules=ruleFixture(),initial=await fixture({dnr:initialRules.dnr});assert.equal((await initial.send({action:'saveProvider',config:{...originConfig,rememberKey:from},key:'old-key'})).ok,true);
+  const seed={local:structuredClone(initial.storage.local.data),session:structuredClone(initial.storage.session.data)};let boundaries=0,finished=false;
+  for(let n=1;n<20;n++){
+   let done=false;
+   for(const side of ['before','after']){
+    const r=ruleFixture();for(const [id,value]of initialRules.rules)r.rules.set(id,structuredClone(value));const old=await fixture({seed,dnr:r.dnr});await old.send({action:'status'});
+    let count=0,checkpoint;const reached=new Promise(resolve=>checkpoint=resolve),forever=new Promise(()=>{});
+    for(const area of [old.storage.local,old.storage.session])for(const method of ['set','remove']){
+     const original=area[method];area[method]=async(...args)=>{const stop=++count===n;if(stop&&side==='before'){checkpoint();await forever;}await original(...args);if(stop&&side==='after'){checkpoint();await forever;}};
+    }
+    const id=seed.local.aiProvidersV8.activeId;
+    const pending=old.send({action:'saveProvider',config:{...originConfig,id,model:'new-model',rememberKey:to},key:'new-key'});
+    const result=await Promise.race([reached.then(()=>false),pending.then(()=>true)]);if(result){done=true;break;}boundaries++;
+    // The old message promise is deliberately abandoned, with its entire stack
+    // suspended. New worker receives only storage/rules left at process death.
+    const residual={local:structuredClone(old.storage.local.data),session:structuredClone(old.storage.session.data)};
+    const restartedRules=ruleFixture();for(const [id,value]of r.rules)restartedRules.rules.set(id,structuredClone(value));
+    const restarted=await fixture({seed:residual,dnr:restartedRules.dnr});const status=(await restarted.send({action:'status'})).value;assert.equal(status.state,'ready',`${from}->${to} ${n}/${side}`);assert.equal(restarted.calls.length,0,'restore never probes');
+    const generated=await restarted.send({action:'generate',instance:'recovered',connectionId:status.connectionId,input,mode:'article'},restarted.x);assert.equal(generated.ok,true);
+    const request=restarted.calls[0].options,model=JSON.parse(request.body).model;assert.ok(['model-user','new-model'].includes(model));assert.equal(request.headers.Authorization,model==='model-user'?'Bearer old-key':'Bearer new-key');assert.equal(restartedRules.rules.has(99),true);
+   }
+   if(done){finished=true;break;}
+  }
+  assert.ok(finished,'must exhaust bundled-worker persistence boundaries');
+  assert.ok(boundaries>=4);
+ }
+});
+
+test('实际worker旧schema崩溃残留：保留Key但须显式绑定，恢复和生成均不探测不fallback',async()=>{
+ const saved={...cfg,id:'legacy',version:'old-version',rememberKey:false,checkedAt:1};
+ const w=await fixture({seed:{local:{aiProvidersV8:{schema:1,activeId:'legacy',services:[saved]}},session:{aiProviderKeysV8:{legacy:'candidate-key-without-version'}}}});
+ const status=(await w.send({action:'status'})).value;assert.equal(status.state,'CUSTOM_REBIND_REQUIRED');assert.equal((await w.send({action:'providers'})).value.services[0].hasKey,true);assert.equal(w.calls.length,0);
+ const generated=await w.send({action:'generate',instance:'owned',connectionId:status.connectionId,input,mode:'article'},w.x);assert.equal(generated.error,'CUSTOM_REBIND_REQUIRED');assert.equal(w.calls.length,0);
+ assert.equal((await w.send({action:'activateProvider',id:'legacy'})).ok,true);assert.equal(w.calls.length,1);assert.notEqual(w.storage.local.data.aiProvidersV8.services[0].version,'old-version');assert.equal((await w.send({action:'status'})).value.state,'ready');
+});
+
+test('实际worker冷会话：local Key恢复规则不probe，session Key丢失明确阻断且清自有孤儿',async()=>{
+ for(const rememberKey of [true,false]){
+  const r=ruleFixture(),initial=await fixture({dnr:r.dnr});assert.equal((await initial.send({action:'saveProvider',config:{...originConfig,rememberKey},key:'synthetic-key'})).ok,true);
+  const coldRules=ruleFixture(),cold=await fixture({seed:{local:structuredClone(initial.storage.local.data),session:{}},dnr:coldRules.dnr});const status=(await cold.send({action:'status'})).value;assert.equal(status.state,rememberKey?'ready':'CUSTOM_KEY_REQUIRED');assert.equal(cold.calls.length,0);assert.equal(coldRules.rules.has(891020),rememberKey);
+  if(!rememberKey){const got=await cold.send({action:'generate',instance:'cold',connectionId:status.connectionId,input,mode:'article'},cold.x);assert.equal(got.error,'CUSTOM_KEY_REQUIRED');assert.equal(cold.calls.length,0);}
+ }
+});
+
+test('实际worker唤醒：豆包只读启动预检未完成时，首次自定义绑定仍可开始',async()=>{
+ for(const accepted of [true,false]){
+ let resume;const gate=new Promise(resolve=>resume=resolve);
+ const w=await fixture({seed:{local:{aiConnection:{enabled:true,partition:'bean'}},session:{}},startupPreferencesGate:gate,...(!accepted?{read:async()=>({ok:false,status:401,text:async()=>'{}'})}:{})});
+ try{
+  const saved=await w.send({action:'saveProvider',config:cfg,key:'wake-test-key'});
+  if(accepted){assert.equal(saved.ok,true,JSON.stringify(saved));assert.notEqual(saved.value.activeId,'doubao');}
+  else assert.equal(saved.error,'CUSTOM_AUTH');
+  assert.equal(w.calls.length,1);
+ }finally{resume();}
+ await new Promise(resolve=>setTimeout(resolve,5));
+ assert.equal(w.created.length,0,'abandoned Doubao preflight cannot later open a page');
+ assert.equal(w.storage.session.data.aiAutoAttempted,undefined,'read-only preflight leaves no attempted marker');
+ if(accepted)assert.equal((await w.send({action:'status'})).value.state,'ready');
+ else{await w.chrome.runtime.onStartup.fire();assert.equal(w.created.length,1,'failed custom check must not suppress later Doubao restore');}
+ }
+});
+
+test('实际worker启动首次写入与开页均不可被自定义检测抢占',async()=>{
+ for(const boundary of ['startupAttemptGate','startupCreateGate']){
+  let resume;const gate=new Promise(resolve=>resume=resolve);
+  const w=await fixture({seed:{local:{aiConnection:{enabled:true,partition:'bean'}},session:{}},[boundary]:gate,read:async()=>({ok:false,status:401,text:async()=>'{}'})});
+  try{
+   const saved=await w.send({action:'saveProvider',config:cfg,key:'must-not-probe'});
+   assert.equal(saved.error,'CUSTOM_CHECK_IN_PROGRESS',boundary);
+   assert.equal(w.calls.length,0,'no custom request while automatic connection owns side effects');
+  }finally{resume();}
+  await new Promise(resolve=>setTimeout(resolve,10));
+  assert.equal(w.created.length,1);assert.equal(w.storage.session.data.aiAutoAttempted,true);
+ }
+});
+
+test('实际worker可选DNR动态授权：启动时API不可用，重授后无需重建即可恢复且不probe',async()=>{
+ const initialRules=ruleFixture(),initial=await fixture({dnr:initialRules.dnr});
+ assert.equal((await initial.send({action:'saveProvider',config:originConfig,key:'local-test-key'})).ok,true);
+ const w=await fixture({seed:{local:structuredClone(initial.storage.local.data),session:{}},permission:false});
+ assert.equal((await w.send({action:'status'})).value.state,'PERMISSION_REQUIRED');
+ const granted=ruleFixture();w.chrome.declarativeNetRequest=granted.dnr;w.chrome.permissions.contains=async()=>true;
+ await w.chrome.permissions.onAdded.fire({permissions:['declarativeNetRequestWithHostAccess']});
+ assert.equal((await w.send({action:'status'})).value.state,'ready');
+ assert.equal(granted.rules.has(891020),true);assert.equal(w.calls.length,0,'permission recovery must not probe');
+ assert.equal((await w.send({action:'activateProvider',id:initial.storage.local.data.aiProvidersV8.activeId})).ok,true);
+ assert.equal(w.calls.length,1,'only the explicit recheck probes');
 });

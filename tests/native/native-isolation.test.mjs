@@ -71,7 +71,7 @@ test("隔离：Native manifest 自定义 HTTPS 可选上限及运行时窄授权
   }
   assert.deepEqual(manifest.permissions, ["storage", "scripting"], "only AI storage/scripting");
   assert.equal(manifest.host_permissions, undefined);
-  assert.equal(manifest.optional_permissions, undefined);
+  assert.deepEqual(manifest.optional_permissions, ["declarativeNetRequestWithHostAccess"]);
   assert.deepEqual(manifest.optional_host_permissions, ["https://*/*"]);
   assert.equal(manifest.web_accessible_resources, undefined, "no web accessible resources");
   assert.equal(manifest.action.default_popup, undefined, "no popup");

@@ -53,5 +53,8 @@
   },
   "action": {
     "default_title": "Peek 设置"
-  }
+  },
+  "optional_permissions": [
+    "declarativeNetRequestWithHostAccess"
+  ]
 }
