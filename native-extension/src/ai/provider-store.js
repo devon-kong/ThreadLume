@@ -80,7 +80,7 @@ export class ProviderStore {
   const oldRecord=old&&this.records[old.rememberKey?'local':'session'][old.keyRef];
   const owned=oldRecord&&oldRecord.providerId===old.id&&oldRecord.configVersion===old.version&&oldRecord.keyRef===old.keyRef&&oldRecord.keyLocation===(old.rememberKey?'local':'session')&&this.validKey(oldRecord.secret)?oldRecord.secret:null;
   const secret=key===undefined?owned:key;if(!this.validKey(secret))fail('CUSTOM_KEY_REQUIRED');
-  const changed=!old||!old.binding||this.descriptorStates.get(old)!=='ready'||['baseURL','model','protocol'].some(k=>config[k]!==old[k])||secret!==owned;
+  const changed=!old||!old.binding||this.descriptorStates.get(old)!=='ready'||['baseURL','model','protocol','stream'].some(k=>config[k]!==old[k])||secret!==owned;
   let candidate={...config,id:old?.id||crypto.randomUUID(),version:changed?crypto.randomUUID():old.version,checkedAt:Date.now(),keyRef:crypto.randomUUID()};
   candidate.binding=createBindingDescriptor(candidate,candidate.keyRef);
   if(old?.binding&&(old.binding.policyId!==candidate.binding.policyId||old.binding.policyVersion!==candidate.binding.policyVersion)){candidate={...candidate,version:crypto.randomUUID()};candidate.binding=createBindingDescriptor(candidate,candidate.keyRef);}

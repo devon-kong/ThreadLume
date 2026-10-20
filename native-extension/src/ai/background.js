@@ -14,7 +14,7 @@ const ownedPages=new Map();
 const stats={workerStartedAt:Date.now(),requests:0,stages:[],focusChecks:[],bindingStages:[]};
 const BINDING_STAGES=new Set(['store_init','store_ready','prepare','probe','probe_ok','commit','binding_permission','rules_acquire','rules_reconcile','executor','rule_read','rule_install','rule_remove','transport_permission','request','response']);
 const bindingStage=stage=>{if(BINDING_STAGES.has(stage)){stats.bindingStages.push({stage,at:Date.now()});stats.bindingStages=stats.bindingStages.slice(-40);}};
-async function transport(path,body,signal,params){
+async function transport(path,body,signal,params,onEvent=()=>{}){
  if(!PATHS.has(path))fail('UNSUPPORTED_OPERATION');
  if(!await chrome.permissions.contains({origins:[BASE+'/*']}))fail('PERMISSION_REQUIRED');
  if(signal.aborted)fail('CANCELLED');
@@ -23,6 +23,7 @@ async function transport(path,body,signal,params){
  stats.stages.push(record);stats.stages=stats.stages.slice(-40);
  try{
   const response=await fetch(BASE+path+'?'+new URLSearchParams(keys),{method:'POST',credentials:'include',redirect:'error',headers:{'Content-Type':'application/json','Agw-Js-Conv':'str'},body:JSON.stringify(body),signal:AbortSignal.any([signal,AbortSignal.timeout(120000)])});
+  onEvent({stage:'response'});
   record.httpStatus=response.status;
   if(!response.ok)fail(response.status===401?'LOGIN_REQUIRED':response.status===429?'RATE_LIMITED':response.status===403?'ACCESS_REJECTED':'SERVER_ERROR');
   const text=await response.text();if(text.length>2000000)fail('RESPONSE_LIMIT');record.elapsedMs=Date.now()-started;
@@ -37,7 +38,7 @@ const bindings=createBindingRuntime({onStage:bindingStage,transport:customTransp
 let bindingRevision=0;
 let service,providerCheck=null;
 const providers=new ProviderStore({onStage:bindingStage,storage:chrome.storage,bindings,verifyPermission:config=>hasPermission(config?descriptorPermissions(config.binding):{origins:[BASE+'/*']}),onChange:change=>{if(change.invalidate||change.bindingChanged){service.providerChanged();if(providerCheck)cancelConnectionWork();}notifyState({connectionChanged:change.invalidate||change.bindingChanged});}});
-service=new AIService({storage:chrome.storage,request:transport,providers,requestCustom:(provider,key,input,mode,signal,binding)=>{if(!binding||binding!==bindings.current()||binding.descriptor.configVersion!==provider.version||binding.descriptor.keyRef!==provider.keyRef)fail('CONNECTION_CHANGED');return binding.executor.generate(key,input,mode,signal);}});
+service=new AIService({storage:chrome.storage,request:transport,providers,requestCustom:(provider,key,input,mode,signal,binding,onEvent)=>{if(!binding||binding!==bindings.current()||binding.descriptor.configVersion!==provider.version||binding.descriptor.keyRef!==provider.keyRef)fail('CONNECTION_CHANGED');return binding.executor.generate(key,input,mode,signal,onEvent);}});
 async function notifyState(extra={}){
  try{
   const preferences=await service.preferences();
@@ -78,7 +79,7 @@ async function status(){
  const tab=Number.isInteger(setup)?await chrome.tabs.get(setup).catch(()=>null):null;
  const setupOpen=!!(tab?.pendingUrl||tab?.url)?.startsWith(BASE+'/');
  if(Number.isInteger(setup)&&!setupOpen)await clearSetup(setup);
- return {...connection,...(!permission?{state:'PERMISSION_REQUIRED'}:{}),setupOpen,xTheme:themeMemory.aiXTheme,checking:!!(checkTask||providerCheck),diagnostics:stats};
+ return {...connection,...(!permission?{state:'PERMISSION_REQUIRED'}:{}),setupOpen,xTheme:themeMemory.aiXTheme,checking:!!(checkTask||providerCheck),diagnostics:{...stats,generation:service.performanceSnapshot()}};
 }
 function currentSetupPage(){return [...ownedPages.values()].find(page=>page.generation===connectionGeneration&&!page.closing);}
 function isCurrentSetup(id,marker){return id===marker||ownedPages.get(id)?.generation===connectionGeneration;}
@@ -284,11 +285,24 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
  const owner=`${sender.tab?.id??'settings'}:${sender.documentId??sender.frameId}:${String(m.instance||'').slice(0,100)}`;
  const record=m.action==='generate'&&Number.isInteger(sender.tab?.id)?{owner,url:typeof m.input?.url==='string'?m.input.url:sender.url}:null;
  if(record){const pending=tabRequests.get(sender.tab.id)||new Set();pending.add(record);tabRequests.set(sender.tab.id,pending);}
- const release=()=>{if(!record)return;const pending=tabRequests.get(sender.tab.id);pending?.delete(record);if(!pending?.size)tabRequests.delete(sender.tab.id);};
+ let progressTimer=null,latestProgress=null,progressClosed=false,progressSequence=0;
+ const deliverProgress=()=>{progressTimer=null;if(progressClosed||!latestProgress)return;
+  const event=latestProgress;latestProgress=null;
+  chrome.tabs.sendMessage(sender.tab.id,{ns:'peek-ai-v7',action:'generationProgress',instance:m.instance,requestId:m.requestId,mode:m.mode,connectionId:m.connectionId,sequence:++progressSequence,...event},{documentId:sender.documentId,frameId:0}).catch(()=>{});
+ };
+ const progress=event=>{
+  if(progressClosed||!m.requestId||!Number.isInteger(sender.tab?.id))return;
+  if(event.stage==='partial'&&typeof event.text==='string'&&event.text.length<=12000){
+   latestProgress={stage:'partial',text:event.text};if(!progressTimer)progressTimer=setTimeout(deliverProgress,80);
+  }else if(['request','uploadStart'].includes(event.stage)){
+   latestProgress={stage:'request'};deliverProgress();
+  }
+ };
+ const release=()=>{progressClosed=true;clearTimeout(progressTimer);latestProgress=null;if(!record)return;const pending=tabRequests.get(sender.tab.id);pending?.delete(record);if(!pending?.size)tabRequests.delete(sender.tab.id);};
  const admission=bindingRevision;
  const dispatch=async()=>{
   await ready;
-  const fields={status:['xTheme'],preferences:[],savePreferences:['preferences'],providers:[],saveProvider:['config','key'],activateProvider:['id'],cancelProviderCheck:[],generate:['connectionId','input','mode','instance'],cached:['connectionId','input','mode','instance'],cancel:['instance'],openSettings:[],openSetup:[],connect:[],capture:[],check:[],cancelCheck:[],disconnect:[]};
+  const fields={status:['xTheme'],preferences:[],savePreferences:['preferences'],providers:[],saveProvider:['config','key'],activateProvider:['id'],cancelProviderCheck:[],generate:['connectionId','input','mode','instance','requestId','contentMs'],cached:['connectionId','input','mode','instance','requestId','contentMs'],cancel:['instance'],displayed:['instance','requestId','displayMs','firstVisibleMs','firstReadableMs','visibilityInterrupted'],openSettings:[],openSetup:[],connect:[],capture:[],check:[],cancelCheck:[],disconnect:[]};
   if(!sender.url?.startsWith('chrome-extension://')&&Object.keys(m).some(key=>!['ns','action',...(fields[m.action]||[])].includes(key)))fail('INVALID_MESSAGE');
   if(providerCheck&&['connect','openSetup','capture','check'].includes(m.action))fail('CUSTOM_CHECK_IN_PROGRESS');
   switch(m.action){
@@ -312,6 +326,7 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
    case 'cancelCheck':cancelConnectionWork();return null;
    case 'disconnect':{providerCheck?.abort.abort();const disconnected=service.disconnect();await cancelConnectionWork();const result=await disconnected;notifyState({connectionChanged:true});return result;}
    case 'cancel':service.cancel(owner);return null;
+   case 'displayed':return service.recordDisplay(owner,m.requestId,{visibilityInterrupted:m.visibilityInterrupted,displayMs:m.displayMs,firstVisibleMs:m.firstVisibleMs,firstReadableMs:m.firstReadableMs});
    case 'cached':
    case 'generate':{
     await auditVisibleBoundary();
@@ -319,7 +334,9 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
     const input=validateInput(m.input);await confirmFocus(sender,m,input);
     if(admission!==bindingRevision)fail('CONNECTION_CHANGED');
     if(typeof m.connectionId!=='string'||m.connectionId!==service.activeIdentity())fail('CONNECTION_CHANGED');
-    return m.action==='cached'?service.cached(input,m.mode):service.generate(owner,input,m.mode);
+    if(m.requestId!==undefined&&(typeof m.requestId!=='string'||!/^[\w-]{1,100}$/.test(m.requestId)))fail('INVALID_MESSAGE');
+    if(m.contentMs!==undefined&&(typeof m.contentMs!=='number'||!Number.isFinite(m.contentMs)||m.contentMs<0||m.contentMs>600000))fail('INVALID_MESSAGE');
+    return m.action==='cached'?service.cachedMeasured(owner,input,m.mode,{requestId:m.requestId,contentMs:m.contentMs}):service.generate(owner,input,m.mode,{requestId:m.requestId,contentMs:m.contentMs,onProgress:progress});
    }
    default:fail('INVALID_MESSAGE');
   }

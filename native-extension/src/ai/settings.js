@@ -93,7 +93,7 @@ async function activateProvider(id){
 function cancelProviderCheck(){++providerRevision;providerBusy=false;notice='已取消检测，保留原服务与草稿。';send('cancelProviderCheck').catch(()=>{});render();}
 function openProviderDialog(service){
  if(providerDialog||providerBusy||busy)return;++refreshRevision;
- const draftId=service?.id||'new',prior=d.activeElement,draft=providerDrafts.get(draftId)||{name:service?.name||'',baseURL:service?.baseURL||'',model:service?.model||'',key:'',rememberKey:service?.rememberKey!==false};
+ const draftId=service?.id||'new',prior=d.activeElement,draft=providerDrafts.get(draftId)||{name:service?.name||'',baseURL:service?.baseURL||'',model:service?.model||'',key:'',rememberKey:service?.rememberKey!==false,stream:service?.stream===true};
  const dialog=el(d,'dialog',{id:'pk-provider-dialog',class:'pk-provider-dialog','aria-labelledby':'pk-provider-title'}),form=el(d,'form',{id:'pk-provider-form',novalidate:true});providerDialog=dialog;
  const close=identified(button(d,'×',()=>dismiss()),'pk-provider-close');close.setAttribute('aria-label','关闭服务设置');
  form.append(el(d,'header',{},el(d,'div',{},el(d,'h2',{id:'pk-provider-title',text:service?'编辑 AI 服务':'添加 AI 服务'}),el(d,'p',{class:'pk-ai-muted',text:'连接兼容 API，选择你习惯的模型。'})),close));
@@ -106,8 +106,9 @@ function openProviderDialog(service){
  form.append(key.wrap);
  const remember=el(d,'input',{id:'pk-provider-rememberKey',type:'checkbox'});remember.checked=draft.rememberKey;
  form.append(el(d,'label',{class:'pk-provider-remember',for:remember.id},remember,el(d,'span',{text:'记住在此设备'})),el(d,'small',{class:'pk-ai-muted',text:'保存在浏览器本地存储，并非系统钥匙串加密。关闭后，Key 只在本次浏览器会话内保存。'}),el(d,'p',{class:'pk-ai-muted',text:'保存时会请求访问此 API 域名，并发送一条最小测试请求，不发送当前文章。连接成功后，当前字幕或正文仅发送至你选择的服务。'}));
+ const stream=el(d,'input',{id:'pk-provider-stream',type:'checkbox'});stream.checked=draft.stream===true;form.append(el(d,'label',{class:'pk-provider-remember',for:stream.id},stream,el(d,'span',{text:'渐进显示摘要（流式）'})),el(d,'small',{class:'pk-ai-muted',text:'更早开始阅读；保存时验证服务的流式兼容性。失败不自动重发，关闭后恢复完整结果方式。'}));
  const error=el(d,'p',{id:'pk-provider-error',class:'pk-provider-error',role:'alert'}),cancel=identified(button(d,'取消',()=>dismiss()),'pk-provider-cancel'),submit=el(d,'button',{id:'pk-provider-submit',type:'submit',class:'pk-provider-primary',text:'保存、检测并启用'});form.append(error,el(d,'footer',{},cancel,submit));dialog.append(form);d.body.append(dialog);
- const capture=()=>{const value={name:name.input.value,baseURL:url.input.value,model:model.input.value,key:key.input.value,rememberKey:remember.checked};providerDrafts.set(draftId,value);return value;};
+ const capture=()=>{const value={name:name.input.value,baseURL:url.input.value,model:model.input.value,key:key.input.value,rememberKey:remember.checked,stream:stream.checked};providerDrafts.set(draftId,value);return value;};
  const preview=()=>{capture();try{endpoint.textContent='请求地址：'+normalizeEndpoint(url.input.value).endpoint+(providerPermissions(url.input.value).permissions?'。此服务需额外网络规则权限，仅在该准确 API 地址移除 Origin 请求头。':'');}catch{endpoint.textContent=url.input.value?'仅支持 HTTPS Base URL，不含账号、查询参数或片段。':'填写服务商提供的 Base URL；请求路径会自动规范化。';}};
  form.addEventListener('input',preview);form.addEventListener('change',capture);preview();
  let checking=false,revision=0;
@@ -117,7 +118,7 @@ function openProviderDialog(service){
  window.addEventListener('keydown',keydown,true);dialog.addEventListener('cancel',e=>{e.preventDefault();dismiss();});dialog.addEventListener('close',()=>{window.removeEventListener('keydown',keydown,true);dialog.remove();providerDialog=null;if(prior?.isConnected)prior.focus({preventScroll:true});},{once:true});
  form.addEventListener('submit',async event=>{
   event.preventDefault();if(checking)return;const value=capture();let config,normalized;
-  try{config=validateProviderConfig({...(service?{id:service.id}:{}),name:value.name,protocol:'chat-completions',baseURL:value.baseURL,model:value.model,rememberKey:value.rememberKey});normalized=normalizeEndpoint(value.baseURL);if(!value.key&&!service?.hasKey)throw Error('CUSTOM_KEY_REQUIRED');}
+  try{config=validateProviderConfig({...(service?{id:service.id}:{}),name:value.name,protocol:'chat-completions',baseURL:value.baseURL,model:value.model,rememberKey:value.rememberKey,stream:value.stream});normalized=normalizeEndpoint(value.baseURL);if(!value.key&&!service?.hasKey)throw Error('CUSTOM_KEY_REQUIRED');}
   catch(e){error.textContent=errorText(e.code||e.message);return;}
   const token=++revision;setChecking(true);error.textContent='';
   // This call must remain before the first await, within the submit gesture.
@@ -154,9 +155,9 @@ function render(){
  const active=root.contains(d.activeElement)?d.activeElement:null,view=d.createDocumentFragment();
  view.append(el(d,'h1',{text:'设置'}),el(d,'p',{class:'pk-ai-muted',text:'让 Peek 按你的习惯阅读'}));
  view.append(providerSection());
- const intelligence=el(d,'section',{id:'pk-intelligence',class:'pk-settings-card'},el(d,'h2',{text:'智能阅读'}),toggle('summary','Summary','自动总结视频与长文，普通短帖不生成'),toggle('timeline','视频时间轴',prefs.summary?'在 Summary 下方展示章节':'开启 Summary 后可使用',!prefs.summary),toggle('mindmap','思维导图','自动生成视频脑图，可与 Summary 随时切换'));
+ const intelligence=el(d,'section',{id:'pk-intelligence',class:'pk-settings-card'},el(d,'h2',{text:'智能阅读'}),toggle('summary','摘要','优先生成当前视图，普通短帖不生成'),toggle('timeline','视频时间轴',prefs.summary?'在 摘要 下方展示章节':'开启 摘要 后可使用',!prefs.summary),toggle('mindmap','思维导图','选择脑图视图时生成，已有结果直接显示'));
  const defaultRow=el(d,'div',{class:'pk-settings-row pk-settings-divider'},el(d,'strong',{text:'视频优先展示'}));
- if(prefs.summary&&prefs.mindmap)defaultRow.append(segmented('defaultView',[['summary','Summary'],['mindmap','思维导图']]));else defaultRow.append(el(d,'small',{text:prefs.summary?'Summary · 唯一已开启视图':prefs.mindmap?'思维导图 · 唯一已开启视图':'全部关闭 · 不生成 AI 内容'}));
+ if(prefs.summary&&prefs.mindmap)defaultRow.append(segmented('defaultView',[['summary','摘要'],['mindmap','思维导图']]));else defaultRow.append(el(d,'small',{text:prefs.summary?'摘要 · 唯一已开启视图':prefs.mindmap?'思维导图 · 唯一已开启视图':'全部关闭 · 不生成 AI 内容'}));
  intelligence.append(defaultRow);view.append(intelligence);
  view.append(el(d,'section',{id:'pk-appearance',class:'pk-settings-card'},el(d,'div',{class:'pk-settings-row'},el(d,'span',{},el(d,'strong',{text:'外观'}),el(d,'small',{text:'跟随 X，或使用独立主题'})),segmented('theme',[['system','跟随 X'],['light','浅色'],['dark','深色']]))));
  view.append(el(d,'section',{id:'pk-feishu',class:'pk-settings-card'},el(d,'div',{class:'pk-settings-row'},el(d,'span',{},el(d,'strong',{text:'飞书收藏'}),el(d,'small',{text:'将喜欢的内容收藏到飞书'})),el(d,'span',{class:'pk-ai-muted',text:'即将开放'}))));

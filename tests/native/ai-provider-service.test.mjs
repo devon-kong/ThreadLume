@@ -29,3 +29,12 @@ test('所有自定义服务共享30项缓存总上限，全部关闭时不请求
  await f.providers.save({...config,name:'另一服务',model:'two'},'key-two');for(let i=0;i<20;i++)await f.service.generate('second-'+i,{...input,text:'Content '+i},'article');
  assert.equal(Object.keys(f.storage.local.data.aiCache).length,30);const before=f.calls();await f.service.savePreferences({summary:false,mindmap:false});await assert.rejects(f.service.generate('off',{...input,text:'Never sent'},'article'),/GENERATION_DISABLED/);assert.equal(f.calls(),before);
 });
+test('stream-mode edit is atomic and changes config/cache identity; failed capability probe preserves old binding',async()=>{
+ const f=await fixture();const old=f.providers.active(),oldIdentity=f.providers.identity();
+ f.providers.probe=async candidate=>{if(candidate.stream)throw Error('UNSUPPORTED');};
+ await assert.rejects(f.providers.save({...config,id:old.id,stream:true}),/UNSUPPORTED/);
+ assert.equal(f.providers.active(),old);assert.equal(f.providers.identity(),oldIdentity);assert.equal(f.providers.keyFor(old),'test-key');
+ f.providers.probe=async()=>{};await f.providers.save({...config,id:old.id,stream:true});
+ const streamed=f.providers.active();assert.equal(streamed.stream,true);assert.equal(streamed.binding.stream,true);assert.notEqual(streamed.version,old.version);
+ const restarted=new ProviderStore({storage:f.storage,probe:()=>{throw Error('no automatic probe');}});await restarted.init();assert.equal(restarted.bindingState(),'ready');assert.equal(restarted.active().stream,true);assert.equal(restarted.keyFor(restarted.active()),'test-key');
+});

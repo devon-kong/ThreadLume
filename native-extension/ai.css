@@ -1,4 +1,10 @@
 /* Extension-owned AI surfaces only. X's DOM and player remain native. */
+.pk-ai-draft{white-space:pre-wrap;line-height:1.7}
+.pk-ai-expand{margin-left:auto;font-size:11px;font-weight:400;white-space:nowrap}
+.pk-ai-chapter[open] .pk-ai-expand{font-size:0}
+.pk-ai-chapter[open] .pk-ai-expand::after{content:"收起要点";font-size:11px}
+html[data-peek-ai-theme="dark"] .pk-connected{color:#5bd6a1}
+html[data-peek-ai-theme="dark"] .pk-provider-error{color:#ff9292}
 #peek-ai-card,.pk-ai-map-dialog,.pk-settings-page{--pk-bg:#fff;--pk-fg:#17212a;--pk-dim:#687887;--pk-soft:#f5f7f9;--pk-line:#e9eef2;--pk-blue:#006bbe;--pk-tint:#e8f3ff;color:var(--pk-fg);font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;box-sizing:border-box}
 html[data-peek-ai-theme="dark"] #peek-ai-card,html[data-peek-ai-theme="dark"] .pk-ai-map-dialog,html[data-peek-ai-theme="dark"] .pk-settings-page{--pk-bg:#15191e;--pk-fg:#e4e9ed;--pk-dim:#94a0aa;--pk-soft:#20262d;--pk-line:#2d353d;--pk-blue:#76c5ff;--pk-tint:#172f41}
 #peek-ai-card *,.pk-ai-map-dialog *,.pk-settings-page *{box-sizing:border-box}

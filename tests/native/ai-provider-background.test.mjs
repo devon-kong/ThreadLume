@@ -7,20 +7,42 @@ const area=seed=>{const data=structuredClone(seed||{}),access=[];return {data,ac
 const cfg={name:'用户服务',protocol:'chat-completions',baseURL:'https://api.example.test/v1',model:'model-user',rememberKey:true};
 const input={kind:'article',focusId:'123',url:'https://x.com/a/status/123',title:'Title',text:'Full body'};
 const fixture=async({current=false,read,permission=true,seed,dnr,urlClass=URL,startupPreferencesGate,startupAttemptGate,startupCreateGate}={})=>{
- const saved={...cfg,id:'custom-one',version:'version-one',checkedAt:1,keyRef:'key-one'};saved.binding=createBindingDescriptor(saved,saved.keyRef);const storage={local:area({aiConnection:{enabled:true,partition:'bean'},...(current?{aiProvidersV8:{schema:2,activeId:saved.id,services:[saved]},['aiProviderKeyV9:'+saved.keyRef]:{providerId:saved.id,configVersion:saved.version,keyRef:saved.keyRef,keyLocation:'local',secret:'synthetic-key'}}:{})}),session:area()},calls=[],created=[],notified=[];
+ const saved={...cfg,id:'custom-one',version:'version-one',checkedAt:1,keyRef:'key-one'};saved.binding=createBindingDescriptor(saved,saved.keyRef);const storage={local:area({aiConnection:{enabled:true,partition:'bean'},...(current?{aiProvidersV8:{schema:2,activeId:saved.id,services:[saved]},['aiProviderKeyV9:'+saved.keyRef]:{providerId:saved.id,configVersion:saved.version,keyRef:saved.keyRef,keyLocation:'local',secret:'synthetic-key'}}:{})}),session:area()},calls=[],created=[],notified=[],progress=[];
  if(seed){storage.local=area(seed.local);storage.session=area(seed.session);}
  if(startupPreferencesGate){const get=storage.local.get;storage.local.get=async key=>{if(key==='aiPreferences')await startupPreferencesGate;return get(key);};}
  if(startupAttemptGate){const set=storage.session.set;storage.session.set=async value=>{if(value.aiAutoAttempted)await startupAttemptGate;return set(value);};}
- const chrome={...(dnr?{declarativeNetRequest:dnr}:{}),storage,runtime:{id:'ours',onMessage:evt(),onStartup:evt(),openOptionsPage:async()=>{}},action:{onClicked:evt()},permissions:{contains:async()=>permission,onRemoved:evt(),onAdded:evt()},tabs:{onUpdated:evt(),onRemoved:evt(),onActivated:evt(),query:async()=>[{id:1,url:input.url}],get:async()=>null,create:async options=>{created.push(options);return {id:9,url:options.url,status:'complete'};},remove:async()=>{},sendMessage:async(id,m)=>{if(m.action==='stateChanged'){notified.push(m);return null;}return {focusId:'123',url:input.url,instance:m.instance};}},scripting:{executeScript:async()=>[]}};
+ const chrome={...(dnr?{declarativeNetRequest:dnr}:{}),storage,runtime:{id:'ours',onMessage:evt(),onStartup:evt(),openOptionsPage:async()=>{}},action:{onClicked:evt()},permissions:{contains:async()=>permission,onRemoved:evt(),onAdded:evt()},tabs:{onUpdated:evt(),onRemoved:evt(),onActivated:evt(),query:async()=>[{id:1,url:input.url}],get:async()=>null,create:async options=>{created.push(options);return {id:9,url:options.url,status:'complete'};},remove:async()=>{},sendMessage:async(id,m,options)=>{if(m.action==='generationProgress'){progress.push({id,m,options});return null;}if(m.action==='stateChanged'){notified.push(m);return null;}return {focusId:'123',url:input.url,instance:m.instance};}},scripting:{executeScript:async()=>[]}};
  if(startupCreateGate){const create=chrome.tabs.create;chrome.tabs.create=async options=>{await startupCreateGate;return create(options);};}
  // Avoid unrelated Doubao startup when no custom has yet been saved.
  if(!current&&!seed)storage.local.data.aiConnection.enabled=false;
  const fetch=async(url,options)=>{calls.push({url,options});if(read)return read(url,options);const probe=JSON.parse(options.body).messages.at(-1).content==='Reply exactly OK.';return {ok:true,status:200,text:async()=>JSON.stringify({choices:[{finish_reason:'stop',message:{role:'assistant',content:probe?'OK':'{"text":"结果"}'}}]})};};
- const context=vm.createContext({chrome,fetch,crypto,URL:urlClass,URLSearchParams,AbortSignal,AbortController,DOMException,TextEncoder,btoa,setTimeout,clearTimeout});vm.runInContext(source,context);const wire=vm.runInContext('JSON.parse',context);await new Promise(r=>setTimeout(r,10));
+ const context=vm.createContext({chrome,fetch,crypto,URL:urlClass,URLSearchParams,AbortSignal,AbortController,DOMException,performance,structuredClone,TextDecoder,TextEncoder,btoa,setTimeout,clearTimeout});vm.runInContext(source,context);const wire=vm.runInContext('JSON.parse',context);await new Promise(r=>setTimeout(r,10));
  const settings={id:'ours',url:'chrome-extension://ours/settings.html'},x={id:'ours',url:input.url,tab:{id:1},documentId:'doc',frameId:0};
  const send=(m,sender=settings)=>new Promise(resolve=>{if(!chrome.runtime.onMessage.handlers[0](wire(JSON.stringify({ns:'peek-ai-v7',...m})),sender,resolve))resolve({rejected:true});});
- return {chrome,storage,calls,created,notified,settings,x,send};
+ return {chrome,storage,calls,created,notified,progress,settings,x,send};
 };
+test('actual worker streams only to owning document, measures generic service, cancellation rejects late cache',async()=>{
+ const frame=(content,finish_reason=null)=>'data: '+JSON.stringify({choices:[{index:0,delta:content===null?{}:{content},finish_reason}]})+'\n\n';
+ let controller;
+ const w=await fixture({read:async(_,options)=>{
+  const body=JSON.parse(options.body);assert.equal(body.stream,true);
+  const probe=body.messages.at(-1).content==='Reply exactly OK.';
+  return new Response(new ReadableStream({start(c){if(probe){c.enqueue(new TextEncoder().encode(frame('OK')+frame(null,'stop')+'data: [DONE]\n\n'));c.close();}else{controller=c;c.enqueue(new TextEncoder().encode(frame('{"text":"readable draft')));}}}),{headers:{'content-type':'text/event-stream'}});
+ }});
+ const saved=await w.send({action:'saveProvider',config:{...cfg,stream:true},key:'synthetic-key'});assert.equal(saved.ok,true);
+ const state=(await w.send({action:'status'})).value;
+ const job=w.send({action:'generate',instance:'stream-owner',requestId:'stream-request',connectionId:state.connectionId,input,mode:'article',contentMs:502},w.x);
+ for(let i=0;i<100&&!w.progress.some(p=>p.m.stage==='partial');i++)await new Promise(r=>setTimeout(r,5));
+ const partial=w.progress.find(p=>p.m.stage==='partial');assert.ok(partial);assert.equal(partial.id,1);assert.equal(partial.options.documentId,'doc');assert.equal(partial.options.frameId,0);assert.equal(partial.m.text,'readable draft');
+ assert.equal((await w.send({action:'displayed',instance:'stream-owner',requestId:'stream-request',firstReadableMs:150},w.x)).value,true);
+ await w.send({action:'cancel',instance:'stream-owner'},w.x);assert.equal((await job).error,'CANCELLED');
+ const before=w.progress.length;try{controller.enqueue(new TextEncoder().encode(frame('"}')+frame(null,'stop')+'data: [DONE]\n\n'));}catch{}
+ await new Promise(r=>setTimeout(r,100));assert.equal(w.progress.length,before);
+ assert.equal(Object.keys(w.storage.local.data.aiCache||{}).length,0);
+ const diagnostic=(await w.send({action:'status'})).value.diagnostics.generation.find(r=>r.requestId==='stream-request');
+ assert.equal(diagnostic.provider,'custom');assert.equal(diagnostic.outcome,'cancelled');assert.equal(diagnostic.firstReadableMs,150);assert.equal(diagnostic.contentMs,502);
+ assert.equal(JSON.stringify(diagnostic).includes('readable draft'),false);
+});
 test('实际后台：自定义当前时豆包不初始化/探测，可信存储与来源限制及脱敏通知',async()=>{
  const w=await fixture({current:true});assert.equal(w.created.length,0);assert.equal(w.calls.length,0);await w.chrome.runtime.onStartup.fire();assert.equal(w.created.length,0);
  for(const area of [w.storage.local,w.storage.session])assert.equal(area.access[0].accessLevel,'TRUSTED_CONTEXTS');

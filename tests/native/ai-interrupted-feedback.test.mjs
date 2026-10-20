@@ -18,7 +18,7 @@ for(const phase of ['cache','waiting','loading'])for(const state of ['DISCONNECT
  const card=w.document.getElementById('peek-ai-card'),video=w.document.querySelector('video'),success=w.document.querySelector('#pk-ai-view-mindmap').firstChild;
  const body=card.querySelector('.pk-ai-body');w.document.getElementById('pk-ai-tab-mindmap').click();body.scrollTop=71;
  const branch=card.querySelector('.pk-ai-node[aria-expanded]');branch?.click();
- card.querySelector('.pk-ai-icon').click();
+ card.querySelector('#pk-ai-fold').click();
  const requests=r.calls.filter(x=>x.action==='generate').length;
  r.state(state);await wait(25);
  const unfinished=phase==='loading'?['summary']:['summary','mindmap'];

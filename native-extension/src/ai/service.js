@@ -1,6 +1,7 @@
 import {AIError,fail,validateInput,md5,buildResource,buildRequest,parseSSE,classifyBusiness} from './protocol.js';
 import {PROMPT_VERSION} from './custom-provider.js';
 import {DEFAULTS,normalizePreferences} from './preferences.js';
+import {createMetrics} from './metrics.js';
 export const PARAM_KEYS=['version_code','language','device_platform','doubao_device_platform','aid','real_aid','pkg_type','device_id','pc_version','doubao_pc_version','web_id','tea_uuid','region','sys_region','samantha_web','use-olympus-account'];
 export function validateParams(params){
  if(!params||typeof params!=='object'||Array.isArray(params)||Object.keys(params).some(k=>!PARAM_KEYS.includes(k))||Object.values(params).some(v=>typeof v!=='string'||v.length>256||/[\r\n]/.test(v)))fail('INVALID_PARAMETERS');
@@ -10,18 +11,24 @@ export function allowedSender(sender,id,action){
  if(sender?.id!==id)return false;
  const settings=sender.url===`chrome-extension://${id}/settings.html`;
  if(['status','preferences','savePreferences','connect','capture','disconnect','cancelCheck','check','openSetup','providers','saveProvider','activateProvider','cancelProviderCheck'].includes(action)&&settings)return true;
- if(!['status','preferences','generate','cached','cancel','openSettings'].includes(action)||!Number.isInteger(sender.tab?.id)||sender.frameId!==0)return false;
+ if(!['status','preferences','generate','cached','cancel','displayed','openSettings'].includes(action)||!Number.isInteger(sender.tab?.id)||sender.frameId!==0)return false;
  try{const u=new URL(sender.url);return u.protocol==='https:'&&['x.com','twitter.com'].includes(u.hostname);}catch{return false;}
 }
 const aborted=()=>new DOMException('Cancelled','AbortError');
 const TTL=7*86400000;
 const AUTH_BLOCKS=new Set(['LOGIN_REQUIRED','VERIFICATION_REQUIRED']);
+const outputCharacters=result=>{
+ let count=(result?.text||'').length;
+ for(const h of result?.highlights||[]){count+=(h.chapter||h.title||'').length;for(const p of h.bullet_points||[])count+=(p.point||p.text||'').length;}
+ const nodes=[...(result?.tree||[])];for(let i=0;i<nodes.length&&i<200;i++){count+=(nodes[i].text||'').length;nodes.push(...(nodes[i].children||[]));}
+ return count;
+};
 export class AIService {
- constructor({storage,request,providers,requestCustom}){this.storage=storage;this.request=request;this.providers=providers;this.requestCustom=requestCustom;this.jobs=new Map();this.cancelledOwners=new Map();this.resources=new Map();this.tail=Promise.resolve();this.epoch=0;this.context=null;this.connection={enabled:false,partition:''};this.cache={};this.error=null;this.errorRevision=0;this.preferenceRevision=0;this.preferencePending=0;this.modeRevision={summary:0,mindmap:0};}
+ constructor({storage,request,providers,requestCustom}){this.storage=storage;this.request=request;this.providers=providers;this.requestCustom=requestCustom;this.metrics=createMetrics({onChange:rows=>this.saveMetrics(rows)});this.jobs=new Map();this.cancelledOwners=new Map();this.resources=new Map();this.tail=Promise.resolve();this.epoch=0;this.context=null;this.connection={enabled:false,partition:''};this.cache={};this.error=null;this.errorRevision=0;this.preferenceRevision=0;this.preferencePending=0;this.modeRevision={summary:0,mindmap:0};}
  init(){return this.initialized??=(async()=>{
   await this.providers?.init();
   const local=await this.storage.local.get(['aiConnection','aiCache']);this.connection=local.aiConnection||this.connection;this.cache=local.aiCache||{};
-  const session=await this.storage.session.get(['aiContext','aiBlock']);
+  const session=await this.storage.session.get(['aiContext','aiBlock','aiPerformanceV12']);this.metrics.restore(session.aiPerformanceV12);
   if(session.aiContext?.partition===this.connection.partition&&session.aiContext?.params){try{this.context={...session.aiContext,params:validateParams(session.aiContext.params)};}catch{await this.storage.session.remove('aiContext');}}
   if(session.aiBlock?.partition===this.connection.partition&&AUTH_BLOCKS.has(session.aiBlock.code))this.error=session.aiBlock.code;
  })();}
@@ -109,47 +116,80 @@ export class AIService {
  async cached(raw,mode){const epoch=this.epoch;await this.init();if(epoch!==this.epoch)throw aborted();const input=validateInput(raw);if((input.kind==='article'&&mode!=='article')||(input.kind==='video'&&!['summary','mindmap'].includes(mode)))fail('INVALID_MODE');const provider=this.providers?.active();if(provider){const state=this.providers.bindingState(provider)!=='ready'?this.providers.bindingState(provider):(this.providers.bindings?.state()||'ready');if(state!=='ready')fail(state);}const entry=this.cache[this.key(input,mode)];return entry&&Date.now()-entry.at<TTL?entry.result:null;}
  cancel(owner){this.cancelledOwners.set(owner,Date.now());for(const [id,at] of this.cancelledOwners)if(Date.now()-at>300000)this.cancelledOwners.delete(id);for(const job of this.jobs.values())if(job.owners.has(owner)){job.owners.delete(owner);for(const reject of job.rejects.get(owner)||[])reject(aborted());job.rejects.delete(owner);if(!job.owners.size)job.abort.abort();}}
  clearJobs(){for(const job of this.jobs.values())this.abortJob(job);this.jobs.clear();}
- async generate(owner,raw,mode){
+ performanceSnapshot(){return this.metrics.snapshot();}
+ saveMetrics(rows){
+  this.pendingMetrics=rows;if(this.metricsScheduled)return;this.metricsScheduled=true;
+  Promise.resolve().then(()=>{this.metricsScheduled=false;const snapshot=this.pendingMetrics;
+   this.metricsWrite=(this.metricsWrite||Promise.resolve()).catch(()=>{}).then(()=>this.storage.session.set({aiPerformanceV12:snapshot})).catch(()=>{});
+  });
+ }
+ recordDisplay(owner,requestId,timing){return this.metrics.display(owner,requestId,timing);}
+ async cachedMeasured(owner,raw,mode,{requestId=crypto.randomUUID(),contentMs}={}){
+  const epoch=this.epoch;await this.init();if(epoch!==this.epoch)throw aborted();
+  const trace=this.metrics.start(owner,requestId,{kind:raw?.kind==='video'?'video':'article',mode:['article','summary','mindmap'].includes(mode)?mode:'unknown',provider:this.providers?.active()?'custom':'doubao',providerId:this.providers?.active()?.id||'doubao',configVersion:this.providers?.active()?.version,contentMs,inputCharacters:typeof raw?.text==='string'?raw.text.length:undefined,operation:'cache'});trace.mark('admitted');
+  try{const result=await this.cached(raw,mode);trace.cache(result?'hit':'miss');if(result)trace.output(outputCharacters(result));trace.finish('success');return result;}
+  catch(e){trace.finish('error');throw e;}
+ }
+ async generate(owner,raw,mode,{requestId=crypto.randomUUID(),contentMs,onProgress=()=>{}}={}){
+  const epoch=this.epoch,flag=mode==='mindmap'?'mindmap':'summary',modeRevision=this.modeRevision[flag];
+  await this.init();if(epoch!==this.epoch||modeRevision!==this.modeRevision[flag]||this.cancelledOwners.has(owner))throw aborted();
+  const trace=this.metrics.start(owner,requestId,{kind:raw?.kind==='video'?'video':'article',mode:['article','summary','mindmap'].includes(mode)?mode:'unknown',provider:this.providers?.active()?'custom':'doubao',providerId:this.providers?.active()?.id||'doubao',configVersion:this.providers?.active()?.version,contentMs,inputCharacters:typeof raw?.text==='string'?raw.text.length:undefined});
+  trace.mark('admitted');
+  try{const result=await this.generateMeasured(owner,raw,mode,trace,onProgress);trace.output(outputCharacters(result));trace.finish('success');return result;}
+  catch(e){trace.finish(e.name==='AbortError'||e.code==='CANCELLED'?'cancelled':'error');throw e;}
+ }
+ async generateMeasured(owner,raw,mode,trace,onProgress){
   const requestEpoch=this.epoch,flag=mode==='mindmap'?'mindmap':'summary',modeRevision=this.modeRevision[flag];const ownerCheck=()=>{if(this.cancelledOwners.has(owner)||requestEpoch!==this.epoch||modeRevision!==this.modeRevision[flag])throw aborted();};ownerCheck();
   await this.init();ownerCheck();const input=validateInput(raw);
   if((input.kind==='article'&&mode!=='article')||(input.kind==='video'&&!['summary','mindmap'].includes(mode)))fail('INVALID_MODE');
   const prefs=await this.preferences();ownerCheck();if(!this.modeEnabled(mode,prefs))fail('GENERATION_DISABLED');
-  const cached=await this.cached(input,mode);ownerCheck();if(cached)return {...cached,cached:true};
+  const cached=await this.cached(input,mode);ownerCheck();if(cached){trace.cache('hit');return {...cached,cached:true};}
   const status=await this.status();ownerCheck();if(status.state!=='ready')fail(status.state);
   const key=this.key(input,mode);let job=this.jobs.get(key);
   if(job?.abort.signal.aborted){this.jobs.delete(key);job=null;}
+  trace.mark('queued');
+  if(job)trace.cache('shared');
   if(!job){
-   job={mode,abort:new AbortController(),owners:new Set(),rejects:new Map()};const epoch=this.epoch,context=this.context,provider=this.providers?.active(),binding=this.providers?.bindings?.current(),identity=this.activeIdentity();
+   job={id:crypto.randomUUID(),mode,abort:new AbortController(),owners:new Set(),rejects:new Map(),observers:new Set()};const epoch=this.epoch,context=this.context,provider=this.providers?.active(),binding=this.providers?.bindings?.current(),identity=this.activeIdentity();
+   const emit=event=>{
+    if(job.abort.signal.aborted||epoch!==this.epoch||identity!==this.activeIdentity())return;
+    for(const o of job.observers)if(job.owners.has(o.owner)){
+     o.trace.mark(event.stage);
+     try{o.progress(event);}catch{/* A closed recipient cannot fail another owner's request. */}
+    }
+   };
    const execute=async()=>{
     const signal=job.abort.signal,isStale=()=>signal.aborted||epoch!==this.epoch||identity!==this.activeIdentity()||(!provider&&context!==this.context),check=()=>{if(isStale())throw aborted();};check();
     const permit=async()=>{const p=await this.preferences();check();if(!this.modeEnabled(mode,p))fail('GENERATION_DISABLED');if(!provider&&this.error)fail(this.error);};
-    await permit();check();
+    emit({stage:'executing'});await permit();check();
     if(!provider&&this.error)fail(this.error);
     let parsed;
-    if(provider){const secret=this.providers.keyFor(provider);if(!secret)fail('CUSTOM_KEY_REQUIRED');parsed=await this.requestCustom(provider,secret,input,mode,signal,binding);check();}
+    if(provider){const secret=this.providers.keyFor(provider);if(!secret)fail('CUSTOM_KEY_REQUIRED');parsed=await this.requestCustom(provider,secret,input,mode,signal,binding,emit);check();}
     else {
     const resourceKey=this.key(input,'resource');let resource=this.resources.get(resourceKey);
-    if(!resource){let response;try{response=JSON.parse(await this.request('/samantha/aireader/resource_content/create',buildResource(input),signal,context.params));}catch(e){if(e instanceof AIError||e.name==='AbortError')throw e;fail('INVALID_RESPONSE');}check();
+    if(!resource){let response;emit({stage:'uploadStart'});try{response=JSON.parse(await this.request('/samantha/aireader/resource_content/create',buildResource(input),signal,context.params));}catch(e){if(e instanceof AIError||e.name==='AbortError')throw e;fail('INVALID_RESPONSE');}check();emit({stage:'uploadDone'});
      if(response.code!==0||!response.data?.id)fail(classifyBusiness(response.code));resource=response.data.id;this.resources.set(resourceKey,resource);
     }
-    await permit();check();const text=await this.request('/samantha/chat/completion',buildRequest(resource,mode,input),signal,context.params);check();
+    await permit();check();emit({stage:'request'});const text=await this.request('/samantha/chat/completion',buildRequest(resource,mode,input),signal,context.params,emit);check();
     parsed=parseSSE(text,mode,input.duration);
     }
-    const result={...parsed,mode,createdAt:Date.now(),providerId:provider?.id||'doubao',providerName:provider?.name||'豆包'};
+    emit({stage:'parsed'});const result={...parsed,mode,createdAt:Date.now(),providerId:provider?.id||'doubao',providerName:provider?.name||'豆包'};
     const entries=Object.entries({...this.cache,[key]:{at:Date.now(),result}}).filter(([,v])=>Date.now()-v.at<TTL).sort(([,a],[,b])=>b.at-a.at);
     const candidate={};let bytes=0;for(const [k,v] of entries){const size=new TextEncoder().encode(JSON.stringify([k,v])).length;if(Object.keys(candidate).length>=30||bytes+size>4*1024*1024)continue;candidate[k]=v;bytes+=size;}
-    try{await this.storage.local.set({aiCache:candidate});
+    emit({stage:'cacheStart'});try{await this.storage.local.set({aiCache:candidate});
      // storage.set itself cannot be cancelled. If ownership changed while it
      // was pending, restore the last accepted cache before releasing the tail.
      if(isStale()){await this.storage.local.set({aiCache:this.cache});check();}
-     check();this.cache=candidate;
+     check();this.cache=candidate;emit({stage:'cacheSaved'});
     }catch(e){check();result.cacheWarning=true;}
     check();return result;
    };
    job.promise=this.tail.then(execute).catch(async e=>{if(!provider&&!job.abort.signal.aborted&&AUTH_BLOCKS.has(e.code))await this.setError(e.code,epoch,context);throw e;}).finally(()=>{if(this.jobs.get(key)===job)this.jobs.delete(key);});
    this.tail=job.promise.catch(()=>{});this.jobs.set(key,job);
   }
-  job.owners.add(owner);
-  return new Promise((resolve,reject)=>{const list=job.rejects.get(owner)||[];list.push(reject);job.rejects.set(owner,list);job.promise.then(result=>{if(job.owners.has(owner))resolve(result);else reject(aborted());},reject);});
+  job.owners.add(owner);trace.job(job.id);
+  const observer={owner,trace,progress:onProgress};job.observers.add(observer);
+  try{return await new Promise((resolve,reject)=>{const list=job.rejects.get(owner)||[];list.push(reject);job.rejects.set(owner,list);job.promise.then(result=>{if(job.owners.has(owner))resolve(result);else reject(aborted());},reject);});}
+  finally{job.observers.delete(observer);}
  }
 }
