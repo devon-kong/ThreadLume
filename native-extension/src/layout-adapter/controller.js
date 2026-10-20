@@ -35,6 +35,7 @@
 import {
   LAD_NS, LAD_FROM_ISOLATED, LAD_FROM_MAIN,
   LAD_INSTALL, LAD_UNINSTALL,
+  LAD_NATIVE_RELEASE, LAD_NATIVE_RELEASED, readNativeReleaseDetail,
   LAD_ACTIVE, LAD_UNSUPPORTED, LAD_ERROR, LAD_UNINSTALLED,
   LAD_HEALTH_ERROR, LAD_HEALTH_UNINSTALLED, LAD_HEALTH_ACTIVE,
   LAD_MARK_ARTICLE,
@@ -55,7 +56,9 @@ import {
 // moments the preview layer must follow — the verified handoff (overlay and
 // split CSS swap in the same task) and every stop path (no handoff is coming).
 import { previewAdapterHandoff, previewAdapterStopped } from "../preview-layer.js";
-import { releasePreservingScroll } from "./view-scroll.js";
+import { releasePreservingScroll, cancelScrollRelease, leftContentPoint, validAnchor } from "./view-scroll.js";
+import { beginNativeHeightLease } from "./native-height-lease.js";
+import { trackReaderInteraction } from "./reader-interaction.js";
 import { requestListReturnRestore } from "../anchor-restore.js";
 
 /* eslint-disable no-undef */ // __PEEK_LAYOUT_ADAPTER__ is an esbuild define
@@ -99,6 +102,14 @@ let initialized = false;
 let session = null;
 let nonceSeq = 0;
 let themeObserver = null;
+let readerInteraction = null;
+let pendingLeftExit = null;
+
+function cancelPendingLeftExit() {
+  const pending = pendingLeftExit;
+  pendingLeftExit = null;
+  pending?.cancel();
+}
 // P1-C theme bookkeeping (M2-B2-B: extended with the skin's chrome palette)
 const THEME_VARS = ["--peek-lad-bg", "--peek-lad-border", "--peek-lad-top", ...SKIN_THEME_VARS];
 let savedInlineVars = null;   // Map var → { value, priority } captured pre-adapter
@@ -139,6 +150,7 @@ export function onDetailRoute(focalId) {
       (session.phase === "active" || session.phase === "installing")) {
     return; // idempotent re-entry (route ticks, re-observation)
   }
+  cancelScrollRelease(); // a new install owns this page, even before ACTIVE
   teardownSession("superseded");
   session = {
     focusUrlId: focalId, phase: "installing", attempts: 0,
@@ -149,7 +161,9 @@ export function onDetailRoute(focalId) {
 }
 
 export function offRoute() {
-  if (!adapterEnabled() || !session) return;
+  if (!adapterEnabled()) return;
+  cancelScrollRelease(); // an explicit exit already cleared session
+  if (!session) return;
   teardownSession("route-left");
   setStateAttr("idle");
 }
@@ -327,18 +341,44 @@ function dormantSession(s, reason) {
   setStateAttr("idle");
 }
 
-function teardownSession(reason) {
+function releaseNativeNow(s, nonce, pathname) {
+  const command = { focusUrlId: s.focusUrlId, nonce, gen: s.gen, pathname };
+  const detail = JSON.stringify(command);
+  if (!readNativeReleaseDetail(detail)) return null;
+  let result = null;
+  const receive = event => {
+    if (event.target !== document || result !== null) return;
+    const m = readNativeReleaseDetail(event.detail, true);
+    if (m && Object.keys(command).every(k => m[k] === command[k])) result = m.status;
+  };
+  // Results live only in this call stack. No Promise/microtask may separate
+  // MAIN unmark/restore from the caller's one content-point mapping.
+  document.addEventListener(LAD_NATIVE_RELEASED, receive);
+  try { document.dispatchEvent(new window.CustomEvent(LAD_NATIVE_RELEASE, { detail })); }
+  catch { /* fail closed below; cleanup has no recovery callback */ }
+  finally { document.removeEventListener(LAD_NATIVE_RELEASED, receive); }
+  return result;
+}
+
+function teardownSession(reason, syncNative = false) {
   const s = session;
   if (!s) return;
+  const href = location.href, pathname = location.pathname;
   session = null;
   clearTimeout(s.ackTimer);
   clearTimeout(s.retryTimer);
   removeLayout();
-  // fire-and-forget: MAIN releases any wrap from every phase (installing
-  // included — the wrap may have landed after our last status check). The
-  // command names its focus so a stale release can never clobber a newer
-  // session's wrap (P0-A).
-  sendToMain({ type: LAD_UNINSTALL, nonce: ++nonceSeq, reason, focusUrlId: s.focusUrlId });
+  const nonce = ++nonceSeq;
+  if (syncNative) {
+    const status = releaseNativeNow(s, nonce, pathname);
+    const released = status === "released" && !session && location.href === href && !focalMarkerVerified(s.focusUrlId);
+    // A missing/refused transport must not orphan retention. One scoped async
+    // cleanup has NO scroll continuation; its generation cannot touch a new
+    // same-focus install. A core restore error keeps its residue lock; no retry.
+    if (!released && status !== "error") sendToMain({ type: LAD_UNINSTALL, nonce: ++nonceSeq, reason: "native-view-cleanup", focusUrlId: s.focusUrlId, gen: s.gen });
+    return released;
+  }
+  sendToMain({ type: LAD_UNINSTALL, nonce, reason, focusUrlId: s.focusUrlId });
 }
 
 function focalMarkerVerified(focusUrlId) {
@@ -360,9 +400,13 @@ function mountLayout() {
   applyAdapterTheme();
   watchTheme();
   mountSkin(); // M2-B2-B: visual layer — best-effort, the split works without it
+  readerInteraction = trackReaderInteraction(document);
 }
 
 function removeLayout() {
+  cancelPendingLeftExit();
+  readerInteraction?.stop();
+  readerInteraction = null;
   removeSkinChrome();
   removeSkinStyle();
   document.getElementById(STYLE_ID)?.remove();
@@ -400,10 +444,30 @@ function onSkinBack() {
 // leaving X's own single-column detail page. The adapter re-arms on the next
 // navigation (a new detail route starts a fresh session as usual).
 export function releaseToNativeView() {
-  if (!adapterEnabled() || !session) return;
-  releasePreservingScroll(() => {
-    teardownSession("native-view");
-    setStateAttr("idle");
+  if (!adapterEnabled() || !session || pendingLeftExit) return;
+  const selection = readerInteraction?.snapshot() || { pane: "left" };
+  const anchor = selection.pane === "left" ? leftContentPoint(selection) : null;
+  const finish = (releaseHeight = () => {}) => releasePreservingScroll(() => {
+    try {
+      const released = teardownSession("native-view", selection.pane === "left");
+      if (!session) setStateAttr("idle"); // reentrant new installs own their state
+      return released;
+    } finally { releaseHeight(); }
+  }, selection, anchor);
+  if (!anchor) { finish(); return; } // right / historical no-anchor path
+  const s = session, href = location.href, gen = s.gen;
+  const pending = { cancel: () => {} };
+  pendingLeftExit = pending;
+  pending.cancel = beginNativeHeightLease({
+    document, anchor, control: document.querySelector('#peek-reader-topbar .pk-tb-native'),
+    ownsLayout: () => session === s && s.phase === "active" && s.gen === gen && location.href === href,
+    valid: () => session === s && s.phase === "active" && s.gen === gen && location.href === href && validAnchor(anchor),
+    onCancel: () => { if (pendingLeftExit === pending) pendingLeftExit = null; },
+    onReady: releaseHeight => {
+      if (pendingLeftExit !== pending) return;
+      pendingLeftExit = null;
+      finish(releaseHeight);
+    },
   });
 }
 

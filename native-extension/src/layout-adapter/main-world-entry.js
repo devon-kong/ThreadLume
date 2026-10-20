@@ -12,6 +12,7 @@
 import {
   LAD_NS, LAD_FROM_ISOLATED, LAD_FROM_MAIN,
   LAD_INSTALL, LAD_UNINSTALL, LAD_QUERY,
+  LAD_NATIVE_RELEASE, LAD_NATIVE_RELEASED, readNativeReleaseDetail,
   LAD_ACTIVE, LAD_UNSUPPORTED, LAD_ERROR, LAD_UNINSTALLED,
 } from "./constants.js";
 import * as core from "./adapter-core.js";
@@ -32,6 +33,28 @@ import * as core from "./adapter-core.js";
   // health-check exits and re-installs surface here
   core.setNotifier((msg) => post(msg, null));
 
+  // A left exit must restore CSS + native ownership + its sole scroll in one
+  // call stack. The fixed DOM operation does not expose core/DOM references or
+  // add a generic dispatcher. Other lifecycle commands keep the async wire.
+  let releasing = false;
+  document.addEventListener(LAD_NATIVE_RELEASE, event => {
+    if (event.target !== document) return;
+    const m = readNativeReleaseDetail(event.detail);
+    if (!m) return;
+    let status = "refused";
+    const s = core.query();
+    if (!releasing && s.phase === "active" && s.gen === m.gen && s.focusUrlId === m.focusUrlId && location.pathname === m.pathname) {
+      releasing = true;
+      try {
+        const result = core.uninstall({ reason: "native-view", focusUrlId: m.focusUrlId });
+        status = result.type === LAD_UNINSTALLED && result.note !== "focus-mismatch-ignored" && result.note !== "not-active" ? "released" : "error";
+      } catch { status = "error"; }
+      finally { releasing = false; }
+    }
+    try { document.dispatchEvent(new window.CustomEvent(LAD_NATIVE_RELEASED, { detail: JSON.stringify({ ...m, status }) })); }
+    catch { /* absent/broken receiver: fail closed, never post a fallback */ }
+  });
+
   window.addEventListener("message", (event) => {
     if (event.source !== window) return;
     if (event.origin !== pageOrigin()) return;
@@ -48,6 +71,12 @@ import * as core from "./adapter-core.js";
         }), m.nonce);
         break;
       case LAD_UNINSTALL:
+        // The single missing-sync-result cleanup is generation-scoped so its
+        // async delivery cannot release a newer install on the same focus.
+        if (Object.hasOwn(m, "gen") && (!Number.isSafeInteger(m.gen) || m.gen <= 0 || core.query().gen !== m.gen || core.query().focusUrlId !== m.focusUrlId)) {
+          post({ type: LAD_UNINSTALLED, note: "generation-mismatch-ignored", restored: false }, m.nonce);
+          break;
+        }
         // focusUrlId scopes the release to the session it names — a stale
         // release can never tear down a newer session's wrap (P0-A)
         post(core.uninstall({

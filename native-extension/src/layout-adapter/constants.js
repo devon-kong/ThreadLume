@@ -17,6 +17,26 @@ export const LAD_FROM_MAIN = "main";
 export const LAD_INSTALL = "INSTALL";
 export const LAD_UNINSTALL = "UNINSTALL";
 export const LAD_QUERY = "QUERY";
+// Only the left native-view handoff uses this synchronous, document-targeted
+// DOM transport. It carries JSON strings, never cross-world object references.
+// Page scripts can forge it, just like postMessage: correlation is NOT auth.
+export const LAD_NATIVE_RELEASE = "peek-lad-native-release";
+export const LAD_NATIVE_RELEASED = "peek-lad-native-released";
+
+export function readNativeReleaseDetail(detail, response = false) {
+  if (typeof detail !== "string" || detail.length > 1024) return null;
+  try {
+    const m = JSON.parse(detail);
+    const keys = response ? ["focusUrlId", "nonce", "gen", "pathname", "status"] : ["focusUrlId", "nonce", "gen", "pathname"];
+    if (!m || Array.isArray(m) || Object.keys(m).length !== keys.length || !keys.every(k => Object.hasOwn(m, k))) return null;
+    if (typeof m.focusUrlId !== "string" || !/^\d{1,32}$/.test(m.focusUrlId) ||
+        !Number.isSafeInteger(m.nonce) || m.nonce <= 0 || !Number.isSafeInteger(m.gen) || m.gen <= 0 ||
+        typeof m.pathname !== "string" || m.pathname.length > 512 || !m.pathname.startsWith("/") ||
+        m.pathname.match(/\/status\/(\d+)(?:\/|$)/)?.[1] !== m.focusUrlId) return null;
+    if (response && !["released", "refused", "error"].includes(m.status)) return null;
+    return m;
+  } catch { return null; }
+}
 // MAIN → ISOLATED request responses (always correlate to a request via nonce)
 export const LAD_ACTIVE = "ACTIVE";
 export const LAD_UNSUPPORTED = "UNSUPPORTED";

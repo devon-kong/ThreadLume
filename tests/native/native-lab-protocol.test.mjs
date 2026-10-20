@@ -225,3 +225,97 @@ test("Q6 无焦点字段的伪造事件不产生无限定释放（A12 回归）"
   assert.equal(sent.filter((m) => m.type === "UNINSTALL" && !m.focusUrlId).length, 0,
     "a focusless forgery must never become an unqualified release");
 });
+
+// Fifth-round fixed DOM transport. Literal event names deliberately let these
+// tests fail behaviorally against the old bundle, before new constants exist.
+const SYNC_RELEASE = 'peek-lad-native-release';
+const SYNC_RELEASED = 'peek-lad-native-released';
+const releaseCommand = (env, poc) => ({ focusUrlId: session(poc).focusUrlId, nonce: 100, gen: session(poc).gen, pathname: env.location.pathname });
+function syncRelease(env, detail, target = env.document) {
+  const responses = [];
+  const receive = event => responses.push(JSON.parse(event.detail));
+  env.document.addEventListener(SYNC_RELEASED, receive);
+  try { target.dispatchEvent(new env.window.CustomEvent(SYNC_RELEASE, { detail: typeof detail === 'string' ? detail : JSON.stringify(detail), bubbles: true })); }
+  finally { env.document.removeEventListener(SYNC_RELEASED, receive); }
+  return responses;
+}
+
+test('S1 fixed synchronous release completes core uninstall before dispatch returns; no posted response', async () => {
+  const { env, poc, fixture, sent, lad } = makeLabEnv(); await activeSession(env);
+  const command = releaseCommand(env, poc), before = sent.length;
+  assert.deepEqual(syncRelease(env, command), [{ ...command, status: 'released' }]);
+  assert.equal(lad.query().phase, 'idle');
+  assert.equal(fixture.art.hasAttribute('data-peek-lad-focal'), false);
+  assert.equal(Object.hasOwn(fixture.v.instance, LAD_KEY), false, 'original prototype ownership restored');
+  assert.equal(sent.length, before, 'this operation posts neither async command nor response');
+  env.window.close();
+});
+
+for (const invalid of ['object-detail', 'malformed', 'oversized', 'extra-field', 'bad-nonce', 'bad-gen', 'foreign-gen', 'foreign-focus', 'foreign-route', 'wrong-target']) test(`S2 synchronous release rejects ${invalid} without touching the live core`, async () => {
+  const { env, poc, fixture, lad } = makeLabEnv(); await activeSession(env);
+  const command = releaseCommand(env, poc); let detail = command, target = env.document;
+  if (invalid === 'object-detail') {
+    env.document.dispatchEvent(new env.window.CustomEvent(SYNC_RELEASE, { detail: command }));
+  } else {
+    if (invalid === 'malformed') detail = '{';
+    if (invalid === 'oversized') detail = ' '.repeat(1025);
+    if (invalid === 'extra-field') detail = { ...command, url: 'https://example.test/' };
+    if (invalid === 'bad-nonce') detail = { ...command, nonce: Number.MAX_SAFE_INTEGER + 1 };
+    if (invalid === 'bad-gen') detail = { ...command, gen: 0 };
+    if (invalid === 'foreign-gen') detail = { ...command, gen: command.gen + 1 };
+    if (invalid === 'foreign-focus') detail = { ...command, focusUrlId: '123', pathname: '/somebody/status/123' };
+    if (invalid === 'foreign-route') detail = { ...command, pathname: `/other/status/${command.focusUrlId}` };
+    if (invalid === 'wrong-target') target = fixture.art;
+    const responses = syncRelease(env, detail, target);
+    assert.ok(responses.every(r => r.status === 'refused'), 'never reports a successful release');
+  }
+  assert.equal(lad.query().phase, 'active'); assert.equal(fixture.art.hasAttribute('data-peek-lad-focal'), true);
+  env.window.close();
+});
+
+test('S3 same-focus new generation rejects old command; duplicate release never rebinds', async () => {
+  const { env, poc, focusId, lad } = makeLabEnv(); await activeSession(env);
+  const old = releaseCommand(env, poc);
+  poc.layoutAdapter.offRoute(); await env.timers.flushMicrotasks();
+  poc.layoutAdapter.onDetailRoute(focusId); await env.timers.flushMicrotasks();
+  assert.notEqual(session(poc).gen, old.gen);
+  assert.equal(syncRelease(env, old)[0]?.status, 'refused'); assert.equal(lad.query().phase, 'active');
+  const current = releaseCommand(env, poc);
+  assert.equal(syncRelease(env, current)[0]?.status, 'released');
+  assert.equal(syncRelease(env, current)[0]?.status, 'refused'); assert.equal(lad.query().phase, 'idle');
+  env.window.close();
+});
+
+test('S4 synchronous uninstall reports core restore failure without claiming release', async () => {
+  const { env, poc, fixture, lad } = makeLabEnv(); await activeSession(env);
+  Object.defineProperty(fixture.v.instance, LAD_KEY, { configurable: false });
+  assert.equal(syncRelease(env, releaseCommand(env, poc))[0]?.status, 'error');
+  assert.equal(lad.query().phase, 'residue-locked'); env.window.close();
+});
+
+test('S5 queued generation-scoped cleanup cannot uninstall a new same-focus session', async () => {
+  const { env, poc, focusId, lad } = makeLabEnv(); await activeSession(env);
+  const old = releaseCommand(env, poc);
+  poc.layoutAdapter.offRoute(); await env.timers.flushMicrotasks();
+  poc.layoutAdapter.onDetailRoute(focusId); await env.timers.flushMicrotasks();
+  assert.notEqual(lad.query().gen, old.gen);
+  env.window.postMessage({ ns: 'peek-lad', from: 'isolated', type: 'UNINSTALL', reason: 'native-view-cleanup', focusUrlId: old.focusUrlId, gen: old.gen, nonce: old.nonce });
+  await env.timers.flushMicrotasks();
+  assert.equal(lad.query().phase, 'active'); assert.equal(session(poc).phase, 'active');
+  assert.equal(ladStyle(env), true); env.window.close();
+});
+
+test('S6 synchronous uninstall refuses nested reentry while restoring core ownership', async () => {
+  const { env, poc, fixture, lad } = makeLabEnv(); await activeSession(env);
+  const command = releaseCommand(env, poc), wrapper = fixture.v.instance[LAD_KEY];
+  let nested = null;
+  Object.defineProperty(fixture.v.instance, LAD_KEY, { configurable: true, get() {
+    if (nested === null) nested = syncRelease(env, { ...command, nonce: command.nonce + 1 });
+    return wrapper;
+  } });
+  const responses = syncRelease(env, command);
+  assert.equal(nested[0]?.status, 'refused');
+  assert.equal(responses.find(r => r.nonce === command.nonce)?.status, 'released');
+  assert.equal(lad.query().phase, 'idle'); assert.equal(Object.hasOwn(fixture.v.instance, LAD_KEY), false);
+  env.window.close();
+});
