@@ -1,3 +1,4 @@
+import {t} from './i18n.js';
 // Peek Native — native interaction adapter. The native controls own every real
 // account action: the user personally likes, reposts, bookmarks, follows and
 // replies on X's own UI. Peek never synthesizes account writes (no .click() on
@@ -51,7 +52,7 @@ function showFeedback(text) {
   const note = document.querySelector(`#${PANE_ID} .${NS}-note`);
   if (!note) return;
   if (note.dataset.staticText === undefined) note.dataset.staticText = note.textContent;
-  note.textContent = text;
+  note.textContent = t(text);
   ownedTimeout(() => {
     if (note.isConnected && note.dataset.staticText !== undefined) {
       note.textContent = note.dataset.staticText;

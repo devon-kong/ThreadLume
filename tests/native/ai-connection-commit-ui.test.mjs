@@ -1,5 +1,8 @@
 // Production controller + service. Storage/network are offline boundary doubles.
-import {test} from 'node:test';import assert from 'node:assert/strict';import {JSDOM} from 'jsdom';import {build} from 'esbuild';import {AIService} from '../../native-extension/src/ai/service.js';import {DEFAULTS} from '../../native-extension/src/ai/preferences.js';
+import {test} from 'node:test';import assert from 'node:assert/strict';import {JSDOM} from 'jsdom';import {build} from 'esbuild';import {AIService} from '../../native-extension/src/ai/service.js';import {DEFAULTS as PRODUCT_DEFAULTS} from '../../native-extension/src/ai/preferences.js';
+// Existing Chinese fixtures remain explicit; ThreadLume defaults are tested separately.
+const DEFAULTS={...PRODUCT_DEFAULTS,uiLanguage:'zh-CN',outputLanguage:'zh-CN'};
+
 const code=(await build({stdin:{contents:'import {initAIReader} from "./native-extension/src/ai/controller.js";initAIReader();',resolveDir:process.cwd()},bundle:true,write:false,format:'iife'})).outputFiles[0].text;
 const defer=()=>{let resolve;const promise=new Promise(r=>resolve=r);return {resolve,promise};};const wait=ms=>new Promise(r=>setTimeout(r,ms));async function until(f){for(let i=0;i<200&&!f();i++)await wait(5);assert.ok(f(),'bounded commit/UI checkpoint');}
 test('F2/F3 sanitized background state event must resume active reader only after ready, without focus',async()=>{
@@ -10,7 +13,7 @@ test('F2/F3 sanitized background state event must resume active reader only afte
  const d=new JSDOM('<html data-peek-lad="on" data-peek-lad-state="active"><body><div data-testid="primaryColumn"><div data-testid="cellInnerDiv"><article><a href="/a/status/123"><time>now</time></a><div data-testid="tweetText">'+'文'.repeat(1000)+'</div></article></div></div></body></html>',{url:'https://x.com/a/status/123',runScripts:'dangerously'}),w=d.window;w.innerWidth=1200;
  w.chrome={runtime:{id:'ours',onMessage:{addListener:f=>listeners.push(f)},sendMessage:async m=>{try{let value;if(m.action==='status'){statusCalls++;value=await service.status();}if(m.action==='preferences')value=await service.preferences();if(m.action==='cached')value=await service.cached(m.input,m.mode);if(m.action==='generate'){generations++;value=await service.generate(m.instance,m.input,m.mode);}if(m.action==='cancel')service.cancel(m.instance);return {ok:true,value};}catch(e){return {ok:false,error:e.code||e.name};}}}};
  try{
- w.eval(code);await until(()=>w.document.body.textContent.includes('尚未连接'));holding=true;const connecting=service.connect({aid:'497858'});await reached.promise;await until(()=>statusCalls>=2);await wait(30);gate.resolve();await connecting;
+ w.eval(code);await until(()=>w.document.querySelector('.pk-ai-error')?.textContent.includes('桥接已停用'));holding=true;const connecting=service.connect({aid:'497858'});await reached.promise;await until(()=>statusCalls>=2);await wait(30);gate.resolve();await connecting;
  await until(()=>w.document.body.textContent.includes('COMMITTED SUMMARY'));assert.equal(generations,2);assert.equal(requests,2);
  }finally{gate.resolve();w.close();}
 });

@@ -1,3 +1,4 @@
+import {t,setUILanguage} from '../i18n.js';
 import {attachCommentScrollbar} from './comment-scrollbar.js';
 import {validPreview} from './preview.js';
 import {readFocalContent,inspectFocal,focalArticle} from './content-source.js';
@@ -49,7 +50,7 @@ async function sync(refresh=false){
  const root=document.documentElement,focusId=location.pathname.match(/^\/[^/]+\/status\/(\d+)/)?.[1];
  if(root.getAttribute('data-peek-lad')!=='on'||root.getAttribute('data-peek-lad-state')!=='active'||innerWidth<980||!focusId){++syncRevision;stop();return;}
  const bar=document.getElementById('peek-reader-topbar');
- if(bar&&!bar.querySelector('[data-peek-ai-settings]')){const b=button(document,'⚙',()=>send('openSettings').catch(()=>{}),'pk-tb-btn');b.setAttribute('aria-label','Peek 设置');b.setAttribute('data-peek-ai-settings','');bar.insertBefore(b,bar.querySelector('.pk-tb-native'));}
+ if(bar&&!bar.querySelector('[data-peek-ai-settings]')){const b=button(document,'⚙',()=>send('openSettings').catch(()=>{}),'pk-tb-btn');b.setAttribute('aria-label',t('设置'));b.setAttribute('data-peek-ai-settings','');bar.insertBefore(b,bar.querySelector('.pk-tb-native'));}
  if(current?.focusId===focusId&&!refresh){applyTheme(current.prefs);return;}
  const revision=++syncRevision;
  let prefs,connection;try{[prefs,connection]=await Promise.all([send('preferences'),send('status',{xTheme:readTheme()})]);}catch{return;}
@@ -62,7 +63,7 @@ async function sync(refresh=false){
    endConnectionWait(current);}
   updateCurrentPreferences(prefs);return;
  }
- const outputLanguage=current?.focusId===focusId?current.outputLanguage:'zh-CN';stop();lastPrefs=prefs;applyTheme(prefs);ensureActions(focusId);if(!prefs.summary&&!prefs.mindmap)return;
+ const outputLanguage=current?.focusId===focusId?current.outputLanguage:(prefs.outputLanguage||'en');stop();lastPrefs=prefs;applyTheme(prefs);ensureActions(focusId);if(!prefs.summary&&!prefs.mindmap)return;
  const s={focusId,prefs,outputLanguage,runs:new Map(),cacheReads:new Map(),progress:new Map(),displayJobs:new Map(),stopped:false,connectionRevision:0,connectionState:connection.state,connectionId:connection.connectionId,instance:crypto.randomUUID(),abort:new AbortController(),card:null,input:null,observer:null,extracting:false,hydrationEnded:false,sourceStamp:null};current=s;
  const stampOf=source=>!source?null:source.kind==='video'?JSON.stringify([source.kind,source.title,source.video.currentSrc]):source.text;
  const valid=()=>current===s&&!s.abort.signal.aborted&&location.pathname.match(/\/status\/(\d+)/)?.[1]===focusId&&root.getAttribute('data-peek-lad')==='on'&&root.getAttribute('data-peek-lad-state')==='active'&&innerWidth>=980;s.valid=valid;
@@ -104,14 +105,15 @@ async function sync(refresh=false){
  s.deadline=setTimeout(()=>{s.hydrationEnded=true;s.observer?.disconnect();if(s.input?.article?.isConnected){s.observer.observe(s.input.article,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['src']});}},10000);
  attempt();
 }
-function applyTheme(prefs){const theme=prefs.theme==='system'?readTheme():prefs.theme;if(document.documentElement.dataset.peekAiTheme!==theme)document.documentElement.dataset.peekAiTheme=theme;}
+function applyTheme(prefs){setUILanguage(prefs.uiLanguage);document.documentElement.dataset.peekUiLanguage=prefs.uiLanguage||'en';window.dispatchEvent(new CustomEvent('peek-ui-language',{detail:{language:prefs.uiLanguage||'en'}}));const theme=prefs.theme==='system'?readTheme():prefs.theme;if(document.documentElement.dataset.peekAiTheme!==theme)document.documentElement.dataset.peekAiTheme=theme;}
 function updateCurrentPreferences(prefs){
  lastPrefs=prefs;applyTheme(prefs);const s=current;if(!s)return;
- const before=s.input?modesFor(s.input,s.prefs):[];s.prefs=prefs;
+ const outputChanged=s.prefs.outputLanguage!==prefs.outputLanguage;const before=s.input?modesFor(s.input,s.prefs):[];s.prefs=prefs;
  const after=s.input?modesFor(s.input,prefs):[];
  if((!prefs.summary&&!prefs.mindmap)||(s.input&&!after.length)){stop();return;}
  for(const mode of before)if(!after.includes(mode)){s.runs.set(mode,(s.runs.get(mode)||0)+1);s.cacheReads.delete(mode);s.progress.delete(mode);for(const [id,job] of s.displayJobs)if(job.mode===mode)s.displayJobs.delete(id);}
  s.card?.updatePreferences(prefs);
+ if(outputChanged){if(s.card)changeLanguage(s,prefs.outputLanguage,false);else s.outputLanguage=prefs.outputLanguage;}
  for(const mode of after)if(!before.includes(mode))readCached(s,mode);
  if(s.card&&!before.includes(s.card.snapshot().view))generate(s,s.card.snapshot().view,true);
 }
@@ -140,9 +142,11 @@ function stopGeneration(s){
  s.progress.clear();s.displayJobs.clear();s.cacheReads.clear();for(const mode of s.runs.keys())s.runs.set(mode,s.runs.get(mode)+1);
  send('cancel',{instance:old}).catch(()=>{});s.card.stop();
 }
-function changeLanguage(s,value){
+function changeLanguage(s,value,persist=true){
  if(!s.valid()||!['zh-CN','en'].includes(value)||value===s.outputLanguage)return;
+ if(persist)send('setOutputLanguage',{outputLanguage:value}).catch(()=>{});
  const old=s.instance;s.instance=crypto.randomUUID();s.outputLanguage=value;s.stopped=false;
+ s.card.resetLanguage(value);
  s.cacheReads.clear();s.progress.clear();s.displayJobs.clear();for(const mode of s.runs.keys())s.runs.set(mode,s.runs.get(mode)+1);
  send('cancel',{instance:old}).catch(()=>{});
  for(const mode of modesFor(s.input,s.prefs))readCached(s,mode);
@@ -210,8 +214,8 @@ function ensureActions(focusId){
  const article=focalArticle(document,focusId);if(!article||article.querySelector('[data-peek-feishu]'))return;
  const reply=Array.from(article.querySelectorAll('[data-testid="reply"]')).find(n=>!n.closest('div[role="link"]'));
  const group=reply?.closest('[role="group"]');if(!group)return;
- const b=button(document,'',()=>{b.setAttribute('title','飞书收藏尚未开放');},'pk-feishu-placeholder');
- b.setAttribute('data-peek-feishu','');b.setAttribute('aria-label','飞书收藏，尚未开放');b.setAttribute('title','飞书收藏尚未开放');
+ const b=button(document,'',()=>{b.setAttribute('title',t('飞书收藏尚未开放'));},'pk-feishu-placeholder');
+ b.setAttribute('data-peek-feishu','');b.setAttribute('aria-label',t('飞书收藏，尚未开放'));b.setAttribute('title',t('飞书收藏尚未开放'));
  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('width','20');svg.setAttribute('height','20');svg.setAttribute('aria-hidden','true');
  const bird=document.createElementNS(svg.namespaceURI,'path');bird.setAttribute('d','M5 11l5 4 5-8 6 1-5 11-6 2-7-5z');bird.setAttribute('fill','currentColor');
  const plus=document.createElementNS(svg.namespaceURI,'path');plus.setAttribute('d','M4 1v6M1 4h6');plus.setAttribute('stroke','currentColor');plus.setAttribute('stroke-width','1.5');svg.append(bird,plus);b.append(svg);group.append(b);

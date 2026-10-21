@@ -6,7 +6,7 @@ import { JSDOM } from "jsdom";
 // Exercise the actual browser monitor and classifier saved with C1-R evidence,
 // rather than a second copy of their rules. This test never loads X or account
 // content; its DOM fixtures model only public post identifiers and geometry.
-const source = readFileSync(new URL("../../docs/m2-b2-c1-r/evidence/perf-run.mjs", import.meta.url), "utf8");
+const source = readFileSync(new URL("./helpers/reader-performance.mjs", import.meta.url), "utf8");
 const monitorLiteral = source.match(/const MONITOR = (`[\s\S]*?`);/);
 const classifySource = source.match(/function classify\(row, last\) \{[\s\S]*?\n\}/);
 assert.ok(monitorLiteral && classifySource, "sampled measurement functions must be present");

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Peek Native",
-  "version": "0.11.0",
-  "description": "Peek 原生双栏阅读器：保留 X 原生视频与评论；按需连接豆包或自定义 AI 服务，为可用字幕与完整长文生成摘要、时间轴和脑图。",
+  "name": "ThreadLume \u2014 AI Reader for X",
+  "version": "0.12.0",
+  "description": "Read Beyond the Post. A native two-column reader for X with AI summaries, video chapters and interactive mind maps.",
   "content_scripts": [
     {
       "matches": [
@@ -38,8 +38,7 @@
     "128": "icons/icon128.png"
   },
   "permissions": [
-    "storage",
-    "scripting"
+    "storage"
   ],
   "optional_host_permissions": [
     "https://*/*"
@@ -52,7 +51,7 @@
     "open_in_tab": true
   },
   "action": {
-    "default_title": "Peek 设置"
+    "default_title": "ThreadLume Settings"
   },
   "optional_permissions": [
     "declarativeNetRequestWithHostAccess"

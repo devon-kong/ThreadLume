@@ -1,3 +1,4 @@
+import {t} from '../i18n.js';
 import {el,button} from './dom.js';
 // Path-derived branch colors survive child-first streaming and final hydration.
 const COLORS=['#3975d5','#238768','#bc781d','#8659c5','#168795','#bc5577'];
@@ -13,7 +14,7 @@ export function initialExpandedDepth(tree,budget=24){
  return 0;
 }
 export function createMindmap(document,{expandedDepth=1}={}){
- const root=el(document,'div',{class:'pk-ai-map',tabindex:'0','aria-label':'思维导图：双指滑动或拖动平移，捏合或 Ctrl 加滚轮缩放'}),layer=el(document,'div',{class:'pk-ai-map-layer'}),svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+ const root=el(document,'div',{class:'pk-ai-map',tabindex:'0','aria-label':t("思维导图：双指滑动或拖动平移，捏合或 Ctrl 加滚轮缩放")}),layer=el(document,'div',{class:'pk-ai-map-layer'}),svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
  svg.setAttribute('aria-hidden','true');layer.append(svg);root.append(layer);
  const nodes=new Map(),edges=new Map(),expanded=new Map();let tree=[],camera={x:24,y:24,scale:1},drag=null,first=true,width=0,height=0,closed=false;
  const apply=()=>{layer.style.transform=`translate(${camera.x}px,${camera.y}px) scale(${camera.scale})`;};
@@ -37,7 +38,7 @@ export function createMindmap(document,{expandedDepth=1}={}){
    const textWidth=[...n.text].reduce((sum,c)=>sum+(/[\u0000-\u00ff]/.test(c)?7:14),0);
    const nodeWidth=Math.max(level===0?160:128,Math.min(level===0?240:224,textWidth+32+(children.length?30:0)));
    if(item.label!==n.text||item.w!==nodeWidth){item.labelNode.textContent=n.text;item.node.title=n.text;item.label=n.text;item.measured=false;}
-   if(children.length){item.node.setAttribute('aria-expanded',String(open));item.node.setAttribute('aria-label',`${n.text}，${open?'收起':'展开'} ${children.length} 个子主题`);}
+   if(children.length){item.node.setAttribute('aria-expanded',String(open));item.node.setAttribute('aria-label',`${n.text}，${open?t("收起"):t("展开")} ${children.length}${t(" 个子主题")}`);}
    else{item.node.removeAttribute('aria-expanded');item.node.setAttribute('aria-label',n.text);}
    const marker=children.length?(open?'−':String(children.length)):'';
    if(item.toggle.textContent!==marker){item.toggle.textContent=marker;item.measured=false;}
@@ -80,5 +81,9 @@ export function createMindmap(document,{expandedDepth=1}={}){
  const wheel=e=>{if(closed)return;e.preventDefault();e.stopPropagation();if(e.ctrlKey||e.metaKey){if(e.deltaY)zoom(e.deltaY<0?.1:-.1);return;}first=false;const unit=e.deltaMode===1?16:e.deltaMode===2?(root.clientHeight||280):1;camera.x-=e.deltaX*unit;camera.y-=e.deltaY*unit;apply();};
  const key=e=>{if(e.target!==root)return;const delta={ArrowLeft:[30,0],ArrowRight:[-30,0],ArrowUp:[0,30],ArrowDown:[0,-30]}[e.key];if(delta){e.preventDefault();first=false;camera.x+=delta[0];camera.y+=delta[1];apply();}};
  root.addEventListener('pointerdown',pointerDown);root.addEventListener('pointermove',pointerMove);root.addEventListener('pointerup',pointerUp);root.addEventListener('pointercancel',pointerUp);root.addEventListener('wheel',wheel,{passive:false});root.addEventListener('keydown',key);
- return {root,update,zoom,fit,snapshot:()=>({...camera}),destroy(){closed=true;root.remove();nodes.clear();edges.clear();expanded.clear();tree=[];}};
+ function localize(){
+  root.setAttribute('aria-label',t('思维导图：双指滑动或拖动平移，捏合或 Ctrl 加滚轮缩放'));
+  for(const item of nodes.values())if(item.children.length)item.node.setAttribute('aria-label',`${item.label}，${item.node.getAttribute('aria-expanded')==='true'?t('收起'):t('展开')} ${item.children.length}${t(' 个子主题')}`);
+ }
+ return {root,update,zoom,fit,localize,snapshot:()=>({...camera}),destroy(){closed=true;root.remove();nodes.clear();edges.clear();expanded.clear();tree=[];}};
 }

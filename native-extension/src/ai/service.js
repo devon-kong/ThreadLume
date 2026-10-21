@@ -11,7 +11,7 @@ export function allowedSender(sender,id,action){
  if(sender?.id!==id)return false;
  const settings=sender.url===`chrome-extension://${id}/settings.html`;
  if(['status','preferences','savePreferences','connect','capture','disconnect','cancelCheck','check','openSetup','providers','saveProvider','activateProvider','cancelProviderCheck'].includes(action)&&settings)return true;
- if(!['status','preferences','generate','cached','cancel','displayed','openSettings'].includes(action)||!Number.isInteger(sender.tab?.id)||sender.frameId!==0)return false;
+ if(!['status','preferences','setOutputLanguage','generate','cached','cancel','displayed','openSettings'].includes(action)||!Number.isInteger(sender.tab?.id)||sender.frameId!==0)return false;
  try{const u=new URL(sender.url);return u.protocol==='https:'&&['x.com','twitter.com'].includes(u.hostname);}catch{return false;}
 }
 const aborted=()=>new DOMException('Cancelled','AbortError');
@@ -24,19 +24,19 @@ const outputCharacters=result=>{
  return count;
 };
 export class AIService {
- constructor({storage,request,providers,requestCustom,doubao}){this.doubao=doubao;this.connectionKey=doubao?'aiDoubaoBridgeConnectionV1':'aiConnection';this.contextKey=doubao?'aiDoubaoBridgeContextV1':'aiContext';this.blockKey=doubao?'aiDoubaoBridgeBlockV1':'aiBlock';this.storage=storage;this.request=request;this.providers=providers;this.requestCustom=requestCustom;this.metrics=createMetrics({onChange:rows=>this.saveMetrics(rows)});this.jobs=new Map();this.cancelledOwners=new Map();this.resources=new Map();this.tail=Promise.resolve();this.epoch=0;this.context=null;this.connection={enabled:false,partition:''};this.cache={};this.error=null;this.errorRevision=0;this.preferenceRevision=0;this.preferencePending=0;this.modeRevision={summary:0,mindmap:0};}
+ constructor({storage,request,providers,requestCustom}){this.connectionKey='aiConnection';this.contextKey='aiContext';this.blockKey='aiBlock';this.storage=storage;this.request=request;this.providers=providers;this.requestCustom=requestCustom;this.metrics=createMetrics({onChange:rows=>this.saveMetrics(rows)});this.jobs=new Map();this.cancelledOwners=new Map();this.resources=new Map();this.tail=Promise.resolve();this.epoch=0;this.context=null;this.connection={enabled:false,partition:''};this.cache={};this.error=null;this.errorRevision=0;this.preferenceRevision=0;this.preferencePending=0;this.modeRevision={summary:0,mindmap:0};}
  init(){return this.initialized??=(async()=>{
   await this.providers?.init();
-  const local=await this.storage.local.get([this.connectionKey,'aiCache']);this.connection=local[this.connectionKey]||this.connection;this.cache=local.aiCache||{};
+  const local=await this.storage.local.get([this.connectionKey,'aiDoubaoBridgeConnectionV1','aiProvidersV8','aiCache']);this.retiredDoubao=local.aiProvidersV8?.activeId==='doubao'||!!local.aiConnection||!!local.aiDoubaoBridgeConnectionV1;this.connection=local[this.connectionKey]||this.connection;this.cache=local.aiCache||{};
   const session=await this.storage.session.get([this.contextKey,this.blockKey,'aiPerformanceV12']);this.metrics.restore(session.aiPerformanceV12);
-  // Restore only the same previously probed background host session.
+  // A legacy request dependency is supplied only by compatibility tests. The
+  // production worker never provides one, so old state is left untouched.
+  if(!this.request)return;
+  // Restore only a legacy isolated test context.
   // A handshake is read-only: never open a page or send a model probe here.
-  if(!this.doubao&&session[this.contextKey]?.partition===this.connection.partition&&session[this.contextKey]?.params){try{this.context={...session[this.contextKey],params:validateParams(session[this.contextKey].params)};}catch{await this.storage.session.remove(this.contextKey);}}
+  if(session[this.contextKey]?.partition===this.connection.partition&&session[this.contextKey]?.params){try{this.context={...session[this.contextKey],params:validateParams(session[this.contextKey].params)};}catch{await this.storage.session.remove(this.contextKey);}}
   if(session[this.blockKey]?.partition===this.connection.partition&&AUTH_BLOCKS.has(session[this.blockKey].code))this.error=session[this.blockKey].code;
-  const saved=session[this.contextKey];
-  if(this.doubao&&!this.providers?.active()&&this.connection.enabled&&!this.error&&saved?.partition===this.connection.partition&&saved.params){
-   try{await this.doubao.restore(saved.params);this.context=saved;}catch{this.error='NEEDS_INITIALIZATION';}
-  }
+
  })();}
  writeBlock(block,epoch=this.epoch){
   // Serialize writes and recheck ownership so old failures cannot overwrite a
@@ -49,19 +49,23 @@ export class AIService {
   if(AUTH_BLOCKS.has(code))await this.writeBlock({partition:this.connection.partition,code},epoch);
  }
  providerChanged(){this.pendingConnection?.abort.abort();this.clearJobs();this.epoch++;this.resources.clear();}
- activeIdentity(){const provider=this.providers?.active();return provider?`custom:${provider.id}:${provider.version}`:this.connection.partition;}
- async status(){await this.init();await this.resumeBridge();
+ activeIdentity(){const provider=this.providers?.active();return provider?`custom:${provider.id}:${provider.version}`:this.request?this.connection.partition:'unconfigured';}
+ async status(){await this.init();
   const provider=this.providers?.active();if(provider)return {state:this.providers.bindingState(provider)!=='ready'?this.providers.bindingState(provider):(this.providers.bindings?.state()||'ready'),checkedAt:provider.checkedAt,connectionId:this.activeIdentity(),providerId:provider.id,providerName:provider.name};
+  if(!this.request)return {state:this.retiredDoubao?'DOUBAO_UNAVAILABLE':'AI_NOT_CONFIGURED',connectionId:'unconfigured',providerId:null,providerName:null,checkedAt:null};
   // A storage change can be observed before connect's final publication.
   // Wait for that transaction (or cancellation), never start a probe/poll.
   for(let p=this.pendingConnection;p&&!p.signal.aborted&&p.epoch===this.epoch;p=this.pendingConnection){
    const pending=p;await new Promise(resolve=>{const done=()=>{pending.signal.removeEventListener('abort',done);resolve();};pending.signal.addEventListener('abort',done,{once:true});pending.promise.then(done,done);if(pending.signal.aborted)done();});
   }
-  return {state:this.error||(this.context&&this.connection.enabled&&(!this.doubao||this.doubao.validContext(this.context.params))?'ready':this.connection.enabled?'NEEDS_INITIALIZATION':'DISCONNECTED'),checkedAt:this.context?.checkedAt||null,connectionId:this.connection.partition,providerId:'doubao',providerName:'豆包'};}
+  return {state:this.error||(this.context&&this.connection.enabled?'ready':this.connection.enabled?'NEEDS_INITIALIZATION':'DISCONNECTED'),checkedAt:this.context?.checkedAt||null,connectionId:this.connection.partition,providerId:'doubao',providerName:'豆包'};}
  async preferences(){
   const revision=this.preferenceRevision,d=await this.storage.local.get('aiPreferences');
   if(revision!==this.preferenceRevision||this.preferencePending)return {...this.preferenceValue};
   return this.preferenceValue=normalizePreferences(d.aiPreferences);
+ }
+ async saveOutputLanguage(outputLanguage){
+  validateLanguage(outputLanguage);const current=await this.preferences();return this.savePreferences({...this.preferenceValue,outputLanguage});
  }
  savePreferences(p){
   const value=normalizePreferences(p),revision=++this.preferenceRevision;
@@ -91,10 +95,11 @@ export class AIService {
   return this.connectionWrite=(this.connectionWrite||Promise.resolve()).catch(()=>{}).then(async()=>{if(epoch!==this.epoch||!valid())return;await this.storage.local.set({[this.connectionKey]:connection});});
  }
  async connect(params,{signal}={}){
+  if(!this.request)fail('DOUBAO_UNAVAILABLE');
   await this.init();if(signal?.aborted)throw aborted();this.pendingConnection?.abort.abort();
   const abort=new AbortController();signal=signal?AbortSignal.any([signal,abort.signal]):abort.signal;
   this.clearJobs();const epoch=++this.epoch;this.resources.clear();
-  const connection={enabled:true,partition:crypto.randomUUID()},context={params:this.doubao?this.doubao.validateContext(params):validateParams(params),partition:connection.partition,checkedAt:Date.now()};
+  const connection={enabled:true,partition:crypto.randomUUID()},context={params:validateParams(params),partition:connection.partition,checkedAt:Date.now()};
   const check=()=>{if(signal?.aborted||epoch!==this.epoch)throw aborted();};
   // Stage durable state under the same serialized context ownership, then
   // publish ready synchronously. An aborted Chrome storage write cannot be
@@ -116,39 +121,10 @@ export class AIService {
   });this.contextWrite=commit;const pending={abort,signal,epoch,promise:commit};this.pendingConnection=pending;
   try{await commit;check();}finally{if(this.pendingConnection===pending)this.pendingConnection=null;}return this.status();
  }
- async resumeBridge(){
-  if(this.bridgeRecovery)return this.bridgeRecovery;
-  if(!this.bridgeSuspended||this.providers?.active())return;
-  this.bridgeSuspended=false;if(!this.context)return;
-  const context=this.context,epoch=this.epoch;
-  // Wake only in response to actual status/cache/generation demand, never from
-  // idle disconnect itself (which would repeatedly wake a sleeping worker).
-  const recovery=Promise.resolve().then(()=>this.doubao.restore(context.params)).then(()=>true,()=>false).then(async restored=>{
-   if(this.bridgeRecovery===recovery)this.bridgeRecovery=null;
-   if(context!==this.context||epoch!==this.epoch)return;
-   if(!restored)await this.bridgeLost('BRIDGE_CHANGED');
-  });
-  this.bridgeRecovery=recovery;return recovery;
- }
- async bridgeLost(code){
-  await this.init();
-  if(this.bridgeRecovery)return {suspended:true};
-  if(code==='BRIDGE_CLOSED'&&this.context&&!this.providers?.active()&&!this.jobs.size&&!this.pendingConnection){
-   this.bridgeSuspended=true;return {suspended:true};
-  }
-  if(!this.providers?.active())this.pendingConnection?.abort.abort();
-  if(!this.context)return;
-  // An inactive Doubao connection must not cancel the active custom provider.
-  if(!this.providers?.active()){this.pendingConnection?.abort.abort();this.clearJobs();this.epoch++;}
-  this.context=null;this.error=code;this.errorRevision++;this.resources.clear();
-  if(!AUTH_BLOCKS.has(code))this.connection={enabled:this.connection.enabled,partition:crypto.randomUUID()};
-  await this.writeBlock(AUTH_BLOCKS.has(code)?{partition:this.connection.partition,code}:null);
-  await this.writeContext(null);await this.writeConnection();
- }
  async invalidateContext(){await this.init();this.pendingConnection?.abort.abort();this.clearJobs();this.epoch++;this.context=null;this.error='CONTEXT_CHANGED';this.errorRevision++;this.resources.clear();this.connection={enabled:this.connection.enabled,partition:crypto.randomUUID()};await this.writeBlock(null);await this.writeContext(null);await this.writeConnection();}
  async disconnect(){await this.init();this.pendingConnection?.abort.abort();this.clearJobs();this.epoch++;this.context=null;this.error=null;this.errorRevision++;this.resources.clear();this.connection.enabled=false;await this.writeBlock(null);await this.writeContext(null);await this.writeConnection();return this.status();}
  key(input,mode,outputLanguage='zh-CN'){validateLanguage(outputLanguage);const provider=this.providers?.active(),partition=provider?`${provider.id}:${provider.version}:${provider.model}:${PROMPT_VERSION}${provider.binding&&(provider.binding.policyId!=='standard'||provider.binding.policyVersion!==1)?':'+provider.binding.policyId+':'+provider.binding.policyVersion:''}`:this.connection.partition;return `${partition}:${RESULT_VERSION}:${outputLanguage}:${md5(JSON.stringify([input.kind,input.url,input.title,input.text,input.duration||0,input.cues||null]))}:${mode}`;}
- async cached(raw,mode,outputLanguage='zh-CN'){validateLanguage(outputLanguage);const epoch=this.epoch;await this.init();await this.resumeBridge();if(epoch!==this.epoch)throw aborted();const input=validateInput(raw);if((input.kind==='article'&&!['article','mindmap'].includes(mode))||(input.kind==='video'&&!['summary','mindmap'].includes(mode)))fail('INVALID_MODE');const provider=this.providers?.active();if(!provider&&this.doubao&&(!this.context||!this.doubao.validContext(this.context.params)))fail(this.error||'NEEDS_INITIALIZATION');if(provider){const state=this.providers.bindingState(provider)!=='ready'?this.providers.bindingState(provider):(this.providers.bindings?.state()||'ready');if(state!=='ready')fail(state);}const entry=this.cache[this.key(input,mode,outputLanguage)];return entry&&Date.now()-entry.at<TTL?entry.result:null;}
+ async cached(raw,mode,outputLanguage='zh-CN'){validateLanguage(outputLanguage);const epoch=this.epoch;await this.init();if(epoch!==this.epoch)throw aborted();const input=validateInput(raw);if((input.kind==='article'&&!['article','mindmap'].includes(mode))||(input.kind==='video'&&!['summary','mindmap'].includes(mode)))fail('INVALID_MODE');const provider=this.providers?.active();if(!provider&&!this.request)fail(this.retiredDoubao?'DOUBAO_UNAVAILABLE':'AI_NOT_CONFIGURED');if(provider){const state=this.providers.bindingState(provider)!=='ready'?this.providers.bindingState(provider):(this.providers.bindings?.state()||'ready');if(state!=='ready')fail(state);}const entry=this.cache[this.key(input,mode,outputLanguage)];return entry&&Date.now()-entry.at<TTL?entry.result:null;}
  cancel(owner){this.cancelledOwners.set(owner,Date.now());for(const [id,at] of this.cancelledOwners)if(Date.now()-at>300000)this.cancelledOwners.delete(id);for(const job of this.jobs.values())if(job.owners.has(owner)){job.owners.delete(owner);for(const reject of job.rejects.get(owner)||[])reject(aborted());job.rejects.delete(owner);if(!job.owners.size)job.abort.abort();}}
  clearJobs(){for(const job of this.jobs.values())this.abortJob(job);this.jobs.clear();}
  performanceSnapshot(){return this.metrics.snapshot();}
@@ -201,7 +177,6 @@ export class AIService {
     if(!provider&&this.error)fail(this.error);
     let parsed;
     if(provider){const secret=this.providers.keyFor(provider);if(!secret)fail('CUSTOM_KEY_REQUIRED');parsed=await this.requestCustom(provider,secret,input,mode,signal,binding,emit,outputLanguage);check();}
-    else if(this.doubao){parsed=await this.doubao.generate(input,mode,signal,context.params,emit,outputLanguage);check();}
     else {
     const resourceKey=this.key(input,'resource');let resource=this.resources.get(resourceKey);
     if(!resource){let response;emit({stage:'uploadStart'});try{response=JSON.parse(await this.request('/samantha/aireader/resource_content/create',buildResource(input),signal,context.params));}catch(e){if(e instanceof AIError||e.name==='AbortError')throw e;fail('INVALID_RESPONSE');}check();emit({stage:'uploadDone'});

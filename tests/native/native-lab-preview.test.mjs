@@ -345,7 +345,7 @@ test("P11 视频帖预览：静态海报 + 明确标注，绝不复制 video 节
   assert.ok(poster, "poster frame shown");
   assert.equal(poster.getAttribute("src"), "https://pbs.twimg.com/ext_tw_video_thumb/xyz/img/sea.jpg");
   assert.ok(ov.querySelector(".ppl-video-note"), "labeled as a static preview");
-  assert.ok(ov.textContent.includes("原生播放器接管后播放"), "never presented as playable");
+  assert.ok(ov.textContent.includes("playback starts in the native player"), "never presented as playable");
   assert.equal(ov.querySelector("video"), null, "video element never cloned");
   assert.equal(env.document.querySelectorAll("video").length, 1, "X's own player untouched");
 });

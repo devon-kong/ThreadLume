@@ -1,17 +1,13 @@
 name: CI
-
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-
 permissions:
   contents: read
-
 jobs:
   native:
-    name: Native (当前产品：C1-R 原生双栏阅读器)
+    name: Native extension
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,17 +16,4 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build
-      - run: npm run test:native
-
-  exploration:
-    name: Exploration (R3/R3-R PoC 回归套件)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run test:r3-r
+      - run: npm test

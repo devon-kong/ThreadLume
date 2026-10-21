@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Build the Peek Native unpacked extension — the SINGLE product artifact.
+// Build the ThreadLume unpacked extension — the SINGLE product artifact.
 //
 // Since the S3 unification (2026-10-15) there is exactly one build:
 //   dist-extension-native/  — the C1-R native two-column reader. The former
@@ -28,7 +28,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const source = path.join(root, "native-extension");
 const dist = path.resolve(root, "dist-extension-native");
 const legacyDist = path.resolve(root, "dist-extension");
-const asset = path.join(root, "public", "assets", "tuzai-icon-source.png");
+const asset = path.join(root, "public", "brand", "icon.svg");
 
 if (process.env.PEEK_LAYOUT_ADAPTER === "1" || process.argv.includes("--lab")) {
   throw new Error("PEEK_LAYOUT_ADAPTER / --lab were retired by the S3 unification: there is a single build now — run `node scripts/build-extension-native.mjs` (or npm run build)");
@@ -40,7 +40,7 @@ if (process.env.PEEK_LAYOUT_ADAPTER === "1" || process.argv.includes("--lab")) {
 // builds only; PEEK_DIAG_DELAY_MS=50 → busy-wait that long before mounting).
 const diagDelayMs = Math.max(0, Number(process.env.PEEK_DIAG_DELAY_MS || 0));
 // Internal measurement-mode tag kept for continuity with the committed perf
-// evidence and analyzers (docs/m2-b2-c1-r/evidence/*): do not repurpose.
+// the retained performance test monitor: do not repurpose.
 const contentMode = "m2a";
 
 if (!dist.startsWith(root + path.sep)) throw new Error("Refusing to clean an output outside the project root");
@@ -50,7 +50,7 @@ if (!existsSync(path.join(source, "src", "main.js"))) throw new Error("Missing n
 if (!existsSync(path.join(source, "src", "layout-adapter", "main-world-entry.js"))) {
   throw new Error("Missing MAIN-world entry: native-extension/src/layout-adapter/main-world-entry.js");
 }
-if (!existsSync(asset)) throw new Error("Missing icon source: public/assets/tuzai-icon-source.png");
+if (!existsSync(asset)) throw new Error("Missing icon source: public/brand/icon.svg");
 
 let build;
 try {
@@ -83,7 +83,7 @@ await build({
   ...COMMON,
   entryPoints: [path.join(source, "src", "main.js")],
   outfile: path.join(dist, "content.js"),
-  banner: { js: "// Peek Native — bundled content script. Source: native-extension/src/*.js" },
+  banner: { js: "// ThreadLume — bundled content script. Source: native-extension/src/*.js" },
 });
 
 // Diagnostic stamps go FIRST, before any bundle code runs
@@ -103,7 +103,7 @@ await build({
   ...COMMON,
   entryPoints: [path.join(source, "src", "layout-adapter", "main-world-entry.js")],
   outfile: path.join(dist, "layout-adapter-main.js"),
-  banner: { js: "// Peek Native — MAIN-world layout adapter. Source: native-extension/src/layout-adapter/*" },
+  banner: { js: "// ThreadLume — MAIN-world layout adapter. Source: native-extension/src/layout-adapter/*" },
 });
 
 // AI background and settings are separate bundles. Neither is imported by MAIN.
@@ -145,7 +145,7 @@ const mainEntry = (manifest.content_scripts ?? []).find((c) => c.world === "MAIN
 if (!mainEntry || !mainEntry.js?.includes("layout-adapter-main.js") || mainEntry.run_at !== "document_start") {
   throw new Error("native-extension/manifest.json must register layout-adapter-main.js as a document_start MAIN-world content script");
 }
-if (JSON.stringify(manifest.permissions) !== JSON.stringify(["storage", "scripting"]) ||
+if (JSON.stringify(manifest.permissions) !== JSON.stringify(["storage"]) ||
     JSON.stringify(manifest.optional_host_permissions) !== JSON.stringify(["https://*/*"]) ||
     manifest.host_permissions || JSON.stringify(manifest.optional_permissions) !== JSON.stringify(["declarativeNetRequestWithHostAccess"]) || manifest.background?.service_worker !== "ai-background.js" || manifest.web_accessible_resources) {
   throw new Error("Native AI permission boundary violated");
@@ -168,6 +168,7 @@ cpSync(path.join(source, "manifest.json"), path.join(dist, "manifest.json"));
 cpSync(path.join(source, "content.css"), path.join(dist, "content.css"));
 cpSync(path.join(source, "ai.css"), path.join(dist, "ai.css"));
 cpSync(path.join(source, "settings.html"), path.join(dist, "settings.html"));
+for (const file of ["LICENSE", "THIRD_PARTY_NOTICES.md", "PRIVACY.md"]) cpSync(path.join(root,file),path.join(dist,file));
 
 // Brand icon: same inline data-URL approach as the Legacy build, generated
 // locally before content.js so an extension reload never depends on an
@@ -180,13 +181,15 @@ writeFileSync(
   `globalThis.TuzaiBrandIconDataUrl = ${JSON.stringify(`data:image/png;base64,${inlineBrandIcon.toString("base64")}`)};\n`
 );
 
+cpSync(path.join(root,"public","brand"),path.join(dist,"brand"),{recursive:true});
+
 const iconDir = path.join(dist, "icons");
 mkdirSync(iconDir, { recursive: true });
 for (const size of [16, 32, 48, 128]) {
-  await sharp(asset).resize(size, size, { fit: "cover" }).png().toFile(path.join(iconDir, `icon${size}.png`));
+  await sharp(size===16?path.join(root,"public","brand","icon-small.svg"):asset).resize(size, size, { fit: "cover" }).png().toFile(path.join(iconDir, `icon${size}.png`));
 }
 
-console.log(`Built unpacked Peek Native extension: ${dist}`);
+console.log(`Built unpacked ThreadLume extension: ${dist}`);
 
 // DNR is worker-owned and limited to session rules; X scans above are unchanged.
 for (const method of aiWorker.matchAll(/\bdnr\.([A-Za-z]+)\s*\(/g)) {

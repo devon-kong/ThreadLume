@@ -1,4 +1,7 @@
-import {test} from 'node:test';import assert from 'node:assert/strict';import {JSDOM} from 'jsdom';import {build} from 'esbuild';import {DEFAULTS} from '../../native-extension/src/ai/preferences.js';
+import {test} from 'node:test';import assert from 'node:assert/strict';import {JSDOM} from 'jsdom';import {build} from 'esbuild';import {DEFAULTS as PRODUCT_DEFAULTS} from '../../native-extension/src/ai/preferences.js';
+// Existing Chinese fixtures remain explicit; ThreadLume defaults are tested separately.
+const DEFAULTS={...PRODUCT_DEFAULTS,uiLanguage:'zh-CN',outputLanguage:'zh-CN'};
+
 const code=(await build({stdin:{contents:'import {initAIReader} from "./native-extension/src/ai/controller.js";initAIReader();',resolveDir:process.cwd()},bundle:true,write:false,format:'iife'})).outputFiles[0].text;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));async function until(f){for(let i=0;i<160&&!f();i++)await wait(5);assert.ok(f(),'bounded UI checkpoint');}
 const result=mode=>mode==='mindmap'?{text:'Cached mindmap',tree:[{text:'CACHED MAP',children:[{text:'CHILD',children:[]}]}]}:{text:'CACHED SUMMARY',highlights:[]};
@@ -22,7 +25,7 @@ for(const phase of ['cache','waiting','loading'])for(const state of ['DISCONNECT
  const requests=r.calls.filter(x=>x.action==='generate').length;
  r.state(state);await wait(25);
  const unfinished=phase==='loading'?['summary']:['summary','mindmap'];
- for(const mode of unfinished){const panel=w.document.getElementById('pk-ai-view-'+mode);assert.doesNotMatch(panel.textContent,/等待生成|正在整理/);assert.ok(panel.textContent.includes('前往设置'));if(state==='PERMISSION_REQUIRED')assert.match(panel.textContent,/授权/);if(state==='DISCONNECTED')assert.match(panel.textContent,/尚未连接/);if(state==='CONTEXT_CHANGED')assert.match(panel.textContent,/上下文可能变化/);if(state==='LOGIN_REQUIRED')assert.match(panel.textContent,/完成登录/);if(state==='VERIFICATION_REQUIRED')assert.match(panel.textContent,/拒绝了后台请求/);}
+ for(const mode of unfinished){const panel=w.document.getElementById('pk-ai-view-'+mode);assert.doesNotMatch(panel.textContent,/等待生成|正在整理/);assert.ok(panel.textContent.includes('前往设置'));if(state==='PERMISSION_REQUIRED')assert.match(panel.textContent,/授权/);if(['DISCONNECTED','CONTEXT_CHANGED','LOGIN_REQUIRED','VERIFICATION_REQUIRED'].includes(state))assert.match(panel.textContent,/桥接已停用/);}
  assert.equal(w.document.getElementById('peek-ai-card'),card);assert.equal(w.document.querySelector('video'),video);if(phase==='loading')assert.equal(body.scrollTop,71);assert.ok(card.classList.contains('pk-ai-collapsed'));
  if(phase==='loading'){assert.equal(w.document.querySelector('#pk-ai-view-mindmap').firstChild,success);assert.ok(branch,'successful map must exercise a real collapsible branch');assert.equal(branch.getAttribute('aria-expanded'),'false');}
  for(const p of r.cached)p.resolve({ok:true,value:result(p.m.mode)});for(const p of r.pending)p.resolve({ok:true,value:{text:'LATE OLD',highlights:[]}});await wait(20);

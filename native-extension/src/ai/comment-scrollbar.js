@@ -1,3 +1,4 @@
+import {t} from '../i18n.js';
 import {attachCommentViewport} from './comment-viewport.js';
 import {attachCommentTail} from './comment-tail.js';
 // Presentation control only. Window remains X's virtualizer scroll source.
@@ -11,7 +12,7 @@ export function attachCommentScrollbar(document){
  const scroll=top=>{wanted=Math.max(0,Math.min(range(),top));if(!scrollFrame)scrollFrame=raf(()=>{scrollFrame=0;if(!closed&&active())win.scrollTo({top:wanted,left:win.scrollX,behavior:'instant'});});};
  const pointer=e=>{if(!drag||drag.id!==e.pointerId||!bar)return;const b=bar.getBoundingClientRect(),t=thumb.getBoundingClientRect();scroll((e.clientY-b.top-drag.offset)/Math.max(1,b.height-t.height)*range());};
  function create(){
-  bar=document.createElement('div');bar.id='peek-comment-scrollbar';bar.setAttribute('role','scrollbar');bar.setAttribute('aria-label','滚动评论，范围为当前已加载内容');bar.setAttribute('aria-orientation','vertical');bar.setAttribute('aria-valuemin','0');bar.tabIndex=0;thumb=document.createElement('div');thumb.className='pk-comment-thumb';bar.append(thumb);document.body.append(bar);
+  bar=document.createElement('div');bar.id='peek-comment-scrollbar';bar.setAttribute('role','scrollbar');bar.setAttribute('aria-label',t('滚动评论，范围为当前已加载内容'));bar.setAttribute('aria-orientation','vertical');bar.setAttribute('aria-valuemin','0');bar.tabIndex=0;thumb=document.createElement('div');thumb.className='pk-comment-thumb';bar.append(thumb);document.body.append(bar);
   bar.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();reveal();drag={id:e.pointerId,offset:e.target===thumb?e.clientY-thumb.getBoundingClientRect().top:thumb.getBoundingClientRect().height/2};bar.focus({preventScroll:true});bar.setPointerCapture?.(e.pointerId);if(e.target!==thumb)pointer(e);});bar.addEventListener('pointermove',pointer);const end=e=>{if(drag?.id===e.pointerId){drag=null;reveal();}};bar.addEventListener('pointerup',end);bar.addEventListener('pointercancel',end);bar.addEventListener('lostpointercapture',end);
   bar.addEventListener('keydown',e=>{if(e.altKey||e.ctrlKey||e.metaKey)return;const size=bar.clientHeight||parseFloat(bar.style.height),delta={ArrowDown:48,ArrowUp:-48,PageDown:size*.85,PageUp:-size*.85}[e.key];if(delta!==undefined||['Home','End'].includes(e.key)){e.preventDefault();scroll(e.key==='Home'?0:e.key==='End'?range():(scrollFrame?wanted:win.scrollY)+delta);}});
  }

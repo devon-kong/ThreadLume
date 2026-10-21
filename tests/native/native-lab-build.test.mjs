@@ -29,9 +29,9 @@ test("P1 统一构建：manifest 注册 document_start MAIN 入口，MAIN 产物
 
 test("P2 统一构建 manifest 身份：Peek Native / 0.11.0 / HTTPS 可选权限上限", () => {
   const manifest = readJson(join(NATIVE_DIST, "manifest.json"));
-  assert.equal(manifest.name, "Peek Native");
-  assert.equal(manifest.version, "0.11.0");
-  assert.deepEqual(manifest.permissions, ["storage", "scripting"]);
+  assert.equal(manifest.name, "ThreadLume — AI Reader for X");
+  assert.equal(manifest.version, "0.12.0");
+  assert.deepEqual(manifest.permissions, ["storage"]);
   assert.equal(manifest.host_permissions, undefined);
   assert.deepEqual(manifest.optional_permissions, ["declarativeNetRequestWithHostAccess"]);
   assert.deepEqual(manifest.optional_host_permissions, ["https://*/*"]);

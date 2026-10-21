@@ -1,5 +1,8 @@
 import {readFileSync} from 'node:fs';
-import {test} from 'node:test';import assert from 'node:assert/strict';import {JSDOM} from 'jsdom';import {createCard} from '../../native-extension/src/ai/card.js';import {DEFAULTS} from '../../native-extension/src/ai/preferences.js';
+import {test} from 'node:test';import assert from 'node:assert/strict';import {JSDOM} from 'jsdom';import {createCard} from '../../native-extension/src/ai/card.js';import {DEFAULTS as PRODUCT_DEFAULTS} from '../../native-extension/src/ai/preferences.js';
+// Existing Chinese fixtures remain explicit; ThreadLume defaults are tested separately.
+const DEFAULTS={...PRODUCT_DEFAULTS,uiLanguage:'zh-CN',outputLanguage:'zh-CN'};
+
 test('article toolbar exposes source search, language and on-demand mindmap without altering surrounding native cards',()=>{
  const w=new JSDOM('<article><div data-testid="twitterArticleRichTextView">Native <b>source</b></div></article><aside id="comments">original</aside>',{pretendToBeVisual:true}).window,d=w.document,article=d.querySelector('article'),native=article.innerHTML;let languages=[],selections=[];
  const c=createCard({document:d,input:{kind:'article',article,title:'Title'},preferences:DEFAULTS,onLanguage:l=>languages.push(l),onSelect:m=>selections.push(m)});d.body.append(c.root);

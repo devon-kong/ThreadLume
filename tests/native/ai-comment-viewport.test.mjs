@@ -3,7 +3,10 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
 import {createCard} from '../../native-extension/src/ai/card.js';
-import {DEFAULTS} from '../../native-extension/src/ai/preferences.js';
+import {DEFAULTS as PRODUCT_DEFAULTS} from '../../native-extension/src/ai/preferences.js';
+// Existing Chinese fixtures remain explicit; ThreadLume defaults are tested separately.
+const DEFAULTS={...PRODUCT_DEFAULTS,uiLanguage:'zh-CN',outputLanguage:'zh-CN'};
+
 
 function fixture(){
  const dom=new JSDOM('<html data-peek-lad="on"><body><div data-testid="primaryColumn"><article data-peek-lad-focal><video></video></article><div data-testid="cellInnerDiv">Native reply</div></div></body></html>',{url:'https://x.com/a/status/123'});

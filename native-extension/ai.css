@@ -189,3 +189,11 @@ html[data-peek-ai-theme="dark"] .pk-ai-map-layer>svg path{stroke:color-mix(in sr
 
 html[data-peek-lad="on"][data-peek-lad-state="active"] [data-testid="primaryColumn"] [data-peek-comment-tail="empty"]{height:var(--peek-reader-inset,16px)!important;min-height:0!important;overflow:hidden!important}
 html[data-peek-lad="on"][data-peek-lad-state="active"] [data-testid="primaryColumn"] [data-peek-comment-list="trimmed"]{min-height:var(--peek-comment-list-height)!important}
+/* ThreadLume branding keeps the existing settings layout and hit targets. */
+.pk-settings-top img { display:block; max-width:220px; height:auto; }
+.pk-provider-selector { flex-wrap:wrap; gap:12px; }
+#pk-provider-add { margin-left:auto; }
+#pk-languages .pk-segment { flex-wrap:wrap; }
+.pk-settings-top .tl-brand-dark { display:none; }
+[data-peek-ai-theme="dark"] .pk-settings-top .tl-brand-light { display:none; }
+[data-peek-ai-theme="dark"] .pk-settings-top .tl-brand-dark { display:block; }

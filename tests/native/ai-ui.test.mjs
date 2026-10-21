@@ -1,5 +1,8 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import {JSDOM} from 'jsdom';
-import {createCard} from '../../native-extension/src/ai/card.js';import {DEFAULTS,modesFor,normalizePreferences} from '../../native-extension/src/ai/preferences.js';
+import {createCard} from '../../native-extension/src/ai/card.js';import {DEFAULTS as PRODUCT_DEFAULTS,modesFor,normalizePreferences} from '../../native-extension/src/ai/preferences.js';
+// Existing Chinese fixtures remain explicit; ThreadLume defaults are tested separately.
+const DEFAULTS={...PRODUCT_DEFAULTS,uiLanguage:'zh-CN',outputLanguage:'zh-CN'};
+
 test('设置依赖：全关不生成，长文支持脑图，Summary 关闭只脑图且保留时间轴偏好',()=>{
  const p={...DEFAULTS,summary:false};assert.equal(p.timeline,true);assert.deepEqual(modesFor({kind:'video'},p),['mindmap']);assert.deepEqual(modesFor({kind:'article'},p),['mindmap']);assert.deepEqual(modesFor({kind:'video'},{...p,mindmap:false}),[]);assert.equal(normalizePreferences({theme:'evil'}).theme,'system');
 });
@@ -37,4 +40,4 @@ test('视图合同：另一模式开始/成功/失败不重建当前脑图，切
  }finally{dom.window.close();}
 });
 
-test('结果来源：按实际视图显示服务名称，安全文本，旧缓存标为豆包',()=>{const w=new JSDOM('<body></body>').window,d=w.document,c=createCard({document:d,input:{kind:'video',title:'fixture'},preferences:DEFAULTS,onRetry(){}});try{d.body.append(c.root);c.set('summary','success',{text:'Summary',highlights:[],providerId:'custom-a',providerName:'<img src=x> 自定义'});assert.equal(d.querySelector('img'),null);assert.ok(c.root.querySelector('footer').textContent.includes('<img src=x> 自定义'));c.set('mindmap','success',{text:'Map',tree:[{text:'Root',children:[]}]});d.getElementById('pk-ai-tab-mindmap').click();assert.ok(c.root.querySelector('footer').textContent.includes('豆包'));d.getElementById('pk-ai-tab-summary').click();assert.ok(c.root.querySelector('footer').textContent.includes('自定义'));}finally{c.destroy();w.close();}});
+test('结果来源：按实际视图显示服务名称，安全文本，缺失来源使用通用 AI 标签',()=>{const w=new JSDOM('<body></body>').window,d=w.document,c=createCard({document:d,input:{kind:'video',title:'fixture'},preferences:DEFAULTS,onRetry(){}});try{d.body.append(c.root);c.set('summary','success',{text:'Summary',highlights:[],providerId:'custom-a',providerName:'<img src=x> 自定义'});assert.equal(d.querySelector('img'),null);assert.ok(c.root.querySelector('footer').textContent.includes('<img src=x> 自定义'));c.set('mindmap','success',{text:'Map',tree:[{text:'Root',children:[]}]});d.getElementById('pk-ai-tab-mindmap').click();assert.ok(c.root.querySelector('footer').textContent.includes('AI'));d.getElementById('pk-ai-tab-summary').click();assert.ok(c.root.querySelector('footer').textContent.includes('自定义'));}finally{c.destroy();w.close();}});

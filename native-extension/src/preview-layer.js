@@ -1,3 +1,4 @@
+import {t,setUILanguage,localizeUI} from './i18n.js';
 // Peek M2-B2-A — instant reading preview (experimental lab build only).
 //
 // S1 design (docs/m2-b2-a/first-paint-analysis.md): M1-R's 19–20ms first paint
@@ -180,12 +181,12 @@ function previewHtml(data, posterUrl) {
     ? `<div class="ppl-text">${ESCAPED(data.text)}</div>`
     : "";
   const video = data.rich.video
-    ? `<div class="ppl-video">${posterUrl ? `<img class="ppl-poster" src="${ESCAPED(posterUrl)}" referrerpolicy="no-referrer" alt="">` : ""}<span class="ppl-video-note">视频/GIF · 静态预览，原生播放器接管后播放</span></div>`
+    ? `<div class="ppl-video">${posterUrl ? `<img class="ppl-poster" src="${ESCAPED(posterUrl)}" referrerpolicy="no-referrer" alt="">` : ""}<span class="ppl-video-note">${t("视频/GIF")} · ${t("静态预览，原生播放器接管后播放")}</span></div>`
     : "";
-  const poll = data.rich.poll ? `<div class="ppl-rich">投票 · 原生组件接管后显示</div>` : "";
-  const card = data.rich.card ? `<div class="ppl-rich">网站卡片 · 原生组件接管后显示</div>` : "";
+  const poll = data.rich.poll ? `<div class="ppl-rich">${t("投票")} · ${t("原生组件接管后显示")}</div>` : "";
+  const card = data.rich.card ? `<div class="ppl-rich">${t("网站卡片")} · ${t("原生组件接管后显示")}</div>` : "";
   const quote = data.quote
-    ? `<div class="ppl-quote"><div class="ppl-quote-author">${ESCAPED(data.quote.author ?? "未知作者")}</div><div>${ESCAPED(data.quote.text || "（引用正文未识别）")}</div></div>`
+    ? `<div class="ppl-quote"><div class="ppl-quote-author">${ESCAPED(data.quote.author ?? t("未知作者"))}</div><div>${ESCAPED(data.quote.text || t("（引用正文未识别）"))}</div></div>`
     : "";
   return `
     <div class="ppl-author">
@@ -197,7 +198,7 @@ function previewHtml(data, posterUrl) {
     ${photos ? `<div class="ppl-photos">${photos}</div>` : ""}
     ${poll}${card}
     ${quote}
-    <div class="ppl-counts">回复 ${data.reply.value ?? "·"} · 转推 ${data.retweet.value ?? "·"} · 喜欢 ${data.like.value ?? "·"}${data.timeText ? ` · ${ESCAPED(data.timeText)}` : ""}</div>`;
+    <div class="ppl-counts">${t("回复")} ${data.reply.value ?? "·"} · ${t("转推")} ${data.retweet.value ?? "·"} · ${t("喜欢")} ${data.like.value ?? "·"}${data.timeText ? ` · ${ESCAPED(data.timeText)}` : ""}</div>`;
 }
 
 function previewCss() {

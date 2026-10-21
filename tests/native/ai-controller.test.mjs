@@ -1,5 +1,8 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import {JSDOM} from 'jsdom';import {build} from 'esbuild';
-import {DEFAULTS} from '../../native-extension/src/ai/preferences.js';
+import {DEFAULTS as PRODUCT_DEFAULTS} from '../../native-extension/src/ai/preferences.js';
+// Existing Chinese fixtures remain explicit; ThreadLume defaults are tested separately.
+const DEFAULTS={...PRODUCT_DEFAULTS,uiLanguage:'zh-CN',outputLanguage:'zh-CN'};
+
 const bundle=await build({stdin:{contents:'import {initAIReader} from "./native-extension/src/ai/controller.js"; initAIReader();',resolveDir:process.cwd()},bundle:true,write:false,format:'iife'});
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 async function until(fn){for(let i=0;i<80&&!fn();i++)await wait(25);assert.ok(fn(),'expected state within 2 seconds');}

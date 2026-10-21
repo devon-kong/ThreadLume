@@ -69,14 +69,14 @@ test("隔离：Native manifest 自定义 HTTPS 可选上限及运行时窄授权
   for (const cs of manifest.content_scripts ?? []) {
     assert.ok((cs.js ?? []).every((f) => !/page-bridge/.test(f)), "no page-bridge in the script list");
   }
-  assert.deepEqual(manifest.permissions, ["storage", "scripting"], "only AI storage/scripting");
+  assert.deepEqual(manifest.permissions, ["storage"], "only AI storage/scripting");
   assert.equal(manifest.host_permissions, undefined);
   assert.deepEqual(manifest.optional_permissions, ["declarativeNetRequestWithHostAccess"]);
   assert.deepEqual(manifest.optional_host_permissions, ["https://*/*"]);
   assert.equal(manifest.web_accessible_resources, undefined, "no web accessible resources");
   assert.equal(manifest.action.default_popup, undefined, "no popup");
   assert.deepEqual(manifest.background, {service_worker:"ai-background.js"});
-  assert.ok(manifest.name.includes("Native"), "distinct display name vs Legacy");
+  assert.ok(manifest.name.startsWith("ThreadLume"), "distinct display name vs Legacy");
   assert.notEqual(manifest.version, "0.8.10", "distinct version vs Legacy");
 });
 

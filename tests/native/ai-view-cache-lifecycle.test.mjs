@@ -1,4 +1,7 @@
-import {test} from 'node:test';import assert from 'node:assert/strict';import {JSDOM} from 'jsdom';import {build} from 'esbuild';import {DEFAULTS} from '../../native-extension/src/ai/preferences.js';
+import {test} from 'node:test';import assert from 'node:assert/strict';import {JSDOM} from 'jsdom';import {build} from 'esbuild';import {DEFAULTS as PRODUCT_DEFAULTS} from '../../native-extension/src/ai/preferences.js';
+// Existing Chinese fixtures remain explicit; ThreadLume defaults are tested separately.
+const DEFAULTS={...PRODUCT_DEFAULTS,uiLanguage:'zh-CN',outputLanguage:'zh-CN'};
+
 const code=(await build({stdin:{contents:'import {initAIReader} from "./native-extension/src/ai/controller.js";initAIReader();',resolveDir:process.cwd()},bundle:true,write:false,format:'iife'})).outputFiles[0].text;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));async function until(f){for(let i=0;i<160&&!f();i++)await wait(5);assert.ok(f(),'bounded UI checkpoint');}
 const result=mode=>mode==='mindmap'?{text:'Cached mindmap',tree:[{text:'CACHED MAP',children:[]}]}:{text:'CACHED SUMMARY',highlights:[]};
@@ -47,7 +50,7 @@ for(const initial of ['off','on'])for(const action of ['exit','narrow','dynamic'
 test('F3 disconnect ends pending generation feedback without rebuilding successful cached content',async()=>{
  const r=reader(),{w}=r;try{
  await until(()=>r.pending.length===1);const card=w.document.getElementById('peek-ai-card');r.disconnect();await wait(30);r.pending[0].resolve({ok:false,error:'CANCELLED'});await wait(30);
- assert.equal(w.document.getElementById('peek-ai-card'),card);assert.equal(card.textContent.includes('正在生成'),false);assert.equal(card.textContent.includes('正在整理'),false);assert.ok(card.textContent.includes('连接'));
+ assert.equal(w.document.getElementById('peek-ai-card'),card);assert.equal(card.textContent.includes('正在生成'),false);assert.equal(card.textContent.includes('正在整理'),false);assert.ok(card.textContent.includes('桥接已停用'));
  w.document.getElementById('pk-ai-tab-mindmap').click();assert.ok(card.textContent.includes('CACHED MAP'));assert.equal(r.calls.filter(m=>m.action==='generate').length,1);
  }finally{r.close();}
 });

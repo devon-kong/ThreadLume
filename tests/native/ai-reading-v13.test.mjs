@@ -1,5 +1,8 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
-import {modesFor,DEFAULTS} from '../../native-extension/src/ai/preferences.js';
+import {modesFor,DEFAULTS as PRODUCT_DEFAULTS} from '../../native-extension/src/ai/preferences.js';
+// Existing Chinese fixtures remain explicit; ThreadLume defaults are tested separately.
+const DEFAULTS={...PRODUCT_DEFAULTS,uiLanguage:'zh-CN',outputLanguage:'zh-CN'};
+
 import {buildChatRequest} from '../../native-extension/src/ai/custom-provider.js';
 import {buildRequest} from '../../native-extension/src/ai/protocol.js';
 import {AIService} from '../../native-extension/src/ai/service.js';

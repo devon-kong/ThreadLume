@@ -1,3 +1,4 @@
+import {t,setUILanguage,localizeUI} from '../i18n.js';
 // Peek M2-B2-B — reader skin: the visual layer of the native split reader.
 //
 // Scope (S2 contract): VISUAL ONLY. This module owns the floating-card
@@ -206,18 +207,19 @@ export function mountSkinChrome({ onBack, onNativeView } = {}) {
   const bar = document.createElement("div");
   bar.id = SKIN_TOPBAR_ID;
   bar.setAttribute("role", "toolbar");
-  bar.setAttribute("aria-label", "Peek 阅读器");
+  setUILanguage(document.documentElement.dataset.peekUiLanguage);
+  bar.setAttribute("aria-label", t("ThreadLume 阅读器"));
 
   const back = document.createElement("button");
   back.type = "button";
   back.className = "pk-tb-btn";
-  back.setAttribute("aria-label", "返回");
+  back.setAttribute("aria-label", t("返回"));
   back.innerHTML = ICON_BACK;
   back.addEventListener("click", () => { try { onBack?.(); } catch { /* close is best-effort */ } });
 
   const title = document.createElement("div");
   title.className = "pk-tb-title";
-  title.textContent = "Peek";
+  title.textContent = "ThreadLume";
 
   const spacer = document.createElement("div");
   spacer.className = "pk-tb-spacer";
@@ -225,8 +227,8 @@ export function mountSkinChrome({ onBack, onNativeView } = {}) {
   const nativeBtn = document.createElement("button");
   nativeBtn.type = "button";
   nativeBtn.className = "pk-tb-btn pk-tb-native";
-  nativeBtn.setAttribute("aria-label", "切换 X 原生视图");
-  nativeBtn.innerHTML = `${ICON_X_VIEW}<span>原生视图</span>`;
+  nativeBtn.setAttribute("aria-label", t("切换 X 原生视图"));
+  nativeBtn.innerHTML = `${ICON_X_VIEW}<span>${t("原生视图")}</span>`;
   nativeBtn.addEventListener("click", () => { try { onNativeView?.(); } catch { /* best-effort */ } });
 
   bar.append(back, title, spacer, nativeBtn);
@@ -267,3 +269,5 @@ export function removeSkinStyle() {
 }
 
 export const skinChromeMounted = () => Boolean(chrome);
+
+if(typeof window!=='undefined')window.addEventListener('peek-ui-language',event=>{const value=event.detail?.language;if(!['en','zh-CN'].includes(value))return;setUILanguage(value);localizeUI(document.getElementById(SKIN_TOPBAR_ID),value);});

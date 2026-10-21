@@ -22,7 +22,7 @@ test('session Key冷启动缺失保持当前服务并阻止生成，不fallback'
  assert.equal((await service.status()).state,'CUSTOM_KEY_REQUIRED');await assert.rejects(service.generate('a',input,'article'),/CUSTOM_KEY_REQUIRED/);assert.equal(calls,0);
 });
 test('首次连接失败空partition阻断跨Worker恢复，只读状态不触发网络',async()=>{
- const storage={local:area(),session:area()};let calls=0;const first=new AIService({storage,request:async()=>{calls++;}});await first.init();await first.setError('VERIFICATION_REQUIRED');const second=new AIService({storage,request:async()=>{calls++;}});assert.equal((await second.status()).state,'VERIFICATION_REQUIRED');assert.equal(calls,0);await second.disconnect();assert.equal((await new AIService({storage}).status()).state,'DISCONNECTED');
+ const storage={local:area(),session:area()};let calls=0;const first=new AIService({storage,request:async()=>{calls++;}});await first.init();await first.setError('VERIFICATION_REQUIRED');const second=new AIService({storage,request:async()=>{calls++;}});assert.equal((await second.status()).state,'VERIFICATION_REQUIRED');assert.equal(calls,0);await second.disconnect();assert.equal((await new AIService({storage}).status()).state,'DOUBAO_UNAVAILABLE');
 });
 test('所有自定义服务共享30项缓存总上限，全部关闭时不请求',async()=>{
  const f=await fixture();for(let i=0;i<20;i++)await f.service.generate('first-'+i,{...input,text:'Content '+i},'article');

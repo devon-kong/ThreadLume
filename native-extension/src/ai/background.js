@@ -1,7 +1,6 @@
 import {validPreview} from './preview.js';
 import {AIService,allowedSender} from './service.js';
 import {AIError,fail,validateInput,validateLanguage} from './protocol.js';
-import {createDoubaoBridge,DOUBAO_BRIDGE_URL} from './doubao-bridge.js';
 import {ProviderStore} from './provider-store.js';
 import {createCustomTransport} from './custom-transport.js';
 import {normalizeEndpoint} from './custom-provider.js';
@@ -18,12 +17,8 @@ const networkRules=createNetworkRuleManager({onStage:bindingStage,extensionId:ch
 const bindings=createBindingRuntime({onStage:bindingStage,transport:customTransport,rules:networkRules,hasPermission});
 let bindingRevision=0,providerAdmission=0;
 let service,providerCheck=null;
-const doubao=createDoubaoBridge({onLost:code=>{
- if(!service)return;const wasDoubao=!providers.active();
- service.bridgeLost(code).then(result=>{if(!result?.suspended&&wasDoubao&&!providers.active())notifyState({connectionChanged:true});}).catch(()=>{});
-}});
-const providers=new ProviderStore({onStage:bindingStage,storage:chrome.storage,bindings,verifyPermission:config=>config?hasPermission(descriptorPermissions(config.binding)):Promise.resolve(doubao.available()),onChange:change=>{if(change.invalidate||change.bindingChanged){service.providerChanged();if(providerCheck)cancelConnectionWork();}notifyState({connectionChanged:change.invalidate||change.bindingChanged});}});
-service=new AIService({storage:chrome.storage,doubao,providers,requestCustom:(provider,key,input,mode,signal,binding,onEvent,outputLanguage)=>{if(!binding||binding!==bindings.current()||binding.descriptor.configVersion!==provider.version||binding.descriptor.keyRef!==provider.keyRef)fail('CONNECTION_CHANGED');return binding.executor.generate(key,input,mode,signal,onEvent,outputLanguage);}});
+const providers=new ProviderStore({onStage:bindingStage,storage:chrome.storage,bindings,verifyPermission:config=>config?hasPermission(descriptorPermissions(config.binding)):Promise.resolve(false),onChange:change=>{if(change.invalidate||change.bindingChanged){service.providerChanged();if(providerCheck)cancelConnectionWork();}notifyState({connectionChanged:change.invalidate||change.bindingChanged});}});
+service=new AIService({storage:chrome.storage,providers,requestCustom:(provider,key,input,mode,signal,binding,onEvent,outputLanguage)=>{if(!binding||binding!==bindings.current()||binding.descriptor.configVersion!==provider.version||binding.descriptor.keyRef!==provider.keyRef)fail('CONNECTION_CHANGED');return binding.executor.generate(key,input,mode,signal,onEvent,outputLanguage);}});
 async function notifyState(extra={}){
  try{
   const preferences=await service.preferences();
@@ -60,65 +55,14 @@ async function status(){
  const custom=providers.active();
  const permission=!custom||providers.bindingState(custom)!=='ready'?true:await hasPermission(custom.binding?descriptorPermissions(custom.binding):{origins:[normalizeEndpoint(custom.baseURL).permission]});
  const themeMemory=await chrome.storage.session.get('aiXTheme');
- const setupState=await chrome.storage.session.get(['aiDoubaoBridgeSetupV2','aiDoubaoBridgeSetupPendingV2']);
- const setup=setupState.aiDoubaoBridgeSetupV2;
- const tab=Number.isInteger(setup)?await chrome.tabs.get(setup).catch(()=>null):null;
- // Other-extension URLs may be redacted without tabs permission. The marker
- // is only UI guidance; a successful authenticated Port probe proves readiness.
- const setupOpen=!!tab&&(!custom||setupState.aiDoubaoBridgeSetupPendingV2===true);
- return {...connection,...(!permission?{state:'PERMISSION_REQUIRED'}:{}),setupOpen,xTheme:themeMemory.aiXTheme,checking:!!(checkTask||providerCheck),diagnostics:{...stats,generation:service.performanceSnapshot()}};
+ return {...connection,...(!permission?{state:'PERMISSION_REQUIRED'}:{}),setupOpen:false,xTheme:themeMemory.aiXTheme,checking:!!providerCheck,diagnostics:{...stats,generation:service.performanceSnapshot()}};
 }
+
 function cancelConnectionWork(){
  ++connectionGeneration;
  setupOpening?.abort.abort();checkTask?.abort.abort();
  // Keep tasks claimed until their asynchronous writes settle; no replacement
  // transaction may overtake a cancelled publication or page creation.
-}
-function openSetup(){
- if(setupOpening)return setupOpening.promise;
- if(checkTask)fail('CUSTOM_CHECK_IN_PROGRESS');
- const task={abort:new AbortController(),generation:connectionGeneration};setupOpening=task;
- const check=()=>{if(task.abort.signal.aborted||task.generation!==connectionGeneration)fail('CANCELLED');};
- task.promise=(async()=>{
-  try{
-   check();
-   // Only an explicit settings gesture opens this visible page. Never create
-   // a hidden tab or reopen it automatically after a worker/browser restart.
-   const id=(await chrome.storage.session.get('aiDoubaoBridgeSetupV2')).aiDoubaoBridgeSetupV2;check();
-   if(Number.isInteger(id)){
-    const tab=await chrome.tabs.get(id).catch(()=>null);check();
-    if(tab){await chrome.tabs.update(id,{active:true});check();await chrome.storage.session.set({aiDoubaoBridgeSetupPendingV2:true});check();return status();}
-   }
-   const tab=await chrome.tabs.create({url:DOUBAO_BRIDGE_URL,active:true});
-   // Preserve the exact visible page marker even on cancellation so a later
-   // user action can reuse it. No user page is navigated or auto-closed.
-   await chrome.storage.session.set({aiDoubaoBridgeSetupV2:tab.id,aiDoubaoBridgeSetupPendingV2:true});check();
-   return status();
-  }finally{if(setupOpening===task)setupOpening=null;}
- })();return task.promise;
-}
-async function check(){
- if(checkTask)return checkTask.promise;
- if(setupOpening)fail('CUSTOM_CHECK_IN_PROGRESS');
- const task={abort:new AbortController(),generation:connectionGeneration};checkTask=task;
- const assert=()=>{if(task.abort.signal.aborted||task.generation!==connectionGeneration)fail('CANCELLED');};
- task.promise=(async()=>{
-  try{
-   if(!providers.active()){
-    ++bindingRevision;service.providerChanged();
-    // Native cancellation must settle before an explicit connection probe.
-    await service.tail;assert();
-   }
-   assert();const params=await doubao.probe(task.abort.signal);assert();
-   // Shared service publishes only a successful native probe. Old HTTP context
-   // is not accepted and custom provider configuration is never rewritten.
-   await service.connect(params,{signal:task.abort.signal});assert();
-   if(!doubao.available())fail('BRIDGE_CHANGED');
-   await providers.selectDoubao({signal:task.abort.signal});
-   await chrome.storage.session.set({aiDoubaoBridgeSetupPendingV2:false}).catch(()=>{});
-   notifyState({connectionChanged:true});return status();
-  }finally{if(checkTask===task)checkTask=null;}
- })();return task.promise;
 }
 chrome.permissions.onRemoved.addListener(async()=>{
  await ready;
@@ -175,13 +119,14 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
   if(['saveProvider','activateProvider'].includes(m.action)){if(m.operationId!==undefined&&(typeof m.operationId!=='string'||!/^[-\w]{1,100}$/.test(m.operationId)))fail('INVALID_MESSAGE');setupStage('background');}
   await ready;
   if(['saveProvider','activateProvider'].includes(m.action)&&checkAdmission!==providerAdmission)fail('CANCELLED');
-  const fields={status:['xTheme'],preferences:[],savePreferences:['preferences'],providers:[],saveProvider:['config','key','operationId'],activateProvider:['id','operationId'],cancelProviderCheck:[],generate:['connectionId','input','mode','instance','requestId','contentMs','outputLanguage'],cached:['connectionId','input','mode','instance','requestId','contentMs','outputLanguage'],cancel:['instance'],displayed:['instance','requestId','displayMs','firstVisibleMs','firstReadableMs','renderMs','visibilityInterrupted'],openSettings:[],openSetup:[],connect:[],capture:[],check:[],cancelCheck:[],disconnect:[]};
+  const fields={status:['xTheme'],preferences:[],savePreferences:['preferences'],setOutputLanguage:['outputLanguage'],providers:[],saveProvider:['config','key','operationId'],activateProvider:['id','operationId'],cancelProviderCheck:[],generate:['connectionId','input','mode','instance','requestId','contentMs','outputLanguage'],cached:['connectionId','input','mode','instance','requestId','contentMs','outputLanguage'],cancel:['instance'],displayed:['instance','requestId','displayMs','firstVisibleMs','firstReadableMs','renderMs','visibilityInterrupted'],openSettings:[],openSetup:[],connect:[],capture:[],check:[],cancelCheck:[],disconnect:[]};
   if(!sender.url?.startsWith('chrome-extension://')&&Object.keys(m).some(key=>!['ns','action',...(fields[m.action]||[])].includes(key)))fail('INVALID_MESSAGE');
-  if(providerCheck&&['connect','openSetup','capture','check'].includes(m.action))fail('CUSTOM_CHECK_IN_PROGRESS');
+
   switch(m.action){
    case 'status':if(sender.tab&&['light','dark'].includes(m.xTheme))await chrome.storage.session.set({aiXTheme:m.xTheme});return status();
    case 'preferences':return service.preferences();
    case 'savePreferences':{const value=await service.savePreferences(m.preferences);notifyState();return value;}
+   case 'setOutputLanguage':{if(Object.keys(m).some(k=>!['ns','action','outputLanguage'].includes(k)))fail('INVALID_MESSAGE');const outputLanguage=validateLanguage(m.outputLanguage);const value=await service.saveOutputLanguage(outputLanguage);notifyState();return value;}
    case 'providers':return providers.list();
    case 'saveProvider':{if(Object.keys(m).some(k=>!['ns','action','config','key','operationId'].includes(k)))fail('INVALID_MESSAGE');return checkProvider(signal=>providers.save(m.config,m.key,{signal,onStage:storeStage}),m.config);}
    case 'activateProvider':{if(Object.keys(m).some(k=>!['ns','action','id','operationId'].includes(k)))fail('INVALID_MESSAGE');return checkProvider(signal=>providers.activate(m.id,{signal,onStage:storeStage}),providers.registry.services.find(s=>s.id===m.id));}
@@ -192,12 +137,8 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
     const cancelled=providerCheck;providerCheck=null;cancelled?.abort.abort();return null;
    }
    case 'openSettings':await chrome.runtime.openOptionsPage();return null;
-   case 'openSetup':return openSetup();
-   case 'connect':return check();
-   case 'capture':return check();
-   case 'check':return check();
-   case 'cancelCheck':cancelConnectionWork();return null;
-   case 'disconnect':{providerCheck?.abort.abort();cancelConnectionWork();const disconnected=service.disconnect();doubao.close();const result=await disconnected;notifyState({connectionChanged:true});return result;}
+   case 'openSetup':case 'connect':case 'capture':case 'check':case 'disconnect':fail('DOUBAO_UNAVAILABLE');
+   case 'cancelCheck':return null;
    case 'cancel':service.cancel(owner);return null;
    case 'displayed':return service.recordDisplay(owner,m.requestId,{visibilityInterrupted:m.visibilityInterrupted,displayMs:m.displayMs,firstVisibleMs:m.firstVisibleMs,firstReadableMs:m.firstReadableMs,renderMs:m.renderMs});
    case 'cached':
@@ -218,17 +159,5 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
 });
 chrome.tabs.onRemoved.addListener(tabId=>cancelTabRequests(tabId));
 chrome.tabs.onUpdated.addListener((tabId,change)=>{if(change.status==='loading')cancelTabRequests(tabId);else if(change.url)cancelTabRequests(tabId,change.url);});
-
-// Forget only our setup marker when that exact tab closes/navigates. No tab is
-// automatically removed. The Port owns readiness and cancels native work.
-chrome.tabs.onRemoved.addListener(async tabId=>{
- const key='aiDoubaoBridgeSetupV2';
- if((await chrome.storage.session.get(key))[key]===tabId)await chrome.storage.session.remove(key);
-});
-chrome.tabs.onUpdated.addListener(async(tabId,change)=>{
- if(!change.url||change.url===DOUBAO_BRIDGE_URL)return;
- const key='aiDoubaoBridgeSetupV2';
- if((await chrome.storage.session.get(key))[key]===tabId)await chrome.storage.session.remove(key);
-});
 
 chrome.permissions.onAdded?.addListener(async()=>{await ready;if(providerCheck)return;await bindings.restore(providers.active(),providers.bindingState());notifyState({connectionChanged:true});});

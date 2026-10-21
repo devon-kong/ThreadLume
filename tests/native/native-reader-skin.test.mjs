@@ -118,8 +118,8 @@ test("K1 ACTIVE：皮肤样式、顶栏与画布暗化挂载；顶栏无品牌�
   const bar = topbar(env);
   assert.ok(bar, "top bar mounted");
   assert.equal(bar.querySelectorAll("img, image").length, 0, "NO brand imagery in the reader chrome (rabbit-logo ban)");
-  assert.ok(bar.textContent.includes("Peek"), "compact Peek wordmark only");
-  assert.ok(bar.querySelector('[aria-label="返回"]'), "safe back control");
+  assert.ok(bar.textContent.includes("ThreadLume"), "compact ThreadLume wordmark only");
+  assert.ok(bar.querySelector('[aria-label="Back"]'), "safe back control");
   assert.ok(bar.querySelector(".pk-tb-native"), "native-view release control");
   const css = styleText(env, "peek-reader-skin");
   assert.ok(css.includes("--peek-reader-top: 52px"), "top bar height var");
@@ -257,7 +257,7 @@ test("K5 直接进入（无安全历史）：顶栏返回不得调用 history.ba
   await env.pushNavigate(`/somebody/status/${focusId}`);
   await realSleep(5);
   assert.equal(stateAttr(env), "active");
-  topbar(env).querySelector('[aria-label="返回"]').click();
+  topbar(env).querySelector('[aria-label="Back"]').click();
   await realSleep(10);
   assert.equal(env.history._backCalls, 0, "history.back() must NOT be gambled on an unknown predecessor");
   assert.equal(stateAttr(env), "idle", "session released in place");
@@ -270,7 +270,7 @@ test("K6 从列表进入（存在同站历史）：顶栏返回走 history.back 
   await env.pushNavigate(`/somebody/status/${focusId}`);
   await realSleep(5);
   assert.equal(stateAttr(env), "active");
-  topbar(env).querySelector('[aria-label="返回"]').click();
+  topbar(env).querySelector('[aria-label="Back"]').click();
   await realSleep(10);
   assert.equal(env.history._backCalls, 1, "same-site predecessor → real back navigation");
 });
@@ -282,7 +282,7 @@ test("K6a 显式返回列表：复用已捕获锚点，原生列表稳定后只�
   fixture.cell.querySelector("time").closest("a").click();
   await env.pushNavigate(`/somebody/status/${focusId}`);
   await realSleep(5);
-  topbar(env).querySelector('[aria-label="返回"]').click();
+  topbar(env).querySelector('[aria-label="Back"]').click();
   await env.navigate("/home");
   env.scroll.y = 469;
   top = 315; // Same list height; native return displaced the anchor by -69px.

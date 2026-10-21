@@ -1,5 +1,8 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import {JSDOM} from 'jsdom';import {build} from 'esbuild';
-import {createCard} from '../../native-extension/src/ai/card.js';import {DEFAULTS} from '../../native-extension/src/ai/preferences.js';
+import {createCard} from '../../native-extension/src/ai/card.js';import {DEFAULTS as PRODUCT_DEFAULTS} from '../../native-extension/src/ai/preferences.js';
+// Existing Chinese fixtures remain explicit; ThreadLume defaults are tested separately.
+const DEFAULTS={...PRODUCT_DEFAULTS,uiLanguage:'zh-CN',outputLanguage:'zh-CN'};
+
 const wait=ms=>new Promise(r=>setTimeout(r,ms));async function until(f){for(let i=0;i<100&&!f();i++)await wait(10);assert.ok(f(),'bounded checkpoint');}
 const code=(await build({stdin:{contents:'import {initAIReader} from "./native-extension/src/ai/controller.js";initAIReader();',resolveDir:process.cwd()},bundle:true,write:false,format:'iife'})).outputFiles[0].text;
 function reader({cached=false,deferCache=false}={}){

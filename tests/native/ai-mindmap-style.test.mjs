@@ -23,7 +23,7 @@ test('early child previews keep branch color and node identity when their parent
  const f=fixture();try{f.map.update([{id:'0.1',text:'发展',children:[]}]);const n=f.node('0.1'),color=n.style.getPropertyValue('--pk-branch');assert.ok(color);f.map.update(tree);assert.equal(f.node('0.1'),n);assert.equal(n.style.getPropertyValue('--pk-branch'),color);}finally{f.close();}
 });
 test('collapsed branches reveal hidden child count and leaves do not pretend to be expandable',()=>{
- const f=fixture();try{f.map.update(tree);assert.match(f.node('0.0').getAttribute('aria-label'),/展开.*1/);assert.equal(f.node('0.0').getAttribute('aria-expanded'),'false');f.node('0.0').click();assert.match(f.node('0.0').getAttribute('aria-label'),/收起/);assert.equal(f.node('0.0.0').hasAttribute('aria-expanded'),false);}finally{f.close();}
+ const f=fixture();try{f.map.update(tree);assert.match(f.node('0.0').getAttribute('aria-label'),/Expand.*1/);assert.equal(f.node('0.0').getAttribute('aria-expanded'),'false');f.node('0.0').click();assert.match(f.node('0.0').getAttribute('aria-label'),/Collapse/);assert.equal(f.node('0.0.0').hasAttribute('aria-expanded'),false);}finally{f.close();}
 });
 test('fit centers a compact diagram in both axes and long labels get more room than short labels',()=>{
  const f=fixture();try{f.map.update([{text:'主题',children:[{text:'短',children:[]},{text:'A longer label that needs more room',children:[]}]}]);assert.ok(parseFloat(f.node('0.1').style.width)>parseFloat(f.node('0.0').style.width));f.map.fit();const layer=f.map.root.querySelector('.pk-ai-map-layer'),c=f.map.snapshot();assert.ok(Math.abs(c.x+(parseFloat(layer.style.width)*c.scale)/2-400)<1);assert.ok(Math.abs(c.y+(parseFloat(layer.style.height)*c.scale)/2-200)<1);}finally{f.close();}

@@ -1,24 +1,23 @@
 {
-  "name": "tuzai-x-popover",
-  "version": "0.11.0",
+  "name": "threadlume",
+  "version": "0.12.0",
   "private": true,
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/devon-kong/peek-exploration.git"
+    "url": "https://github.com/devon-kong/ThreadLume.git"
   },
   "bugs": {
-    "url": "https://github.com/devon-kong/peek-exploration/issues"
+    "url": "https://github.com/devon-kong/ThreadLume/issues"
   },
-  "homepage": "https://github.com/devon-kong/peek-exploration#readme",
+  "homepage": "https://github.com/devon-kong/ThreadLume#readme",
   "type": "module",
   "scripts": {
     "build": "npm run build:native",
     "build:current": "npm run build:native",
     "build:native": "node scripts/build-extension-native.mjs",
     "test": "npm run test:native",
-    "test:native": "npm run build && node --test tests/native/*.test.mjs",
-    "test:r3-r": "node --test exploration-poc/r3/r3-poc-units.test.mjs exploration-poc/r3-r/tests/*.test.mjs"
+    "test:native": "npm run build && node --test tests/native/*.test.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.25.12",

@@ -91,18 +91,9 @@ test('实际后台：候选权限在不可取消提交中撤销，原服务不�
  const p=w.send({action:'saveProvider',config:{...cfg,baseURL:'https://candidate.example.test/v1'},key:'candidate-key'});while(!entered)await new Promise(r=>setTimeout(r,0));
  w.chrome.permissions.contains=async p=>!p.origins.includes('https://candidate.example.test/*');await w.chrome.permissions.onRemoved.fire({origins:['https://candidate.example.test/*']});release();assert.equal((await p).ok,false);assert.equal((await w.send({action:'providers'})).value.activeId,'custom-one');assert.equal(JSON.stringify(w.storage.local.data).includes('candidate-key'),false);
 });
-test('实际后台：豆包probe成功后提交等待中取消，不提前替换自定义服务',async()=>{
- const w=await fixture({current:true});const set=w.storage.session.set;let release,entered=false;
- w.storage.session.set=async v=>{if(v.aiDoubaoBridgeContextV1&&!entered){entered=true;await new Promise(r=>release=r);}return set(v);};
- const pending=w.send({action:'capture'});while(!entered)await new Promise(r=>setTimeout(r,0));
- assert.equal((await w.send({action:'providers'})).value.activeId,'custom-one');await w.send({action:'cancelCheck'});release();
- assert.equal((await pending).error,'CANCELLED');assert.equal((await w.send({action:'providers'})).value.activeId,'custom-one');assert.equal(w.calls.length,0);
-});
 
-test('实际后台：豆包/自定义检测互斥，旧检测不能覆盖较新的选择',async()=>{
- let release;const w=await fixture({current:true,read:()=>new Promise(r=>release=r)});const old=w.send({action:'saveProvider',config:cfg,key:'candidate-key'});while(!release)await new Promise(r=>setTimeout(r,0));assert.equal((await w.send({action:'check'})).error,'CUSTOM_CHECK_IN_PROGRESS');await w.send({action:'cancelProviderCheck'});release({ok:true,status:200,text:async()=>' {"choices":[{"finish_reason":"stop","message":{"role":"assistant","content":"OK"}}]}'});assert.equal((await old).error,'CANCELLED');
- let beanRelease;const bean=await fixture({current:true,bridgeRead:()=>new Promise(r=>beanRelease=r)});const capture=bean.send({action:'capture'});while(!beanRelease)await new Promise(r=>setTimeout(r,0));assert.equal((await bean.send({action:'saveProvider',config:cfg,key:'candidate-key'})).error,'CUSTOM_CHECK_IN_PROGRESS');beanRelease({status:200,finished:true,text:'OK'});assert.equal((await capture).ok,true);assert.equal((await bean.send({action:'providers'})).value.activeId,'doubao');assert.equal(bean.calls.length,0);
-});
+
+
 
 test('实际后台：无tabs权限及Tab.url字段仍通知自有内容脚本，不依赖URL筛选',async()=>{
  const w=await fixture({current:true});w.chrome.tabs.query=async options=>options.url?[]:[{id:1},{id:2}];const before=w.notified.length;await w.send({action:'savePreferences',preferences:{summary:false,mindmap:false}});await new Promise(r=>setTimeout(r,10));assert.equal(w.notified.length-before,2);for(const message of w.notified.slice(before)){assert.equal(message.action,'stateChanged');assert.equal(message.preferences.summary,false);assert.equal(JSON.stringify(message).includes('synthetic-key'),false);}
@@ -192,13 +183,7 @@ test('实际worker唤醒：旧豆包配置不触发自动开页，自定义绑�
  }
 });
 
-test('实际worker：显式豆包开页尚未完成时自定义检测不能抢占',async()=>{
- let resume,entered;const gate=new Promise(r=>resume=r),started=new Promise(r=>entered=r);const w=await fixture();
- const create=w.chrome.tabs.create;w.chrome.tabs.create=async args=>{entered();await gate;return create(args);};
- const opening=w.send({action:'openSetup'});await started;
- assert.equal((await w.send({action:'saveProvider',config:cfg,key:'must-not-probe'})).error,'CUSTOM_CHECK_IN_PROGRESS');assert.equal(w.calls.length,0);
- await w.send({action:'cancelCheck'});resume();assert.equal((await opening).error,'CANCELLED');assert.equal(w.created.length,1);
-});
+
 
 test('实际worker可选DNR动态授权：启动时API不可用，重授后无需重建即可恢复且不probe',async()=>{
  const initialRules=ruleFixture(),initial=await fixture({dnr:initialRules.dnr});
@@ -231,4 +216,34 @@ test('every English request progress frame carries the validated language',async
  const w=await fixture({current:true}),state=(await w.send({action:'status'})).value;
  const result=await w.send({action:'generate',instance:'english',requestId:'english-request',connectionId:state.connectionId,input,mode:'article',outputLanguage:'en'},w.x);assert.equal(result.ok,true);
  const frames=w.progress.filter(p=>p.m.action==='generationProgress');assert.ok(frames.some(p=>p.m.stage==='request'));assert.ok(frames.every(p=>p.m.outputLanguage==='en'));
+});
+
+// These lifecycle contracts were migrated from the retired bridge worker suite.
+for(const change of [{url:'https://x.com/a/status/456'},{status:'loading'},null])test('custom worker navigation/close cancels ownership and never caches late output '+JSON.stringify(change),async()=>{
+ let release,signal;const w=await fixture({current:true,read:(_,options)=>{signal=options.signal;return new Promise(r=>release=r);}});
+ const state=(await w.send({action:'status'})).value;
+ const job=w.send({action:'generate',instance:'nav-owner',connectionId:state.connectionId,input,mode:'article'},w.x);
+ for(let i=0;i<100&&!release;i++)await new Promise(r=>setTimeout(r,5));assert.ok(release);
+ if(change)await w.chrome.tabs.onUpdated.fire(1,change,{id:1});else await w.chrome.tabs.onRemoved.fire(1);
+ assert.equal((await job).error,'CANCELLED');assert.equal(signal.aborted,true);
+ release({ok:true,status:200,text:async()=>JSON.stringify({choices:[{finish_reason:'stop',message:{content:'{"text":"late"}'}}]})});await new Promise(r=>setTimeout(r,20));
+ assert.equal(Object.keys(w.storage.local.data.aiCache||{}).length,0);
+});
+for(const change of [{url:'https://x.com/a/status/456'},null])test('custom worker navigation during focus confirmation blocks request '+JSON.stringify(change),async()=>{
+ let release;const w=await fixture({current:true});const state=(await w.send({action:'status'})).value;
+ w.chrome.tabs.sendMessage=async(_,m)=>m.action==='confirmFocus'?new Promise(r=>release=r):null;
+ const job=w.send({action:'generate',instance:'pending-focus',connectionId:state.connectionId,input,mode:'article'},w.x);
+ for(let i=0;i<100&&!release;i++)await new Promise(r=>setTimeout(r,5));assert.ok(release);
+ if(change)await w.chrome.tabs.onUpdated.fire(1,change,{id:1});else await w.chrome.tabs.onRemoved.fire(1);
+ release({url:input.url,focusId:input.focusId,instance:'pending-focus'});assert.equal((await job).error,'CANCELLED');assert.equal(w.calls.length,0);
+});
+test('custom worker confirms current SPA document, rejects missing document, prerender and mismatched instance',async()=>{
+ const w=await fixture({current:true}),state=(await w.send({action:'status'})).value,next={...input,focusId:'456',url:'https://x.com/a/status/456'};
+ const message={action:'generate',instance:'spa-owner',connectionId:state.connectionId,input:next,mode:'article'};
+ w.chrome.tabs.sendMessage=async(_,m)=>({url:next.url,focusId:next.focusId,instance:m.instance});
+ assert.equal((await w.send(message,w.x)).ok,true);
+ const before=w.calls.length;w.chrome.tabs.sendMessage=async()=>({url:next.url,focusId:next.focusId,instance:'wrong'});
+ assert.equal((await w.send(message,w.x)).error,'FOCUS_MISMATCH');
+ for(const sender of [{...w.x,documentId:undefined},{...w.x,documentLifecycle:'prerender'}])assert.equal((await w.send(message,sender)).error,'FOCUS_MISMATCH');
+ assert.equal(w.calls.length,before);
 });
