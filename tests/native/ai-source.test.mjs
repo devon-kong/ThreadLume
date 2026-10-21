@@ -104,7 +104,7 @@ test('完整 Article 内嵌无字幕视频仍读取文章，不读取视频字�
  try{
   for(const v of d.querySelectorAll('video'))Object.defineProperty(v,'textTracks',{get(){throw new Error('Article must not read embedded captions');}});
   const result=await readFocalContent('123',{document:d,settleMs:1,timeoutMs:5});
-  assert.equal(result?.kind,'article');assert.equal(result.title,'文章标题');assert.equal(result.text,'文章标题\n\n文章正文嵌入帖文字');assert.equal(result.video,undefined);
+  assert.equal(result?.kind,'article');assert.equal(result.title,'文章标题');assert.equal(result.text,'文章标题\n\n文章正文\n嵌入帖文字');assert.equal(result.video,undefined);
  }finally{d.defaultView.close();}
 });
 test('Article 未加载完整时不把内部视频或嵌入长帖提升为主内容',()=>{
@@ -115,4 +115,11 @@ test('Article 未加载完整时不把内部视频或嵌入长帖提升为主内
 test('普通视频帖仍走字幕，引用 Article 不覆盖原帖视频类型',()=>{
  const d=doc('<div data-testid="tweetText">视频帖</div><video></video><div role="link"><h1 data-testid="twitter-article-title">引用标题</h1><div data-testid="twitterArticleRichTextView">引用正文</div></div>');
  try{const result=inspectFocal(d,'123');assert.equal(result.kind,'video');assert.equal(result.video,d.querySelector('video'));}finally{d.defaultView.close();}
+});
+test('Article body ignores video controls and embedded engagement while retaining source edits',()=>{
+ const d=doc('<h1 data-testid="twitter-article-title">Title</h1><div data-testid="twitterArticleRichTextView"><p>First paragraph</p><article data-testid="tweet"><div data-testid="tweetText">Embedded source</div><div data-testid="videoPlayer"><video></video><span id="time">1:55</span></div><div role="group"><span id="count">20</span></div></article><p id="prose">Last paragraph</p></div>');
+ try{const before=inspectFocal(d,'123');assert.equal(before.body,'First paragraph\nEmbedded source\nLast paragraph');d.getElementById('time').textContent='1:54';d.getElementById('count').textContent='21';assert.equal(inspectFocal(d,'123').text,before.text);d.getElementById('prose').textContent='Edited paragraph';assert.notEqual(inspectFocal(d,'123').text,before.text);}finally{d.defaultView.close();}
+});
+test('hidden Article descendants do not enter content or invalidate its identity',()=>{
+ const d=doc('<h1 data-testid="twitter-article-title">Title</h1><div data-testid="twitterArticleRichTextView"><p>Visible source</p><span hidden id="hidden">Private duplicate</span></div>');try{const before=inspectFocal(d,'123');assert.equal(before.body,'Visible source');d.getElementById('hidden').textContent='Changed duplicate';assert.equal(inspectFocal(d,'123').text,before.text);}finally{d.defaultView.close();}
 });

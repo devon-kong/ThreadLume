@@ -14,3 +14,7 @@ test('new search remaps equivalent native text nodes without reusing stale range
  root.innerHTML='Hello <span>World</span>';assert.equal(s.activate(0),false);const fresh=s.find('world');assert.equal(fresh.length,1);assert.notEqual(fresh[0].range.startContainer,first.startContainer);assert.equal(fresh[0].range.toString(),'World');
  root.textContent='Different content';assert.equal(s.find('Different').length,0);s.destroy();root.textContent='Hello World';assert.equal(s.find('World').length,0);w.close();
 });
+test('article search remains valid through player and engagement updates',()=>{
+ const w=new JSDOM('<article><div data-testid="twitterArticleRichTextView"><p>Stable source</p><article data-testid="tweet"><div data-testid="tweetText">Embedded text</div><div data-testid="videoPlayer"><span id="clock">1:55</span></div><div role="group" id="counts">20</div></article></div></article>').window,d=w.document,s=createSourceSearch({kind:'article',article:d.querySelector('article')},d);
+ try{assert.equal(s.find('Embedded').length,1);d.getElementById('clock').textContent='1:54';d.getElementById('counts').textContent='21';assert.equal(s.valid(),true);assert.equal(s.find('1:54').length,0);assert.equal(s.find('Embedded')[0].range.toString(),'Embedded');}finally{s.destroy();w.close();}
+});

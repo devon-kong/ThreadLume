@@ -1,3 +1,4 @@
+import {renderMarkdown} from './markdown.js';
 import {el,button} from './dom.js';
 import {clock,seekNative} from './content-source.js';
 import {errorText} from './client.js';
@@ -19,14 +20,6 @@ export function renderTree(document,tree){
    toggle.setAttribute('aria-expanded','true');toggle.setAttribute('aria-controls',children.id);li.append(toggle,children);
   }else li.append(el(document,'span',{class:'pk-ai-node',text:node.text}));ul.append(li);
  }return ul;
-}
-function renderSummary(document,text){
- const root=el(document,'div',{class:'pk-ai-summary'});
- for(const line of text.split('\n')){
-  const row=el(document,/^#{1,4} /.test(line)?'h4':'p');
-  const parts=line.replace(/^#{1,4} /,'').split(/(\*\*[^*]+\*\*)/g);
-  for(const part of parts)row.append(part.startsWith('**')&&part.endsWith('**')?el(document,'strong',{text:part.slice(2,-2)}):document.createTextNode(part));root.append(row);
- }return root;
 }
 export function createCard({document,input,preferences,onRetry=()=>{},onSettings=()=>{},onClose,onSelect=()=>{},onStop=()=>{},onLanguage=()=>{},onPresentationChange=()=>{},onRender=()=>{}}){
  const win=document.defaultView;
@@ -59,9 +52,9 @@ export function createCard({document,input,preferences,onRetry=()=>{},onSettings
   const label=mode==='mindmap'?'脑图':'摘要',tab=button(document,'',()=>select(mode),'pk-ai-tab');tab.append(icon(document,mode==='mindmap'?'mindmap':input.kind==='video'?'video':'article'),el(document,'span',{class:'pk-ai-tab-label',text:label}));tab.id='pk-ai-tab-'+mode;tab.title=label;tab.setAttribute('aria-label',label);tab.setAttribute('role','tab');tab.setAttribute('aria-controls',panel.id);panel.setAttribute('aria-labelledby',tab.id);
   tab.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const enabled=modes(),next=enabled[(enabled.indexOf(view)+(e.key==='ArrowRight'?1:enabled.length-1))%enabled.length];select(next);tabs.get(next)?.focus();});tabs.set(mode,tab);tablist.append(tab);
  }
- bar.append(el(document,'span',{class:'pk-ai-heading',text:input.kind==='video'?'视频解读':'长文解读'}),search,el(document,'div',{class:'pk-ai-language-anchor'},languageButton,languagePanel),tablist);
+ bar.append(el(document,'span',{class:'pk-ai-heading'},el(document,'span',{text:input.kind==='video'?'视频解读':'长文解读'}),status),search,el(document,'div',{class:'pk-ai-language-anchor'},languageButton,languagePanel),tablist);
  const copyLabel=()=>view==='mindmap'?'复制大纲':'复制',copy=button(document,'复制',async()=>{try{const data=results[view]||drafts[view],text=view==='mindmap'?treeOutline(data?.tree||[]):data?.text||'';await (win.navigator.clipboard||globalThis.navigator?.clipboard).writeText((results[view]?'':'未完成\n')+text);if(destroyed)return;copy.textContent='已复制';clearTimeout(copyTimer);copyTimer=setTimeout(()=>copy.textContent=copyLabel(),1500);}catch{if(!destroyed)copy.textContent='复制失败';}},'pk-ai-icon');
- footer.append(el(document,'span',{text:'AI 生成 · 请结合原文阅读'}),copy,expand,fold);root.append(bar,searchPanel,el(document,'div',{class:'pk-ai-progress'},status,stop),body,footer);
+ footer.append(el(document,'span',{text:'AI 生成 · 请结合原文阅读'}),stop,copy,expand,fold);root.append(bar,searchPanel,body,footer);
  function geometry(){
   closeLanguage();
   const available=win.innerHeight-68-8-160-16;if(available<180)collapsed=true;
@@ -70,19 +63,23 @@ export function createCard({document,input,preferences,onRetry=()=>{},onSettings
  function chrome(){
   const enabled=modes();root.hidden=!enabled.length;
   for(const [key,tab] of tabs){tab.hidden=!enabled.includes(key);tab.setAttribute('aria-selected',String(key===view));tab.tabIndex=key===view?0:-1;}
-  const running=enabled.find(m=>BUSY.has(states[m])),name=running==='mindmap'?'脑图':'摘要';const label=running?(states[running]==='queued'?`${name}排队中…`:`正在生成${name} · 未完成`):states[view]==='success'?(view==='mindmap'?'脑图':'摘要')+'已完成':states[view]==='error'?(errors[view]==='CANCELLED'?'已停止，未完成内容不会保存':'生成失败，请查看恢复操作'):'选择此视图后生成';if(status.textContent!==label)status.textContent=label;
+  const running=enabled.find(m=>BUSY.has(states[m]));
+  const partial=!!drafts[view]&&!results[view],state=states[view];
+  const label=(state==='success'?'已完成':state==='error'?(errors[view]==='CANCELLED'?'已停止':'生成失败'):state==='queued'?'排队中':BUSY.has(state)?'生成中':'未生成')+(partial?' · 未完成':'');
+  if(status.textContent!==label)status.textContent=label;status.dataset.state=state||'waiting';
+  status.setAttribute('aria-label',(view==='mindmap'?'脑图':'摘要')+'：'+label);
   stop.hidden=!running;copy.disabled=!results[view]&&!drafts[view];copy.textContent=copyLabel();const result=results[view],source=result?(result.providerName||'豆包'):null;
   footer.firstElementChild.textContent=(source?`AI · ${source} · ${result.cacheWarning?'本次结果未能缓存':'请结合原文阅读'}`:'AI 生成 · 请结合原文阅读')+(input.kind==='video'&&input.completion==='available-cues-snapshot'?' · 基于当前可用字幕':'');
  }
  function select(mode,notify=true){if(destroyed||!modes().includes(mode))return;positions.set(view,{top:body.scrollTop,left:body.scrollLeft});view=mode;for(const [key,panel] of panels)panel.hidden=key!==view;const position=positions.get(view);body.scrollTop=position?.top||0;body.scrollLeft=position?.left||0;chrome();const map=contents.get(mode)?.map;if(map)map.update((results[mode]||drafts[mode])?.tree||[]);if(notify){onPresentationChange();onSelect(mode);}}
  function contentFor(mode){
-  let c=contents.get(mode);if(c)return c;const panel=panels.get(mode);panel.replaceChildren();const note=el(document,'p',{class:'pk-ai-muted'}),text=el(document,'div',{class:'pk-ai-draft'}),timeline=el(document,'div',{class:'pk-ai-timeline'}),error=el(document,'div',{class:'pk-ai-error'});c={note,text,timeline,error,chapters:new Map(),map:null};
-  panel.append(note,text);if(mode==='mindmap'){c.map=createMindmap(document);const tools=el(document,'div',{class:'pk-ai-map-inline-tools'},button(document,'−',()=>c.map.zoom(-.1)),button(document,'＋',()=>c.map.zoom(.1)),button(document,'适应',()=>c.map.fit()),button(document,'展开 ↗',()=>openMap(),'pk-ai-link'));tools.children[0].setAttribute('aria-label','缩小脑图');tools.children[1].setAttribute('aria-label','放大脑图');panel.append(error,c.map.root,tools);}else panel.append(timeline,error);contents.set(mode,c);return c;
+  let c=contents.get(mode);if(c)return c;const panel=panels.get(mode);panel.replaceChildren();const text=el(document,'div',{class:'pk-ai-draft pk-ai-summary'}),timeline=el(document,'div',{class:'pk-ai-timeline'}),error=el(document,'div',{class:'pk-ai-error'});c={text,timeline,error,chapters:new Map(),map:null};
+  panel.append(text);if(mode==='mindmap'){c.map=createMindmap(document);const tools=el(document,'div',{class:'pk-ai-map-inline-tools'},button(document,'−',()=>c.map.zoom(-.1)),button(document,'＋',()=>c.map.zoom(.1)),button(document,'适应',()=>c.map.fit()),button(document,'展开 ↗',()=>openMap(),'pk-ai-link'));tools.children[0].setAttribute('aria-label','缩小脑图');tools.children[1].setAttribute('aria-label','放大脑图');panel.append(error,c.map.root,tools);}else panel.append(timeline,error);contents.set(mode,c);return c;
  }
  function render(mode){
   const panel=panels.get(mode),hadFocus=panel.contains(document.activeElement),data=results[mode]||drafts[mode],top=body.scrollTop,left=body.scrollLeft;
   panel.dataset.state=states[mode]||'waiting';
-  if(data){const c=contentFor(mode);c.note.textContent=results[mode]?'':'未完成 · 请等待完整结果后核对';c.note.hidden=!!results[mode];if(c.text.textContent!==data.text)c.text.textContent=data.text||'';c.text.hidden=mode==='mindmap';
+  if(data){const c=contentFor(mode);if(mode!=='mindmap'&&c.rawText!==data.text){renderMarkdown(document,c.text,data.text||'');c.rawText=data.text;}c.text.hidden=mode==='mindmap';
    if(c.map){c.map.update(data.tree||[]);modalMap?.update(data.tree||[]);}
    else{c.timeline.hidden=mode!=='summary'||!prefs.timeline;const seen=new Set();for(const [i,h] of (data.highlights||[]).entries()){
     const key=String(i);seen.add(key);let item=c.chapters.get(key);

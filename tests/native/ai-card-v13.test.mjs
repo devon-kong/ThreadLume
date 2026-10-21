@@ -16,9 +16,9 @@ test('render timing reports actual content render only and identifies its mode',
 test('switching cached views announces the selected result rather than the last completed task',()=>{
  const w=new JSDOM('<body></body>').window,d=w.document,c=createCard({document:d,input:{kind:'article'},preferences:DEFAULTS});d.body.append(c.root);
  c.set('article','success',{text:'Summary',highlights:[]});c.set('mindmap','success',{text:'Overview',tree:[{text:'Root',children:[]}]});
- d.getElementById('pk-ai-tab-mindmap').click();assert.equal(d.querySelector('.pk-ai-progress [role="status"]').textContent,'脑图已完成');
- d.getElementById('pk-ai-tab-article').click();assert.equal(d.querySelector('.pk-ai-progress [role="status"]').textContent,'摘要已完成');
- c.set('mindmap','error','CUSTOM_TIMEOUT');assert.equal(d.querySelector('.pk-ai-progress [role="status"]').textContent,'摘要已完成');c.destroy();w.close();
+ d.getElementById('pk-ai-tab-mindmap').click();assert.equal(d.querySelector('.pk-ai-toolbar [role="status"]').textContent,'已完成');
+ d.getElementById('pk-ai-tab-article').click();assert.equal(d.querySelector('.pk-ai-toolbar [role="status"]').textContent,'已完成');
+ c.set('mindmap','error','CUSTOM_TIMEOUT');assert.equal(d.querySelector('.pk-ai-toolbar [role="status"]').textContent,'已完成');c.destroy();w.close();
 });
 test('invalid generated output stays failed and offers an explicit local retry without automatic resend',()=>{
  const w=new JSDOM('<body></body>').window,d=w.document,calls=[],c=createCard({document:d,input:{kind:'article'},preferences:DEFAULTS,onRetry:mode=>calls.push(mode)});d.body.append(c.root);c.set('mindmap','error','CUSTOM_INVALID_RESPONSE');d.getElementById('pk-ai-tab-mindmap').click();assert.equal(calls.length,0);const retry=[...d.querySelectorAll('#pk-ai-view-mindmap button')].find(n=>n.textContent==='重试脑图');assert.ok(retry);assert.equal(retry.parentElement.className,'pk-ai-error');retry.click();assert.deepEqual(calls,['mindmap']);c.destroy();w.close();
@@ -34,4 +34,14 @@ test('language menu floats without resizing content and closes on outside input 
  assert.deepEqual(changes,['en']);assert.equal(d.getElementById('pk-ai-language-en').getAttribute('aria-checked'),'true');
  trigger.click();d.getElementById('outside').dispatchEvent(new w.Event('pointerdown',{bubbles:true}));assert.equal(panel.hidden,true);
  trigger.click();panel.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));assert.equal(panel.hidden,true);assert.equal(d.activeElement,trigger);c.destroy();w.close();
+});
+test('compact header reports selected view state and marks incomplete previews only once',()=>{
+ const w=new JSDOM('<body></body>').window,d=w.document,c=createCard({document:d,input:{kind:'article'},preferences:DEFAULTS});d.body.append(c.root);
+ try{const status=c.root.querySelector('.pk-ai-toolbar [role=status]');assert.ok(status);c.set('article','loading');assert.equal(status.textContent,'生成中');c.progress('article','Partial');c.flushProgress();assert.equal(status.textContent,'生成中 · 未完成');c.set('article','success',{text:'Done',highlights:[]});assert.equal(status.textContent,'已完成');c.set('mindmap','loading');assert.equal(status.textContent,'已完成');assert.ok(c.root.querySelector('footer #pk-ai-stop'));c.stop();d.getElementById('pk-ai-tab-mindmap').click();assert.equal(status.textContent,'已停止');}finally{c.destroy();w.close();}
+});
+test('summary renders safe Markdown across streaming chunks and preserves completed block identity',()=>{
+ const w=new JSDOM('<body></body>').window,d=w.document,c=createCard({document:d,input:{kind:'article'},preferences:DEFAULTS});d.body.append(c.root);
+ try{c.set('article','loading');c.progress('article','# Heading\n\n**Bold** and *italic*\n\n- item\n- second');c.flushProgress();const text=d.querySelector('.pk-ai-draft'),heading=text.querySelector('h3');assert.ok(heading);assert.equal(text.querySelector('strong').textContent,'Bold');assert.equal(text.querySelector('em').textContent,'italic');assert.equal(text.querySelectorAll('li').length,2);
+ c.progress('article','# Heading\n\n**Bold** and *italic*\n\n- item\n- second\n\n> quote\n\n```js\n<img src=x onerror=alert(1)>\n```');c.flushProgress();assert.equal(text.querySelector('h3'),heading);assert.ok(text.querySelector('blockquote'));assert.match(text.querySelector('pre code').textContent,/<img/);assert.equal(text.querySelector('img'),null);
+ c.set('article','success',{text:'<script>alert(1)</script>\n\n`inline` and **closed**',highlights:[]});assert.equal(text.querySelector('script'),null);assert.equal(text.querySelector('code').textContent,'inline');assert.equal(text.querySelector('strong').textContent,'closed');}finally{c.destroy();w.close();}
 });

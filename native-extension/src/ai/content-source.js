@@ -1,3 +1,4 @@
+import {readArticleText} from './article-text.js';
 // Standard native DOM / TextTrack only. No network or alternate player.
 const abortError = () => new DOMException('Cancelled', 'AbortError');
 const textOf = n => (n?.innerText ?? n?.textContent ?? '').trim();
@@ -84,8 +85,9 @@ export function inspectFocal(document,focusId) {
   const url=`${document.location.origin}${document.location.pathname.replace(/\/(photo|video)\/\d+.*$/,'')}`;
   const bodies=owned('[data-testid="twitterArticleRichTextView"]');
   const titles=owned('[data-testid="twitter-article-title"]');
-  if(bodies.length===1&&titles.length===1&&textOf(bodies[0])&&textOf(titles[0])){
-    const title=textOf(titles[0]),body=textOf(bodies[0]);
+  const body=bodies.length===1?readArticleText(bodies[0]):'';
+  if(bodies.length===1&&titles.length===1&&body&&textOf(titles[0])){
+    const title=textOf(titles[0]);
     return {kind:'article',text:`${title}\n\n${body}`,body,title,url,focusId,article};
   }
   // Article embeds can contain videos and tweetText. The outer article owns

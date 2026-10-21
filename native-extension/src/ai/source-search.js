@@ -1,3 +1,4 @@
+import {excludedArticleText} from './article-text.js';
 import {seekNative} from './content-source.js';
 // Ephemeral source-only index. Range references never wrap or move native DOM.
 export function createSourceSearch(input,document){
@@ -8,7 +9,7 @@ export function createSourceSearch(input,document){
   if(!roots.length)roots=[...input.article.querySelectorAll('[data-testid="tweetText"]')];
   for(const root of roots.filter(n=>!n.closest('div[role="link"], [data-testid="card.wrapper"]'))){
    const walker=document.createTreeWalker(root,win.NodeFilter.SHOW_TEXT),nodes=[];let text='',node;
-   while((node=walker.nextNode())){if(node.parentElement?.closest('script,style,[hidden]'))continue;nodes.push({node,start:text.length,value:node.data});text+=node.data;}
+   while((node=walker.nextNode())){if(node.parentElement?.closest('script,style,[hidden]')||excludedArticleText(node,root))continue;nodes.push({node,start:text.length,value:node.data});text+=node.data;}
    result.push({text,nodes});
   }
  }

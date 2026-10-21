@@ -125,7 +125,7 @@ test('switch language cancels old ownership, reads language cache and generates 
 });
 test('English selection survives source rebuild and accepts English request stage',async()=>{
  const r=reader(),{w}=r;try{
-  await until(()=>r.pending.length===1);w.document.getElementById('pk-ai-language').click();w.document.getElementById('pk-ai-language-en').click();await until(()=>r.pending.length===2);const english=r.pending[1];r.progress(english,'',{stage:'request',outputLanguage:'en'});assert.match(w.document.querySelector('.pk-ai-progress').textContent,/正在生成/);
+  await until(()=>r.pending.length===1);w.document.getElementById('pk-ai-language').click();w.document.getElementById('pk-ai-language-en').click();await until(()=>r.pending.length===2);const english=r.pending[1];r.progress(english,'',{stage:'request',outputLanguage:'en'});assert.match(w.document.querySelector('.pk-ai-toolbar [role=status]').textContent,/生成中/);
   w.document.querySelector('[data-testid="tweetText"]').textContent='Changed title';await until(()=>r.pending.length===3);const fresh=r.pending[2];assert.equal(fresh.m.outputLanguage,'en');assert.equal(w.document.getElementById('pk-ai-language').getAttribute('aria-label'),'输出语言：English');
   r.progress(fresh,'English node',{outputLanguage:'en',preview:{version:1,outputLanguage:'en',text:'English node',tree:[],highlights:[]}});await wait(25);assert.match(w.document.querySelector('.pk-ai-draft').textContent,/English node/);
  }finally{w.close();}
