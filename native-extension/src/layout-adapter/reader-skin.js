@@ -30,7 +30,7 @@
 
 export const SKIN_VARIANT = "floating"; // "floating" | "flush"
 
-const GEOM_FLOATING = { topbarH: 52, topInset: 4, inset: 16, columnGap: 2, gap: 4, radius: 16 };
+const GEOM_FLOATING = { topbarH: 52, topInset: 0, inset: 16, columnGap: 2, gap: 4, radius: 16 };
 const GEOM_FLUSH = { topbarH: 52, topInset: 0, inset: 0, columnGap: 0, gap: 0, radius: 0 };
 
 export function skinGeometry() {
@@ -43,13 +43,13 @@ export function skinPalette(theme) {
       card: "#000000", fg: "#e7e9ea", dim: "#71767b", border: "#2f3336",
       hover: "rgba(231,233,234,0.08)", accent: "#1d9bf0",
       page: SKIN_VARIANT === "flush" ? "#000000" : "#0b0e11",
-      shadow: SKIN_VARIANT === "flush" ? "none" : "0 8px 28px rgba(0,0,0,0.55)",
+      shadow: "none",
     }
     : {
       card: "#ffffff", fg: "#0f1419", dim: "#536471", border: "#eff3f4",
       hover: "rgba(15,20,25,0.06)", accent: "#1d9bf0",
       page: SKIN_VARIANT === "flush" ? "#ffffff" : "#edf1f4",
-      shadow: SKIN_VARIANT === "flush" ? "none" : "0 8px 28px rgba(15,20,25,0.14)",
+      shadow: "none",
     };
 }
 

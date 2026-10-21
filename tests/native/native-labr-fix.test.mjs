@@ -630,9 +630,9 @@ test("D4 深浅切换：一次外部变更 → 恰好一轮更新", async () => 
   await realSleep(10);
   const d = poc.layoutAdapter.themeDiagnostics();
   assert.equal(d.inlineVars["--peek-lad-bg"], "#ffffff", "light palette applied");
-  // M2-B2-B: the palette is now 7 vars (bg/border/fg/dim/hover/backdrop/shadow,
-  // all differing between dark and light); top stays identical → skipped
-  assert.equal(d.writes, before + 7, "exactly one pass: 7 palette vars change, top identical → no echo re-write");
+  // Six color vars change (bg/border/fg/dim/hover/backdrop);
+  // shadow remains none and top stays identical, so both writes are skipped.
+  assert.equal(d.writes, before + 6, "exactly one pass: 6 color vars change, shadow/top identical → no echo re-write");
   env.document.body.style.backgroundColor = "rgb(0, 0, 0)"; // back to dark
   await realSleep(10);
   assert.equal(poc.layoutAdapter.themeDiagnostics().inlineVars["--peek-lad-bg"], "#000000");
