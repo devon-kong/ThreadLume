@@ -1,11 +1,12 @@
 import {attachCommentViewport} from './comment-viewport.js';
+import {attachCommentTail} from './comment-tail.js';
 // Presentation control only. Window remains X's virtualizer scroll source.
 export function attachCommentScrollbar(document){
  const win=document.defaultView,root=document.documentElement,raf=win.requestAnimationFrame?.bind(win)||(f=>win.setTimeout(f,16)),cancel=win.cancelAnimationFrame?.bind(win)||win.clearTimeout.bind(win);
- let bar=null,thumb=null,frame=0,scrollFrame=0,wanted=0,closed=false,drag=null,observedCard=null,observedColumn=null,releaseViewport=null,hideTimer=0;
+ let bar=null,thumb=null,frame=0,scrollFrame=0,wanted=0,closed=false,drag=null,observedCard=null,observedColumn=null,releaseViewport=null,releaseTail=null,hideTimer=0;
  const active=()=>root.getAttribute('data-peek-lad')==='on'&&root.getAttribute('data-peek-lad-state')==='active'&&win.innerWidth>=980&&!document.querySelector('[data-testid="swipe-to-dismiss"]');
  const range=()=>Math.max(0,Math.max(root.scrollHeight,document.body?.scrollHeight||0)-win.innerHeight);
- const remove=()=>{win.clearTimeout(hideTimer);releaseViewport?.();releaseViewport=null;if(observedColumn)resize?.unobserve(observedColumn);if(observedCard)resize?.unobserve(observedCard);observedColumn=observedCard=null;bar?.remove();bar=thumb=null;drag=null;cancel(scrollFrame);scrollFrame=0;root.removeAttribute('data-peek-internal-scrollbar');};
+ const remove=()=>{win.clearTimeout(hideTimer);releaseViewport?.();releaseViewport=null;releaseTail?.();releaseTail=null;if(observedColumn)resize?.unobserve(observedColumn);if(observedCard)resize?.unobserve(observedCard);observedColumn=observedCard=null;bar?.remove();bar=thumb=null;drag=null;cancel(scrollFrame);scrollFrame=0;root.removeAttribute('data-peek-internal-scrollbar');};
  const reveal=()=>{if(!bar)return;bar.setAttribute('data-visible','');win.clearTimeout(hideTimer);hideTimer=win.setTimeout(()=>{if(!drag)bar?.removeAttribute('data-visible');},800);};
  const scroll=top=>{wanted=Math.max(0,Math.min(range(),top));if(!scrollFrame)scrollFrame=raf(()=>{scrollFrame=0;if(!closed&&active())win.scrollTo({top:wanted,left:win.scrollX,behavior:'instant'});});};
  const pointer=e=>{if(!drag||drag.id!==e.pointerId||!bar)return;const b=bar.getBoundingClientRect(),t=thumb.getBoundingClientRect();scroll((e.clientY-b.top-drag.offset)/Math.max(1,b.height-t.height)*range());};
@@ -16,9 +17,9 @@ export function attachCommentScrollbar(document){
  }
  function update(){frame=0;if(closed)return;try{
   if(!active()){remove();return;}const col=document.querySelector('[data-testid="primaryColumn"]');if(!col){remove();return;}
-  if(col!==observedColumn){releaseViewport?.();releaseViewport=attachCommentViewport(document,()=>document.getElementById('peek-ai-card'));}
+  if(col!==observedColumn){releaseViewport?.();releaseTail?.();releaseViewport=attachCommentViewport(document,()=>document.getElementById('peek-ai-card'));releaseTail=attachCommentTail(col);}
   if(col!==observedColumn||document.getElementById('peek-ai-card')!==observedCard)releaseViewport?.update();
-  if(!bar)create();const card=document.getElementById('peek-ai-card'),box=card?.getBoundingClientRect(),top=box?.width>0?box.bottom+16:76,bottom=win.innerHeight-24,h=Math.max(0,bottom-top),right=box?.width>0?box.right:win.innerWidth-16,max=range(),t=Math.min(h,Math.max(28,h*win.innerHeight/(max+win.innerHeight)));
+  if(!bar)create();const card=document.getElementById('peek-ai-card'),box=card?.getBoundingClientRect(),style=win.getComputedStyle(root),gap=parseFloat(style.getPropertyValue('--peek-reader-gap'))||8,top=(box?.width>0?box.bottom+gap:parseFloat(style.getPropertyValue('--peek-reader-card-top'))||68)+8,bottom=win.innerHeight-24,h=Math.max(0,bottom-top),right=box?.width>0?box.right:win.innerWidth-16,max=range(),t=Math.min(h,Math.max(28,h*win.innerHeight/(max+win.innerHeight)));
   if(h<44){remove();return;}
   Object.assign(bar.style,{top:top+'px',left:(right-15)+'px',height:h+'px'});Object.assign(thumb.style,{height:t+'px',transform:`translateY(${(h-t)*Math.max(0,Math.min(max,win.scrollY))/Math.max(1,max)}px)`});bar.setAttribute('aria-valuemax',String(Math.round(max)));bar.setAttribute('aria-valuenow',String(Math.round(Math.max(0,Math.min(max,win.scrollY)))));root.setAttribute('data-peek-internal-scrollbar','');
   if(card!==observedCard){if(observedCard)resize?.unobserve(observedCard);observedCard=card;if(card)resize?.observe(card);}if(col!==observedColumn){if(observedColumn)resize?.unobserve(observedColumn);observedColumn=col;resize?.observe(col);}

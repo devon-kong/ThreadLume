@@ -210,7 +210,7 @@ function previewCss() {
     #${PREVIEW_ID} {
       position: fixed;
       left: ${g.inset}px;
-      top: ${g.topbarH + g.inset}px;
+      top: ${g.topbarH + g.topInset}px;
       bottom: ${g.inset}px;
       width: calc(52vw - ${g.inset + g.gap}px);
       box-sizing: border-box; overflow: hidden; z-index: ${PREVIEW_Z_INDEX};

@@ -30,8 +30,8 @@
 
 export const SKIN_VARIANT = "floating"; // "floating" | "flush"
 
-const GEOM_FLOATING = { topbarH: 52, inset: 16, gap: 4, radius: 16 };
-const GEOM_FLUSH = { topbarH: 52, inset: 0, gap: 0, radius: 0 };
+const GEOM_FLOATING = { topbarH: 52, topInset: 8, inset: 16, gap: 4, radius: 16 };
+const GEOM_FLUSH = { topbarH: 52, topInset: 0, inset: 0, gap: 0, radius: 0 };
 
 export function skinGeometry() {
   return { ...(SKIN_VARIANT === "flush" ? GEOM_FLUSH : GEOM_FLOATING) };
@@ -77,6 +77,7 @@ export function skinCss() {
 @media (min-width: 980px) {
   html[data-peek-lad="on"] {
     --peek-reader-top: ${g.topbarH}px;
+    --peek-reader-card-top: ${g.topbarH + g.topInset}px;
     --peek-reader-inset: ${g.inset}px;
     --peek-reader-gap: ${g.gap}px;
     --peek-reader-radius: ${g.radius}px;
@@ -84,7 +85,7 @@ export function skinCss() {
   /* ---- focal post: floating reading card (flush variant: inset 0 → edge-to-edge) ---- */
   html[data-peek-lad="on"] article[data-peek-lad-focal] {
     left: var(--peek-reader-inset) !important;
-    top: calc(var(--peek-reader-top) + var(--peek-reader-inset)) !important;
+    top: var(--peek-reader-card-top) !important;
     bottom: var(--peek-reader-inset) !important;
     width: calc(52vw - var(--peek-reader-inset) - var(--peek-reader-gap)) !important;
     border: 1px solid var(--peek-lad-border, #eff3f4) !important;
@@ -110,7 +111,7 @@ export function skinCss() {
   /* conversation starts below the reader top bar: a CONSTANT offset applied to
      the list's scroll container (measurement-safe — set once at mount) */
   html[data-peek-lad="on"] [data-testid="primaryColumn"] section[role="region"] {
-    padding-top: calc(var(--peek-reader-top) + var(--peek-reader-inset)) !important;
+    padding-top: var(--peek-reader-card-top) !important;
   }
   /* X's column hairlines must not cross the canvas gaps */
   html[data-peek-lad="on"] [data-testid="primaryColumn"] {

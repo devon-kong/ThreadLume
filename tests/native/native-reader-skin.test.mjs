@@ -338,8 +338,9 @@ test("K9 皮肤 CSS 的几何变量与 skinGeometry() 单一来源一致（预�
   assert.ok(skin.includes(`--peek-reader-gap: ${g.gap}px`));
   assert.ok(skin.includes(`--peek-reader-radius: ${g.radius}px`));
   assert.ok(skin.includes(`width: calc(52vw - var(--peek-reader-inset) - var(--peek-reader-gap))`), "focal card width = geometry");
-  // the handoff target: focal top = topbar + inset, expressed through the vars
-  assert.ok(skin.includes(`top: calc(var(--peek-reader-top) + var(--peek-reader-inset))`));
+  // Preview and native focal top share the same top inset independently of side margins.
+  assert.ok(skin.includes(`--peek-reader-card-top: ${g.topbarH + g.topInset}px`));
+  assert.ok(skin.includes(`top: var(--peek-reader-card-top)`));
 });
 
 test("K10 画布 !important 规则存在时，主题仍跟随 X 的内联信号（就地切换）", async () => {

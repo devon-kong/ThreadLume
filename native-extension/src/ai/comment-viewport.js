@@ -23,8 +23,9 @@ export function attachCommentViewport(document,card){
   if(current!==observedCard){if(observedCard)resize?.unobserve?.(observedCard);observedCard=current;if(current)resize?.observe(current);}
   const style=win.getComputedStyle(root),inset=parseFloat(style.getPropertyValue('--peek-reader-inset'))||16;
   const gap=parseFloat(style.getPropertyValue('--peek-reader-gap'))||8,barTop=parseFloat(style.getPropertyValue('--peek-reader-top'))||52;
+  const cardTop=parseFloat(style.getPropertyValue('--peek-reader-card-top'))||barTop+inset;
   const hasCard=current?.isConnected&&!current.hidden;
-  const box=hasCard?current.getBoundingClientRect():{left:win.innerWidth*.52+gap,right:win.innerWidth-inset,bottom:barTop+inset,width:win.innerWidth*.48-inset-gap,height:1};
+  const box=hasCard?current.getBoundingClientRect():{left:win.innerWidth*.52+gap,right:win.innerWidth-inset,bottom:cardTop,width:win.innerWidth*.48-inset-gap,height:1};
   // A native lightbox hides the card with CSS. Keep the previous geometry;
   // CSS releases both surface and frame synchronously while the lightbox owns it.
   if(box.width<=0||box.height<=0)return;
@@ -38,7 +39,9 @@ export function attachCommentViewport(document,card){
   // A fixed outer frame with a rounded hole. Unlike a clip on primaryColumn,
   // this never changes with scrollY. The hole also lets native pointer events
   // through; the painted perimeter blocks clicks on concealed native content.
-  const path=`path(evenodd, "M ${n(frameLeft)} ${n(barTop)} H ${win.innerWidth} V ${win.innerHeight} H ${n(frameLeft)} Z M ${n(left+radius)} ${n(top)} H ${n(right-radius)} A ${r} ${r} 0 0 1 ${n(right)} ${n(top+radius)} V ${n(bottom-radius)} A ${r} ${r} 0 0 1 ${n(right-radius)} ${n(bottom)} H ${n(left+radius)} A ${r} ${r} 0 0 1 ${n(left)} ${n(bottom-radius)} V ${n(top+radius)} A ${r} ${r} 0 0 1 ${n(left+radius)} ${n(top)} Z")`;
+  // The left bottom strip meets (never overlaps) the right frame, so evenodd
+  // cannot punch an accidental hole through either card's bottom surround.
+  const path=`path(evenodd, "M ${n(frameLeft)} ${n(barTop)} H ${win.innerWidth} V ${win.innerHeight} H ${n(frameLeft)} Z M ${n(left+radius)} ${n(top)} H ${n(right-radius)} A ${r} ${r} 0 0 1 ${n(right)} ${n(top+radius)} V ${n(bottom-radius)} A ${r} ${r} 0 0 1 ${n(right-radius)} ${n(bottom)} H ${n(left+radius)} A ${r} ${r} 0 0 1 ${n(left)} ${n(bottom-radius)} V ${n(top+radius)} A ${r} ${r} 0 0 1 ${n(left+radius)} ${n(top)} Z M 0 ${n(bottom)} H ${n(frameLeft)} V ${win.innerHeight} H 0 Z")`;
   if(boundary.style.clipPath!==path)boundary.style.clipPath=path;
   write('--peek-comments-left',px(left));
   write('--peek-comments-width',px(right-left));
