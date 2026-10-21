@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
-import {collectCaptions, readFocalContent, transcriptOf, seekNative} from '../../native-extension/src/ai/content-source.js';
+import {collectCaptions, inspectFocal, readFocalContent, transcriptOf, seekNative} from '../../native-extension/src/ai/content-source.js';
 function video(mode='disabled',cues=null){
  const win=new JSDOM('').window, v=new win.EventTarget(), list=new win.EventTarget();
  const track={kind:'subtitles',language:'en',label:'English',mode,cues};
@@ -97,4 +97,22 @@ test('字幕：用户原生CC点击即使仍为hidden也释放临时模式所有
   await pending;assert.equal(d.track.mode,expected);
   assert.equal(d.v.paused,true);assert.equal(d.v.currentTime,0);
  }
+});
+
+test('完整 Article 内嵌无字幕视频仍读取文章，不读取视频字幕',async()=>{
+ const d=doc('<h1 data-testid="twitter-article-title">文章标题</h1><div data-testid="twitterArticleRichTextView">文章正文<video></video><div data-testid="tweetText">嵌入帖文字</div><video></video></div>');
+ try{
+  for(const v of d.querySelectorAll('video'))Object.defineProperty(v,'textTracks',{get(){throw new Error('Article must not read embedded captions');}});
+  const result=await readFocalContent('123',{document:d,settleMs:1,timeoutMs:5});
+  assert.equal(result?.kind,'article');assert.equal(result.title,'文章标题');assert.equal(result.text,'文章标题\n\n文章正文嵌入帖文字');assert.equal(result.video,undefined);
+ }finally{d.defaultView.close();}
+});
+test('Article 未加载完整时不把内部视频或嵌入长帖提升为主内容',()=>{
+ for(const html of ['<h1 data-testid="twitter-article-title">标题</h1><video></video>','<div data-testid="twitterArticleRichTextView"><video></video><div data-testid="tweetText">'+ '内'.repeat(1000)+'</div></div>']){
+  const d=doc(html);try{assert.equal(inspectFocal(d,'123'),null);}finally{d.defaultView.close();}
+ }
+});
+test('普通视频帖仍走字幕，引用 Article 不覆盖原帖视频类型',()=>{
+ const d=doc('<div data-testid="tweetText">视频帖</div><video></video><div role="link"><h1 data-testid="twitter-article-title">引用标题</h1><div data-testid="twitterArticleRichTextView">引用正文</div></div>');
+ try{const result=inspectFocal(d,'123');assert.equal(result.kind,'video');assert.equal(result.video,d.querySelector('video'));}finally{d.defaultView.close();}
 });

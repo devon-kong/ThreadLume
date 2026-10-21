@@ -81,16 +81,19 @@ export function focalArticle(document,focusId) {
 export function inspectFocal(document,focusId) {
   const article=focalArticle(document,focusId);if(!article)return null;
   const owned=selector=>Array.from(article.querySelectorAll(selector)).filter(n=>!n.closest('div[role="link"], [data-testid="card.wrapper"]'));
-  const video=owned('video')[0];
   const url=`${document.location.origin}${document.location.pathname.replace(/\/(photo|video)\/\d+.*$/,'')}`;
-  const postText=textOf(owned('[data-testid="tweetText"]')[0]);
-  if(video)return {kind:'video',video,article,url,title:postText.slice(0,200)||'X 视频',focusId};
   const bodies=owned('[data-testid="twitterArticleRichTextView"]');
   const titles=owned('[data-testid="twitter-article-title"]');
   if(bodies.length===1&&titles.length===1&&textOf(bodies[0])&&textOf(titles[0])){
     const title=textOf(titles[0]),body=textOf(bodies[0]);
     return {kind:'article',text:`${title}\n\n${body}`,body,title,url,focusId,article};
   }
+  // Article embeds can contain videos and tweetText. The outer article owns
+  // the input; incomplete hydration must not turn an embed into the source.
+  if(bodies.length||titles.length)return null;
+  const video=owned('video')[0];
+  const postText=textOf(owned('[data-testid="tweetText"]')[0]);
+  if(video)return {kind:'video',video,article,url,title:postText.slice(0,200)||'X 视频',focusId};
   if(Array.from(postText).length>=1000&&!owned('[data-testid="tweet-text-show-more-link"], a[href*="show-more"]').length&&!postText.endsWith('…'))
     return {kind:'article',text:postText,title:postText.split('\n')[0].slice(0,160),url,focusId,article};
   return null;
