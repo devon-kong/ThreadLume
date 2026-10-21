@@ -24,18 +24,24 @@ const outputCharacters=result=>{
  return count;
 };
 export class AIService {
- constructor({storage,request,providers,requestCustom}){this.storage=storage;this.request=request;this.providers=providers;this.requestCustom=requestCustom;this.metrics=createMetrics({onChange:rows=>this.saveMetrics(rows)});this.jobs=new Map();this.cancelledOwners=new Map();this.resources=new Map();this.tail=Promise.resolve();this.epoch=0;this.context=null;this.connection={enabled:false,partition:''};this.cache={};this.error=null;this.errorRevision=0;this.preferenceRevision=0;this.preferencePending=0;this.modeRevision={summary:0,mindmap:0};}
+ constructor({storage,request,providers,requestCustom,doubao}){this.doubao=doubao;this.connectionKey=doubao?'aiDoubaoBridgeConnectionV1':'aiConnection';this.contextKey=doubao?'aiDoubaoBridgeContextV1':'aiContext';this.blockKey=doubao?'aiDoubaoBridgeBlockV1':'aiBlock';this.storage=storage;this.request=request;this.providers=providers;this.requestCustom=requestCustom;this.metrics=createMetrics({onChange:rows=>this.saveMetrics(rows)});this.jobs=new Map();this.cancelledOwners=new Map();this.resources=new Map();this.tail=Promise.resolve();this.epoch=0;this.context=null;this.connection={enabled:false,partition:''};this.cache={};this.error=null;this.errorRevision=0;this.preferenceRevision=0;this.preferencePending=0;this.modeRevision={summary:0,mindmap:0};}
  init(){return this.initialized??=(async()=>{
   await this.providers?.init();
-  const local=await this.storage.local.get(['aiConnection','aiCache']);this.connection=local.aiConnection||this.connection;this.cache=local.aiCache||{};
-  const session=await this.storage.session.get(['aiContext','aiBlock','aiPerformanceV12']);this.metrics.restore(session.aiPerformanceV12);
-  if(session.aiContext?.partition===this.connection.partition&&session.aiContext?.params){try{this.context={...session.aiContext,params:validateParams(session.aiContext.params)};}catch{await this.storage.session.remove('aiContext');}}
-  if(session.aiBlock?.partition===this.connection.partition&&AUTH_BLOCKS.has(session.aiBlock.code))this.error=session.aiBlock.code;
+  const local=await this.storage.local.get([this.connectionKey,'aiCache']);this.connection=local[this.connectionKey]||this.connection;this.cache=local.aiCache||{};
+  const session=await this.storage.session.get([this.contextKey,this.blockKey,'aiPerformanceV12']);this.metrics.restore(session.aiPerformanceV12);
+  // Restore only the same still-visible, previously probed host session.
+  // A handshake is read-only: never open a page or send a model probe here.
+  if(!this.doubao&&session[this.contextKey]?.partition===this.connection.partition&&session[this.contextKey]?.params){try{this.context={...session[this.contextKey],params:validateParams(session[this.contextKey].params)};}catch{await this.storage.session.remove(this.contextKey);}}
+  if(session[this.blockKey]?.partition===this.connection.partition&&AUTH_BLOCKS.has(session[this.blockKey].code))this.error=session[this.blockKey].code;
+  const saved=session[this.contextKey];
+  if(this.doubao&&!this.providers?.active()&&this.connection.enabled&&!this.error&&saved?.partition===this.connection.partition&&saved.params){
+   try{await this.doubao.restore(saved.params);this.context=saved;}catch{this.error='NEEDS_INITIALIZATION';}
+  }
  })();}
  writeBlock(block,epoch=this.epoch){
   // Serialize writes and recheck ownership so old failures cannot overwrite a
   // reconnect's clear or a newer partition's block after an async storage wait.
-  return this.blockWrite=(this.blockWrite||Promise.resolve()).catch(()=>{}).then(async()=>{if(epoch!==this.epoch)return;if(block)await this.storage.session.set({aiBlock:block});else await this.storage.session.remove('aiBlock');});
+  return this.blockWrite=(this.blockWrite||Promise.resolve()).catch(()=>{}).then(async()=>{if(epoch!==this.epoch)return;if(block)await this.storage.session.set({[this.blockKey]:block});else await this.storage.session.remove(this.blockKey);});
  }
  async setError(code,epoch=this.epoch,context=this.context){
   if(epoch!==this.epoch||context!==this.context)return;
@@ -51,7 +57,7 @@ export class AIService {
   for(let p=this.pendingConnection;p&&!p.signal.aborted&&p.epoch===this.epoch;p=this.pendingConnection){
    const pending=p;await new Promise(resolve=>{const done=()=>{pending.signal.removeEventListener('abort',done);resolve();};pending.signal.addEventListener('abort',done,{once:true});pending.promise.then(done,done);if(pending.signal.aborted)done();});
   }
-  return {state:this.error||(this.context&&this.connection.enabled?'ready':this.connection.enabled?'NEEDS_INITIALIZATION':'DISCONNECTED'),checkedAt:this.context?.checkedAt||null,connectionId:this.connection.partition,providerId:'doubao',providerName:'豆包'};}
+  return {state:this.error||(this.context&&this.connection.enabled&&(!this.doubao||this.doubao.validContext(this.context.params))?'ready':this.connection.enabled?'NEEDS_INITIALIZATION':'DISCONNECTED'),checkedAt:this.context?.checkedAt||null,connectionId:this.connection.partition,providerId:'doubao',providerName:'豆包'};}
  async preferences(){
   const revision=this.preferenceRevision,d=await this.storage.local.get('aiPreferences');
   if(revision!==this.preferenceRevision||this.preferencePending)return {...this.preferenceValue};
@@ -72,7 +78,7 @@ export class AIService {
  modeEnabled(mode,p){return mode==='mindmap'?p.mindmap:p.summary;}
  abortJob(job){job.abort.abort();for(const rejects of job.rejects.values())for(const reject of rejects)reject(aborted());}
  writeContext(context,epoch=this.epoch){
-  return this.contextWrite=(this.contextWrite||Promise.resolve()).catch(()=>{}).then(async()=>{if(epoch!==this.epoch||context!==this.context)return;context?await this.storage.session.set({aiContext:context}):await this.storage.session.remove('aiContext');});
+  return this.contextWrite=(this.contextWrite||Promise.resolve()).catch(()=>{}).then(async()=>{if(epoch!==this.epoch||context!==this.context)return;context?await this.storage.session.set({[this.contextKey]:context}):await this.storage.session.remove(this.contextKey);});
  }
  async recheck(context,epoch,errorRevision){
   await this.init();if(!context||!this.connection.enabled||context!==this.context||epoch!==this.epoch||errorRevision!==this.errorRevision)throw aborted();
@@ -82,26 +88,26 @@ export class AIService {
   if(context!==this.context||epoch!==this.epoch)throw aborted();return this.status();
  }
  writeConnection(connection=this.connection,epoch=this.epoch,valid=()=>connection===this.connection){
-  return this.connectionWrite=(this.connectionWrite||Promise.resolve()).catch(()=>{}).then(async()=>{if(epoch!==this.epoch||!valid())return;await this.storage.local.set({aiConnection:connection});});
+  return this.connectionWrite=(this.connectionWrite||Promise.resolve()).catch(()=>{}).then(async()=>{if(epoch!==this.epoch||!valid())return;await this.storage.local.set({[this.connectionKey]:connection});});
  }
  async connect(params,{signal}={}){
   await this.init();if(signal?.aborted)throw aborted();this.pendingConnection?.abort.abort();
   const abort=new AbortController();signal=signal?AbortSignal.any([signal,abort.signal]):abort.signal;
   this.clearJobs();const epoch=++this.epoch;this.resources.clear();
-  const connection={enabled:true,partition:crypto.randomUUID()},context={params:validateParams(params),partition:connection.partition,checkedAt:Date.now()};
+  const connection={enabled:true,partition:crypto.randomUUID()},context={params:this.doubao?this.doubao.validateContext(params):validateParams(params),partition:connection.partition,checkedAt:Date.now()};
   const check=()=>{if(signal?.aborted||epoch!==this.epoch)throw aborted();};
   // Stage durable state under the same serialized context ownership, then
   // publish ready synchronously. An aborted Chrome storage write cannot be
   // stopped, so restore accepted state unless a newer epoch owns the cleanup.
   const commit=(this.contextWrite||Promise.resolve()).catch(()=>{}).then(async()=>{
    try{
-    check();await this.storage.session.set({aiContext:context});check();
+    check();await this.storage.session.set({[this.contextKey]:context});check();
     await this.writeConnection(connection,epoch,()=>!signal?.aborted);check();
     await this.writeBlock(null,epoch);check();
     this.connection=connection;this.context=context;this.error=null;this.errorRevision++;
    }catch(e){
     if(epoch===this.epoch){
-     if(this.context)await this.storage.session.set({aiContext:this.context});else await this.storage.session.remove('aiContext');
+     if(this.context)await this.storage.session.set({[this.contextKey]:this.context});else await this.storage.session.remove(this.contextKey);
      await this.writeConnection(this.connection,epoch);
      await this.writeBlock(AUTH_BLOCKS.has(this.error)?{partition:this.connection.partition,code:this.error}:null,epoch);
     }
@@ -110,10 +116,21 @@ export class AIService {
   });this.contextWrite=commit;const pending={abort,signal,epoch,promise:commit};this.pendingConnection=pending;
   try{await commit;check();}finally{if(this.pendingConnection===pending)this.pendingConnection=null;}return this.status();
  }
+ async bridgeLost(code){
+  await this.init();
+  if(!this.providers?.active())this.pendingConnection?.abort.abort();
+  if(!this.context)return;
+  // An inactive Doubao connection must not cancel the active custom provider.
+  if(!this.providers?.active()){this.pendingConnection?.abort.abort();this.clearJobs();this.epoch++;}
+  this.context=null;this.error=code;this.errorRevision++;this.resources.clear();
+  if(!AUTH_BLOCKS.has(code))this.connection={enabled:this.connection.enabled,partition:crypto.randomUUID()};
+  await this.writeBlock(AUTH_BLOCKS.has(code)?{partition:this.connection.partition,code}:null);
+  await this.writeContext(null);await this.writeConnection();
+ }
  async invalidateContext(){await this.init();this.pendingConnection?.abort.abort();this.clearJobs();this.epoch++;this.context=null;this.error='CONTEXT_CHANGED';this.errorRevision++;this.resources.clear();this.connection={enabled:this.connection.enabled,partition:crypto.randomUUID()};await this.writeBlock(null);await this.writeContext(null);await this.writeConnection();}
  async disconnect(){await this.init();this.pendingConnection?.abort.abort();this.clearJobs();this.epoch++;this.context=null;this.error=null;this.errorRevision++;this.resources.clear();this.connection.enabled=false;await this.writeBlock(null);await this.writeContext(null);await this.writeConnection();return this.status();}
  key(input,mode){const provider=this.providers?.active(),partition=provider?`${provider.id}:${provider.version}:${provider.model}:${PROMPT_VERSION}${provider.binding&&(provider.binding.policyId!=='standard'||provider.binding.policyVersion!==1)?':'+provider.binding.policyId+':'+provider.binding.policyVersion:''}`:this.connection.partition;return `${partition}:${md5(JSON.stringify([input.kind,input.url,input.title,input.text,input.duration||0,input.cues||null]))}:${mode}`;}
- async cached(raw,mode){const epoch=this.epoch;await this.init();if(epoch!==this.epoch)throw aborted();const input=validateInput(raw);if((input.kind==='article'&&mode!=='article')||(input.kind==='video'&&!['summary','mindmap'].includes(mode)))fail('INVALID_MODE');const provider=this.providers?.active();if(provider){const state=this.providers.bindingState(provider)!=='ready'?this.providers.bindingState(provider):(this.providers.bindings?.state()||'ready');if(state!=='ready')fail(state);}const entry=this.cache[this.key(input,mode)];return entry&&Date.now()-entry.at<TTL?entry.result:null;}
+ async cached(raw,mode){const epoch=this.epoch;await this.init();if(epoch!==this.epoch)throw aborted();const input=validateInput(raw);if((input.kind==='article'&&mode!=='article')||(input.kind==='video'&&!['summary','mindmap'].includes(mode)))fail('INVALID_MODE');const provider=this.providers?.active();if(!provider&&this.doubao&&(!this.context||!this.doubao.validContext(this.context.params)))fail(this.error||'NEEDS_INITIALIZATION');if(provider){const state=this.providers.bindingState(provider)!=='ready'?this.providers.bindingState(provider):(this.providers.bindings?.state()||'ready');if(state!=='ready')fail(state);}const entry=this.cache[this.key(input,mode)];return entry&&Date.now()-entry.at<TTL?entry.result:null;}
  cancel(owner){this.cancelledOwners.set(owner,Date.now());for(const [id,at] of this.cancelledOwners)if(Date.now()-at>300000)this.cancelledOwners.delete(id);for(const job of this.jobs.values())if(job.owners.has(owner)){job.owners.delete(owner);for(const reject of job.rejects.get(owner)||[])reject(aborted());job.rejects.delete(owner);if(!job.owners.size)job.abort.abort();}}
  clearJobs(){for(const job of this.jobs.values())this.abortJob(job);this.jobs.clear();}
  performanceSnapshot(){return this.metrics.snapshot();}
@@ -165,6 +182,7 @@ export class AIService {
     if(!provider&&this.error)fail(this.error);
     let parsed;
     if(provider){const secret=this.providers.keyFor(provider);if(!secret)fail('CUSTOM_KEY_REQUIRED');parsed=await this.requestCustom(provider,secret,input,mode,signal,binding,emit);check();}
+    else if(this.doubao){parsed=await this.doubao.generate(input,mode,signal,context.params,emit);check();}
     else {
     const resourceKey=this.key(input,'resource');let resource=this.resources.get(resourceKey);
     if(!resource){let response;emit({stage:'uploadStart'});try{response=JSON.parse(await this.request('/samantha/aireader/resource_content/create',buildResource(input),signal,context.params));}catch(e){if(e instanceof AIError||e.name==='AbortError')throw e;fail('INVALID_RESPONSE');}check();emit({stage:'uploadDone'});
