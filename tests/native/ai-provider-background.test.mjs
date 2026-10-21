@@ -6,7 +6,7 @@ const evt=()=>{const handlers=[];return {handlers,addListener:f=>handlers.push(f
 const area=seed=>{const data=structuredClone(seed||{}),access=[];return {data,access,get:async k=>typeof k==='string'?{[k]:data[k]}:structuredClone(data),set:async v=>Object.assign(data,structuredClone(v)),remove:async k=>delete data[k],setAccessLevel:async v=>access.push(v)};};
 const cfg={name:'用户服务',protocol:'chat-completions',baseURL:'https://api.example.test/v1',model:'model-user',rememberKey:true};
 const input={kind:'article',focusId:'123',url:'https://x.com/a/status/123',title:'Title',text:'Full body'};
-const fixture=async({current=false,read,permission=true,seed,dnr,urlClass=URL,startupPreferencesGate,startupAttemptGate,startupCreateGate,storageGate}={})=>{
+const fixture=async({current=false,read,permission=true,seed,dnr,urlClass=URL,startupPreferencesGate,startupAttemptGate,startupCreateGate,storageGate,bridgeRead}={})=>{
  const saved={...cfg,id:'custom-one',version:'version-one',checkedAt:1,keyRef:'key-one'};saved.binding=createBindingDescriptor(saved,saved.keyRef);const storage={local:area({aiConnection:{enabled:true,partition:'bean'},...(current?{aiProvidersV8:{schema:2,activeId:saved.id,services:[saved]},['aiProviderKeyV9:'+saved.keyRef]:{providerId:saved.id,configVersion:saved.version,keyRef:saved.keyRef,keyLocation:'local',secret:'synthetic-key'}}:{})}),session:area()},calls=[],created=[],notified=[],progress=[];
  if(seed){storage.local=area(seed.local);storage.session=area(seed.session);}
  if(storageGate){const access=storage.local.setAccessLevel;storage.local.setAccessLevel=async v=>{await storageGate;return access(v);};}
@@ -16,11 +16,19 @@ const fixture=async({current=false,read,permission=true,seed,dnr,urlClass=URL,st
  if(startupCreateGate){const create=chrome.tabs.create;chrome.tabs.create=async options=>{await startupCreateGate;return create(options);};}
  // Avoid unrelated Doubao startup when no custom has yet been saved.
  if(!current&&!seed)storage.local.data.aiConnection.enabled=false;
+ const beanCalls=[];
+ chrome.runtime.connect=()=>{
+  const port={onMessage:evt(),onDisconnect:evt(),disconnect(){this.onDisconnect.fire();},postMessage(m){
+   beanCalls.push(m);const reply=v=>port.onMessage.fire({...v,requestId:m.requestId,session:'host-session'});
+   if(m.op==='cancel'){reply({type:'error',code:'CANCELLED'});return;}
+   Promise.resolve().then(async()=>{const result=bridgeRead?await bridgeRead(m):{status:200,finished:true,text:'OK'};reply({type:'result',result});});
+  }};queueMicrotask(()=>port.onMessage.fire({type:'hello',version:2,session:'host-session',verified:false}));return port;
+ };
  const fetch=async(url,options)=>{calls.push({url,options});if(read)return read(url,options);const probe=JSON.parse(options.body).messages.at(-1).content==='Reply exactly OK.';return {ok:true,status:200,text:async()=>JSON.stringify({choices:[{finish_reason:'stop',message:{role:'assistant',content:probe?'OK':'{"text":"结果"}'}}]})};};
  const context=vm.createContext({chrome,fetch,crypto,URL:urlClass,URLSearchParams,AbortSignal,AbortController,DOMException,performance,structuredClone,TextDecoder,TextEncoder,btoa,setTimeout,clearTimeout});vm.runInContext(source,context);const wire=vm.runInContext('JSON.parse',context);await new Promise(r=>setTimeout(r,10));
  const settings={id:'ours',url:'chrome-extension://ours/settings.html'},x={id:'ours',url:input.url,tab:{id:1},documentId:'doc',frameId:0};
  const send=(m,sender=settings)=>new Promise(resolve=>{if(!chrome.runtime.onMessage.handlers[0](wire(JSON.stringify({ns:'peek-ai-v7',...m})),sender,resolve))resolve({rejected:true});});
- return {chrome,storage,calls,created,notified,progress,settings,x,send};
+ return {chrome,storage,calls,created,notified,progress,settings,x,send,beanCalls};
 };
 test('actual worker streams only to owning document, measures generic service, cancellation rejects late cache',async()=>{
  const frame=(content,finish_reason=null)=>'data: '+JSON.stringify({choices:[{index:0,delta:content===null?{}:{content},finish_reason}]})+'\n\n';
@@ -83,15 +91,19 @@ test('实际后台：候选权限在不可取消提交中撤销，原服务不�
  const p=w.send({action:'saveProvider',config:{...cfg,baseURL:'https://candidate.example.test/v1'},key:'candidate-key'});while(!entered)await new Promise(r=>setTimeout(r,0));
  w.chrome.permissions.contains=async p=>!p.origins.includes('https://candidate.example.test/*');await w.chrome.permissions.onRemoved.fire({origins:['https://candidate.example.test/*']});release();assert.equal((await p).ok,false);assert.equal((await w.send({action:'providers'})).value.activeId,'custom-one');assert.equal(JSON.stringify(w.storage.local.data).includes('candidate-key'),false);
 });
-test('实际后台：切豆包成功探测后的清理等待中取消，不提前启用豆包',async()=>{
- const w=await fixture({current:true,read:async()=>beanOK});w.storage.session.data.aiSetup=9;w.chrome.tabs.get=async()=>({id:9,url:'https://www.doubao.com/chat/',status:'complete'});w.chrome.scripting.executeScript=async()=>[{result:{params:{aid:'497858'}}}];
- const remove=w.storage.session.remove;let release,entered=false;w.storage.session.remove=async k=>{if(k==='aiSetup'&&!entered){entered=true;await new Promise(r=>release=r);}return remove(k);};
- const p=w.send({action:'capture'});while(!entered)await new Promise(r=>setTimeout(r,0));assert.equal((await w.send({action:'providers'})).value.activeId,'custom-one');const stopped=w.send({action:'cancelCheck'});release();await stopped;assert.equal((await p).error,'CANCELLED');assert.equal((await w.send({action:'providers'})).value.activeId,'custom-one');
+test('实际后台：豆包probe成功后提交等待中取消，不提前替换自定义服务',async()=>{
+ const w=await fixture({current:true});const set=w.storage.session.set;let release,entered=false;
+ w.storage.session.set=async v=>{if(v.aiDoubaoBridgeContextV1&&!entered){entered=true;await new Promise(r=>release=r);}return set(v);};
+ const pending=w.send({action:'capture'});while(!entered)await new Promise(r=>setTimeout(r,0));
+ assert.equal((await w.send({action:'providers'})).value.activeId,'custom-one');await w.send({action:'cancelCheck'});release();
+ assert.equal((await pending).error,'CANCELLED');assert.equal((await w.send({action:'providers'})).value.activeId,'custom-one');assert.equal(w.calls.length,0);
 });
+
 test('实际后台：豆包/自定义检测互斥，旧检测不能覆盖较新的选择',async()=>{
- let release;const w=await fixture({current:true,read:()=>new Promise(r=>release=r)});const old=w.send({action:'saveProvider',config:cfg,key:'candidate-key'});while(!release)await new Promise(r=>setTimeout(r,0));assert.equal((await w.send({action:'check'})).error,'CUSTOM_CHECK_IN_PROGRESS');await w.send({action:'cancelProviderCheck'});release({ok:true,status:200,text:async()=>'{"choices":[{"finish_reason":"stop","message":{"role":"assistant","content":"OK"}}]}'});assert.equal((await old).error,'CANCELLED');assert.equal((await w.send({action:'providers'})).value.activeId,'custom-one');
- let beanRelease;const bean=await fixture({current:true,read:()=>new Promise(r=>beanRelease=r)});bean.storage.session.data.aiSetup=9;bean.chrome.tabs.get=async()=>({id:9,url:'https://www.doubao.com/chat/',status:'complete'});bean.chrome.scripting.executeScript=async()=>[{result:{params:{aid:'497858'}}}];const capture=bean.send({action:'capture'});while(!beanRelease)await new Promise(r=>setTimeout(r,0));assert.equal((await bean.send({action:'saveProvider',config:cfg,key:'candidate-key'})).error,'CUSTOM_CHECK_IN_PROGRESS');beanRelease(beanOK);assert.equal((await capture).ok,true);assert.equal((await bean.send({action:'providers'})).value.activeId,'doubao');
+ let release;const w=await fixture({current:true,read:()=>new Promise(r=>release=r)});const old=w.send({action:'saveProvider',config:cfg,key:'candidate-key'});while(!release)await new Promise(r=>setTimeout(r,0));assert.equal((await w.send({action:'check'})).error,'CUSTOM_CHECK_IN_PROGRESS');await w.send({action:'cancelProviderCheck'});release({ok:true,status:200,text:async()=>' {"choices":[{"finish_reason":"stop","message":{"role":"assistant","content":"OK"}}]}'});assert.equal((await old).error,'CANCELLED');
+ let beanRelease;const bean=await fixture({current:true,bridgeRead:()=>new Promise(r=>beanRelease=r)});const capture=bean.send({action:'capture'});while(!beanRelease)await new Promise(r=>setTimeout(r,0));assert.equal((await bean.send({action:'saveProvider',config:cfg,key:'candidate-key'})).error,'CUSTOM_CHECK_IN_PROGRESS');beanRelease({status:200,finished:true,text:'OK'});assert.equal((await capture).ok,true);assert.equal((await bean.send({action:'providers'})).value.activeId,'doubao');assert.equal(bean.calls.length,0);
 });
+
 test('实际后台：无tabs权限及Tab.url字段仍通知自有内容脚本，不依赖URL筛选',async()=>{
  const w=await fixture({current:true});w.chrome.tabs.query=async options=>options.url?[]:[{id:1},{id:2}];const before=w.notified.length;await w.send({action:'savePreferences',preferences:{summary:false,mindmap:false}});await new Promise(r=>setTimeout(r,10));assert.equal(w.notified.length-before,2);for(const message of w.notified.slice(before)){assert.equal(message.action,'stateChanged');assert.equal(message.preferences.summary,false);assert.equal(JSON.stringify(message).includes('synthetic-key'),false);}
 });
@@ -171,36 +183,21 @@ test('实际worker冷会话：local Key恢复规则不probe，session Key丢失�
  }
 });
 
-test('实际worker唤醒：豆包只读启动预检未完成时，首次自定义绑定仍可开始',async()=>{
+test('实际worker唤醒：旧豆包配置不触发自动开页，自定义绑定成功或失败均不fallback',async()=>{
  for(const accepted of [true,false]){
- let resume;const gate=new Promise(resolve=>resume=resolve);
- const w=await fixture({seed:{local:{aiConnection:{enabled:true,partition:'bean'}},session:{}},startupPreferencesGate:gate,...(!accepted?{read:async()=>({ok:false,status:401,text:async()=>'{}'})}:{})});
- try{
+  const w=await fixture({seed:{local:{aiConnection:{enabled:true,partition:'bean'}},session:{}},...(!accepted?{read:async()=>({ok:false,status:401,text:async()=>'{}'})}:{})});
   const saved=await w.send({action:'saveProvider',config:cfg,key:'wake-test-key'});
-  if(accepted){assert.equal(saved.ok,true,JSON.stringify(saved));assert.notEqual(saved.value.activeId,'doubao');}
-  else assert.equal(saved.error,'CUSTOM_AUTH');
-  assert.equal(w.calls.length,1);
- }finally{resume();}
- await new Promise(resolve=>setTimeout(resolve,5));
- assert.equal(w.created.length,0,'abandoned Doubao preflight cannot later open a page');
- assert.equal(w.storage.session.data.aiAutoAttempted,undefined,'read-only preflight leaves no attempted marker');
- if(accepted)assert.equal((await w.send({action:'status'})).value.state,'ready');
- else{await w.chrome.runtime.onStartup.fire();assert.equal(w.created.length,1,'failed custom check must not suppress later Doubao restore');}
+  if(accepted)assert.equal(saved.ok,true);else assert.equal(saved.error,'CUSTOM_AUTH');
+  await w.chrome.runtime.onStartup.fire();assert.equal(w.created.length,0);assert.equal(w.calls.length,1);assert.equal(w.beanCalls.length,0);assert.equal(w.storage.session.data.aiAutoAttempted,undefined);
  }
 });
 
-test('实际worker启动首次写入与开页均不可被自定义检测抢占',async()=>{
- for(const boundary of ['startupAttemptGate','startupCreateGate']){
-  let resume;const gate=new Promise(resolve=>resume=resolve);
-  const w=await fixture({seed:{local:{aiConnection:{enabled:true,partition:'bean'}},session:{}},[boundary]:gate,read:async()=>({ok:false,status:401,text:async()=>'{}'})});
-  try{
-   const saved=await w.send({action:'saveProvider',config:cfg,key:'must-not-probe'});
-   assert.equal(saved.error,'CUSTOM_CHECK_IN_PROGRESS',boundary);
-   assert.equal(w.calls.length,0,'no custom request while automatic connection owns side effects');
-  }finally{resume();}
-  await new Promise(resolve=>setTimeout(resolve,10));
-  assert.equal(w.created.length,1);assert.equal(w.storage.session.data.aiAutoAttempted,true);
- }
+test('实际worker：显式豆包开页尚未完成时自定义检测不能抢占',async()=>{
+ let resume,entered;const gate=new Promise(r=>resume=r),started=new Promise(r=>entered=r);const w=await fixture();
+ const create=w.chrome.tabs.create;w.chrome.tabs.create=async args=>{entered();await gate;return create(args);};
+ const opening=w.send({action:'openSetup'});await started;
+ assert.equal((await w.send({action:'saveProvider',config:cfg,key:'must-not-probe'})).error,'CUSTOM_CHECK_IN_PROGRESS');assert.equal(w.calls.length,0);
+ await w.send({action:'cancelCheck'});resume();assert.equal((await opening).error,'CANCELLED');assert.equal(w.created.length,1);
 });
 
 test('实际worker可选DNR动态授权：启动时API不可用，重授后无需重建即可恢复且不probe',async()=>{

@@ -28,9 +28,6 @@ async function save(next){
 async function connectionAction(action){
  if(busy)return;const keepCustom=providers.activeId!=='doubao';++refreshRevision;busy=true;notice='';render();
  try{
-  if(action==='connect'||action==='openSetup'){
-   const granted=await chrome.permissions.request({origins:['https://www.doubao.com/*']});if(!granted)throw Error('PERMISSION_REQUIRED');
-  }
   connection=await send(action);const list=await send('providers');if(list?.services)providers=list;
  }catch(e){if(!keepCustom)connection={...connection,state:e.message};notice=errorText(e.message);}
  finally{busy=false;render();}
@@ -44,7 +41,7 @@ function providerSection(){
  const menu=el(d,'details',{id:'pk-provider-menu',class:'pk-provider-menu'},el(d,'summary',{'aria-label':'选择 AI 服务'},el(d,'span',{id:'pk-provider-current',text:custom?.name||'豆包'}),el(d,'span',{'aria-hidden':true,text:'⌄'})));
  const options=el(d,'div',{class:'pk-provider-options'});
  const choose=(id,label,description,action)=>{const b=identified(button(d,'',()=>{d.getElementById('pk-provider-menu').open=false;action();}),'pk-provider-'+id);b.disabled=busy||providerBusy;b.setAttribute('aria-pressed',String(providers.activeId===id));b.append(el(d,'strong',{text:label}),el(d,'small',{text:description}));options.append(b);return b;};
- choose('doubao','豆包','浏览器账号连接',()=>connectionAction(providers.activeId==='doubao'&&connection.state==='ready'?'check':'openSetup'));
+ choose('doubao','豆包','通过配套豆包扩展连接',()=>connectionAction(providers.activeId==='doubao'&&connection.state==='ready'?'check':'openSetup'));
  for(const service of providers.services){
   const option=choose(service.id,service.name,service.model+(service.id===providers.activeId?' · 当前使用':''),()=>activateProvider(service.id));option.classList.add('pk-provider-option-main');
   const edit=identified(button(d,'编辑',()=>openProviderDialog(providers.services.find(s=>s.id===service.id))),'pk-provider-edit-'+service.id);edit.classList.add('pk-provider-option-edit');edit.disabled=busy||providerBusy;edit.setAttribute('aria-label','编辑 '+service.name);
@@ -52,23 +49,23 @@ function providerSection(){
  }
  const add=identified(button(d,'＋ 添加 AI 服务',()=>openProviderDialog()),'pk-provider-add');add.disabled=busy||providerBusy;options.append(add);menu.append(options);
  const selector=el(d,'div',{class:'pk-provider-selector'},el(d,'strong',{text:'AI 服务'}),menu);
- const details=el(d,'div',{class:'pk-connection-name'},el(d,'div',{},el(d,'strong',{text:custom?.model||'豆包'}),el(d,'span',{class:ready?'pk-connected':'pk-connection-state',text:stateLabel})),el(d,'small',{text:custom?'Chat Completions · OpenAI 兼容':ready?'使用当前浏览器的登录状态，无需常驻豆包网页':'连接浏览器已登录的豆包，自动生成摘要与脑图'}));
+ const details=el(d,'div',{class:'pk-connection-name'},el(d,'div',{},el(d,'strong',{text:custom?.model||'豆包'}),el(d,'span',{class:ready?'pk-connected':'pk-connection-state',text:stateLabel})),el(d,'small',{text:custom?'Chat Completions · OpenAI 兼容':ready?'通过豆包扩展生成，使用期间请保持连接页打开':'需要安装配套豆包扩展，打开连接页并检测'}));
  const row=el(d,'div',{class:'pk-connection-row'},details);
  let primary;
  if(providerBusy)primary=button(d,'取消检测',cancelProviderCheck);
  else if(busy)primary=button(d,'取消检测',()=>send('cancelCheck').catch(()=>{}));
- else if(connection.setupOpen)primary=button(d,'完成后检测',()=>connectionAction('capture'));
+ else if(connection.setupOpen&&(!ready||custom))primary=button(d,'完成后检测',()=>connectionAction('capture'));
  else if(custom)primary=button(d,'重新检测',()=>activateProvider(providers.activeId));
  else if(ready)primary=button(d,'重新检测',()=>connectionAction('check'));
- else primary=button(d,['LOGIN_REQUIRED','VERIFICATION_REQUIRED','NEEDS_INITIALIZATION'].includes(state)?'打开豆包网页':'连接豆包',()=>connectionAction(['LOGIN_REQUIRED','VERIFICATION_REQUIRED','NEEDS_INITIALIZATION'].includes(state)?'openSetup':'connect'));
- primary.id='pk-connection-'+(busy||providerBusy?'cancel':connection.setupOpen?'capture':custom?'check-'+custom.id:ready?'check':['LOGIN_REQUIRED','VERIFICATION_REQUIRED','NEEDS_INITIALIZATION'].includes(state)?'setup':'connect');row.append(primary);
+ else primary=button(d,['LOGIN_REQUIRED','VERIFICATION_REQUIRED','NEEDS_INITIALIZATION'].includes(state)?'打开连接页':'连接豆包',()=>connectionAction(['LOGIN_REQUIRED','VERIFICATION_REQUIRED','NEEDS_INITIALIZATION'].includes(state)?'openSetup':'connect'));
+ primary.id='pk-connection-'+(busy||providerBusy?'cancel':connection.setupOpen&&(!ready||custom)?'capture':custom?'check-'+custom.id:ready?'check':['LOGIN_REQUIRED','VERIFICATION_REQUIRED','NEEDS_INITIALIZATION'].includes(state)?'setup':'connect');row.append(primary);
  const more=el(d,'details',{class:'pk-settings-more'},el(d,'summary',{id:'pk-more','aria-label':'更多连接操作',text:'···'}));
  if(custom)more.append(identified(button(d,'编辑服务',()=>openProviderDialog(providers.services.find(s=>s.id===providers.activeId))),'pk-provider-edit'));
- else more.append(identified(button(d,'断开连接',()=>connectionAction('disconnect')),'pk-disconnect'));
+ else {more.append(identified(button(d,'打开连接页',()=>connectionAction('openSetup')),'pk-open-bridge'));more.append(identified(button(d,'断开连接',()=>connectionAction('disconnect')),'pk-disconnect'));}
  row.append(more);
- const blocked=custom&&!ready&&state!=='CHECKING';
- const foot=providerBusy?(setupStage||'等待服务响应。')+' 取消后保留原连接与本次草稿。':blocked?errorText(state)+(state==='CUSTOM_KEY_REQUIRED'?' 请编辑服务，重新输入后检测。':''):custom?new URL(custom.baseURL).host+' · '+(custom.rememberKey?'密钥已保存在此设备':'密钥仅在本次浏览器会话保存'):'当前字幕或正文会发送至豆包。切换服务会保留此连接。';
- return el(d,'section',{id:'pk-connection-card',class:'pk-settings-card'},selector,row,...(custom&&connection.setupOpen?[el(d,'p',{class:'pk-ai-muted',text:'豆包连接页已打开。完成登录或验证后，请点击「完成后检测」；成功前继续使用当前服务。'})]:[]),el(d,'div',{class:'pk-connection-foot'},el(d,'span',{id:providerBusy?'pk-provider-phase':undefined,text:foot}),el(d,'span',{text:connection.checkedAt?'最近检测：'+new Date(connection.checkedAt).toLocaleString():''})));
+ const blocked=(custom||state.startsWith('BRIDGE_')||['NEEDS_INITIALIZATION','LOGIN_REQUIRED','VERIFICATION_REQUIRED'].includes(state))&&!ready&&state!=='CHECKING';
+ const foot=providerBusy?(setupStage||'等待服务响应。')+' 取消后保留原连接与本次草稿。':blocked?errorText(state)+(state==='CUSTOM_KEY_REQUIRED'?' 请编辑服务，重新输入后检测。':''):custom?new URL(custom.baseURL).host+' · '+(custom.rememberKey?'密钥已保存在此设备':'密钥仅在本次浏览器会话保存'):'当前字幕或正文通过配套豆包扩展发送至豆包。关闭连接页后需重新检测。';
+ return el(d,'section',{id:'pk-connection-card',class:'pk-settings-card'},selector,row,...(custom&&connection.setupOpen?[el(d,'p',{class:'pk-ai-muted',text:'豆包连接页已打开。在豆包原生界面完成登录或验证后，请点击「完成后检测」；成功前继续使用当前服务。'})]:[]),el(d,'div',{class:'pk-connection-foot'},el(d,'span',{id:providerBusy?'pk-provider-phase':undefined,text:foot}),el(d,'span',{text:connection.checkedAt?'最近检测：'+new Date(connection.checkedAt).toLocaleString():''})));
 }
 // The atomic save/activate ACK is the final success boundary. Later read-only
 // status requests cannot re-open cancellation or turn a committed success red.
@@ -171,7 +168,7 @@ function render(){
  const bottom=el(d,'div',{id:'pk-bottom',class:'pk-settings-bottom'},el(d,'span',{'role':'status',text:notice||'更改自动保存'}),reset);
  if(undo)bottom.append(identified(button(d,'撤销',()=>{const previous=undo;undo=null;save(previous);}),'pk-undo'));if(lastFailed)bottom.append(identified(button(d,'重试保存',()=>save(lastFailed)),'pk-retry-save'));view.append(bottom);
  if(notice)view.append(el(d,'p',{id:'pk-notice',class:'pk-settings-notice',text:notice}));
- view.append(el(d,'p',{id:'pk-privacy',class:'pk-settings-privacy',text:'当前字幕或完整长文仅发送至当前启用的 AI 服务。豆包使用浏览器已有会话；自定义服务使用你配置的 Key。切换保留其他连接；失败不会自动换服务。'}));
+ view.append(el(d,'p',{id:'pk-privacy',class:'pk-settings-privacy',text:'当前字幕或完整长文仅发送至当前启用的 AI 服务。豆包通过配套扩展生成，需保持可见连接页打开；自定义服务使用你配置的 Key。切换保留其他连接；失败不会自动换服务。'}));
  const diagnostics=el(d,'details',{id:'pk-diagnostics',class:'pk-settings-diagnostics'},el(d,'summary',{id:'pk-diagnostics-toggle',text:'验收信息（不保活）'}),el(d,'pre',{text:JSON.stringify({version:chrome.runtime.getManifest().version,state:connection.state,diagnostics:connection.diagnostics},null,2)}));view.append(diagnostics);
  patchChildren(root,view);
  if(active&&(!active.isConnected||active.disabled||d.activeElement!==active)){
