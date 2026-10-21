@@ -20,7 +20,7 @@ let bindingRevision=0,providerAdmission=0;
 let service,providerCheck=null;
 const doubao=createDoubaoBridge({onLost:code=>{
  if(!service)return;const wasDoubao=!providers.active();
- service.bridgeLost(code).then(()=>{if(wasDoubao&&!providers.active())notifyState({connectionChanged:true});}).catch(()=>{});
+ service.bridgeLost(code).then(result=>{if(!result?.suspended&&wasDoubao&&!providers.active())notifyState({connectionChanged:true});}).catch(()=>{});
 }});
 const providers=new ProviderStore({onStage:bindingStage,storage:chrome.storage,bindings,verifyPermission:config=>config?hasPermission(descriptorPermissions(config.binding)):Promise.resolve(doubao.available()),onChange:change=>{if(change.invalidate||change.bindingChanged){service.providerChanged();if(providerCheck)cancelConnectionWork();}notifyState({connectionChanged:change.invalidate||change.bindingChanged});}});
 service=new AIService({storage:chrome.storage,doubao,providers,requestCustom:(provider,key,input,mode,signal,binding,onEvent,outputLanguage)=>{if(!binding||binding!==bindings.current()||binding.descriptor.configVersion!==provider.version||binding.descriptor.keyRef!==provider.keyRef)fail('CONNECTION_CHANGED');return binding.executor.generate(key,input,mode,signal,onEvent,outputLanguage);}});
@@ -60,12 +60,12 @@ async function status(){
  const custom=providers.active();
  const permission=!custom||providers.bindingState(custom)!=='ready'?true:await hasPermission(custom.binding?descriptorPermissions(custom.binding):{origins:[normalizeEndpoint(custom.baseURL).permission]});
  const themeMemory=await chrome.storage.session.get('aiXTheme');
- const setupState=await chrome.storage.session.get(['aiDoubaoBridgeSetupV1','aiDoubaoBridgeSetupPendingV1']);
- const setup=setupState.aiDoubaoBridgeSetupV1;
+ const setupState=await chrome.storage.session.get(['aiDoubaoBridgeSetupV2','aiDoubaoBridgeSetupPendingV2']);
+ const setup=setupState.aiDoubaoBridgeSetupV2;
  const tab=Number.isInteger(setup)?await chrome.tabs.get(setup).catch(()=>null):null;
  // Other-extension URLs may be redacted without tabs permission. The marker
  // is only UI guidance; a successful authenticated Port probe proves readiness.
- const setupOpen=!!tab&&(!custom||setupState.aiDoubaoBridgeSetupPendingV1===true);
+ const setupOpen=!!tab&&(!custom||setupState.aiDoubaoBridgeSetupPendingV2===true);
  return {...connection,...(!permission?{state:'PERMISSION_REQUIRED'}:{}),setupOpen,xTheme:themeMemory.aiXTheme,checking:!!(checkTask||providerCheck),diagnostics:{...stats,generation:service.performanceSnapshot()}};
 }
 function cancelConnectionWork(){
@@ -84,15 +84,15 @@ function openSetup(){
    check();
    // Only an explicit settings gesture opens this visible page. Never create
    // a hidden tab or reopen it automatically after a worker/browser restart.
-   const id=(await chrome.storage.session.get('aiDoubaoBridgeSetupV1')).aiDoubaoBridgeSetupV1;check();
+   const id=(await chrome.storage.session.get('aiDoubaoBridgeSetupV2')).aiDoubaoBridgeSetupV2;check();
    if(Number.isInteger(id)){
     const tab=await chrome.tabs.get(id).catch(()=>null);check();
-    if(tab){await chrome.tabs.update(id,{active:true});check();await chrome.storage.session.set({aiDoubaoBridgeSetupPendingV1:true});check();return status();}
+    if(tab){await chrome.tabs.update(id,{active:true});check();await chrome.storage.session.set({aiDoubaoBridgeSetupPendingV2:true});check();return status();}
    }
    const tab=await chrome.tabs.create({url:DOUBAO_BRIDGE_URL,active:true});
    // Preserve the exact visible page marker even on cancellation so a later
    // user action can reuse it. No user page is navigated or auto-closed.
-   await chrome.storage.session.set({aiDoubaoBridgeSetupV1:tab.id,aiDoubaoBridgeSetupPendingV1:true});check();
+   await chrome.storage.session.set({aiDoubaoBridgeSetupV2:tab.id,aiDoubaoBridgeSetupPendingV2:true});check();
    return status();
   }finally{if(setupOpening===task)setupOpening=null;}
  })();return task.promise;
@@ -115,7 +115,7 @@ async function check(){
    await service.connect(params,{signal:task.abort.signal});assert();
    if(!doubao.available())fail('BRIDGE_CHANGED');
    await providers.selectDoubao({signal:task.abort.signal});
-   await chrome.storage.session.set({aiDoubaoBridgeSetupPendingV1:false}).catch(()=>{});
+   await chrome.storage.session.set({aiDoubaoBridgeSetupPendingV2:false}).catch(()=>{});
    notifyState({connectionChanged:true});return status();
   }finally{if(checkTask===task)checkTask=null;}
  })();return task.promise;
@@ -193,9 +193,9 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
    }
    case 'openSettings':await chrome.runtime.openOptionsPage();return null;
    case 'openSetup':return openSetup();
-   case 'connect':return !providers.active()&&service.context?check():openSetup();
+   case 'connect':return check();
    case 'capture':return check();
-   case 'check':return providers.active()?openSetup():check();
+   case 'check':return check();
    case 'cancelCheck':cancelConnectionWork();return null;
    case 'disconnect':{providerCheck?.abort.abort();cancelConnectionWork();const disconnected=service.disconnect();doubao.close();const result=await disconnected;notifyState({connectionChanged:true});return result;}
    case 'cancel':service.cancel(owner);return null;
@@ -222,12 +222,12 @@ chrome.tabs.onUpdated.addListener((tabId,change)=>{if(change.status==='loading')
 // Forget only our setup marker when that exact tab closes/navigates. No tab is
 // automatically removed. The Port owns readiness and cancels native work.
 chrome.tabs.onRemoved.addListener(async tabId=>{
- const key='aiDoubaoBridgeSetupV1';
+ const key='aiDoubaoBridgeSetupV2';
  if((await chrome.storage.session.get(key))[key]===tabId)await chrome.storage.session.remove(key);
 });
 chrome.tabs.onUpdated.addListener(async(tabId,change)=>{
  if(!change.url||change.url===DOUBAO_BRIDGE_URL)return;
- const key='aiDoubaoBridgeSetupV1';
+ const key='aiDoubaoBridgeSetupV2';
  if((await chrome.storage.session.get(key))[key]===tabId)await chrome.storage.session.remove(key);
 });
 

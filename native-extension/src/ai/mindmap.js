@@ -7,6 +7,11 @@ function branchColor(id){
  const index=numeric?Number(parts[0])*3+Number(parts[1]||0):[...parts.slice(0,2).join('.')].reduce((n,c)=>(n*31+c.charCodeAt(0))%997,0);
  return COLORS[index%COLORS.length];
 }
+export function initialExpandedDepth(tree,budget=24){
+ const count=(nodes,depth)=>nodes.reduce((n,item)=>n+1+(depth>0?count(item.children||[],depth-1):0),0);
+ for(const depth of [2,1,0])if(count(tree,depth)<=budget)return depth;
+ return 0;
+}
 export function createMindmap(document,{expandedDepth=1}={}){
  const root=el(document,'div',{class:'pk-ai-map',tabindex:'0','aria-label':'思维导图：拖动平移，使用缩放按钮或 Ctrl 加滚轮缩放'}),layer=el(document,'div',{class:'pk-ai-map-layer'}),svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
  svg.setAttribute('aria-hidden','true');layer.append(svg);root.append(layer);
@@ -14,7 +19,7 @@ export function createMindmap(document,{expandedDepth=1}={}){
  const apply=()=>{layer.style.transform=`translate(${camera.x}px,${camera.y}px) scale(${camera.scale})`;};
  const fit=()=>{
   first=false;const w=root.clientWidth||640,h=root.clientHeight||280;
-  const scale=Math.max(.4,Math.min(1,(w-48)/Math.max(1,width),(h-48)/Math.max(1,height)));
+  const scale=Math.max(.01,Math.min(1,(w-48)/Math.max(1,width),(h-48)/Math.max(1,height)));
   camera={x:Math.max(24,(w-width*scale)/2),y:Math.max(24,(h-height*scale)/2),scale};apply();
  };
  function update(next){
@@ -71,7 +76,7 @@ export function createMindmap(document,{expandedDepth=1}={}){
  const pointerDown=e=>{if(e.button!==0||e.target.closest('button'))return;first=false;drag={id:e.pointerId,x:e.clientX,y:e.clientY,cx:camera.x,cy:camera.y};root.setPointerCapture?.(e.pointerId);};
  const pointerMove=e=>{if(!drag||drag.id!==e.pointerId)return;camera.x=drag.cx+e.clientX-drag.x;camera.y=drag.cy+e.clientY-drag.y;apply();};
  const pointerUp=e=>{if(drag?.id===e.pointerId)drag=null;};
- const zoom=delta=>{first=false;const scale=Math.max(.4,Math.min(2.5,camera.scale+delta)),x=(root.clientWidth||640)/2,y=(root.clientHeight||280)/2;camera={x:x-(x-camera.x)*scale/camera.scale,y:y-(y-camera.y)*scale/camera.scale,scale};apply();};
+ const zoom=delta=>{first=false;const scale=Math.max(.01,Math.min(2.5,camera.scale+delta)),x=(root.clientWidth||640)/2,y=(root.clientHeight||280)/2;camera={x:x-(x-camera.x)*scale/camera.scale,y:y-(y-camera.y)*scale/camera.scale,scale};apply();};
  const wheel=e=>{if(!e.ctrlKey&&!e.metaKey)return;e.preventDefault();zoom(e.deltaY<0?.1:-.1);};
  const key=e=>{if(e.target!==root)return;const delta={ArrowLeft:[30,0],ArrowRight:[-30,0],ArrowUp:[0,30],ArrowDown:[0,-30]}[e.key];if(delta){e.preventDefault();first=false;camera.x+=delta[0];camera.y+=delta[1];apply();}};
  root.addEventListener('pointerdown',pointerDown);root.addEventListener('pointermove',pointerMove);root.addEventListener('pointerup',pointerUp);root.addEventListener('pointercancel',pointerUp);root.addEventListener('wheel',wheel,{passive:false});root.addEventListener('keydown',key);

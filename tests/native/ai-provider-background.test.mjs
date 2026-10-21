@@ -22,7 +22,7 @@ const fixture=async({current=false,read,permission=true,seed,dnr,urlClass=URL,st
    beanCalls.push(m);const reply=v=>port.onMessage.fire({...v,requestId:m.requestId,session:'host-session'});
    if(m.op==='cancel'){reply({type:'error',code:'CANCELLED'});return;}
    Promise.resolve().then(async()=>{const result=bridgeRead?await bridgeRead(m):{status:200,finished:true,text:'OK'};reply({type:'result',result});});
-  }};queueMicrotask(()=>port.onMessage.fire({type:'hello',version:2,session:'host-session',verified:false}));return port;
+  }};queueMicrotask(()=>port.onMessage.fire({type:'hello',version:3,session:'host-session',verified:false}));return port;
  };
  const fetch=async(url,options)=>{calls.push({url,options});if(read)return read(url,options);const probe=JSON.parse(options.body).messages.at(-1).content==='Reply exactly OK.';return {ok:true,status:200,text:async()=>JSON.stringify({choices:[{finish_reason:'stop',message:{role:'assistant',content:probe?'OK':'{"text":"结果"}'}}]})};};
  const context=vm.createContext({chrome,fetch,crypto,URL:urlClass,URLSearchParams,AbortSignal,AbortController,DOMException,performance,structuredClone,TextDecoder,TextEncoder,btoa,setTimeout,clearTimeout});vm.runInContext(source,context);const wire=vm.runInContext('JSON.parse',context);await new Promise(r=>setTimeout(r,10));

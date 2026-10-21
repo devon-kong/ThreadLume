@@ -29,7 +29,7 @@ export class AIService {
   await this.providers?.init();
   const local=await this.storage.local.get([this.connectionKey,'aiCache']);this.connection=local[this.connectionKey]||this.connection;this.cache=local.aiCache||{};
   const session=await this.storage.session.get([this.contextKey,this.blockKey,'aiPerformanceV12']);this.metrics.restore(session.aiPerformanceV12);
-  // Restore only the same still-visible, previously probed host session.
+  // Restore only the same previously probed background host session.
   // A handshake is read-only: never open a page or send a model probe here.
   if(!this.doubao&&session[this.contextKey]?.partition===this.connection.partition&&session[this.contextKey]?.params){try{this.context={...session[this.contextKey],params:validateParams(session[this.contextKey].params)};}catch{await this.storage.session.remove(this.contextKey);}}
   if(session[this.blockKey]?.partition===this.connection.partition&&AUTH_BLOCKS.has(session[this.blockKey].code))this.error=session[this.blockKey].code;
@@ -50,7 +50,7 @@ export class AIService {
  }
  providerChanged(){this.pendingConnection?.abort.abort();this.clearJobs();this.epoch++;this.resources.clear();}
  activeIdentity(){const provider=this.providers?.active();return provider?`custom:${provider.id}:${provider.version}`:this.connection.partition;}
- async status(){await this.init();
+ async status(){await this.init();await this.resumeBridge();
   const provider=this.providers?.active();if(provider)return {state:this.providers.bindingState(provider)!=='ready'?this.providers.bindingState(provider):(this.providers.bindings?.state()||'ready'),checkedAt:provider.checkedAt,connectionId:this.activeIdentity(),providerId:provider.id,providerName:provider.name};
   // A storage change can be observed before connect's final publication.
   // Wait for that transaction (or cancellation), never start a probe/poll.
@@ -116,8 +116,26 @@ export class AIService {
   });this.contextWrite=commit;const pending={abort,signal,epoch,promise:commit};this.pendingConnection=pending;
   try{await commit;check();}finally{if(this.pendingConnection===pending)this.pendingConnection=null;}return this.status();
  }
+ async resumeBridge(){
+  if(this.bridgeRecovery)return this.bridgeRecovery;
+  if(!this.bridgeSuspended||this.providers?.active())return;
+  this.bridgeSuspended=false;if(!this.context)return;
+  const context=this.context,epoch=this.epoch;
+  // Wake only in response to actual status/cache/generation demand, never from
+  // idle disconnect itself (which would repeatedly wake a sleeping worker).
+  const recovery=Promise.resolve().then(()=>this.doubao.restore(context.params)).then(()=>true,()=>false).then(async restored=>{
+   if(this.bridgeRecovery===recovery)this.bridgeRecovery=null;
+   if(context!==this.context||epoch!==this.epoch)return;
+   if(!restored)await this.bridgeLost('BRIDGE_CHANGED');
+  });
+  this.bridgeRecovery=recovery;return recovery;
+ }
  async bridgeLost(code){
   await this.init();
+  if(this.bridgeRecovery)return {suspended:true};
+  if(code==='BRIDGE_CLOSED'&&this.context&&!this.providers?.active()&&!this.jobs.size&&!this.pendingConnection){
+   this.bridgeSuspended=true;return {suspended:true};
+  }
   if(!this.providers?.active())this.pendingConnection?.abort.abort();
   if(!this.context)return;
   // An inactive Doubao connection must not cancel the active custom provider.
@@ -130,7 +148,7 @@ export class AIService {
  async invalidateContext(){await this.init();this.pendingConnection?.abort.abort();this.clearJobs();this.epoch++;this.context=null;this.error='CONTEXT_CHANGED';this.errorRevision++;this.resources.clear();this.connection={enabled:this.connection.enabled,partition:crypto.randomUUID()};await this.writeBlock(null);await this.writeContext(null);await this.writeConnection();}
  async disconnect(){await this.init();this.pendingConnection?.abort.abort();this.clearJobs();this.epoch++;this.context=null;this.error=null;this.errorRevision++;this.resources.clear();this.connection.enabled=false;await this.writeBlock(null);await this.writeContext(null);await this.writeConnection();return this.status();}
  key(input,mode,outputLanguage='zh-CN'){validateLanguage(outputLanguage);const provider=this.providers?.active(),partition=provider?`${provider.id}:${provider.version}:${provider.model}:${PROMPT_VERSION}${provider.binding&&(provider.binding.policyId!=='standard'||provider.binding.policyVersion!==1)?':'+provider.binding.policyId+':'+provider.binding.policyVersion:''}`:this.connection.partition;return `${partition}:${RESULT_VERSION}:${outputLanguage}:${md5(JSON.stringify([input.kind,input.url,input.title,input.text,input.duration||0,input.cues||null]))}:${mode}`;}
- async cached(raw,mode,outputLanguage='zh-CN'){validateLanguage(outputLanguage);const epoch=this.epoch;await this.init();if(epoch!==this.epoch)throw aborted();const input=validateInput(raw);if((input.kind==='article'&&!['article','mindmap'].includes(mode))||(input.kind==='video'&&!['summary','mindmap'].includes(mode)))fail('INVALID_MODE');const provider=this.providers?.active();if(!provider&&this.doubao&&(!this.context||!this.doubao.validContext(this.context.params)))fail(this.error||'NEEDS_INITIALIZATION');if(provider){const state=this.providers.bindingState(provider)!=='ready'?this.providers.bindingState(provider):(this.providers.bindings?.state()||'ready');if(state!=='ready')fail(state);}const entry=this.cache[this.key(input,mode,outputLanguage)];return entry&&Date.now()-entry.at<TTL?entry.result:null;}
+ async cached(raw,mode,outputLanguage='zh-CN'){validateLanguage(outputLanguage);const epoch=this.epoch;await this.init();await this.resumeBridge();if(epoch!==this.epoch)throw aborted();const input=validateInput(raw);if((input.kind==='article'&&!['article','mindmap'].includes(mode))||(input.kind==='video'&&!['summary','mindmap'].includes(mode)))fail('INVALID_MODE');const provider=this.providers?.active();if(!provider&&this.doubao&&(!this.context||!this.doubao.validContext(this.context.params)))fail(this.error||'NEEDS_INITIALIZATION');if(provider){const state=this.providers.bindingState(provider)!=='ready'?this.providers.bindingState(provider):(this.providers.bindings?.state()||'ready');if(state!=='ready')fail(state);}const entry=this.cache[this.key(input,mode,outputLanguage)];return entry&&Date.now()-entry.at<TTL?entry.result:null;}
  cancel(owner){this.cancelledOwners.set(owner,Date.now());for(const [id,at] of this.cancelledOwners)if(Date.now()-at>300000)this.cancelledOwners.delete(id);for(const job of this.jobs.values())if(job.owners.has(owner)){job.owners.delete(owner);for(const reject of job.rejects.get(owner)||[])reject(aborted());job.rejects.delete(owner);if(!job.owners.size)job.abort.abort();}}
  clearJobs(){for(const job of this.jobs.values())this.abortJob(job);this.jobs.clear();}
  performanceSnapshot(){return this.metrics.snapshot();}

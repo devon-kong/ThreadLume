@@ -25,10 +25,10 @@ test('open settings immediately reflect trusted connection changes without focus
   assert.equal(actions.some(a=>['capture','connect','check','openSetup'].includes(a)),false);
  }finally{w.close();}
 });
-test('worker notifies trusted extension settings as well as content scripts when bridge is lost',async()=>{
+test('worker notifies trusted extension settings as well as content scripts when the bridge session is invalidated',async()=>{
  const w=await worker();const messages=[];
  w.chrome.runtime.sendMessage=async message=>{messages.push(message);};
- await w.ports[0].onDisconnect.fire();await until(()=>messages.some(m=>m.action==='stateChanged'&&m.connectionChanged));
+ await w.ports[0].onMessage.fire({type:'invalidated',code:'BRIDGE_CHANGED'});await until(()=>messages.some(m=>m.action==='stateChanged'&&m.connectionChanged));
  assert.notEqual((await w.status()).value.state,'ready');assert.equal(w.requests.filter(m=>m.op==='probe').length,1);
  for(const m of messages){assert.equal(m.ns,'peek-ai-v7');assert.equal(m.connectionChanged,true);assert.equal(m.key,undefined);assert.equal(m.context,undefined);}
 });
