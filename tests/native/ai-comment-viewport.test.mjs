@@ -20,17 +20,17 @@ function fixture(){
  return {w,document,col,card,dom,frames,scroll(y){top=-y;w.dispatchEvent(new w.Event('scroll'));},collapse(){height=68;card.root.querySelector('.pk-ai-icon').click();resize?.();},flush(){const jobs=[...frames.values()];frames.clear();for(const f of jobs)f();},close(){card.destroy();dom.window.close()}};
 }
 
-test('native comments have a viewport below the fixed AI card, updated on document scroll without replacing nodes',async()=>{
+test('native comments stay inside a fixed frame while the document scrolls without replacing nodes',async()=>{
  const r=fixture();try{
  const focal=r.document.querySelector('article'),reply=r.document.querySelector('[data-testid=cellInnerDiv]');
  await Promise.resolve();r.flush();
- assert.equal(r.col.hasAttribute('data-peek-ai-viewport'),true,'a fixed clipping boundary must exist, not just scrolling padding');
- assert.equal(r.col.style.getPropertyValue('--peek-comments-top'),'686px');
- assert.equal(r.col.style.getPropertyValue('--peek-comments-bottom'),'1034px');
+ assert.equal(r.col.hasAttribute('data-peek-ai-viewport'),true,'a fixed frame must exist, not just scrolling padding');
+ assert.equal(r.document.documentElement.style.getPropertyValue('--peek-comments-left'),'640px');
+ assert.equal(r.document.documentElement.style.getPropertyValue('--peek-comments-height'),'348px');
  assert.equal(r.document.documentElement.style.getPropertyValue('--peek-comments-track-top'),'436px');
- r.scroll(600);r.scroll(650);assert.equal(r.frames.size,1,'scroll measurements coalesce per animation frame');r.flush();
- assert.equal(r.col.style.getPropertyValue('--peek-comments-top'),'1086px');
- assert.equal(r.col.style.getPropertyValue('--peek-comments-bottom'),'1434px');
+ r.scroll(600);r.scroll(650);assert.equal(r.frames.size,0,'document scrolling never reschedules the fixed frame');r.flush();
+ assert.equal(r.document.documentElement.style.getPropertyValue('--peek-comments-track-top'),'436px');
+ assert.equal(r.document.documentElement.style.getPropertyValue('--peek-comments-height'),'348px');
  assert.equal(r.document.querySelector('article'),focal);assert.equal(r.document.querySelector('[data-testid=cellInnerDiv]'),reply);
  assert.equal(r.col.scrollTop,0,'window remains the X virtualizer scroll source');
  }finally{r.close()}
@@ -40,7 +40,7 @@ test('collapse and resize update comment boundary; teardown restores styles and 
  const r=fixture();try{
  await Promise.resolve();r.flush();r.collapse();r.flush();
  assert.equal(r.document.documentElement.style.getPropertyValue('--peek-comments-track-top'),'144px');
- r.w.innerHeight=600;r.w.dispatchEvent(new r.w.Event('resize'));r.flush();assert.equal(r.col.style.getPropertyValue('--peek-comments-bottom'),'834px');
+ r.w.innerHeight=600;r.w.dispatchEvent(new r.w.Event('resize'));r.flush();assert.equal(r.document.documentElement.style.getPropertyValue('--peek-comments-height'),'440px');
  r.scroll(700);r.card.destroy();r.flush();
  assert.equal(r.col.hasAttribute('data-peek-ai-viewport'),false);assert.equal(r.col.style.getPropertyValue('--peek-comments-top'),'');assert.equal(r.document.documentElement.style.getPropertyValue('--peek-comments-track-top'),'');
  r.scroll(800);assert.equal(r.frames.size,0,'closed card leaves no scroll work');
@@ -51,9 +51,33 @@ test('comment corners follow the card radius and the shared gap, including after
  const r=fixture();try{
  r.document.documentElement.style.setProperty('--peek-reader-radius','24px');r.document.documentElement.style.setProperty('--peek-reader-gap','12px');
  await Promise.resolve();r.flush();
- assert.match(r.col.style.getPropertyValue('--peek-comments-clip'),/A 24 24 /,'visible contents must clip with the same rounded corners');
+ assert.match(r.document.getElementById('peek-comment-boundary').style.clipPath,/A 24 24 /,'visible contents must clip with the same rounded corners');
  assert.equal(r.document.documentElement.style.getPropertyValue('--peek-comments-track-top'),'440px');
  r.document.documentElement.style.setProperty('--peek-reader-gap','8px');r.w.dispatchEvent(new r.w.Event('resize'));r.flush();
  assert.equal(r.document.documentElement.style.getPropertyValue('--peek-comments-track-top'),'436px');
  }finally{r.close()}
+});
+
+// Catches the old document-relative clip: it moved with the native column until
+// the next animation frame, even though the external card was fixed.
+test('comment frame geometry survives document movement before any animation frame runs',async()=>{
+ const r=fixture();try{
+ await Promise.resolve();r.flush();
+ const boundary=r.document.getElementById('peek-comment-boundary');
+ assert.match(boundary.style.clipPath,/^path\(evenodd,/,'the hit-test boundary must use fixed viewport geometry');
+ const clip=boundary.style.clipPath;
+ r.scroll(650);
+ assert.equal(boundary.style.clipPath,clip,'all four corners stay put before rAF');
+ assert.equal(r.frames.size,0,'frame geometry must not chase native document scrolling');
+ assert.equal(r.col.style.getPropertyValue('--peek-comments-clip'),'','native scroll column must not carry a moving clip');
+ r.flush();assert.equal(boundary.style.clipPath,clip);
+ }finally{r.close()}
+});
+
+test('teardown before the first microtask leaves no frame, marker or owned geometry',async()=>{
+ const r=fixture();r.card.destroy();await Promise.resolve();r.flush();
+ assert.equal(r.document.getElementById('peek-comment-boundary'),null);
+ assert.equal(r.col.hasAttribute('data-peek-ai-viewport'),false);
+ assert.equal(r.document.documentElement.style.getPropertyValue('--peek-comments-track-top'),'');
+ r.close();
 });

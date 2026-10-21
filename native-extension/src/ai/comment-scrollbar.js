@@ -16,7 +16,8 @@ export function attachCommentScrollbar(document){
  }
  function update(){frame=0;if(closed)return;try{
   if(!active()){remove();return;}const col=document.querySelector('[data-testid="primaryColumn"]');if(!col){remove();return;}
-  if(col!==observedColumn){releaseViewport?.();releaseViewport=attachCommentViewport(document,()=>document.getElementById('peek-ai-card'));}releaseViewport?.update();
+  if(col!==observedColumn){releaseViewport?.();releaseViewport=attachCommentViewport(document,()=>document.getElementById('peek-ai-card'));}
+  if(col!==observedColumn||document.getElementById('peek-ai-card')!==observedCard)releaseViewport?.update();
   if(!bar)create();const card=document.getElementById('peek-ai-card'),box=card?.getBoundingClientRect(),top=box?.width>0?box.bottom+16:76,bottom=win.innerHeight-24,h=Math.max(0,bottom-top),right=box?.width>0?box.right:win.innerWidth-16,max=range(),t=Math.min(h,Math.max(28,h*win.innerHeight/(max+win.innerHeight)));
   if(h<44){remove();return;}
   Object.assign(bar.style,{top:top+'px',left:(right-15)+'px',height:h+'px'});Object.assign(thumb.style,{height:t+'px',transform:`translateY(${(h-t)*Math.max(0,Math.min(max,win.scrollY))/Math.max(1,max)}px)`});bar.setAttribute('aria-valuemax',String(Math.round(max)));bar.setAttribute('aria-valuenow',String(Math.round(Math.max(0,Math.min(max,win.scrollY)))));root.setAttribute('data-peek-internal-scrollbar','');
