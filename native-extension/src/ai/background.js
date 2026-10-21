@@ -33,6 +33,9 @@ async function notifyState(extra={}){
   // never another extension, a website handler, or a new injection.
   const tabs=await chrome.tabs.query({});
   await Promise.all(tabs.filter(t=>Number.isInteger(t.id)).map(t=>chrome.tabs.sendMessage(t.id,message,{frameId:0}).catch(()=>{})));
+  // tabs.sendMessage cannot reach extension settings documents. Broadcast the
+  // same sanitized event there so an open settings page cannot retain stale ready.
+  await chrome.runtime.sendMessage?.(message).catch(()=>{});
  }catch{/* Closed documents do not own state. No retry/poll. */}
 }
 async function checkProvider(operation,config){

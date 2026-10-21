@@ -5,6 +5,10 @@ import {normalizeEndpoint,validateProviderConfig} from './custom-provider.js';
 import {providerPermissions} from './transport-policy.js';
 const d=document,root=d.getElementById('peek-settings');let prefs={...DEFAULTS},connection={state:'DISCONNECTED'},busy=false,notice='',undo=null,lastFailed=null,saveQueue=Promise.resolve(),saveRevision=0,pendingSaves=0,refreshRevision=0,confirmedPrefs={...DEFAULTS},providers={activeId:'doubao',services:[]},providerBusy=false,providerRevision=0,providerDialog=null;
 const providerDrafts=new Map();
+chrome.runtime.onMessage?.addListener((m,sender)=>{
+ if(sender.id!==chrome.runtime.id||sender.tab||m?.ns!=='peek-ai-v7'||m.action!=='stateChanged')return;
+ refresh();
+});
 let setupOperation=null,setupStage='';
 const SETUP_LABELS={permission:'正在请求域名授权…',background:'正在准备后台…',rules:'正在准备网络规则…',model:'正在检测模型…',commit:'正在保存配置…'};
 function beginSetup(){setupOperation=crypto.randomUUID();showSetup('permission');return setupOperation;}
