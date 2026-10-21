@@ -26,3 +26,12 @@ test('invalid generated output stays failed and offers an explicit local retry w
 test('mindmap failure places recovery before the preview and makes its body scrollable',()=>{
  const w=new JSDOM('<head><style>'+readFileSync('native-extension/ai.css','utf8')+'</style></head><body></body>',{pretendToBeVisual:true}).window,d=w.document,c=createCard({document:d,input:{kind:'article'},preferences:DEFAULTS});d.body.append(c.root);d.getElementById('pk-ai-tab-mindmap').click();c.set('mindmap','loading');c.progress('mindmap','Overview',{version:1,outputLanguage:'zh-CN',text:'Overview',tree:[{id:'0',text:'Partial',children:[]}],highlights:[]});c.flushProgress();c.set('mindmap','error','CUSTOM_INVALID_RESPONSE');const panel=d.getElementById('pk-ai-view-mindmap'),error=panel.querySelector('.pk-ai-error'),map=panel.querySelector('.pk-ai-map');assert.equal(panel.dataset.state,'error');assert.ok(error.compareDocumentPosition(map)&w.Node.DOCUMENT_POSITION_FOLLOWING);assert.equal(w.getComputedStyle(d.querySelector('.pk-ai-body')).overflow,'auto');c.destroy();w.close();
 });
+test('language menu floats without resizing content and closes on outside input and Escape',()=>{
+ const w=new JSDOM('<body><button id="outside">Outside</button></body>',{pretendToBeVisual:true}).window,d=w.document,changes=[],c=createCard({document:d,input:{kind:'article'},preferences:DEFAULTS,onLanguage:l=>changes.push(l)});d.body.append(c.root);
+ const trigger=d.getElementById('pk-ai-language'),panel=d.querySelector('.pk-ai-language-panel');trigger.click();
+ assert.equal(panel.getAttribute('role'),'menu');assert.equal(d.activeElement.dataset.language,'zh-CN');
+ panel.dispatchEvent(new w.KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true,cancelable:true}));assert.equal(d.activeElement.dataset.language,'en');d.activeElement.click();
+ assert.deepEqual(changes,['en']);assert.equal(d.getElementById('pk-ai-language-en').getAttribute('aria-checked'),'true');
+ trigger.click();d.getElementById('outside').dispatchEvent(new w.Event('pointerdown',{bubbles:true}));assert.equal(panel.hidden,true);
+ trigger.click();panel.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));assert.equal(panel.hidden,true);assert.equal(d.activeElement,trigger);c.destroy();w.close();
+});

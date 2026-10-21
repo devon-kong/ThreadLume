@@ -1,3 +1,4 @@
+import {attachCommentViewport} from '../../native-extension/src/ai/comment-viewport.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
@@ -15,6 +16,7 @@ function fixture(){
  const card=createCard({document,input:{kind:'video',title:'Native video',video:document.querySelector('video')},preferences:DEFAULTS,onRetry(){},onSettings(){}});
  card.root.getBoundingClientRect=()=>({left:640,right:1184,top:68,bottom:68+height,width:544,height});
  document.body.append(card.root);
+ const release=attachCommentViewport(document,card.root),destroy=card.destroy;card.destroy=()=>{release();destroy();};
  return {w,document,col,card,dom,frames,scroll(y){top=-y;w.dispatchEvent(new w.Event('scroll'));},collapse(){height=68;card.root.querySelector('.pk-ai-icon').click();resize?.();},flush(){const jobs=[...frames.values()];frames.clear();for(const f of jobs)f();},close(){card.destroy();dom.window.close()}};
 }
 
@@ -47,7 +49,7 @@ test('collapse and resize update comment boundary; teardown restores styles and 
 
 test('comment corners follow the card radius and the shared gap, including after a size change',async()=>{
  const r=fixture();try{
- r.card.root.style.borderTopLeftRadius='24px';r.document.documentElement.style.setProperty('--peek-reader-gap','12px');
+ r.document.documentElement.style.setProperty('--peek-reader-radius','24px');r.document.documentElement.style.setProperty('--peek-reader-gap','12px');
  await Promise.resolve();r.flush();
  assert.match(r.col.style.getPropertyValue('--peek-comments-clip'),/A 24 24 /,'visible contents must clip with the same rounded corners');
  assert.equal(r.document.documentElement.style.getPropertyValue('--peek-comments-track-top'),'440px');

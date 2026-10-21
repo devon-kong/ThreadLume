@@ -23,3 +23,9 @@ test('unchanged map labels retain text nodes and avoid repeated geometry reads d
 test('early child previews do not force a viewport read before a main node is ready to frame',()=>{
  const w=new JSDOM('<body></body>').window,d=w.document,map=createMindmap(d);d.body.append(map.root);let reads=0;Object.defineProperty(map.root,'clientHeight',{get(){reads++;return 110;}});map.update([{id:'0.0',text:'Early child',children:[]}]);assert.equal(reads,0);map.destroy();w.close();
 });
+test('trackpad pans both axes without scrolling ancestors, while pinch still zooms',()=>{
+ const w=new JSDOM('<body></body>').window,map=createMindmap(w.document);w.document.body.append(map.root);const before=map.snapshot();
+ const move=new w.WheelEvent('wheel',{deltaX:70,deltaY:-45,bubbles:true,cancelable:true});map.root.dispatchEvent(move);
+ assert.equal(move.defaultPrevented,true);assert.deepEqual(map.snapshot(),{x:before.x-70,y:before.y+45,scale:before.scale});
+ map.root.dispatchEvent(new w.WheelEvent('wheel',{deltaY:-10,ctrlKey:true,cancelable:true}));assert.ok(map.snapshot().scale>before.scale);map.destroy();w.close();
+});

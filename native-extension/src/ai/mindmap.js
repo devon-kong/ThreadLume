@@ -13,7 +13,7 @@ export function initialExpandedDepth(tree,budget=24){
  return 0;
 }
 export function createMindmap(document,{expandedDepth=1}={}){
- const root=el(document,'div',{class:'pk-ai-map',tabindex:'0','aria-label':'思维导图：拖动平移，使用缩放按钮或 Ctrl 加滚轮缩放'}),layer=el(document,'div',{class:'pk-ai-map-layer'}),svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+ const root=el(document,'div',{class:'pk-ai-map',tabindex:'0','aria-label':'思维导图：双指滑动或拖动平移，捏合或 Ctrl 加滚轮缩放'}),layer=el(document,'div',{class:'pk-ai-map-layer'}),svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
  svg.setAttribute('aria-hidden','true');layer.append(svg);root.append(layer);
  const nodes=new Map(),edges=new Map(),expanded=new Map();let tree=[],camera={x:24,y:24,scale:1},drag=null,first=true,width=0,height=0,closed=false;
  const apply=()=>{layer.style.transform=`translate(${camera.x}px,${camera.y}px) scale(${camera.scale})`;};
@@ -77,7 +77,7 @@ export function createMindmap(document,{expandedDepth=1}={}){
  const pointerMove=e=>{if(!drag||drag.id!==e.pointerId)return;camera.x=drag.cx+e.clientX-drag.x;camera.y=drag.cy+e.clientY-drag.y;apply();};
  const pointerUp=e=>{if(drag?.id===e.pointerId)drag=null;};
  const zoom=delta=>{first=false;const scale=Math.max(.01,Math.min(2.5,camera.scale+delta)),x=(root.clientWidth||640)/2,y=(root.clientHeight||280)/2;camera={x:x-(x-camera.x)*scale/camera.scale,y:y-(y-camera.y)*scale/camera.scale,scale};apply();};
- const wheel=e=>{if(!e.ctrlKey&&!e.metaKey)return;e.preventDefault();zoom(e.deltaY<0?.1:-.1);};
+ const wheel=e=>{if(closed)return;e.preventDefault();e.stopPropagation();if(e.ctrlKey||e.metaKey){if(e.deltaY)zoom(e.deltaY<0?.1:-.1);return;}first=false;const unit=e.deltaMode===1?16:e.deltaMode===2?(root.clientHeight||280):1;camera.x-=e.deltaX*unit;camera.y-=e.deltaY*unit;apply();};
  const key=e=>{if(e.target!==root)return;const delta={ArrowLeft:[30,0],ArrowRight:[-30,0],ArrowUp:[0,30],ArrowDown:[0,-30]}[e.key];if(delta){e.preventDefault();first=false;camera.x+=delta[0];camera.y+=delta[1];apply();}};
  root.addEventListener('pointerdown',pointerDown);root.addEventListener('pointermove',pointerMove);root.addEventListener('pointerup',pointerUp);root.addEventListener('pointercancel',pointerUp);root.addEventListener('wheel',wheel,{passive:false});root.addEventListener('keydown',key);
  return {root,update,zoom,fit,snapshot:()=>({...camera}),destroy(){closed=true;root.remove();nodes.clear();edges.clear();expanded.clear();tree=[];}};

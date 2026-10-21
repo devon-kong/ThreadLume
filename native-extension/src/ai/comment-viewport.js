@@ -7,6 +7,7 @@ export function attachCommentViewport(document,card){
  if(!win||!col)return ()=>{};
  const root=document.documentElement,marker='data-peek-ai-viewport';
  const priorMarker=col.getAttribute(marker),saved=new Map(),owned=new Map();
+ const boundary=document.createElement('div');boundary.id='peek-comment-boundary';boundary.setAttribute('aria-hidden','true');document.body.append(boundary);
  let closed=false,frame=0;
  const request=win.requestAnimationFrame?.bind(win)||(f=>win.setTimeout(f,16));
  const cancel=win.cancelAnimationFrame?.bind(win)||win.clearTimeout.bind(win);
@@ -19,15 +20,18 @@ export function attachCommentViewport(document,card){
  const px=n=>`${Math.round(n*1000)/1000}px`;
  const update=()=>{
   frame=0;
-  if(closed||!card.isConnected||!col.isConnected||win.innerWidth<980)return;
-  const box=card.getBoundingClientRect(),column=col.getBoundingClientRect();
+  if(closed||!col.isConnected||win.innerWidth<980)return;
+  const current=typeof card==='function'?card():card;
+  const style=win.getComputedStyle(root),inset=parseFloat(style.getPropertyValue('--peek-reader-inset'))||16;
+  const box=current?.isConnected&&!current.hidden?current.getBoundingClientRect():{left:win.innerWidth*.52+(parseFloat(style.getPropertyValue('--peek-reader-gap'))||8),right:win.innerWidth-inset,bottom:(parseFloat(style.getPropertyValue('--peek-reader-top'))||52)+inset,width:win.innerWidth*.48-inset-8,height:1};
+  const column=col.getBoundingClientRect();
   // A native lightbox temporarily hides the card via CSS. Keep the last good
   // geometry; CSS releases the clip while that lightbox owns the screen.
   if(box.width<=0||box.height<=0||column.width<=0)return;
   const gap=parseFloat(win.getComputedStyle(root).getPropertyValue('--peek-reader-gap'))||8;
-  const top=Math.min(box.bottom+gap,win.innerHeight-16),bottom=win.innerHeight-16;
+  const top=Math.min(box.bottom+(current?.isConnected&&!current.hidden?gap:0),win.innerHeight-inset),bottom=win.innerHeight-inset;
   const left=box.left-column.left,right=box.right-column.left,t=top-column.top,b=bottom-column.top;
-  const radius=Math.max(0,Math.min(parseFloat(win.getComputedStyle(card).borderTopLeftRadius)||16,(right-left)/2,(b-t)/2));
+  const radius=Math.max(0,Math.min(parseFloat(style.getPropertyValue('--peek-reader-radius'))||16,(right-left)/2,(b-t)/2));
   const n=v=>Math.round(v*1000)/1000,r=n(radius),x=n(left),y=n(t),end=n(right),low=n(b);
   // Two clockwise subpaths form a union: uncut left pane + rounded replies.
   // The path is extension-generated geometry, never provider/model text.
@@ -43,15 +47,16 @@ export function attachCommentViewport(document,card){
  const schedule=()=>{if(!closed&&!frame)frame=request(update);};
  win.addEventListener('scroll',schedule,{passive:true});win.addEventListener('resize',schedule);
  const resize=typeof win.ResizeObserver==='function'?new win.ResizeObserver(schedule):null;
- resize?.observe(card);resize?.observe(col);resize?.observe(root);
+ if(card&&typeof card!=='function')resize?.observe(card);resize?.observe(col);resize?.observe(root);
  // The card is appended by the caller immediately after construction.
  win.queueMicrotask(schedule);
- return ()=>{
-  if(closed)return;closed=true;cancel(frame);frame=0;
+ const release=()=>{
+  if(closed)return;closed=true;cancel(frame);frame=0;boundary.remove();
   win.removeEventListener('scroll',schedule);win.removeEventListener('resize',schedule);resize?.disconnect();
   for(const [key,prior] of saved){if(prior.node.style.getPropertyValue(key)!==owned.get(key))continue;
    if(prior.value)prior.node.style.setProperty(key,prior.value,prior.priority);else prior.node.style.removeProperty(key);
   }
   if(col.getAttribute(marker)===''){if(priorMarker===null)col.removeAttribute(marker);else col.setAttribute(marker,priorMarker);}
  };
+ release.update=update;return release;
 }
