@@ -45,7 +45,7 @@ Native X menus, comments and source content keep X's own language. AI output dep
 
 ## Timing observations
 
-These are individual observations, **not a benchmark or improvement claim**. No previous percentage improvement is reused. Service latency, model output length, source and cache state vary.
+The article timing sample is the [public Chinese-language article by @Khazix0918](https://x.com/Khazix0918/status/2112794968981139875), not the English post used in the updated README screenshots. These are individual observations, **not a benchmark or improvement claim**. No previous percentage improvement is reused. Service latency, model output length, source and cache state vary.
 
 | Sample | Mode / cache | First readable in foreground | Complete display | Backend completion |
 | --- | --- | --- | --- | --- |
@@ -56,10 +56,11 @@ Timers start at request admission; source extraction is separately measured. Fir
 
 ## Screenshot provenance
 
-All four README images are real screenshots of the 0.12.0 candidate's final product code, captured through browser interaction. The summary image is a direct crop of the AI card; map branches were interactively collapsed for readability. No generated interface or fabricated model output is used.
+All five README images are real screenshots of the v0.12.0 product, captured through browser interaction. The English reading examples and captioned-video image were refreshed in a documentation-only follow-up on 21 October 2026; the release code and package are unchanged. Capture viewports were 1341 × 814 CSS pixels for the English post and 1329 × 802 for the video. The summary image is a direct crop of the AI card; map branches were interactively collapsed for readability. No generated interface or fabricated model output is used.
 
-- Reader / summary / mind map: [public article by @Khazix0918](https://x.com/Khazix0918/status/2112794968981139875).
-- Video acceptance: [public captioned video by @GoSailGlobal](https://x.com/GoSailGlobal/status/2111665973891854815).
+- Reader / summary / mind map: [public English post by @karpathy](https://x.com/karpathy/status/2109361546505966046), with English output from the existing configured service.
+- Video screenshot: [public captioned video by @PromptWizard](https://x.com/PromptWizard/status/2053112760381436066). Native English captions were explicitly enabled through the player UI; the screenshot shows those captions alongside completed AI chapters. This is a separate showcase sample from the release acceptance video below.
+- Original release video acceptance: [public captioned video by @GoSailGlobal](https://x.com/GoSailGlobal/status/2111665973891854815).
 - Settings: real configured service, with diagnostics closed and no API-key value displayed.
 
 Source posts and images belong to their respective authors. Public handles appearing in the screenshots identify the quoted content; no private conversation is shown.

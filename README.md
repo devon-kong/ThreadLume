@@ -1,5 +1,7 @@
-<p align="center"><img src="public/brand/logo-light.svg" alt="ThreadLume" width="420"></p>
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="public/brand/logo-dark.svg"><img src="public/brand/logo-light.svg" alt="ThreadLume" width="420"></picture></p>
 <p align="center"><strong>Read Beyond the Post.</strong><br>A native two-column reader for X, with AI summaries, video chapters and interactive mind maps.</p>
+
+**English** · [简体中文](README.zh-CN.md)
 
 [Installation](#installation) · [Architecture](docs/architecture.md) · [Engineering case study](docs/case-study.md) · [Validation](docs/validation.md) · [Privacy](PRIVACY.md)
 
@@ -14,6 +16,12 @@ ThreadLume keeps the original post and its media beside the conversation. Read a
 | Article summary | Interactive mind map |
 | --- | --- |
 | ![Article summary](docs/assets/summary.png) | ![Interactive mind map](docs/assets/mindmap.png) |
+
+**Video captions and chapters**
+
+![Native video captions with AI chapters](docs/assets/video-captions.png)
+
+**AI service settings**
 
 ![AI service settings](docs/assets/settings.png)
 
