@@ -30,8 +30,8 @@
 
 export const SKIN_VARIANT = "floating"; // "floating" | "flush"
 
-const GEOM_FLOATING = { topbarH: 52, topInset: 8, inset: 16, gap: 4, radius: 16 };
-const GEOM_FLUSH = { topbarH: 52, topInset: 0, inset: 0, gap: 0, radius: 0 };
+const GEOM_FLOATING = { topbarH: 52, topInset: 4, inset: 16, columnGap: 2, gap: 4, radius: 16 };
+const GEOM_FLUSH = { topbarH: 52, topInset: 0, inset: 0, columnGap: 0, gap: 0, radius: 0 };
 
 export function skinGeometry() {
   return { ...(SKIN_VARIANT === "flush" ? GEOM_FLUSH : GEOM_FLOATING) };
@@ -80,6 +80,7 @@ export function skinCss() {
     --peek-reader-card-top: ${g.topbarH + g.topInset}px;
     --peek-reader-inset: ${g.inset}px;
     --peek-reader-gap: ${g.gap}px;
+    --peek-reader-column-gap: ${g.columnGap}px;
     --peek-reader-radius: ${g.radius}px;
   }
   /* ---- focal post: floating reading card (flush variant: inset 0 → edge-to-edge) ---- */
@@ -87,7 +88,9 @@ export function skinCss() {
     left: var(--peek-reader-inset) !important;
     top: var(--peek-reader-card-top) !important;
     bottom: var(--peek-reader-inset) !important;
-    width: calc(52vw - var(--peek-reader-inset) - var(--peek-reader-gap)) !important;
+    width: calc(52vw - var(--peek-reader-inset) - var(--peek-reader-column-gap)) !important;
+    /* X may temporarily disable its scrolling list; the pinned pane is independent. */
+    pointer-events: auto !important;
     border: 1px solid var(--peek-lad-border, #eff3f4) !important;
     border-radius: var(--peek-reader-radius) !important;
     box-shadow: var(--peek-lad-shadow, none) !important;
@@ -98,8 +101,8 @@ export function skinCss() {
      virtualizer measures cells against these widths) + card background so the
      dimmed canvas shows through the gaps as visual separation ---- */
   html[data-peek-lad="on"] [data-testid="cellInnerDiv"] {
-    margin-left: calc(52vw + var(--peek-reader-gap)) !important;
-    width: calc(48vw - var(--peek-reader-gap) - var(--peek-reader-inset)) !important;
+    margin-left: calc(52vw + var(--peek-reader-column-gap)) !important;
+    width: calc(48vw - var(--peek-reader-column-gap) - var(--peek-reader-inset)) !important;
     background: var(--peek-lad-bg, #ffffff);
   }
   /* X's own detail app bar ("← 帖子") is replaced by the reader top bar. The

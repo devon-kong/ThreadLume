@@ -7,6 +7,7 @@ export function attachCommentViewport(document,card){
  const root=document.documentElement,marker='data-peek-ai-viewport';
  const priorMarker=col.getAttribute(marker),saved=new Map(),owned=new Map();
  const boundary=document.createElement('div');boundary.id='peek-comment-boundary';boundary.setAttribute('aria-hidden','true');document.body.append(boundary);
+ const trim=document.createElement('div');trim.id='peek-focal-bottom-trim';trim.setAttribute('aria-hidden','true');trim.style.pointerEvents='none';document.body.append(trim);
  let closed=false,frame=0,observedCard=null;
  const request=win.requestAnimationFrame?.bind(win)||(f=>win.setTimeout(f,16));
  const cancel=win.cancelAnimationFrame?.bind(win)||win.clearTimeout.bind(win);
@@ -23,9 +24,10 @@ export function attachCommentViewport(document,card){
   if(current!==observedCard){if(observedCard)resize?.unobserve?.(observedCard);observedCard=current;if(current)resize?.observe(current);}
   const style=win.getComputedStyle(root),inset=parseFloat(style.getPropertyValue('--peek-reader-inset'))||16;
   const gap=parseFloat(style.getPropertyValue('--peek-reader-gap'))||8,barTop=parseFloat(style.getPropertyValue('--peek-reader-top'))||52;
+  const columnGap=parseFloat(style.getPropertyValue('--peek-reader-column-gap'))||gap;
   const cardTop=parseFloat(style.getPropertyValue('--peek-reader-card-top'))||barTop+inset;
   const hasCard=current?.isConnected&&!current.hidden;
-  const box=hasCard?current.getBoundingClientRect():{left:win.innerWidth*.52+gap,right:win.innerWidth-inset,bottom:cardTop,width:win.innerWidth*.48-inset-gap,height:1};
+  const box=hasCard?current.getBoundingClientRect():{left:win.innerWidth*.52+columnGap,right:win.innerWidth-inset,bottom:cardTop,width:win.innerWidth*.48-inset-columnGap,height:1};
   // A native lightbox hides the card with CSS. Keep the previous geometry;
   // CSS releases both surface and frame synchronously while the lightbox owns it.
   if(box.width<=0||box.height<=0)return;
@@ -33,15 +35,19 @@ export function attachCommentViewport(document,card){
   const left=box.left,right=box.right;
   // Cover the whole gutter up to the focal card's right edge. Starting halfway
   // through it exposes the focal shadow as a hard vertical seam behind both cards.
-  const frameLeft=left-gap*2;
+  const frameLeft=left-columnGap*2;
   const radius=Math.max(0,Math.min(parseFloat(style.getPropertyValue('--peek-reader-radius'))||16,(right-left)/2,(bottom-top)/2));
   const r=n(radius);
   // A fixed outer frame with a rounded hole. Unlike a clip on primaryColumn,
   // this never changes with scrollY. The hole also lets native pointer events
   // through; the painted perimeter blocks clicks on concealed native content.
-  // The left bottom strip meets (never overlaps) the right frame, so evenodd
-  // cannot punch an accidental hole through either card's bottom surround.
-  const path=`path(evenodd, "M ${n(frameLeft)} ${n(barTop)} H ${win.innerWidth} V ${win.innerHeight} H ${n(frameLeft)} Z M ${n(left+radius)} ${n(top)} H ${n(right-radius)} A ${r} ${r} 0 0 1 ${n(right)} ${n(top+radius)} V ${n(bottom-radius)} A ${r} ${r} 0 0 1 ${n(right-radius)} ${n(bottom)} H ${n(left+radius)} A ${r} ${r} 0 0 1 ${n(left)} ${n(bottom-radius)} V ${n(top+radius)} A ${r} ${r} 0 0 1 ${n(left+radius)} ${n(top)} Z M 0 ${n(bottom)} H ${n(frameLeft)} V ${win.innerHeight} H 0 Z")`;
+  // Restrict the actual element box to the right pane. A disconnected left
+  // subpath made compositor wheel hit testing cover the left scroll container,
+  // even while DOM elementFromPoint correctly reported the hole beneath it.
+  // The separate left bottom trim is paint-only and can never catch input.
+  boundary.style.left=px(frameLeft);trim.style.width=px(frameLeft);trim.style.height=px(inset);
+  const x=value=>n(value-frameLeft);
+  const path=`path(evenodd, "M 0 ${n(barTop)} H ${x(win.innerWidth)} V ${win.innerHeight} H 0 Z M ${x(left+radius)} ${n(top)} H ${x(right-radius)} A ${r} ${r} 0 0 1 ${x(right)} ${n(top+radius)} V ${n(bottom-radius)} A ${r} ${r} 0 0 1 ${x(right-radius)} ${n(bottom)} H ${x(left+radius)} A ${r} ${r} 0 0 1 ${x(left)} ${n(bottom-radius)} V ${n(top+radius)} A ${r} ${r} 0 0 1 ${x(left+radius)} ${n(top)} Z")`;
   if(boundary.style.clipPath!==path)boundary.style.clipPath=path;
   write('--peek-comments-left',px(left));
   write('--peek-comments-width',px(right-left));
@@ -55,7 +61,7 @@ export function attachCommentViewport(document,card){
  // The caller may append the AI card just after construction.
  win.queueMicrotask(()=>{if(!closed)update();});
  const release=()=>{
-  if(closed)return;closed=true;cancel(frame);frame=0;boundary.remove();
+  if(closed)return;closed=true;cancel(frame);frame=0;boundary.remove();trim.remove();
   win.removeEventListener('resize',schedule);resize?.disconnect();
   for(const [key,prior] of saved){if(root.style.getPropertyValue(key)!==owned.get(key))continue;
    if(prior.value)root.style.setProperty(key,prior.value,prior.priority);else root.style.removeProperty(key);

@@ -337,7 +337,8 @@ test("K9 皮肤 CSS 的几何变量与 skinGeometry() 单一来源一致（预�
   assert.ok(skin.includes(`--peek-reader-inset: ${g.inset}px`));
   assert.ok(skin.includes(`--peek-reader-gap: ${g.gap}px`));
   assert.ok(skin.includes(`--peek-reader-radius: ${g.radius}px`));
-  assert.ok(skin.includes(`width: calc(52vw - var(--peek-reader-inset) - var(--peek-reader-gap))`), "focal card width = geometry");
+  assert.ok(skin.includes(`--peek-reader-column-gap: ${g.columnGap}px`));
+  assert.ok(skin.includes(`width: calc(52vw - var(--peek-reader-inset) - var(--peek-reader-column-gap))`), "focal card width = geometry");
   // Preview and native focal top share the same top inset independently of side margins.
   assert.ok(skin.includes(`--peek-reader-card-top: ${g.topbarH + g.topInset}px`));
   assert.ok(skin.includes(`top: var(--peek-reader-card-top)`));

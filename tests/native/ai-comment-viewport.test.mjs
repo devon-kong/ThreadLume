@@ -81,3 +81,17 @@ test('teardown before the first microtask leaves no frame, marker or owned geome
  assert.equal(r.document.documentElement.style.getPropertyValue('--peek-comments-track-top'),'');
  r.close();
 });
+
+test('interactive comment frame excludes the left pane; its bottom trim cannot catch wheel input',async()=>{
+ const r=fixture();try{
+ r.document.documentElement.style.setProperty('--peek-reader-column-gap','2px');
+ r.document.documentElement.style.setProperty('--peek-reader-gap','4px');
+ await Promise.resolve();r.flush();
+ const frame=r.document.getElementById('peek-comment-boundary'),trim=r.document.getElementById('peek-focal-bottom-trim');
+ assert.equal(frame.style.left,'636px','the actual hit-test box starts at the left card right edge');
+ assert.ok(trim);assert.equal(trim.style.pointerEvents,'none');assert.equal(trim.style.width,'636px');assert.equal(trim.style.height,'16px');
+ assert.equal(r.document.documentElement.style.getPropertyValue('--peek-comments-track-top'),'432px','column gap does not change the vertical card gap');
+ const clip=frame.style.clipPath;r.scroll(600);assert.equal(frame.style.clipPath,clip);assert.equal(r.frames.size,0);
+ r.card.destroy();assert.equal(r.document.getElementById('peek-focal-bottom-trim'),null);
+ }finally{r.close()}
+});

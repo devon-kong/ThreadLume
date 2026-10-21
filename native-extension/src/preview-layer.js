@@ -212,7 +212,7 @@ function previewCss() {
       left: ${g.inset}px;
       top: ${g.topbarH + g.topInset}px;
       bottom: ${g.inset}px;
-      width: calc(52vw - ${g.inset + g.gap}px);
+      width: calc(52vw - ${g.inset + g.columnGap}px);
       box-sizing: border-box; overflow: hidden; z-index: ${PREVIEW_Z_INDEX};
       pointer-events: none; background: ${theme.card}; color: ${theme.fg};
       border: 1px solid ${theme.border};
