@@ -30,12 +30,15 @@ export function attachCommentViewport(document,card){
   if(box.width<=0||box.height<=0)return;
   const top=Math.min(box.bottom+(hasCard?gap:0),win.innerHeight-inset),bottom=win.innerHeight-inset;
   const left=box.left,right=box.right;
+  // Cover the whole gutter up to the focal card's right edge. Starting halfway
+  // through it exposes the focal shadow as a hard vertical seam behind both cards.
+  const frameLeft=left-gap*2;
   const radius=Math.max(0,Math.min(parseFloat(style.getPropertyValue('--peek-reader-radius'))||16,(right-left)/2,(bottom-top)/2));
   const r=n(radius);
   // A fixed outer frame with a rounded hole. Unlike a clip on primaryColumn,
   // this never changes with scrollY. The hole also lets native pointer events
   // through; the painted perimeter blocks clicks on concealed native content.
-  const path=`path(evenodd, "M ${n(left-gap)} ${n(barTop)} H ${win.innerWidth} V ${win.innerHeight} H ${n(left-gap)} Z M ${n(left+radius)} ${n(top)} H ${n(right-radius)} A ${r} ${r} 0 0 1 ${n(right)} ${n(top+radius)} V ${n(bottom-radius)} A ${r} ${r} 0 0 1 ${n(right-radius)} ${n(bottom)} H ${n(left+radius)} A ${r} ${r} 0 0 1 ${n(left)} ${n(bottom-radius)} V ${n(top+radius)} A ${r} ${r} 0 0 1 ${n(left+radius)} ${n(top)} Z")`;
+  const path=`path(evenodd, "M ${n(frameLeft)} ${n(barTop)} H ${win.innerWidth} V ${win.innerHeight} H ${n(frameLeft)} Z M ${n(left+radius)} ${n(top)} H ${n(right-radius)} A ${r} ${r} 0 0 1 ${n(right)} ${n(top+radius)} V ${n(bottom-radius)} A ${r} ${r} 0 0 1 ${n(right-radius)} ${n(bottom)} H ${n(left+radius)} A ${r} ${r} 0 0 1 ${n(left)} ${n(bottom-radius)} V ${n(top+radius)} A ${r} ${r} 0 0 1 ${n(left+radius)} ${n(top)} Z")`;
   if(boundary.style.clipPath!==path)boundary.style.clipPath=path;
   write('--peek-comments-left',px(left));
   write('--peek-comments-width',px(right-left));
