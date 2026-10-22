@@ -5,6 +5,10 @@
 
 [Download preview](https://github.com/devon-kong/ThreadLume/releases) · [See it in use](#see-it-in-use) · [Install](#installation)
 
+[![ThreadLume in action: summaries, mind maps and video chapters](docs/assets/demo-preview.gif)](https://github.com/devon-kong/ThreadLume/releases/download/v0.12.0/ThreadLume-demo.mp4)
+
+**[Watch / download the 70-second demo (MP4)](https://github.com/devon-kong/ThreadLume/releases/download/v0.12.0/ThreadLume-demo.mp4)** · Real browser captures, music and on-screen text. [Sources and demo notes](docs/demo.md).
+
 Turn long X posts and captioned videos into clear summaries, interactive mind maps, and clickable chapters—while keeping the original content and conversation in view.
 
 **Desktop Chromium preview.** Basic reading works without AI setup. AI features require your own compatible API service and are subject to that service's charges. Install the ZIP as an unpacked extension; no Node.js or build tools are needed.

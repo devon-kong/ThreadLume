@@ -5,6 +5,10 @@
 
 [下载预览版](https://github.com/devon-kong/ThreadLume/releases) · [查看实际效果](#实际效果) · [安装](#安装)
 
+[![ThreadLume 实操：摘要、脑图与视频章节](docs/assets/demo-preview.gif)](https://github.com/devon-kong/ThreadLume/releases/download/v0.12.0/ThreadLume-demo.mp4)
+
+**[观看 / 下载 70 秒完整演示（MP4）](https://github.com/devon-kong/ThreadLume/releases/download/v0.12.0/ThreadLume-demo.mp4)** · 真实浏览器录制，英文画面说明、配乐和操作音效。[素材来源与演示说明](docs/demo.md)。
+
 将 X 长文和带字幕视频转成清晰摘要、交互脑图与可跳转章节，同时保留原文、媒体和评论，方便随时对照。
 
 **桌面 Chromium 预览版。** 基础阅读无需配置 AI；AI 功能需要自己的兼容 API 服务，费用由所选服务收取。下载 ZIP 后加载即可，无需 Node.js 或构建工具。
