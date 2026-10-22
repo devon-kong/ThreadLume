@@ -37,12 +37,12 @@ for(const action of ['post','input','partition','disconnect','close','disable','
 });
 for(const initial of ['off','on'])for(const action of ['exit','narrow','dynamic'])test(`F1 ${initial}/${action}: owned DOM cleans with or without current; repeated entry is unique`,async()=>{
  const r=reader({alloff:initial==='off'}),{w}=r;try{
- await until(()=>w.document.querySelector('[data-peek-feishu]'));if(action==='dynamic'){r.preferences({summary:false,mindmap:false});await wait(30);}
+ await until(()=>r.calls.some(m=>m.action==='status'));await wait(30);const nativeActions=[...w.document.querySelectorAll('[data-testid="reply"],[data-testid="like"]')];assert.equal(w.document.querySelector('[data-peek-feishu]'),null);if(initial==='on')await until(()=>w.document.querySelector('#peek-ai-card'));if(action==='dynamic'){r.preferences({summary:false,mindmap:false});await wait(30);}
  for(let i=0;i<3;i++){
  if(action==='narrow'){w.innerWidth=900;w.dispatchEvent(new w.Event('resize'));}else r.exit();await wait(30);
  assert.equal(w.document.querySelectorAll('[data-peek-feishu]').length,0);assert.equal(w.document.querySelector('#peek-ai-card'),null);assert.equal(w.document.documentElement.hasAttribute('data-peek-ai-card'),false);assert.equal(w.document.documentElement.style.getPropertyValue('--peek-ai-space'),'');
  assert.equal(w.document.querySelectorAll('[data-testid="reply"],[data-testid="like"]').length,2);
- w.innerWidth=1200;w.document.documentElement.dataset.peekLad='on';w.document.documentElement.dataset.peekLadState='active';w.dispatchEvent(new w.Event('resize'));await until(()=>w.document.querySelector('[data-peek-feishu]'));assert.equal(w.document.querySelectorAll('[data-peek-feishu]').length,1);
+ w.innerWidth=1200;w.document.documentElement.dataset.peekLad='on';w.document.documentElement.dataset.peekLadState='active';w.dispatchEvent(new w.Event('resize'));await wait(30);if(initial==='on'&&action!=='dynamic')await until(()=>w.document.querySelector('#peek-ai-card'));assert.equal(w.document.querySelector('[data-peek-feishu]'),null);assert.deepEqual([...w.document.querySelectorAll('[data-testid="reply"],[data-testid="like"]')],nativeActions);
  }
  assert.equal(r.calls.some(m=>/feishu/i.test(m.action)),false);
  }finally{r.close();}

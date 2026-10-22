@@ -1,99 +1,79 @@
 <p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="public/brand/logo-dark.svg"><img src="public/brand/logo-light.svg" alt="ThreadLume" width="420"></picture></p>
-<p align="center"><strong>Read Beyond the Post.</strong><br>A native two-column reader for X, with AI summaries, video chapters and interactive mind maps.</p>
+<p align="center"><strong>Read Beyond the Post.</strong><br>AI summaries, interactive mind maps and video chapters, right beside the original X post.</p>
 
 **English** · [简体中文](README.zh-CN.md)
 
-[Installation](#installation) · [Architecture](docs/architecture.md) · [Engineering case study](docs/case-study.md) · [Validation](docs/validation.md) · [Privacy](PRIVACY.md)
+[Download preview](https://github.com/devon-kong/ThreadLume/releases) · [See it in use](#see-it-in-use) · [Install](#installation)
 
-ThreadLume keeps the original post and its media beside the conversation. Read an article, watch a captioned video, explore a mind map, and return to the timeline without losing your place.
+Turn long X posts and captioned videos into clear summaries, interactive mind maps, and clickable chapters—while keeping the original content and conversation in view.
 
-**Preview release:** desktop Chromium extension, installed unpacked. AI requires your own compatible API service; basic reading works without it. ThreadLume is an independent project and is not affiliated with or endorsed by X Corp.
+**Desktop Chromium preview.** Basic reading works without AI setup. AI features require your own compatible API service and are subject to that service's charges. Install the ZIP as an unpacked extension; no Node.js or build tools are needed.
 
 ## See it in use
 
-![Native two-column reading](docs/assets/reader.png)
+**Read the post and its conversation together**
 
-| Article summary | Interactive mind map |
-| --- | --- |
-| ![Article summary](docs/assets/summary.png) | ![Interactive mind map](docs/assets/mindmap.png) |
+Keep the original text, media and native comments in a focused two-column view.
 
-**Video captions and chapters**
+![Original X post beside AI summary and native comments](docs/assets/reader.png)
 
-![Native video captions with AI chapters](docs/assets/video-captions.png)
+**Find the main points**
 
-**AI service settings**
+Read a structured summary beside its source, then copy it for your notes.
 
-![AI service settings](docs/assets/settings.png)
+![English article summary](docs/assets/summary.png)
 
-Screenshots and their validation conditions are documented in [Validation](docs/validation.md). A video walkthrough is planned separately.
+**Explore the structure**
 
-## What it does
+Expand a branch to inspect its details, zoom in, or copy the map as an outline.
 
-- **Native reading:** the original X post, video and comments keep their native interactions in a focused two-column layout.
-- **AI summaries and chapters:** summarize eligible articles and available video captions; jump to a chapter in the original player.
-- **Interactive mind maps:** expand branches, pan, zoom, fit the map and copy a structured outline.
-- **Progressive results:** optionally read streamed summaries and validated map previews before the full response completes.
-- **Control over requests:** generate the current view first, stop a task, retry explicitly and reuse cached results. Incomplete output is never a successful cache entry.
-- **Bring your own service:** configure HTTPS Chat Completions APIs, models and API keys. No provider account is bundled.
-- **Independent languages:** English and Simplified Chinese UI; separately choose and remember the AI output language.
-- **Light and dark themes:** match X or choose a separate reader theme.
+A detail of one expanded branch:
+
+![Interactive mind map with an expanded branch](docs/assets/mindmap.png)
+
+**Return to a moment in the video**
+
+Generate chapters from available native captions, then click a timestamp to seek in the original player. Available captions may cover only part of the video.
+
+![Captioned video beside AI chapters](docs/assets/video-captions.png)
+
+These are real browser captures. See [capture sources and release conditions](docs/validation.md#screenshot-provenance) and the [latest showcase checks](docs/showcase-validation.md).
+
+## What you can do
+
+- **Read in context:** use X's original post, media and comments, then return to the timeline.
+- **Summarize and organize:** turn eligible long content into a summary, a mind map or video chapters.
+- **Keep control:** stop generation, retry when you choose and reuse completed results. Optional streaming lets you read provisional results as they arrive.
+- **Use your own AI service:** configure a compatible HTTPS Chat Completions endpoint and model.
+- **Choose your language and theme:** English or Simplified Chinese controls, a separate AI output language, and light or dark appearance.
 
 ## Installation
 
-Use Node.js 22.12+ and npm with a current desktop Chromium browser.
+1. [Download the extension ZIP from the latest preview release](https://github.com/devon-kong/ThreadLume/releases) and extract it into a folder you will keep.
+2. Open `chrome://extensions/` in a desktop Chromium browser and enable **Developer mode**.
+3. Choose **Load unpacked** and select the extracted folder containing `manifest.json`.
+4. Refresh your X tabs and open a post to try the reader.
 
-```sh
-git clone https://github.com/devon-kong/ThreadLume.git
-cd ThreadLume
-npm ci
-npm run build
-```
+**Start with basic reading; connect AI when you need it.** Open ThreadLume Settings → **Add AI service**, enter your service details and choose **Save, test & enable**. The test sends a minimal prompt, not the current article.
 
-1. Open `chrome://extensions/` and enable **Developer mode**.
-2. Choose **Load unpacked** and select `dist-extension-native/`.
-3. Refresh your X tabs and open a post.
+Once connected, opening eligible content automatically generates the selected AI view. Choosing the other view can send another request. Article text or available captions are sent to your selected service; provider billing and data policies apply.
 
-You can also download the unpacked extension ZIP from [Releases](https://github.com/devon-kong/ThreadLume/releases), extract it and load the extracted directory containing `manifest.json`.
+[Detailed setup, updates and troubleshooting](docs/installation.md) · [Privacy and data handling](PRIVACY.md)
 
-To update, rebuild, reload the extension and refresh X. Keep the same unpacked installation directory to preserve the browser's extension identity and local settings. A fresh checkout or a different browser profile does not automatically receive your saved API configuration.
+## Before you try it
 
-## Connect AI
+- Use a desktop window at least 980 CSS pixels wide for the AI panel.
+- Video AI uses available native captions; it does not transcribe audio. Short posts and videos without usable captions do not generate AI results.
+- Check AI output against the source. Quality, response time and compatibility depend on your service and model.
+- X layout changes can interrupt the reader. You can return to X's native view; the extension does not initiate X private HTTP API requests.
 
-Open ThreadLume Settings and select **Add AI service**. Enter a service name, HTTPS Base URL, model and API key. **Save, test & enable** requests access only to that host and runs a minimal compatibility test. Your current article is not sent during that test.
+ThreadLume is an independent project, not affiliated with or endorsed by X Corp.
 
-After connection, opening eligible content automatically generates the selected view. The other view is generated when selected. Provider charges and usage limits apply. Streaming is opt-in and verified when saving; unsupported streaming does not trigger an automatic fallback.
+## For developers
 
-The former Doubao extension bridge is unavailable. Previous data is retained locally, but no Doubao connection or generation is attempted. Select a configured API service to continue.
+The extension uses Manifest V3, JavaScript and CSS, with one build output: `dist-extension-native/`.
 
-## Engineering highlights
-
-- **Native page lifecycle:** layout adaptation with bounded ownership and restoration, preserving X's virtualized content rather than rebuilding comments.
-- **Asynchronous reliability:** scoped request ownership, cancellation, stale-response rejection, worker recovery and explicit failure states.
-- **Provider binding:** versioned configuration and key records, atomic publication after a successful test, and endpoint-scoped permission handling.
-- **Progressive visualization:** validated partial results, readable initial map depth, stable rendering and independent view caches.
-- **Verification:** behavioral tests, build-time isolation checks and separately labelled browser evidence.
-
-The [case study](docs/case-study.md) explains the problem, design decisions and tradeoffs. [Architecture](docs/architecture.md) documents the runtime boundaries.
-
-## Development
-
-```sh
-npm test              # builds the only artifact and runs the Native suite
-npm run build:current # same output as npm run build
-npm run build:native  # same output as npm run build
-```
-
-`native-extension/` contains the product, `tests/native/` the regression suite, `scripts/` the build tools, and `docs/` current technical and release documentation. Build output and dependencies are not committed.
-
-## Supported scope and limitations
-
-- Designed for desktop windows. AI panels are hidden below 980 CSS pixels; X's native view remains available.
-- Video AI uses currently available native caption cues, which may not cover an entire video. There is no video download, speech recognition or automatic caption-button activation.
-- Short posts and videos without usable captions do not generate AI content.
-- The reader depends on X's DOM and a bounded internal React layout adapter. X changes can make it unavailable; it then returns control to the native view.
-- Native replies, likes, bookmarks and other account actions remain X interactions. ThreadLume does not issue X private HTTP API requests.
-- Lark saving is a disabled future feature, not part of the preview's supported capabilities.
-- Model quality, format compliance, latency and availability depend on the selected service. See [tested and untested scenarios](docs/validation.md).
+[Build from source](docs/installation.md#build-from-source) · [Architecture](docs/architecture.md) · [Engineering case study](docs/case-study.md) · [Validation](docs/validation.md)
 
 ## Project information
 

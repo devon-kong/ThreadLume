@@ -43,7 +43,7 @@ export function initAIReader(){
 }
 function stop(){
  const s=current;current=null;if(s){s.abort.abort();s.readAbort?.abort();clearTimeout(s.deadline);clearTimeout(s.debounce);s.observer?.disconnect();s.card?.destroy();send('cancel',{instance:s.instance}).catch(()=>{});}
- // Owned DOM can exist even when all modes were disabled before an instance.
+ // Also remove legacy placeholder DOM left by an older reader instance.
  document.querySelectorAll('[data-peek-feishu]').forEach(n=>n.remove());document.getElementById('peek-ai-card')?.remove();document.documentElement.removeAttribute('data-peek-ai-card');document.documentElement.style.removeProperty('--peek-ai-space');
 }
 async function sync(refresh=false){
@@ -63,7 +63,7 @@ async function sync(refresh=false){
    endConnectionWait(current);}
   updateCurrentPreferences(prefs);return;
  }
- const outputLanguage=current?.focusId===focusId?current.outputLanguage:(prefs.outputLanguage||'en');stop();lastPrefs=prefs;applyTheme(prefs);ensureActions(focusId);if(!prefs.summary&&!prefs.mindmap)return;
+ const outputLanguage=current?.focusId===focusId?current.outputLanguage:(prefs.outputLanguage||'en');stop();lastPrefs=prefs;applyTheme(prefs);if(!prefs.summary&&!prefs.mindmap)return;
  const s={focusId,prefs,outputLanguage,runs:new Map(),cacheReads:new Map(),progress:new Map(),displayJobs:new Map(),stopped:false,connectionRevision:0,connectionState:connection.state,connectionId:connection.connectionId,instance:crypto.randomUUID(),abort:new AbortController(),card:null,input:null,observer:null,extracting:false,hydrationEnded:false,sourceStamp:null};current=s;
  const stampOf=source=>!source?null:source.kind==='video'?JSON.stringify([source.kind,source.title,source.video.currentSrc]):source.text;
  const valid=()=>current===s&&!s.abort.signal.aborted&&location.pathname.match(/\/status\/(\d+)/)?.[1]===focusId&&root.getAttribute('data-peek-lad')==='on'&&root.getAttribute('data-peek-lad-state')==='active'&&innerWidth>=980;s.valid=valid;
@@ -92,7 +92,7 @@ async function sync(refresh=false){
   finally{s.extracting=false;s.pendingStamp=null;if(s.rerun){s.rerun=false;attempt();}}
  }
  s.observer=new MutationObserver(records=>{
-  if(!valid()||!relevantMutation(records,s.observedArticle,focusId))return;ensureActions(focusId);
+  if(!valid()||!relevantMutation(records,s.observedArticle,focusId))return;
   const source=inspectFocal(document,focusId),stamp=stampOf(source);
   if(s.pendingStamp&&stamp!==s.pendingStamp){s.readAbort?.abort();s.rerun=true;}
   if(s.input&&(stamp!==s.sourceStamp||(source?.kind==='video'&&source.video!==s.input.video))){
@@ -208,15 +208,4 @@ async function generate(s,mode,automatic=false){
  try{const result=await send('generate',{instance,connectionId:s.connectionId,input:requestInput(s.input),mode,requestId:job.id,contentMs:s.contentMs,outputLanguage:s.outputLanguage});if(active()){job.complete=true;card.set(mode,'success',result);recordVisible(s,mode,job,true);}}
  catch(e){if(active())card.set(mode,'error',e.message);}
  finally{if(s.progress.get(mode)===job)s.progress.delete(mode);if(!job.complete)s.displayJobs.delete(job.id);}
-}
-
-function ensureActions(focusId){
- const article=focalArticle(document,focusId);if(!article||article.querySelector('[data-peek-feishu]'))return;
- const reply=Array.from(article.querySelectorAll('[data-testid="reply"]')).find(n=>!n.closest('div[role="link"]'));
- const group=reply?.closest('[role="group"]');if(!group)return;
- const b=button(document,'',()=>{b.setAttribute('title',t('飞书收藏尚未开放'));},'pk-feishu-placeholder');
- b.setAttribute('data-peek-feishu','');b.setAttribute('aria-label',t('飞书收藏，尚未开放'));b.setAttribute('title',t('飞书收藏尚未开放'));
- const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('width','20');svg.setAttribute('height','20');svg.setAttribute('aria-hidden','true');
- const bird=document.createElementNS(svg.namespaceURI,'path');bird.setAttribute('d','M5 11l5 4 5-8 6 1-5 11-6 2-7-5z');bird.setAttribute('fill','currentColor');
- const plus=document.createElementNS(svg.namespaceURI,'path');plus.setAttribute('d','M4 1v6M1 4h6');plus.setAttribute('stroke','currentColor');plus.setAttribute('stroke-width','1.5');svg.append(bird,plus);b.append(svg);group.append(b);
 }

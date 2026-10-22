@@ -9,15 +9,15 @@ test('English controls and live Chinese switch retain user content, result ident
  c.updatePreferences(DEFAULTS);assert.ok(d.body.textContent.includes('Article insights'));assert.equal(prose.textContent,'摘要');c.destroy();
 });
 
-test('English settings expose onboarding and disabled Doubao without probing; language saves preserve focus',async()=>{
+test('English settings expose onboarding without retired services without probing; language saves preserve focus',async()=>{
  const {build}=await import('esbuild');const {normalizePreferences}=await import('../../native-extension/src/ai/preferences.js');
  const bundle=(await build({entryPoints:['native-extension/src/ai/settings.js'],bundle:true,write:false,format:'iife'})).outputFiles[0].text;
  const w=new JSDOM('<main id="peek-settings"></main>',{url:'https://fixture.test',runScripts:'dangerously'}).window;let prefs={...DEFAULTS};const calls=[];
  w.matchMedia=()=>({matches:false,addEventListener(){}});w.chrome={runtime:{id:'ours',getManifest:()=>({version:'0.12.0'}),sendMessage:async m=>{calls.push(m.action);if(m.action==='preferences')return {ok:true,value:prefs};if(m.action==='providers')return {ok:true,value:{activeId:'doubao',services:[]}};if(m.action==='status')return {ok:true,value:{state:'AI_NOT_CONFIGURED'}};if(m.action==='savePreferences'){prefs=normalizePreferences(m.preferences);return {ok:true,value:prefs};}return {ok:false,error:'INVALID_MESSAGE'};}}};
  const until=async f=>{for(let i=0;i<100&&!f();i++)await new Promise(r=>setTimeout(r,5));assert.ok(f());};
  try{w.eval(bundle);await until(()=>w.document.getElementById('pk-provider-add'));const d=w.document;
- assert.equal(d.documentElement.lang,'en');assert.equal(d.getElementById('pk-provider-add').textContent,'Add AI service');assert.equal(d.getElementById('pk-provider-doubao').disabled,true);
- d.getElementById('pk-provider-doubao').click();w.dispatchEvent(new w.Event('focus'));
+ assert.equal(d.documentElement.lang,'en');assert.equal(d.getElementById('pk-provider-add').textContent,'Add AI service');assert.equal(d.getElementById('pk-provider-doubao'),null);
+ w.dispatchEvent(new w.Event('focus'));
  const language=d.getElementById('pk-uiLanguage-zh-CN');language.focus();language.click();await until(()=>d.documentElement.lang==='zh-CN');
  assert.equal(d.getElementById('pk-provider-add').textContent,'添加 AI 服务');assert.equal(d.activeElement,language);assert.equal(prefs.outputLanguage,'en');
  assert.equal(calls.some(a=>['generate','connect','check','capture','openSetup'].includes(a)),false);

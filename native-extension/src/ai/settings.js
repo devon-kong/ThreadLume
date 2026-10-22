@@ -36,14 +36,13 @@ function providerSection(){
  const custom=providers.services.find(s=>s.id===providers.activeId),state=providerBusy?'CHECKING':connection.state,ready=state==='ready';
  const menu=el(d,'details',{id:'pk-provider-menu',class:'pk-provider-menu'},el(d,'summary',{'aria-label':t("选择 AI 服务")},el(d,'span',{id:'pk-provider-current',text:custom?.name||t("选择 AI 服务")}),el(d,'span',{'aria-hidden':true,text:'⌄'})));
  const options=el(d,'div',{class:'pk-provider-options'});
- const retired=identified(button(d,t("豆包 · 不可用"),()=>{}),'pk-provider-doubao');retired.disabled=true;retired.title=t("豆包桥接已停用，请选择其他 AI 服务");options.append(retired);
  for(const service of providers.services){
   const option=identified(button(d,'',()=>{d.getElementById('pk-provider-menu').open=false;activateProvider(service.id);}), 'pk-provider-'+service.id);option.disabled=providerBusy;option.setAttribute('aria-pressed',String(service.id===providers.activeId));option.append(el(d,'strong',{text:service.name}),el(d,'small',{text:service.model}));option.classList.add('pk-provider-option-main');
   const edit=identified(button(d,t("编辑"),()=>openProviderDialog(providers.services.find(s=>s.id===service.id))),'pk-provider-edit-'+service.id);edit.disabled=providerBusy;edit.classList.add('pk-provider-option-edit');options.append(el(d,'div',{class:'pk-provider-option-row'},option,edit));
  }
  menu.append(options);
  const add=identified(button(d,t("添加 AI 服务"),()=>openProviderDialog()),'pk-provider-add');add.disabled=providerBusy;
- const selector=el(d,'div',{class:'pk-provider-selector'},el(d,'strong',{text:t("AI 服务")}),menu,add);
+ const selector=el(d,'div',{class:'pk-provider-selector'},el(d,'strong',{text:t("AI 服务")}),...(providers.services.length?[menu]:[]),add);
  const label=ready?t("✓ 已连接"):providerBusy?t("正在检测…"):custom?t("连接需要处理"):t("尚未配置 AI 服务");
  const details=el(d,'div',{class:'pk-connection-name'},el(d,'strong',{text:custom?.model||t("使用自己的 AI 服务")}),el(d,'span',{class:ready?'pk-connected':'pk-connection-state',text:label}));
  const row=el(d,'div',{class:'pk-connection-row'},details);

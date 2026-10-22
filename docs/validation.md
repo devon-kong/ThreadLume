@@ -56,6 +56,8 @@ Timers start at request admission; source extraction is separately measured. Fir
 
 ## Screenshot provenance
 
+The account below records the original release captures. The current image files were refreshed on 22 October 2026; see [follow-up screenshot provenance](showcase-validation.md#screenshot-provenance) for their current build, crop and source conditions. This does not change the release acceptance results above.
+
 All five README images are real screenshots of the v0.12.0 product, captured through browser interaction. The English reading examples and captioned-video image were refreshed in a documentation-only follow-up on 21 October 2026; the release code and package are unchanged. Capture viewports were 1341 × 814 CSS pixels for the English post and 1329 × 802 for the video. The summary image is a direct crop of the AI card; map branches were interactively collapsed for readability. No generated interface or fabricated model output is used.
 
 - Reader / summary / mind map: [public English post by @karpathy](https://x.com/karpathy/status/2109361546505966046), with English output from the existing configured service.
