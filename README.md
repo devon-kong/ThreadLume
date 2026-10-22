@@ -5,9 +5,9 @@
 
 [Download preview](https://github.com/devon-kong/ThreadLume/releases) · [See it in use](#see-it-in-use) · [Install](#installation)
 
-[![ThreadLume in action: side-by-side reading and a video chapter jump](docs/assets/demo-preview.gif)](https://github.com/devon-kong/ThreadLume/releases/download/v0.12.0/ThreadLume-demo-38s.mp4)
+https://github.com/user-attachments/assets/41f6f284-f99a-4dd9-9912-e6faaac70f3e
 
-**[Watch / download the 38-second demo (MP4)](https://github.com/devon-kong/ThreadLume/releases/download/v0.12.0/ThreadLume-demo-38s.mp4)** · Side-by-side reading, chapter jumps, progressive summaries and mind maps. Real browser captures with music and on-screen text. [Sources and demo notes](docs/demo.md).
+**38-second product demo** · Side-by-side reading, chapter jumps, progressive summaries and mind maps. Real browser captures with music and on-screen text. [Download the original MP4](https://github.com/devon-kong/ThreadLume/releases/download/v0.12.0/ThreadLume-demo-38s.mp4) · [Sources and demo notes](docs/demo.md).
 
 Turn long X posts and captioned videos into clear summaries, interactive mind maps, and clickable chapters—while keeping the original content and conversation in view.
 

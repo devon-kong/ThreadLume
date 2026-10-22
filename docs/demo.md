@@ -1,6 +1,6 @@
 # Product demo
 
-The 38-second film shows ThreadLume through real browser recordings: reading the original post beside native replies, jumping to a video chapter, watching a summary take shape and expanding a mind-map branch. The 13-second README preview is the opening of the same film. Full video: [watch or download the MP4](https://github.com/devon-kong/ThreadLume/releases/download/v0.12.0/ThreadLume-demo-38s.mp4).
+The 38-second film shows ThreadLume through real browser recordings: reading the original post beside native replies, jumping to a video chapter, watching a summary take shape and expanding a mind-map branch. The README embeds the entire film with its soundtrack in a player. An upload-optimized 1080p encode is used for inline playback; the [original MP4 is available to download](https://github.com/devon-kong/ThreadLume/releases/download/v0.12.0/ThreadLume-demo-38s.mp4). Both versions retain all 38 seconds and the same audio track.
 
 | Time | What is shown |
 | --- | --- |

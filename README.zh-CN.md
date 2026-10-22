@@ -5,9 +5,9 @@
 
 [下载预览版](https://github.com/devon-kong/ThreadLume/releases) · [查看实际效果](#实际效果) · [安装](#安装)
 
-[![ThreadLume 实操：双栏阅读与视频章节跳转](docs/assets/demo-preview.gif)](https://github.com/devon-kong/ThreadLume/releases/download/v0.12.0/ThreadLume-demo-38s.mp4)
+https://github.com/user-attachments/assets/41f6f284-f99a-4dd9-9912-e6faaac70f3e
 
-**[观看 / 下载 38 秒完整演示（MP4）](https://github.com/devon-kong/ThreadLume/releases/download/v0.12.0/ThreadLume-demo-38s.mp4)** · 双栏阅读、章节跳转、摘要渐进与脑图展开。真实浏览器录制，英文画面说明、配乐和操作音效。[素材来源与演示说明](docs/demo.md)。
+**38 秒完整演示** · 双栏阅读、章节跳转、摘要渐进与脑图展开。真实浏览器录制，英文画面说明、配乐和操作音效。[下载原画质 MP4](https://github.com/devon-kong/ThreadLume/releases/download/v0.12.0/ThreadLume-demo-38s.mp4) · [素材来源与演示说明](docs/demo.md)。
 
 将 X 长文和带字幕视频转成清晰摘要、交互脑图与可跳转章节，同时保留原文、媒体和评论，方便随时对照。
 
