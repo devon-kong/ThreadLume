@@ -81,3 +81,9 @@ npm run build:native  # same output as npm run build
 更新时保留相同安装目录，重载扩展并刷新 X。新目录或新浏览器配置不会自动继承旧设置。Release ZIP 对应其发布标签；主分支的新改动需要发布新包后才会进入下载版。
 
 若 AI 面板不出现，检查窗口是否至少 980 CSS 像素宽、AI 视图是否开启、内容是否为长文或具有可用原生字幕的视频。连接失败按界面提示检查地址、模型、Key 和域名权限。旧豆包连接仅保留迁移提示，请添加兼容 API 服务继续使用。
+
+## Connection diagnostics
+
+In Settings, expand the diagnostics section and use **Read connection diagnostics**, **Copy connection diagnostics**, or **Clear connection diagnostics**. The bounded log includes permission requests, permission events, background readiness, rule preparation, model probes and configuration commits. It excludes keys and response/source content. Copy it before uninstalling: removal deletes the log along with other extension data. These diagnostics help identify first-install failures; they do not fix or bypass a stalled browser rule operation.
+
+If a source exceeds the extension's local single-request limit, no AI request is sent. A separate message identifies length rejection returned by the service. Native subtitle markup is removed when the browser's cue parser is available; genuinely long transcripts remain subject to the existing limits.

@@ -40,3 +40,9 @@ Interface language and AI output language are independent. Interface updates pre
 ## Verification
 
 `npm test` rebuilds the artifact and runs Native regressions. Build and isolation tests separately scan the X-facing bundles for forbidden network/credential capabilities. Unit and integration tests use explicit browser/network doubles. Real service and browser evidence is reported separately in [Validation](validation.md).
+
+## Setup observations and caption normalization
+
+Connection diagnostics use a separate trusted-settings interface and bounded local history. Each save/activation carries an operation ID; startup and permission-event recovery have independent IDs. Rule calls retain their original promises and mutation ownership. Observations do not change permission admission, retry, binding or recovery policy, and diagnostic storage failure must not delay a connection attempt. Diagnostics remain readable while model/rule initialization is pending.
+
+Native subtitle cues are read through `getCueAsHTML().textContent`, with a temporary native `VTTCue` parser as fallback. Detached fragments are never rendered. If neither parser is usable, the original text is retained. This removes X word-timing markup before request size checks while preserving cue order and timestamps. Existing input limits still apply; local oversize errors are distinct from provider-side length rejection. Native cue availability is a snapshot, not a universal guarantee of a complete transcript.

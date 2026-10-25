@@ -21,7 +21,8 @@ Streaming displays provisional output. Only fully validated results enter the su
 - API keys: password input and fixed saved-key masks; keys are not returned to content scripts, diagnostics, exports or sync storage. Only trusted extension contexts can access local/session storage.
 - **Remember on this device** stores the key in browser-local extension storage. This is not system-keychain encryption. With it off, the key is kept in browser-session storage and is lost when that session ends.
 - Validated AI output: a bounded local cache, at most 30 entries, approximately 4 MiB and seven days. Cache identity includes provider/configuration, source, view and output language.
-- Diagnostics: bounded numeric timing and fixed status records in session storage. No API keys, source text or raw provider responses are included. Diagnostic reads do not probe the model or keep workers alive.
+- Generation diagnostics: bounded numeric timing and fixed status records in session storage.
+- Connection diagnostics: up to 200 fixed stage/timing records in local storage, retained for at most 24 hours of observable use. Expired records are removed on initialization, reading or appending; no background expiry timer keeps the worker alive. They survive browser restart, but not extension removal. Settings can read, copy or clear these records. No API keys, endpoints, source text or raw provider responses are included; there is no automatic upload. Diagnostic reads do not probe the model.
 
 Legacy Doubao data is retained for compatibility. Its bridge and runtime entry points are disabled; old connection state is not restored or used to generate content. ThreadLume does not access or modify an external Doubao installation.
 
