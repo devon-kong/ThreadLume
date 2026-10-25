@@ -1,3 +1,4 @@
+import {createSetupDiagnostics,diagnosticCall,diagnosticError,validSetupEvent} from './setup-diagnostics.js';
 import {validPreview} from './preview.js';
 import {AIService,allowedSender} from './service.js';
 import {AIError,fail,validateInput,validateLanguage} from './protocol.js';
@@ -8,6 +9,10 @@ import {descriptorPermissions,providerPermissions} from './transport-policy.js';
 import {createNetworkRuleManager} from './network-rule-manager.js';
 import {createBindingRuntime} from './binding-runtime.js';
 let checkTask=null,setupOpening=null,connectionGeneration=0;
+let allowDiagnosticStorage;
+const setupDiagnostics=createSetupDiagnostics({storage:chrome.storage.local,storageReady:new Promise(resolve=>{allowDiagnosticStorage=resolve;})});
+void setupDiagnostics.load();
+const startupTrace=setupDiagnostics.trace('startup');
 const stats={workerStartedAt:Date.now(),requests:0,stages:[],focusChecks:[],bindingStages:[],configuration:[]};
 const BINDING_STAGES=new Set(['store_init','store_ready','prepare','probe','probe_ok','commit','binding_permission','rules_acquire','rules_reconcile','executor','rule_read','rule_install','rule_remove','transport_permission','request','response']);
 const bindingStage=stage=>{if(BINDING_STAGES.has(stage)){stats.bindingStages.push({stage,at:Date.now()});stats.bindingStages=stats.bindingStages.slice(-40);}};
@@ -47,7 +52,7 @@ function sameFocus(source,target){
 function cancelTabRequests(tabId,nextUrl){
  for(const record of tabRequests.get(tabId)||[])if(!nextUrl||!sameFocus(record.url,nextUrl))service.cancel(record.owner);
 }
-const ready=(async()=>{await chrome.storage.local.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'});await chrome.storage.session.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'});await service.init();await bindings.restore(providers.active(),providers.bindingState());})();
+const ready=diagnosticCall(startupTrace,'worker_ready',async()=>{await diagnosticCall(startupTrace,'worker_access',()=>chrome.storage.local.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'}));await diagnosticCall(startupTrace,'worker_access',()=>chrome.storage.session.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'}));allowDiagnosticStorage();await diagnosticCall(startupTrace,'worker_init',()=>service.init());await bindings.restore(providers.active(),providers.bindingState(),{trace:startupTrace});});
 chrome.action.onClicked.addListener(()=>chrome.runtime.openOptionsPage());
 function safeError(e){return {ok:false,error:e.name==='AbortError'?'CANCELLED':e instanceof AIError?e.code:'INTERNAL_ERROR'};}
 async function status(){
@@ -65,10 +70,11 @@ function cancelConnectionWork(){
  // transaction may overtake a cancelled publication or page creation.
 }
 chrome.permissions.onRemoved.addListener(async()=>{
- await ready;
+ const trace=setupDiagnostics.trace('permission_removed');trace.event('permission_event','observed',{checking:!!providerCheck});
+ await diagnosticCall(trace,'worker_ready',()=>ready);
  const pending=providerCheck;if(pending?.permission&&!await hasPermission(pending.permission))pending.abort.abort();
  const custom=providers.active();
- if(custom){if(providers.bindingState(custom)!=='ready'||!await hasPermission(descriptorPermissions(custom.binding))){++bindingRevision;providerCheck?.abort.abort();service.providerChanged();await bindings.restore(custom,providers.bindingState());notifyState({connectionChanged:true});}}
+ if(custom){if(providers.bindingState(custom)!=='ready'||!await hasPermission(descriptorPermissions(custom.binding))){++bindingRevision;providerCheck?.abort.abort();service.providerChanged();await bindings.restore(custom,providers.bindingState(),{trace});notifyState({connectionChanged:true});}}
 });
 async function confirmFocus(sender,m,input){
  const record={inputFocusId:input.focusId,documentFocusId:new URL(sender.url).pathname.match(/^\/[^/]+\/status\/(\d+)/)?.[1]||null,accepted:false};
@@ -103,6 +109,7 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
  const release=()=>{progressClosed=true;clearTimeout(progressTimer);latestProgress=null;if(!record)return;const pending=tabRequests.get(sender.tab.id);pending?.delete(record);if(!pending?.size)tabRequests.delete(sender.tab.id);};
  const admission=bindingRevision,checkAdmission=providerAdmission,operationStarted=performance.now();
  const operationId=typeof m.operationId==='string'&&/^[\w-]{1,100}$/.test(m.operationId)?m.operationId:crypto.randomUUID();
+ const setupTrace=['saveProvider','activateProvider'].includes(m.action)?setupDiagnostics.trace(m.action==='saveProvider'?'save':'activate',operationId):null;
  const setupStage=stage=>{
   if(!['background','rules','model','commit'].includes(stage)||checkAdmission!==providerAdmission)return;
   const event={ns:'peek-ai-v7',action:'providerProgress',operationId,stage,elapsedMs:Math.round(performance.now()-operationStarted)};
@@ -111,13 +118,20 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
  };
  const storeStage=stage=>{const phase={prepare:'rules',probe:'model',commit:'commit'}[stage];if(phase)setupStage(phase);};
  const dispatch=async()=>{
+  if(['recordSetupDiagnostic','getSetupDiagnostics','clearSetupDiagnostics'].includes(m.action)){
+   const allowed=m.action==='recordSetupDiagnostic'?['ns','action','event']:['ns','action'];
+   if(Object.keys(m).some(k=>!allowed.includes(k)))fail('INVALID_MESSAGE');
+   if(m.action==='recordSetupDiagnostic'){if(!validSetupEvent(m.event))fail('INVALID_MESSAGE');setupDiagnostics.record(m.event);return null;}
+   if(m.action==='clearSetupDiagnostics'){setupDiagnostics.clear();return null;}
+   return setupDiagnostics.snapshot();
+  }
   // Cancellation is admitted before storage/rule restoration. A save already
   // waiting for initialization must never start after its UI was dismissed.
   if(m.action==='cancelProviderCheck'){
    ++providerAdmission;const cancelled=providerCheck;providerCheck=null;cancelled?.abort.abort();return null;
   }
-  if(['saveProvider','activateProvider'].includes(m.action)){if(m.operationId!==undefined&&(typeof m.operationId!=='string'||!/^[-\w]{1,100}$/.test(m.operationId)))fail('INVALID_MESSAGE');setupStage('background');}
-  await ready;
+  if(['saveProvider','activateProvider'].includes(m.action)){if(m.operationId!==undefined&&(typeof m.operationId!=='string'||!/^[-\w]{1,100}$/.test(m.operationId)))fail('INVALID_MESSAGE');setupStage('background');setupTrace.event('save','started');}
+  await diagnosticCall(setupTrace,'worker_ready',()=>ready);
   if(['saveProvider','activateProvider'].includes(m.action)&&checkAdmission!==providerAdmission)fail('CANCELLED');
   const fields={status:['xTheme'],preferences:[],savePreferences:['preferences'],setOutputLanguage:['outputLanguage'],providers:[],saveProvider:['config','key','operationId'],activateProvider:['id','operationId'],cancelProviderCheck:[],generate:['connectionId','input','mode','instance','requestId','contentMs','outputLanguage'],cached:['connectionId','input','mode','instance','requestId','contentMs','outputLanguage'],cancel:['instance'],displayed:['instance','requestId','displayMs','firstVisibleMs','firstReadableMs','renderMs','visibilityInterrupted'],openSettings:[],openSetup:[],connect:[],capture:[],check:[],cancelCheck:[],disconnect:[]};
   if(!sender.url?.startsWith('chrome-extension://')&&Object.keys(m).some(key=>!['ns','action',...(fields[m.action]||[])].includes(key)))fail('INVALID_MESSAGE');
@@ -128,8 +142,8 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
    case 'savePreferences':{const value=await service.savePreferences(m.preferences);notifyState();return value;}
    case 'setOutputLanguage':{if(Object.keys(m).some(k=>!['ns','action','outputLanguage'].includes(k)))fail('INVALID_MESSAGE');const outputLanguage=validateLanguage(m.outputLanguage);const value=await service.saveOutputLanguage(outputLanguage);notifyState();return value;}
    case 'providers':return providers.list();
-   case 'saveProvider':{if(Object.keys(m).some(k=>!['ns','action','config','key','operationId'].includes(k)))fail('INVALID_MESSAGE');return checkProvider(signal=>providers.save(m.config,m.key,{signal,onStage:storeStage}),m.config);}
-   case 'activateProvider':{if(Object.keys(m).some(k=>!['ns','action','id','operationId'].includes(k)))fail('INVALID_MESSAGE');return checkProvider(signal=>providers.activate(m.id,{signal,onStage:storeStage}),providers.registry.services.find(s=>s.id===m.id));}
+   case 'saveProvider':{if(Object.keys(m).some(k=>!['ns','action','config','key','operationId'].includes(k)))fail('INVALID_MESSAGE');return checkProvider(signal=>providers.save(m.config,m.key,{signal,onStage:storeStage,trace:setupTrace}),m.config);}
+   case 'activateProvider':{if(Object.keys(m).some(k=>!['ns','action','id','operationId'].includes(k)))fail('INVALID_MESSAGE');return checkProvider(signal=>providers.activate(m.id,{signal,onStage:storeStage,trace:setupTrace}),providers.registry.services.find(s=>s.id===m.id));}
    case 'cancelProviderCheck':{
     // Aborted fetch/body reads need not settle immediately. Relinquish this
     // check now so retry works; its finally is identity-guarded, and the store
@@ -155,9 +169,9 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
    default:fail('INVALID_MESSAGE');
   }
  };
- dispatch().then(value=>respond({ok:true,value})).catch(e=>respond(safeError(e))).finally(release);return true;
+ dispatch().then(value=>{setupTrace?.event('save','success');respond({ok:true,value});}).catch(e=>{setupTrace?.event('save','failed',{errorCode:diagnosticError(e)});respond(safeError(e));}).finally(release);return true;
 });
 chrome.tabs.onRemoved.addListener(tabId=>cancelTabRequests(tabId));
 chrome.tabs.onUpdated.addListener((tabId,change)=>{if(change.status==='loading')cancelTabRequests(tabId);else if(change.url)cancelTabRequests(tabId,change.url);});
 
-chrome.permissions.onAdded?.addListener(async()=>{await ready;if(providerCheck)return;await bindings.restore(providers.active(),providers.bindingState());notifyState({connectionChanged:true});});
+chrome.permissions.onAdded?.addListener(async()=>{const trace=setupDiagnostics.trace('permission_added');trace.event('permission_event','observed',{checking:!!providerCheck});await diagnosticCall(trace,'worker_ready',()=>ready);if(providerCheck){trace.event('restore','skipped',{checking:true});return;}await bindings.restore(providers.active(),providers.bindingState(),{trace});notifyState({connectionChanged:true});});

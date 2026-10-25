@@ -44,3 +44,33 @@ test('旧Manifest缺少可选DNR时明确重载且保留草稿，不发送检测
 });
 
 for(const state of ['CUSTOM_KEY_REQUIRED','CUSTOM_BINDING_INVALID','CUSTOM_REBIND_REQUIRED','CUSTOM_BINDING_UNAVAILABLE'])test(`恢复阻断直接显示操作提示，无自动检测: ${state}`,async()=>{const f=await fixture({custom:true,initialState:state});try{assert.match(f.d.getElementById('pk-connection-card').textContent,state==='CUSTOM_KEY_REQUIRED'?/请输入 API Key/:state==='CUSTOM_REBIND_REQUIRED'?/重新绑定/:/已停止请求/);assert.equal(f.calls.some(m=>['saveProvider','activateProvider'].includes(m.action)),false);assert.equal(f.grants.length,0);}finally{f.close();}});
+
+test('permission diagnostics do not await storage/messages or consume the submit gesture; focus keeps the draft',async()=>{
+ const f=await fixture({hold:true});try{
+  const events=[];let allow,requested=false;const send=f.w.chrome.runtime.sendMessage;
+  f.w.chrome.runtime.sendMessage=m=>{if(m.action==='recordSetupDiagnostic'){events.push(m.event);return new Promise(()=>{});}return send(m);};
+  f.w.chrome.permissions.request=()=>{requested=true;return new Promise(r=>allow=r);};
+  f.d.getElementById('pk-provider-add').click();fill(f);submit(f);
+  assert.equal(requested,true,'permission requested inside the click, before any await');
+  f.w.dispatchEvent(new f.w.Event('blur'));f.w.dispatchEvent(new f.w.Event('focus'));
+  assert.equal(f.d.getElementById('pk-provider-name').value,'测试配置');assert.equal(f.calls.filter(m=>m.action==='saveProvider').length,0);
+  allow(true);await until(()=>f.calls.some(m=>m.action==='saveProvider'));
+  assert.deepEqual(events.filter(e=>e.stage==='permission_request').map(e=>e.status),['started','success']);assert.equal(new Set(events.map(e=>e.operationId)).size,1);
+  assert.doesNotMatch(JSON.stringify(events),/test-secret|api\.example/);
+  f.d.getElementById('pk-provider-cancel').click();assert.ok(events.some(e=>e.stage==='cancel'));
+ }finally{f.close();}
+});
+test('diagnostic panel reads, copies and clears only the sanitized setup history',async()=>{
+ const f=await fixture();try{
+  let history={schema:1,persistence:'ready',events:[{stage:'permission_request',status:'started'}]},copied;
+  const send=f.w.chrome.runtime.sendMessage;f.w.chrome.runtime.sendMessage=async m=>{
+   if(m.action==='getSetupDiagnostics')return {ok:true,value:history};
+   if(m.action==='clearSetupDiagnostics'){history={...history,events:[]};return {ok:true,value:null};}
+   return send(m);
+  };
+  Object.defineProperty(f.w.navigator,'clipboard',{value:{writeText:async text=>{copied=text;}}});
+  assert.ok(f.d.getElementById('pk-setup-read'));f.d.getElementById('pk-setup-read').click();await until(()=>f.d.getElementById('pk-setup-history').textContent.includes('permission_request'));
+  f.d.getElementById('pk-setup-copy').click();await until(()=>copied);assert.equal(JSON.parse(copied).events.length,1);
+  f.d.getElementById('pk-setup-clear').click();await until(()=>JSON.parse(f.d.getElementById('pk-setup-history').textContent).events.length===0);
+ }finally{f.close();}
+});

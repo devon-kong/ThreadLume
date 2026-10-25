@@ -1,3 +1,4 @@
+import {diagnosticCall,diagnosticError} from './setup-diagnostics.js';
 // Trusted worker only. A short queue serializes rules, never model/storage work.
 import {AIError,fail} from './protocol.js';
 import {ORIGIN_ENDPOINT,DNR_PERMISSION,descriptorPermissions} from './transport-policy.js';
@@ -11,39 +12,40 @@ export function createNetworkRuleManager({extensionId,dnr,getDnr=()=>dnr,hasPerm
  const owners=new Set(),rule=makeOriginRule(extensionId);let tail=Promise.resolve(),stalled=false;
  // Chrome mutations cannot be aborted. Bound the caller's wait, but keep the
  // real queue intact. An uncertain queue admits cleanup only until restart.
- const enqueue=(operation,cleanup=false)=>{
+ const enqueue=(operation,cleanup=false,trace)=>{
+  trace?.event('rule_queue','queued',{stalled});
   if(stalled&&!cleanup)return Promise.reject(new AIError('CUSTOM_RULE_TIMEOUT'));
   const p=tail.catch(()=>{}).then(operation);tail=p;
   if(stalled){p.catch(()=>{});return Promise.reject(new AIError('CUSTOM_RULE_TIMEOUT'));}
   return new Promise((resolve,reject)=>{
-   const timer=setTimeout(()=>{stalled=true;reject(new AIError('CUSTOM_RULE_TIMEOUT'));},operationTimeoutMs);
-   p.then(value=>{clearTimeout(timer);resolve(value);},error=>{clearTimeout(timer);reject(error);});
+   const timer=setTimeout(()=>{stalled=true;trace?.event('rule_queue','timeout',{stalled:true,errorCode:'CUSTOM_RULE_TIMEOUT'});reject(new AIError('CUSTOM_RULE_TIMEOUT'));},operationTimeoutMs);
+   p.then(value=>{clearTimeout(timer);trace?.event('rule_queue',stalled?'late_success':'success');resolve(value);},error=>{clearTimeout(timer);trace?.event('rule_queue',stalled?'late_failed':'failed',{errorCode:diagnosticError(error)});reject(error);});
   });
  };
- async function synchronize(wanted,cleanup=false){
-  if(!await hasPermission({permissions:[DNR_PERMISSION]})){if(wanted)fail('PERMISSION_REQUIRED');return;}
+ async function synchronize(wanted,cleanup=false,trace){
+  if(!await diagnosticCall(trace,'rule_permission',()=>hasPermission({permissions:[DNR_PERMISSION]}))){if(wanted)fail('PERMISSION_REQUIRED');return;}
   if(stalled&&!cleanup)fail('CUSTOM_RULE_TIMEOUT');
   // An optional API may be absent when the Worker starts without permission.
   // Resolve it after the grant check, never cache that initial absence.
-  const api=getDnr();if(!api){if(wanted)fail('PERMISSION_REQUIRED');return;}
-  onStage('rule_read');const existing=(await api.getSessionRules()).find(r=>r.id===RULE_ID);
+  const api=getDnr();trace?.event('rule_api','observed',{apiAvailable:!!api});if(!api){if(wanted)fail('PERMISSION_REQUIRED');return;}
+  onStage('rule_read');const existing=(await diagnosticCall(trace,'rule_read',()=>api.getSessionRules())).find(r=>r.id===RULE_ID);
   if(existing&&!equal(existing,rule))fail('CUSTOM_RULE_CONFLICT');
   // A read may finish after its caller timed out. Never start a late install.
   if(stalled&&(!cleanup||wanted))fail('CUSTOM_RULE_TIMEOUT');
-  if(wanted&&!existing){onStage('rule_install');await api.updateSessionRules({addRules:[rule]});}
-  if(!wanted&&existing){onStage('rule_remove');await api.updateSessionRules({removeRuleIds:[RULE_ID]});}
+  if(wanted&&!existing){onStage('rule_install');await diagnosticCall(trace,'rule_install',()=>api.updateSessionRules({addRules:[rule]}));}
+  if(!wanted&&existing){onStage('rule_remove');await diagnosticCall(trace,'rule_remove',()=>api.updateSessionRules({removeRuleIds:[RULE_ID]}));}
  }
- async function acquire(d,{signal}={}){
+ async function acquire(d,{signal,trace}={}){
   if(signal?.aborted)fail('CANCELLED');
   if(d.policyId!=='yuanjing-origin')return {release:async()=>{}};
   if(d.endpoint!==ORIGIN_ENDPOINT||d.policyVersion!==1)fail('CUSTOM_BINDING_INVALID');
   const token={};owners.add(token);let released=false,releasing;
-  const release=()=>{if(released)return releasing;released=true;owners.delete(token);signal?.removeEventListener('abort',cancel);return releasing=enqueue(()=>synchronize(owners.size>0,true),true);};
+  const release=()=>{if(released)return releasing;released=true;owners.delete(token);signal?.removeEventListener('abort',cancel);return releasing=enqueue(()=>synchronize(owners.size>0,true,trace),true,trace);};
   const cancel=()=>{release().catch(()=>{});};signal?.addEventListener('abort',cancel,{once:true});
   try{
-   await enqueue(async()=>{if(signal?.aborted)fail('CANCELLED');if(stalled)fail('CUSTOM_RULE_TIMEOUT');if(!await hasPermission(descriptorPermissions(d)))fail('PERMISSION_REQUIRED');await synchronize(owners.size>0);});
+   await enqueue(async()=>{if(signal?.aborted)fail('CANCELLED');if(stalled)fail('CUSTOM_RULE_TIMEOUT');if(!await hasPermission(descriptorPermissions(d)))fail('PERMISSION_REQUIRED');await synchronize(owners.size>0,false,trace);},false,trace);
    if(signal?.aborted)fail('CANCELLED');signal?.removeEventListener('abort',cancel);return {release};
   }catch(e){await release().catch(()=>{});throw e;}
  }
- return {acquire,reconcile:d=>enqueue(()=>synchronize(!!d&&d.policyId==='yuanjing-origin'||owners.size>0))};
+ return {acquire,reconcile:(d,{trace}={})=>enqueue(()=>synchronize(!!d&&d.policyId==='yuanjing-origin'||owners.size>0,false,trace),false,trace)};
 }

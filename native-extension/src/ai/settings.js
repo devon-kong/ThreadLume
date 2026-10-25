@@ -10,9 +10,12 @@ chrome.runtime.onMessage?.addListener((m,sender)=>{
  if(sender.id!==chrome.runtime.id||sender.tab||m?.ns!=='peek-ai-v7'||m.action!=='stateChanged')return;
  refresh();
 });
-let setupOperation=null,setupStage='';
+let setupOperation=null,setupStage='',setupHistory=null;const setupTimes=new Map();
+function recordSetup(operationId,stage,status,extra={}){if(!operationId)return;send('recordSetupDiagnostic',{event:{operationId,stage,status,elapsedMs:Math.max(0,Math.round(performance.now()-(setupTimes.get(operationId)||performance.now()))),...extra}}).catch(()=>{});}
+function sendProvider(action,data){recordSetup(data.operationId,'save_message','started');const pending=send(action,data);pending.then(()=>recordSetup(data.operationId,'save_message','success'),()=>recordSetup(data.operationId,'save_message','failed'));return pending;}
+async function readSetupHistory(){try{setupHistory=await send('getSetupDiagnostics');const node=d.getElementById('pk-setup-history');if(node)node.textContent=JSON.stringify(setupHistory,null,2);}catch{const node=d.getElementById('pk-setup-history');if(node)node.textContent=t('无法读取诊断，请重试。');}}
 const SETUP_LABELS={permission:t("正在请求域名授权…"),background:t("正在准备后台…"),rules:t("正在准备网络规则…"),model:t("正在检测模型…"),commit:t("正在保存配置…")};
-function beginSetup(){setupOperation=crypto.randomUUID();showSetup('permission');return setupOperation;}
+function beginSetup(){setupOperation=crypto.randomUUID();setupTimes.set(setupOperation,performance.now());if(setupTimes.size>20)setupTimes.delete(setupTimes.keys().next().value);showSetup('permission');return setupOperation;}
 function showSetup(stage){setupStage=t(SETUP_LABELS[stage]||'');const node=d.getElementById('pk-provider-phase');if(node)node.textContent=setupStage;const submit=d.getElementById('pk-provider-submit');if(submit?.disabled)submit.textContent=setupStage||t("正在检测…");}
 chrome.runtime.onMessage?.addListener((m,sender)=>{if(sender.id!==chrome.runtime.id||sender.tab||m?.ns!=='peek-ai-v7'||m.action!=='providerProgress'||m.operationId!==setupOperation||!Object.hasOwn(SETUP_LABELS,m.stage))return;showSetup(m.stage);});
 function applyTheme(){d.documentElement.dataset.peekAiTheme=prefs.theme==='system'?(connection.xTheme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')):prefs.theme;}
@@ -61,20 +64,23 @@ function refreshCommittedStatus(){
 }
 // Updating unpacked files does not reload Chrome's in-memory Manifest. Check
 // before the gesture-bound request so a stale grant ceiling has a clear remedy.
-function requestProviderPermission(baseURL){
+function requestProviderPermission(baseURL,operationId){
+ recordSetup(operationId,'permission_request','started');
+ try{
  const request=providerPermissions(baseURL),permission=request.origins[0];
  const hosts=chrome.runtime.getManifest().optional_host_permissions||[];
  if(!hosts.includes('https://*/*')&&!hosts.includes(permission))throw Error('CUSTOM_EXTENSION_RELOAD_REQUIRED');
  if(request.permissions?.some(p=>!chrome.runtime.getManifest().optional_permissions?.includes(p)))throw Error('CUSTOM_EXTENSION_RELOAD_REQUIRED');
- return chrome.permissions.request(request);
+ const pending=chrome.permissions.request(request);Promise.resolve(pending).then(granted=>recordSetup(operationId,'permission_request','success',{granted:granted===true}),()=>recordSetup(operationId,'permission_request','failed'));return pending;
+ }catch(e){recordSetup(operationId,'permission_request','failed');throw e;}
 }
 async function activateProvider(id){
  if(providerBusy||busy)return;const operationId=beginSetup(),revision=++providerRevision;++refreshRevision;providerBusy=true;notice='';render();
- try{const service=providers.services.find(s=>s.id===id);const permission=requestProviderPermission(service.baseURL);if(!await permission)throw Error('CUSTOM_PERMISSION_REQUIRED');if(revision!==providerRevision)return;const list=await send('activateProvider',{id,operationId});if(revision!==providerRevision)return;acceptProviderList(list);providerBusy=false;notice=t("连接成功，已启用服务");render();refreshCommittedStatus();}
+ try{const service=providers.services.find(s=>s.id===id);const permission=requestProviderPermission(service.baseURL,operationId);if(!await permission)throw Error('CUSTOM_PERMISSION_REQUIRED');if(revision!==providerRevision)return;const list=await sendProvider('activateProvider',{id,operationId});if(revision!==providerRevision)return;acceptProviderList(list);providerBusy=false;notice=t("连接成功，已启用服务");render();refreshCommittedStatus();}
  catch(e){if(revision===providerRevision)notice=errorText(e.message);}
  finally{if(revision===providerRevision){providerBusy=false;render();}}
 }
-function cancelProviderCheck(){setupOperation=null;++providerRevision;providerBusy=false;notice=t("已取消检测，保留原服务与草稿。");send('cancelProviderCheck').catch(()=>{});render();}
+function cancelProviderCheck(){recordSetup(setupOperation,'cancel','cancelled');setupOperation=null;++providerRevision;providerBusy=false;notice=t("已取消检测，保留原服务与草稿。");send('cancelProviderCheck').catch(()=>{});render();}
 function openProviderDialog(service){
  if(providerDialog||providerBusy||busy)return;++refreshRevision;
  const draftId=service?.id||'new',prior=d.activeElement,draft=providerDrafts.get(draftId)||{name:service?.name||'',baseURL:service?.baseURL||'',model:service?.model||'',key:'',rememberKey:service?.rememberKey!==false,stream:service?.stream===true};
@@ -97,7 +103,7 @@ function openProviderDialog(service){
  form.addEventListener('input',preview);form.addEventListener('change',capture);preview();
  let checking=false,revision=0;
  const setChecking=value=>{checking=value;for(const node of form.querySelectorAll('input,button[type=submit]'))node.disabled=value;submit.textContent=value?t("正在检测…"):t("保存、检测并启用");cancel.textContent=value?t("取消检测"):t("取消");};
- function dismiss(){capture();setupOperation=null;++revision;if(checking)send('cancelProviderCheck').catch(()=>{});dialog.close();}
+ function dismiss(){capture();if(checking)recordSetup(setupOperation,'cancel','cancelled');setupOperation=null;++revision;if(checking)send('cancelProviderCheck').catch(()=>{});dialog.close();}
  const keydown=event=>{if(!dialog.open)return;if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();dismiss();}else if(event.key==='Tab'){const nodes=[...dialog.querySelectorAll('button,input')].filter(n=>!n.disabled),first=nodes[0],last=nodes.at(-1);if(event.shiftKey&&d.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&d.activeElement===last){event.preventDefault();first.focus();}}};
  window.addEventListener('keydown',keydown,true);dialog.addEventListener('cancel',e=>{e.preventDefault();dismiss();});dialog.addEventListener('close',()=>{window.removeEventListener('keydown',keydown,true);dialog.remove();providerDialog=null;if(prior?.isConnected)prior.focus({preventScroll:true});},{once:true});
  form.addEventListener('submit',async event=>{
@@ -106,7 +112,7 @@ function openProviderDialog(service){
   catch(e){error.textContent=errorText(e.code||e.message);return;}
   const token=++revision;setChecking(true);const operationId=beginSetup();error.textContent='';
   // This call must remain before the first await, within the submit gesture.
-  try{const permission=requestProviderPermission(config.baseURL);const granted=await permission;if(token!==revision)return;if(!granted)throw Error('CUSTOM_PERMISSION_REQUIRED');const list=await send('saveProvider',{config,operationId,...(value.key?{key:value.key}:{})});if(token!==revision)return;acceptProviderList(list);providerDrafts.delete(draftId);key.input.value='';checking=false;notice=t("连接成功，已启用服务");dialog.close();render();refreshCommittedStatus();}
+  try{const permission=requestProviderPermission(config.baseURL,operationId);const granted=await permission;if(token!==revision)return;if(!granted)throw Error('CUSTOM_PERMISSION_REQUIRED');const list=await sendProvider('saveProvider',{config,operationId,...(value.key?{key:value.key}:{})});if(token!==revision)return;acceptProviderList(list);providerDrafts.delete(draftId);key.input.value='';checking=false;notice=t("连接成功，已启用服务");dialog.close();render();refreshCommittedStatus();}
   catch(e){if(token===revision)error.textContent=errorText(e.message);}
   finally{if(token===revision&&dialog.isConnected)setChecking(false);}
  });
@@ -152,7 +158,11 @@ function render(){
  if(undo)bottom.append(identified(button(d,t("撤销"),()=>{const previous=undo;undo=null;save(previous);}),'pk-undo'));if(lastFailed)bottom.append(identified(button(d,t("重试保存"),()=>save(lastFailed)),'pk-retry-save'));view.append(bottom);
  if(notice)view.append(el(d,'p',{id:'pk-notice',class:'pk-settings-notice',text:notice}));
  view.append(el(d,'p',{id:'pk-privacy',class:'pk-settings-privacy',text:t("当前字幕或完整长文仅发送至你启用的 AI 服务。API Key 保存在此浏览器。失败不会自动切换服务或重试。")}));
- const diagnostics=el(d,'details',{id:'pk-diagnostics',class:'pk-settings-diagnostics'},el(d,'summary',{id:'pk-diagnostics-toggle',text:t("验收信息（不保活）")}),el(d,'pre',{text:JSON.stringify({version:chrome.runtime.getManifest().version,state:connection.state,diagnostics:connection.diagnostics},null,2)}));view.append(diagnostics);
+ const diagnostics=el(d,'details',{id:'pk-diagnostics',class:'pk-settings-diagnostics'},el(d,'summary',{id:'pk-diagnostics-toggle',text:t("验收信息（不保活）")}),el(d,'pre',{text:JSON.stringify({version:chrome.runtime.getManifest().version,state:connection.state,diagnostics:connection.diagnostics},null,2)}));diagnostics.append(el(d,'p',{text:t('连接诊断仅记录阶段与耗时，最多保留 200 条、24 小时，不包含密钥或正文。')}),
+  identified(button(d,t('读取连接诊断'),readSetupHistory),'pk-setup-read'),
+  identified(button(d,t('复制连接诊断'),async()=>{await readSetupHistory();if(setupHistory)try{await navigator.clipboard.writeText(JSON.stringify(setupHistory,null,2));}catch{const node=d.getElementById('pk-setup-history');if(node)node.textContent=t('复制失败');}}),'pk-setup-copy'),
+  identified(button(d,t('清除连接诊断'),async()=>{try{await send('clearSetupDiagnostics');await readSetupHistory();}catch{const node=d.getElementById('pk-setup-history');if(node)node.textContent=t('无法读取诊断，请重试。');}}),'pk-setup-clear'),
+  el(d,'pre',{id:'pk-setup-history',text:setupHistory?JSON.stringify(setupHistory,null,2):''}));view.append(diagnostics);
  patchChildren(root,view);
  if(active&&(!active.isConnected||active.disabled||d.activeElement!==active)){
   const fallback=active.id==='pk-pref-timeline'?'pk-pref-summary':active.id.startsWith('pk-defaultView-')?(prefs.summary?'pk-pref-summary':'pk-pref-mindmap'):'pk-reset';

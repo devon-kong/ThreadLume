@@ -87,7 +87,7 @@ test('实际后台：取消后立即重试不等待旧网络响应，迟到旧�
  assert.equal((await w.send({action:'providers'})).value.activeId,'custom-one');
 });
 test('实际后台：候选权限在不可取消提交中撤销，原服务不被替换',async()=>{
- const w=await fixture({current:true});let release,entered=false;const set=w.storage.local.set;w.storage.local.set=async v=>{if(v.aiProvidersV8?.activeId!=='custom-one'&&!entered){entered=true;await new Promise(r=>release=r);}return set(v);};
+ const w=await fixture({current:true});let release,entered=false;const set=w.storage.local.set;w.storage.local.set=async v=>{if(!Object.hasOwn(v,'aiSetupDiagnosticsV1')&&v.aiProvidersV8?.activeId!=='custom-one'&&!entered){entered=true;await new Promise(r=>release=r);}return set(v);};
  const p=w.send({action:'saveProvider',config:{...cfg,baseURL:'https://candidate.example.test/v1'},key:'candidate-key'});while(!entered)await new Promise(r=>setTimeout(r,0));
  w.chrome.permissions.contains=async p=>!p.origins.includes('https://candidate.example.test/*');await w.chrome.permissions.onRemoved.fire({origins:['https://candidate.example.test/*']});release();assert.equal((await p).ok,false);assert.equal((await w.send({action:'providers'})).value.activeId,'custom-one');assert.equal(JSON.stringify(w.storage.local.data).includes('candidate-key'),false);
 });
@@ -138,7 +138,7 @@ test('实际worker逐持久化边界终止：不运行旧finally，四种Key记�
     const r=ruleFixture();for(const [id,value]of initialRules.rules)r.rules.set(id,structuredClone(value));const old=await fixture({seed,dnr:r.dnr});await old.send({action:'status'});
     let count=0,checkpoint;const reached=new Promise(resolve=>checkpoint=resolve),forever=new Promise(()=>{});
     for(const area of [old.storage.local,old.storage.session])for(const method of ['set','remove']){
-     const original=area[method];area[method]=async(...args)=>{const stop=++count===n;if(stop&&side==='before'){checkpoint();await forever;}await original(...args);if(stop&&side==='after'){checkpoint();await forever;}};
+     const original=area[method];area[method]=async(...args)=>{if(method==='set'&&Object.hasOwn(args[0],'aiSetupDiagnosticsV1'))return original(...args);const stop=++count===n;if(stop&&side==='before'){checkpoint();await forever;}await original(...args);if(stop&&side==='after'){checkpoint();await forever;}};
     }
     const id=seed.local.aiProvidersV8.activeId;
     const pending=old.send({action:'saveProvider',config:{...originConfig,id,model:'new-model',rememberKey:to},key:'new-key'});
@@ -246,4 +246,21 @@ test('custom worker confirms current SPA document, rejects missing document, pre
  assert.equal((await w.send(message,w.x)).error,'FOCUS_MISMATCH');
  for(const sender of [{...w.x,documentId:undefined},{...w.x,documentLifecycle:'prerender'}])assert.equal((await w.send(message,sender)).error,'FOCUS_MISMATCH');
  assert.equal(w.calls.length,before);
+});
+
+test('trusted setup diagnostics remain readable while worker startup is pending; X cannot append/read/clear',async()=>{
+ let release;const w=await fixture({storageGate:new Promise(r=>release=r)});
+ const actions=['recordSetupDiagnostic','getSetupDiagnostics','clearSetupDiagnostics'];
+ for(const action of actions)assert.equal((await w.send({action},w.x)).rejected,true);
+ const pending=w.send({action:'getSetupDiagnostics'});const result=await Promise.race([pending,new Promise(r=>setTimeout(()=>r({timedOut:true}),50))]);
+ release();assert.equal(result.timedOut,undefined);assert.equal(result.ok,true);assert.ok(Array.isArray(result.value.events));
+ const invalid=await w.send({action:'recordSetupDiagnostic',event:{operationId:'one',stage:'permission_request',status:'started',key:'SECRET'}});assert.equal(invalid.ok,false);
+ const valid=await w.send({action:'recordSetupDiagnostic',event:{operationId:'one',stage:'permission_request',status:'success',elapsedMs:20,granted:true}});assert.equal(valid.ok,true);
+ const read=await w.send({action:'getSetupDiagnostics'});assert.ok(read.value.events.some(r=>r.operationId==='one'&&r.granted===true));assert.doesNotMatch(JSON.stringify(read),/SECRET/);
+ await w.send({action:'status'});await w.send({action:'clearSetupDiagnostics'});assert.equal((await w.send({action:'getSetupDiagnostics'})).value.events.length,0);
+});
+test('diagnostics report a swallowed restore failure as failed, never as a successful restore',async()=>{
+ const w=await fixture({dnr:{getSessionRules:async()=>[{id:891020}],updateSessionRules:async()=>{throw Error('must not mutate conflicting rule')}}});
+ await w.send({action:'status'});const rows=(await w.send({action:'getSetupDiagnostics'})).value.events.filter(r=>r.origin==='startup'&&r.stage==='restore');
+ assert.ok(rows.some(r=>r.status==='failed'&&r.errorCode==='CUSTOM_RULE_CONFLICT'));assert.equal(rows.some(r=>r.status==='success'),false);
 });

@@ -1,3 +1,4 @@
+import {diagnosticCall} from './setup-diagnostics.js';
 // Trusted worker state only. Immutable versioned Key records precede the single
 // registry commit pointer. Recovery never depends on the dying worker's finally.
 import {fail} from './protocol.js';
@@ -70,9 +71,9 @@ export class ProviderStore {
   this.cleanupError=null;
   }catch{this.cleanupError='CUSTOM_KEY_CLEANUP_REQUIRED';}
  }
- async save(raw,key,{signal,onStage=()=>{}}={}){
+ async save(raw,key,{signal,onStage=()=>{},trace}={}){
   const stage=name=>{this.onStage(name);if(!signal?.aborted)onStage(name);};
-  stage('store_init');await this.init();stage('store_ready');const check=()=>{if(signal?.aborted)cancelled();};check();
+  stage('store_init');await diagnosticCall(trace,'store_init',()=>this.init());stage('store_ready');const check=()=>{if(signal?.aborted)cancelled();};check();
   const config=validateProviderConfig(raw),before=this.registry,old=config.id?before.services.find(s=>s.id===config.id):null;
   if(config.id&&!old)fail('CUSTOM_INVALID_CONFIG');if(!old&&before.services.length>=MAX_SERVICES)fail('CUSTOM_CONFIG_LIMIT');
   if(key!==undefined&&!this.validKey(key))fail('CUSTOM_KEY_REQUIRED');
@@ -88,15 +89,15 @@ export class ProviderStore {
   this.descriptorStates.set(candidate,'ready');
   let prepared,published=false;
   try{
-   stage('prepare');prepared=await this.bindings?.prepare(candidate,{signal});check();
-   stage('probe');await (prepared?prepared.executor.probe(secret,signal):this.probe(candidate,secret,signal));check();stage('probe_ok');
-   stage('commit');return await this.commit(async()=>{
+   stage('prepare');prepared=await this.bindings?.prepare(candidate,{signal,trace});check();
+   stage('probe');await diagnosticCall(trace,'model_probe',()=>prepared?prepared.executor.probe(secret,signal):this.probe(candidate,secret,signal));check();stage('probe_ok');
+   stage('commit');return await diagnosticCall(trace,'commit',()=>this.commit(async()=>{
     check();if(this.registry!==before)cancelled();if(!await this.verifyPermission(candidate))fail('PERMISSION_REQUIRED');check();
     const registry={schema:2,activeId:candidate.id,services:[...before.services.filter(s=>s.id!==candidate.id),candidate]};
     // Staged records have unique refs, so old bound requests cannot see them.
-    await this.stageKey(candidate,secret);check();
+    await diagnosticCall(trace,'key_write',()=>this.stageKey(candidate,secret));check();
     try{
-     await this.storage.local.set({[REGISTRY]:registry});check();
+     await diagnosticCall(trace,'registry_write',()=>this.storage.local.set({[REGISTRY]:registry}));check();
      if(!await this.verifyPermission(candidate))fail('PERMISSION_REQUIRED');check();
     }catch(e){await this.storage.local.set({[REGISTRY]:before});throw e;}
     const previousIdentity=this.identity();this.registry=registry;
@@ -106,7 +107,7 @@ export class ProviderStore {
     // save; unreferenced records are retried on the next worker initialization.
     try{await retired?.release();}catch{/* Runtime exposes a fixed cleanup state. */}await this.collectKeys();
     return this.list();
-   });
+   }));
   }finally{if(!published){try{await prepared?.release();}finally{const location=candidate.rememberKey?'local':'session';try{await this.storage[location].remove(KEY_PREFIX+candidate.keyRef);delete this.records[location][candidate.keyRef];}catch{this.cleanupError='CUSTOM_KEY_CLEANUP_REQUIRED';}}}}
  }
  async activate(id,options={}){await this.init();const c=this.registry.services.find(s=>s.id===id);if(!c)fail('CUSTOM_INVALID_CONFIG');return this.save(protocolConfig(c),undefined,options);}

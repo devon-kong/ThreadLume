@@ -10,7 +10,7 @@ export function validateParams(params){
 export function allowedSender(sender,id,action){
  if(sender?.id!==id)return false;
  const settings=sender.url===`chrome-extension://${id}/settings.html`;
- if(['status','preferences','savePreferences','connect','capture','disconnect','cancelCheck','check','openSetup','providers','saveProvider','activateProvider','cancelProviderCheck'].includes(action)&&settings)return true;
+ if(['recordSetupDiagnostic','getSetupDiagnostics','clearSetupDiagnostics','status','preferences','savePreferences','connect','capture','disconnect','cancelCheck','check','openSetup','providers','saveProvider','activateProvider','cancelProviderCheck'].includes(action)&&settings)return true;
  if(!['status','preferences','setOutputLanguage','generate','cached','cancel','displayed','openSettings'].includes(action)||!Number.isInteger(sender.tab?.id)||sender.frameId!==0)return false;
  try{const u=new URL(sender.url);return u.protocol==='https:'&&['x.com','twitter.com'].includes(u.hostname);}catch{return false;}
 }
