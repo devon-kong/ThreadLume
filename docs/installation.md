@@ -34,6 +34,8 @@ Extract the new package into the same installation folder, or rebuild your exist
 
 A new folder or browser profile does not automatically receive saved settings or API keys. Configure the service through Settings; never copy credentials into an issue report.
 
+The first-connection fix initializes the network-rule API when the extension loads; service domains still require explicit authorization. After copying this update over an existing installation, reload the extension before testing a service. Replacing files alone does not update Chromium's in-memory permission declaration.
+
 ## If something needs attention
 
 | What you see | Next action |

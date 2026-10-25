@@ -54,7 +54,7 @@ export const MESSAGES=Object.freeze({
  "取消": "Cancel",
  "保存、检测并启用": "Save, test & enable",
  "请求地址：": "Request URL: ",
- "。此服务需额外网络规则权限，仅在该准确 API 地址移除 Origin 请求头。": ". This endpoint needs an optional network-rule permission to remove only the Origin header at this exact URL.",
+ "。此服务使用兼容网络规则，仅在该准确 API 地址移除 Origin 请求头。": ". This service uses a compatibility rule that removes only the Origin header at this exact API URL.",
  "仅支持 HTTPS Base URL，不含账号、查询参数或片段。": "Use an HTTPS Base URL without credentials, query parameters or fragments.",
  "填写服务商提供的 Base URL；请求路径会自动规范化。": "Enter your provider's Base URL. The request path is normalized automatically.",
  "设置": "Settings",

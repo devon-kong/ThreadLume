@@ -81,8 +81,10 @@ function requestProviderPermission(baseURL,operationId){
  const request=providerPermissions(baseURL),permission=request.origins[0];
  const hosts=chrome.runtime.getManifest().optional_host_permissions||[];
  if(!hosts.includes('https://*/*')&&!hosts.includes(permission))throw Error('CUSTOM_EXTENSION_RELOAD_REQUIRED');
- if(request.permissions?.some(p=>!chrome.runtime.getManifest().optional_permissions?.includes(p)))throw Error('CUSTOM_EXTENSION_RELOAD_REQUIRED');
- const pending=chrome.permissions.request(request);Promise.resolve(pending).then(granted=>recordSetup(operationId,'permission_request','success',{granted:granted===true}),()=>recordSetup(operationId,'permission_request','failed'));return pending;
+ // Chromium's DNR write queue is initialized at extension load. Granting the
+ // API for the first time here can leave that queue uninitialized until reload.
+ if(request.permissions?.some(p=>!chrome.runtime.getManifest().permissions?.includes(p)))throw Error('CUSTOM_EXTENSION_RELOAD_REQUIRED');
+ const pending=chrome.permissions.request({origins:request.origins});Promise.resolve(pending).then(granted=>recordSetup(operationId,'permission_request','success',{granted:granted===true}),()=>recordSetup(operationId,'permission_request','failed'));return pending;
  }catch(e){recordSetup(operationId,'permission_request','failed');throw e;}
 }
 async function activateProvider(id){
@@ -110,7 +112,7 @@ function openProviderDialog(service){
  const stream=el(d,'input',{id:'pk-provider-stream',type:'checkbox'});stream.checked=draft.stream===true;form.append(el(d,'label',{class:'pk-provider-remember',for:stream.id},stream,el(d,'span',{text:t("渐进显示摘要与脑图（流式）")})),el(d,'small',{class:'pk-ai-muted',text:t("更早开始阅读；保存时验证服务的流式兼容性。失败不自动重发，关闭后恢复完整结果方式。")}));
  const error=el(d,'p',{id:'pk-provider-error',class:'pk-provider-error',role:'alert'}),cancel=identified(button(d,t("取消"),()=>dismiss()),'pk-provider-cancel'),submit=el(d,'button',{id:'pk-provider-submit',type:'submit',class:'pk-provider-primary',text:t("保存、检测并启用")});form.append(error,el(d,'footer',{},cancel,submit));dialog.append(form);d.body.append(dialog);
  const capture=()=>{const value={name:name.input.value,baseURL:url.input.value,model:model.input.value,key:key.input.value,rememberKey:remember.checked,stream:stream.checked};providerDrafts.set(draftId,value);return value;};
- const preview=()=>{capture();try{endpoint.textContent=t("请求地址：")+normalizeEndpoint(url.input.value).endpoint+(providerPermissions(url.input.value).permissions?t("。此服务需额外网络规则权限，仅在该准确 API 地址移除 Origin 请求头。"):'');}catch{endpoint.textContent=url.input.value?t("仅支持 HTTPS Base URL，不含账号、查询参数或片段。"):t("填写服务商提供的 Base URL；请求路径会自动规范化。");}};
+ const preview=()=>{capture();try{endpoint.textContent=t("请求地址：")+normalizeEndpoint(url.input.value).endpoint+(providerPermissions(url.input.value).permissions?t("。此服务使用兼容网络规则，仅在该准确 API 地址移除 Origin 请求头。"):'');}catch{endpoint.textContent=url.input.value?t("仅支持 HTTPS Base URL，不含账号、查询参数或片段。"):t("填写服务商提供的 Base URL；请求路径会自动规范化。");}};
  form.addEventListener('input',preview);form.addEventListener('change',capture);preview();
  let checking=false,revision=0;
  const setChecking=value=>{checking=value;for(const node of form.querySelectorAll('input,button[type=submit]'))node.disabled=value;submit.textContent=value?t("正在检测…"):t("保存、检测并启用");cancel.textContent=value?t("取消检测"):t("取消");};

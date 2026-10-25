@@ -38,7 +38,8 @@
     "128": "icons/icon128.png"
   },
   "permissions": [
-    "storage"
+    "storage",
+    "declarativeNetRequestWithHostAccess"
   ],
   "optional_host_permissions": [
     "https://*/*"
@@ -52,8 +53,5 @@
   },
   "action": {
     "default_title": "ThreadLume Settings"
-  },
-  "optional_permissions": [
-    "declarativeNetRequestWithHostAccess"
-  ]
+  }
 }

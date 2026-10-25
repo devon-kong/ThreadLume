@@ -27,6 +27,8 @@ A candidate service is normalized and validated, its specific host grant is chec
 
 Generation uses that bound executor directly. The standard policy uses fixed HTTPS POST Chat Completions with omitted cookies and rejected redirects. The one existing Yuanjing exception uses an exact-endpoint, extension-scoped session rule to remove Origin. There is no provider fallback or automatic model retry.
 
+`declarativeNetRequestWithHostAccess` is declared in the required API permissions so Chromium initializes the rule engine when the extension loads. Service host access remains optional and is requested only for the configured HTTPS host. Granting the DNR API for the first time at runtime can leave Chromium's write queue uninitialized until extension reload; settings therefore reject an older in-memory manifest that still declares this API as optional. Backend permission checks, the exact rule, uncertain-write ownership and cancellation behavior remain unchanged.
+
 The former Doubao bridge is removed. Old connection records are retained without restoration. In production, no legacy request transport is supplied: absent custom configuration reports `AI_NOT_CONFIGURED` or `DOUBAO_UNAVAILABLE`. Offline compatibility tests can exercise retained legacy parsers and lifecycle helpers with injected synthetic transports; that is not a shipped connection route.
 
 ## Rendering and lifecycle

@@ -31,7 +31,7 @@ Legacy Doubao data is retained for compatibility. Its bridge and runtime entry p
 - Required `storage`: preferences, provider bindings, keys and bounded cache.
 - Static content scripts: X/Twitter pages, to provide the reader.
 - Optional HTTPS host access: requested for the specific configured service by a settings-page gesture. The broad manifest ceiling is not a bulk runtime grant.
-- Optional `declarativeNetRequestWithHostAccess`: only for the existing exact Yuanjing compatibility endpoint. Its session rule removes Origin only for this extension's POST request to that URL. Other endpoints do not use this rule.
+- Required `declarativeNetRequestWithHostAccess`: declared at installation so Chromium initializes its rule engine before the first service setup. It does not grant service-host access; that remains optional. The only session rule is for the existing exact Yuanjing compatibility endpoint and removes Origin only for this extension's POST request to that URL. Other endpoints do not use this rule.
 
 No cookies, history, management, webRequest, required all-site network permission, hidden page, iframe, offscreen document or keepalive is added.
 

@@ -145,9 +145,9 @@ const mainEntry = (manifest.content_scripts ?? []).find((c) => c.world === "MAIN
 if (!mainEntry || !mainEntry.js?.includes("layout-adapter-main.js") || mainEntry.run_at !== "document_start") {
   throw new Error("native-extension/manifest.json must register layout-adapter-main.js as a document_start MAIN-world content script");
 }
-if (JSON.stringify(manifest.permissions) !== JSON.stringify(["storage"]) ||
+if (JSON.stringify(manifest.permissions) !== JSON.stringify(["storage", "declarativeNetRequestWithHostAccess"]) ||
     JSON.stringify(manifest.optional_host_permissions) !== JSON.stringify(["https://*/*"]) ||
-    manifest.host_permissions || JSON.stringify(manifest.optional_permissions) !== JSON.stringify(["declarativeNetRequestWithHostAccess"]) || manifest.background?.service_worker !== "ai-background.js" || manifest.web_accessible_resources) {
+    manifest.host_permissions || manifest.optional_permissions || manifest.background?.service_worker !== "ai-background.js" || manifest.web_accessible_resources) {
   throw new Error("Native AI permission boundary violated");
 }
 const aiWorker = readFileSync(path.join(dist, "ai-background.js"), "utf8");

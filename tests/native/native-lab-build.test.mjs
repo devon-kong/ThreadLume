@@ -31,9 +31,9 @@ test("P2 统一构建 manifest 身份：Peek Native / 0.11.0 / HTTPS 可选权�
   const manifest = readJson(join(NATIVE_DIST, "manifest.json"));
   assert.equal(manifest.name, "ThreadLume — AI Reader for X");
   assert.equal(manifest.version, "0.12.0");
-  assert.deepEqual(manifest.permissions, ["storage"]);
+  assert.deepEqual(manifest.permissions, ["storage", "declarativeNetRequestWithHostAccess"]);
   assert.equal(manifest.host_permissions, undefined);
-  assert.deepEqual(manifest.optional_permissions, ["declarativeNetRequestWithHostAccess"]);
+  assert.equal(manifest.optional_permissions, undefined);
   assert.deepEqual(manifest.optional_host_permissions, ["https://*/*"]);
   assert.deepEqual(manifest.background, {service_worker:"ai-background.js"});
   assert.equal(manifest.web_accessible_resources, undefined);
