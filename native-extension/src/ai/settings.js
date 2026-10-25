@@ -10,10 +10,21 @@ chrome.runtime.onMessage?.addListener((m,sender)=>{
  if(sender.id!==chrome.runtime.id||sender.tab||m?.ns!=='peek-ai-v7'||m.action!=='stateChanged')return;
  refresh();
 });
-let setupOperation=null,setupStage='',setupHistory=null;const setupTimes=new Map();
+let setupOperation=null,setupStage='',setupHistory=null,setupHistoryRevision=0,setupHistoryClearing=false,settingsLoaded=false;const setupTimes=new Map();
 function recordSetup(operationId,stage,status,extra={}){if(!operationId)return;send('recordSetupDiagnostic',{event:{operationId,stage,status,elapsedMs:Math.max(0,Math.round(performance.now()-(setupTimes.get(operationId)||performance.now()))),...extra}}).catch(()=>{});}
 function sendProvider(action,data){recordSetup(data.operationId,'save_message','started');const pending=send(action,data);pending.then(()=>recordSetup(data.operationId,'save_message','success'),()=>recordSetup(data.operationId,'save_message','failed'));return pending;}
-async function readSetupHistory(){try{setupHistory=await send('getSetupDiagnostics');const node=d.getElementById('pk-setup-history');if(node)node.textContent=JSON.stringify(setupHistory,null,2);}catch{const node=d.getElementById('pk-setup-history');if(node)node.textContent=t('无法读取诊断，请重试。');}}
+function showSetupHistory(text){const node=d.getElementById('pk-setup-history');if(node)node.textContent=text;}
+async function readSetupHistory(){
+ if(setupHistoryClearing)return null;const revision=++setupHistoryRevision;setupHistory=null;
+ try{const history=await send('getSetupDiagnostics');if(revision!==setupHistoryRevision)return null;if(!history||!Array.isArray(history.events))throw Error('INVALID_MESSAGE');setupHistory=history;showSetupHistory(JSON.stringify(history,null,2));return history;}
+ catch{if(revision===setupHistoryRevision)showSetupHistory(t('无法读取诊断，请重试。'));return null;}
+}
+async function clearSetupHistory(){
+ if(setupHistoryClearing)return;setupHistoryClearing=true;++setupHistoryRevision;setupHistory=null;showSetupHistory('');
+ try{await send('clearSetupDiagnostics');setupHistoryClearing=false;await readSetupHistory();}
+ catch{showSetupHistory(t('无法读取诊断，请重试。'));}finally{setupHistoryClearing=false;}
+}
+
 const SETUP_LABELS={permission:t("正在请求域名授权…"),background:t("正在准备后台…"),rules:t("正在准备网络规则…"),model:t("正在检测模型…"),commit:t("正在保存配置…")};
 function beginSetup(){setupOperation=crypto.randomUUID();setupTimes.set(setupOperation,performance.now());if(setupTimes.size>20)setupTimes.delete(setupTimes.keys().next().value);showSetup('permission');return setupOperation;}
 function showSetup(stage){setupStage=t(SETUP_LABELS[stage]||'');const node=d.getElementById('pk-provider-phase');if(node)node.textContent=setupStage;const submit=d.getElementById('pk-provider-submit');if(submit?.disabled)submit.textContent=setupStage||t("正在检测…");}
@@ -141,6 +152,14 @@ function patchChildren(parent,template){
  }
  while(parent.childNodes.length>index)parent.lastChild.remove();
 }
+function diagnosticsPanel(){
+ const diagnostics=el(d,'details',{id:'pk-diagnostics',class:'pk-settings-diagnostics'},el(d,'summary',{id:'pk-diagnostics-toggle',text:t("验收信息（不保活）")}),el(d,'pre',{text:JSON.stringify({version:chrome.runtime.getManifest().version,state:connection.state,diagnostics:connection.diagnostics},null,2)}));diagnostics.append(el(d,'p',{text:t('连接诊断仅记录阶段与耗时，最多保留 200 条、24 小时，不包含密钥或正文。')}),
+  identified(button(d,t('读取连接诊断'),readSetupHistory),'pk-setup-read'),
+  identified(button(d,t('复制连接诊断'),async()=>{const history=await readSetupHistory();if(history)try{await navigator.clipboard.writeText(JSON.stringify(history,null,2));}catch{const node=d.getElementById('pk-setup-history');if(node)node.textContent=t('复制失败');}}),'pk-setup-copy'),
+  identified(button(d,t('清除连接诊断'),clearSetupHistory),'pk-setup-clear'),
+  el(d,'pre',{id:'pk-setup-history',text:setupHistory?JSON.stringify(setupHistory,null,2):''}));return diagnostics;
+}
+function renderPending(){setUILanguage(prefs.uiLanguage);const view=d.createDocumentFragment();view.append(el(d,'h1',{text:t('设置')}),el(d,'p',{text:notice||t('正在准备后台…')}),diagnosticsPanel());patchChildren(root,view);}
 function render(){
  setUILanguage(prefs.uiLanguage);d.documentElement.lang=prefs.uiLanguage;d.title='ThreadLume — '+t('设置');
  const active=root.contains(d.activeElement)?d.activeElement:null,view=d.createDocumentFragment();
@@ -158,11 +177,7 @@ function render(){
  if(undo)bottom.append(identified(button(d,t("撤销"),()=>{const previous=undo;undo=null;save(previous);}),'pk-undo'));if(lastFailed)bottom.append(identified(button(d,t("重试保存"),()=>save(lastFailed)),'pk-retry-save'));view.append(bottom);
  if(notice)view.append(el(d,'p',{id:'pk-notice',class:'pk-settings-notice',text:notice}));
  view.append(el(d,'p',{id:'pk-privacy',class:'pk-settings-privacy',text:t("当前字幕或完整长文仅发送至你启用的 AI 服务。API Key 保存在此浏览器。失败不会自动切换服务或重试。")}));
- const diagnostics=el(d,'details',{id:'pk-diagnostics',class:'pk-settings-diagnostics'},el(d,'summary',{id:'pk-diagnostics-toggle',text:t("验收信息（不保活）")}),el(d,'pre',{text:JSON.stringify({version:chrome.runtime.getManifest().version,state:connection.state,diagnostics:connection.diagnostics},null,2)}));diagnostics.append(el(d,'p',{text:t('连接诊断仅记录阶段与耗时，最多保留 200 条、24 小时，不包含密钥或正文。')}),
-  identified(button(d,t('读取连接诊断'),readSetupHistory),'pk-setup-read'),
-  identified(button(d,t('复制连接诊断'),async()=>{await readSetupHistory();if(setupHistory)try{await navigator.clipboard.writeText(JSON.stringify(setupHistory,null,2));}catch{const node=d.getElementById('pk-setup-history');if(node)node.textContent=t('复制失败');}}),'pk-setup-copy'),
-  identified(button(d,t('清除连接诊断'),async()=>{try{await send('clearSetupDiagnostics');await readSetupHistory();}catch{const node=d.getElementById('pk-setup-history');if(node)node.textContent=t('无法读取诊断，请重试。');}}),'pk-setup-clear'),
-  el(d,'pre',{id:'pk-setup-history',text:setupHistory?JSON.stringify(setupHistory,null,2):''}));view.append(diagnostics);
+ view.append(diagnosticsPanel());
  patchChildren(root,view);
  if(active&&(!active.isConnected||active.disabled||d.activeElement!==active)){
   const fallback=active.id==='pk-pref-timeline'?'pk-pref-summary':active.id.startsWith('pk-defaultView-')?(prefs.summary?'pk-pref-summary':'pk-pref-mindmap'):'pk-reset';
@@ -170,6 +185,6 @@ function render(){
   target?.focus({preventScroll:true});
  }
 }
-async function refresh(){if(busy||providerBusy||providerDialog||pendingSaves)return;const revision=++refreshRevision;try{const [saved,state,list]=await Promise.all([send('preferences'),send('status'),send('providers').catch(()=>null)]);if(revision!==refreshRevision||busy||providerBusy||providerDialog)return;connection=state;if(list?.services)providers=list;if(!pendingSaves){prefs=saved;confirmedPrefs={...saved};}applyTheme();render();}catch(e){if(revision!==refreshRevision||busy)return;notice=errorText(e.message);render();}}
+async function refresh(){if(busy||providerBusy||providerDialog||pendingSaves)return;const revision=++refreshRevision;try{const [saved,state,list]=await Promise.all([send('preferences'),send('status'),send('providers').catch(()=>null)]);if(revision!==refreshRevision||busy||providerBusy||providerDialog)return;settingsLoaded=true;connection=state;if(list?.services)providers=list;if(!pendingSaves){prefs=saved;confirmedPrefs={...saved};}applyTheme();render();}catch(e){if(revision!==refreshRevision||busy)return;notice=errorText(e.message);if(settingsLoaded)render();else renderPending();}}
 window.addEventListener('focus',refresh);matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme);
-refresh();
+renderPending();refresh();
