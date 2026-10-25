@@ -2,6 +2,14 @@ import {readArticleText} from './article-text.js';
 // Standard native DOM / TextTrack only. No network or alternate player.
 const abortError = () => new DOMException('Cancelled', 'AbortError');
 const textOf = n => (n?.innerText ?? n?.textContent ?? '').trim();
+// Native cue parsing understands WebVTT entities, formatting and X word-time
+// annotations. Read a detached fragment only; never mutate or render the cue.
+function cueText(cue,video){
+  try{const text=cue.getCueAsHTML?.()?.textContent;if(typeof text==='string')return text;}catch{/* Try the standard native parser below. */}
+  const raw=String(cue.text||''),Cue=video?.ownerDocument?.defaultView?.VTTCue||globalThis.VTTCue;
+  try{if(typeof Cue==='function'){const text=new Cue(cue.startTime,cue.endTime,raw).getCueAsHTML().textContent;if(typeof text==='string')return text;}}catch{/* Preserve source if a browser has no usable native parser. */}
+  return raw;
+}
 export function transcriptOf(cues) {
   return cues.map(c => `${clock(c.start)} ${c.text.trim().replace(/\s+/g,' ')}`).join('\n');
 }
@@ -25,7 +33,7 @@ export function collectCaptions(video,{signal,timeoutMs=8000,settleMs=500,isCurr
       if(changed&&!userChanged&&selected?.mode==='hidden')selected.mode='disabled';
       if(error)reject(error);else resolve(value);
     };
-    const snapshot=()=>Array.from(selected?.cues||[]).map(c=>({start:c.startTime,end:c.endTime,text:String(c.text||'')})).filter(c=>Number.isFinite(c.start)&&Number.isFinite(c.end)&&c.start>=0&&c.end>=c.start&&c.text.trim());
+    const snapshot=()=>Array.from(selected?.cues||[]).map(c=>({start:c.startTime,end:c.endTime,text:cueText(c,video)})).filter(c=>Number.isFinite(c.start)&&Number.isFinite(c.end)&&c.start>=0&&c.end>=c.start&&c.text.trim());
     const check=()=>{
       if(done)return;
       if(!isCurrent()||!video.isConnected)return finish(null,abortError());

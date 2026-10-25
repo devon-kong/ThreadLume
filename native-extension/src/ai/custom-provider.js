@@ -38,7 +38,7 @@ export function validateProviderConfig(raw){
 }
 
 function checkSize(text){
- if(text.length>CUSTOM_LIMITS.inputCharacters||new TextEncoder().encode(text).length>CUSTOM_LIMITS.inputBytes)fail('CUSTOM_INPUT_TOO_LONG');
+ if(text.length>CUSTOM_LIMITS.inputCharacters||new TextEncoder().encode(text).length>CUSTOM_LIMITS.inputBytes)fail('CUSTOM_LOCAL_INPUT_TOO_LONG');
 }
 function sourceFor(input){
  if(typeof input?.text==='string')checkSize(input.text);

@@ -101,9 +101,9 @@ test('timeline chapters, points and aggregate text are bounded without truncatio
 });
 
 test('oversized articles and cue payloads are explicitly refused before constructing requests',()=>{
-  for(const text of ['a'.repeat(48001),'文'.repeat(35000)])throwsCode(()=>custom.buildChatRequest(config,{...article,text},'article'),'CUSTOM_INPUT_TOO_LONG');
+  for(const text of ['a'.repeat(48001),'文'.repeat(35000)])throwsCode(()=>custom.buildChatRequest(config,{...article,text},'article'),'CUSTOM_LOCAL_INPUT_TOO_LONG');
   const cues=Array.from({length:3000},()=>({start:0,end:1,text:'caption'}));
-  throwsCode(()=>custom.buildChatRequest(config,{...video,cues,text:cues.map(()=>'00:00:00 caption').join('\n')},'summary'),'CUSTOM_INPUT_TOO_LONG');
+  throwsCode(()=>custom.buildChatRequest(config,{...video,cues,text:cues.map(()=>'00:00:00 caption').join('\n')},'summary'),'CUSTOM_LOCAL_INPUT_TOO_LONG');
 });
 
 test('HTTP error mapping returns only fixed categories regardless of remote secrets',()=>{

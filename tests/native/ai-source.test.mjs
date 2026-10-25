@@ -123,3 +123,28 @@ test('Article body ignores video controls and embedded engagement while retainin
 test('hidden Article descendants do not enter content or invalidate its identity',()=>{
  const d=doc('<h1 data-testid="twitter-article-title">Title</h1><div data-testid="twitterArticleRichTextView"><p>Visible source</p><span hidden id="hidden">Private duplicate</span></div>');try{const before=inspectFocal(d,'123');assert.equal(before.body,'Visible source');d.getElementById('hidden').textContent='Changed duplicate';assert.equal(inspectFocal(d,'123').text,before.text);}finally{d.defaultView.close();}
 });
+
+test('native cue markup is removed before length validation without changing cue timing or player state',async()=>{
+ const {buildChatRequest}=await import('../../native-extension/src/ai/custom-provider.js');
+ const document=new JSDOM('').window.document;
+ const cues=Array.from({length:600},(_,i)=>({startTime:i/5,endTime:(i+1)/5,text:`<X-word-ms ms=${'100,'.repeat(35)} index=${i+1} character_ranges=0-4,5-10>word ${i}</X-word-ms>`,getCueAsHTML(){const fragment=document.createDocumentFragment();fragment.textContent=`word ${i}`;return fragment;}}));
+ const f=video('showing',cues),result=await collectCaptions(f.v,{settleMs:1});
+ assert.equal(result.cues.length,600);assert.deepEqual(result.cues[0],{start:0,end:.2,text:'word 0'});assert.deepEqual(result.cues.at(-1),{start:119.8,end:120,text:'word 599'});
+ assert.match(cues[0].text,/X-word-ms/);assert.equal(f.v.paused,true);assert.equal(f.v.currentTime,0);
+ const input={kind:'video',title:'Title',url:'https://x.com/a/status/123',focusId:'123',duration:150,cues:result.cues,text:transcriptOf(result.cues)};
+ const cfg={name:'Test',protocol:'chat-completions',baseURL:'https://example.test/v1',model:'test'};
+ for(const mode of ['summary','mindmap']){const body=buildChatRequest(cfg,input,mode,'en');assert.doesNotMatch(body.messages[1].content,/X-word-ms|character_ranges/);assert.equal(JSON.parse(body.messages[1].content).cues.length,600);}
+});
+test('cue native fragments preserve readable entities, newlines and Chinese; empty text is filtered',async()=>{
+ const d=new JSDOM('').window.document,fragment=text=>{const f=d.createDocumentFragment();f.textContent=text;return f;};
+ const f=video('showing',[{startTime:0,endTime:2,text:'<b>中文 &amp; text</b>\nsecond',getCueAsHTML:()=>fragment('中文 & text\nsecond')},{startTime:2,endTime:3,text:'<c.empty></c>',getCueAsHTML:()=>fragment('')}]);
+ const result=await collectCaptions(f.v,{settleMs:1});assert.equal(result.cues.length,1);assert.equal(result.cues[0].text,'中文 & text\nsecond');assert.equal(transcriptOf(result.cues),'00:00:00 中文 & text second');
+});
+test('cue fallback uses a temporary native VTTCue, or preserves text if parsing is unavailable',async()=>{
+ const previous=globalThis.VTTCue;let constructed=0;
+ try{
+  globalThis.VTTCue=class{constructor(start,end,text){assert.equal(start,0);assert.equal(end,2);assert.equal(text,'<b>safe</b>');constructed++;}getCueAsHTML(){return {textContent:'safe'};}};
+  const f=video('showing',[{startTime:0,endTime:2,text:'<b>safe</b>',getCueAsHTML(){throw Error('unavailable')}}]);assert.equal((await collectCaptions(f.v,{settleMs:1})).cues[0].text,'safe');assert.ok(constructed>0);
+  globalThis.VTTCue=undefined;const raw='literal <value> & text';const g=video('showing',[{startTime:0,endTime:1,text:raw}]);assert.equal((await collectCaptions(g.v,{settleMs:1})).cues[0].text,raw);
+ }finally{if(previous===undefined)delete globalThis.VTTCue;else globalThis.VTTCue=previous;}
+});
