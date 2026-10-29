@@ -57,3 +57,8 @@ test('segmented map shows incomplete notes without chapters, retains failure and
  c.set('mindmap','error','CUSTOM_TIMEOUT');assert.match(d.body.textContent,/A condition/);
  c.set('mindmap','success',{text:'Overview',tree:[{text:'Final',children:[]}],highlights:[]});assert.equal(d.querySelector('#pk-ai-view-mindmap .pk-ai-summary').hidden,true);assert.equal(d.getElementById('pk-ai-task-progress').hidden,true);c.destroy();w.close();
 });
+
+test('stopped segmented task retains notes but never advertises active processing',()=>{
+ const w=new JSDOM('<body></body>').window,d=w.document,c=createCard({document:d,input:{kind:'article'},preferences:DEFAULTS});d.body.append(c.root);c.set('article','loading');c.taskProgress('article',{stage:'plan',total:2,requests:3});c.taskProgress('article',{stage:'integrate',total:2});c.stop();
+ const progress=d.getElementById('pk-ai-task-progress').textContent;assert.doesNotMatch(progress,/正在整合|处理第/);assert.match(progress,/已停止/);c.destroy();w.close();
+});

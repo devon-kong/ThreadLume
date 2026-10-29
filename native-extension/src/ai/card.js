@@ -71,7 +71,7 @@ export function createCard({document,input,preferences,onRetry=()=>{},onSettings
   const enabled=modes();root.hidden=!enabled.length;
   for(const [key,tab] of tabs){tab.hidden=!enabled.includes(key);tab.setAttribute('aria-selected',String(key===view));tab.tabIndex=key===view?0:-1;}
   const task=tasks[view];taskInfo.hidden=!task||!!results[view];
-  if(task&&!results[view])taskInfo.textContent=(task.stage==='integrate'?t("正在整合"):format('处理第 {current}/{total} 段',{current:Math.min(task.total,(task.completed||0)+1),total:task.total}))+' · '+format('计划 {requests} 次请求 · 本地估算',{requests:task.requests})+(drafts[view]?t(" · 局部提要，未完成"):'');
+  if(task&&!results[view])taskInfo.textContent=(!BUSY.has(states[view])?(errors[view]==='CANCELLED'?t("已停止"):t("未完成")):task.stage==='integrate'?t("正在整合"):format('处理第 {current}/{total} 段',{current:Math.min(task.total,(task.completed||0)+1),total:task.total}))+' · '+format('计划 {requests} 次请求 · 本地估算',{requests:task.requests})+(drafts[view]?t(" · 局部提要，未完成"):'');
   const running=enabled.find(m=>BUSY.has(states[m]));
   const partial=!!drafts[view]&&!results[view],state=states[view];
   const label=(state==='success'?t("已完成"):state==='error'?(errors[view]==='CANCELLED'?t("已停止"):t("生成失败")):state==='queued'?t("排队中"):BUSY.has(state)?t("生成中"):t("未生成"))+(partial?t(" · 未完成"):'');

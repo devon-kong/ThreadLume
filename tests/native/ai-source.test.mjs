@@ -154,3 +154,9 @@ test('named source track wins over anonymous rolling display without changing us
  const rolling={kind:'captions',language:'',mode:'showing',cues:[{startTime:0,endTime:1,text:'Start'}]};d.list[1]=rolling;d.list.length=2;
  const result=await collectCaptions(d.v,{settleMs:1});assert.equal(result.cues.length,2);assert.equal(result.completion,'available-cues-snapshot');assert.equal(rolling.mode,'showing');assert.equal(d.track.mode,'hidden');
 });
+
+test('disabled named track loads before anonymous rolling display can be selected',async()=>{
+ const d=video('disabled',null),rolling={kind:'captions',language:'',mode:'showing',cues:[{startTime:0,endTime:1,text:'Current line'}]};d.list[1]=rolling;d.list.length=2;
+ let mode='disabled';Object.defineProperty(d.track,'mode',{get:()=>mode,set:value=>{mode=value;if(value==='hidden')setTimeout(()=>{d.track.cues=[{startTime:0,endTime:1,text:'Start'},{startTime:140,endTime:149,text:'End'}];d.list.dispatchEvent(new d.Event('change'));},1);}});
+ const result=await collectCaptions(d.v,{timeoutMs:100,settleMs:5});assert.equal(result.cues.length,2);assert.equal(result.language,'en');assert.equal(d.track.mode,'disabled');assert.equal(rolling.mode,'showing');
+});

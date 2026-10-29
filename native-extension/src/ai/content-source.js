@@ -39,7 +39,8 @@ export function collectCaptions(video,{signal,timeoutMs=8000,settleMs=500,isCurr
       if(!isCurrent()||!video.isConnected)return finish(null,abortError());
       if(!selected){
         const tracks=Array.from(list||[]).filter(t=>['subtitles','captions'].includes(t.kind));
-        const named=tracks.filter(t=>t.language&&t.cues?.length);
+        // A disabled named source may load only after our temporary hidden lease.
+        const named=tracks.filter(t=>t.language);
         const chosen=named.find(t=>t.mode==='showing');
         const language=chosen?.language||named.find(t=>/^zh/i.test(t.language))?.language||named.map(t=>t.language).sort()[0];
         const candidates=language?named.filter(t=>t.language===language):tracks;
