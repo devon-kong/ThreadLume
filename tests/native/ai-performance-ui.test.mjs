@@ -89,6 +89,18 @@ test('card repairs: full outline copy, settings-only recovery, stable retry focu
   card.set('summary','error','CUSTOM_NETWORK');const retry=[...d.querySelectorAll('button')].find(n=>n.textContent==='重试摘要');retry.focus();retry.click();assert.equal(d.activeElement.id,'pk-ai-tab-summary');
  }finally{card?.destroy();w.close();Object.defineProperty(globalThis,'navigator',{value:old,configurable:true});}
 });
+test('context and truncated-output failures offer service editing without another generation',()=>{
+ const w=new JSDOM('<body></body>',{url:'https://x.com'}).window,d=w.document;let edits=0,retries=0;
+ const card=createCard({document:d,input:{kind:'video'},preferences:DEFAULTS,onSettings:()=>edits++,onRetry:()=>retries++});d.body.append(card.root);
+ try{
+  for(const error of ['CUSTOM_CONTEXT_BUDGET','CUSTOM_LONG_CONTENT_LIMIT','CUSTOM_INPUT_TOO_LONG','CUSTOM_TRUNCATED']){
+   card.set('summary','error',error);const panel=d.getElementById('pk-ai-view-summary');
+   const edit=[...panel.querySelectorAll('button')].find(n=>n.textContent==='编辑服务');assert.ok(edit,error);
+   assert.equal(panel.textContent.includes('重试摘要'),false);edit.click();
+  }
+  assert.equal(edits,4);assert.equal(retries,0);
+ }finally{card.destroy();w.close();}
+});
 test('unrelated comment mutations do not rescan focal cells; source changes still invalidate immediately',async()=>{
  const r=reader(),{w}=r;try{
   await until(()=>r.pending.length===1);
