@@ -1,4 +1,6 @@
-import {fail} from './protocol.js';
+import {AIError,fail} from './protocol.js';
+export const STREAM_FAILURE_STAGES=new Set(['invalidStreamBytes','invalidStreamIncomplete','invalidStreamContent','invalidStreamJSON','invalidStreamEnvelope','invalidStreamSequence','invalidStreamFinish','invalidStreamEncoding']);
+const invalidStream=phase=>{const error=new AIError('CUSTOM_INVALID_RESPONSE');error.validationPhase=phase;throw error;};
 import {cueTimestamp} from './source-references.js';
 import {validPreview} from './preview.js';
 // Decode only a leading top-level text string. The preview remains provisional;
@@ -72,7 +74,7 @@ export function structuredPreview(content,mode,input,outputLanguage='zh-CN'){
 export async function readChatStream(response,{signal,onEvent=()=>{},mode,input,outputLanguage='zh-CN'}={}){
  if(!response.headers?.get('content-type')?.toLowerCase().includes('text/event-stream')||!response.body?.getReader)fail('CUSTOM_STREAM_UNSUPPORTED');
  const reader=response.body.getReader(),decoder=new TextDecoder('utf-8',{fatal:true});
- const decode=(value,options)=>{try{return decoder.decode(value,options);}catch{fail('CUSTOM_INVALID_RESPONSE');}};
+ const decode=(value,options)=>{try{return decoder.decode(value,options);}catch{invalidStream('invalidStreamEncoding');}};
  let line='',lines=[],skipLF=false,content='',finish=null,done=false,bytes=0,first=false,preview='';
  const abort=()=>{reader.cancel().catch(()=>{});};
  signal?.addEventListener('abort',abort,{once:true});
@@ -80,24 +82,24 @@ export async function readChatStream(response,{signal,onEvent=()=>{},mode,input,
  function frame(block){
   const data=block.split('\n').filter(l=>l.startsWith('data:')).map(l=>l.slice(5).replace(/^ /,'')).join('\n');
   if(!data)return;
-  if(done)fail('CUSTOM_INVALID_RESPONSE');
+  if(done)invalidStream('invalidStreamSequence');
   if(data==='[DONE]'){done=true;return;}
-  let e;try{e=JSON.parse(data);}catch{fail('CUSTOM_INVALID_RESPONSE');}
-  if(!e||e.error||!Array.isArray(e.choices))fail('CUSTOM_INVALID_RESPONSE');
+  let e;try{e=JSON.parse(data);}catch{invalidStream('invalidStreamJSON');}
+  if(!e||e.error||!Array.isArray(e.choices))invalidStream('invalidStreamEnvelope');
   if(!e.choices.length)return; // standard usage-only terminal event
-  if(e.choices.length!==1)fail('CUSTOM_INVALID_RESPONSE');
+  if(e.choices.length!==1)invalidStream('invalidStreamEnvelope');
   const c=e.choices[0],d=c.delta;
-  if(c.index!==0||!d||typeof d!=='object'||Array.isArray(d)||d.tool_calls||d.function_call||d.refusal||d.role&&d.role!=='assistant'||finish!==null)fail('CUSTOM_INVALID_RESPONSE');
+  if(c.index!==0||!d||typeof d!=='object'||Array.isArray(d)||d.tool_calls||d.function_call||d.refusal||d.role&&d.role!=='assistant'||finish!==null)invalidStream('invalidStreamSequence');
   if(d.content!==undefined&&d.content!==null){
-   if(typeof d.content!=='string')fail('CUSTOM_INVALID_RESPONSE');
-   content+=d.content;if(content.length>60000)fail('CUSTOM_INVALID_RESPONSE');
+   if(typeof d.content!=='string')invalidStream('invalidStreamContent');
+   content+=d.content;if(content.length>60000)invalidStream('invalidStreamContent');
    if(mode!=='probe'){
     const data=structuredPreview(content,mode,input,outputLanguage),signature=JSON.stringify(data);if(signature!==preview&&(data.text||data.tree.length||data.highlights.length)){preview=signature;onEvent({stage:'partial',text:data.text,preview:data});}
    }
   }
   if(c.finish_reason!==null&&c.finish_reason!==undefined){
    if(c.finish_reason==='length')fail('CUSTOM_TRUNCATED');
-   if(c.finish_reason!=='stop')fail('CUSTOM_INVALID_RESPONSE');finish=c.finish_reason;
+   if(c.finish_reason!=='stop')invalidStream('invalidStreamFinish');finish=c.finish_reason;
   }
  }
  function consume(text){
@@ -117,13 +119,14 @@ export async function readChatStream(response,{signal,onEvent=()=>{},mode,input,
   while(!done){
    const chunk=await reader.read();check();
    if(chunk.done){consume(decode());break;}
-   bytes+=chunk.value.byteLength;if(bytes>2000000)fail('CUSTOM_INVALID_RESPONSE');
+   // Wire framing/reasoning metadata is not the final text. Keep both bounded.
+   bytes+=chunk.value.byteLength;if(bytes>8*1024*1024)invalidStream('invalidStreamBytes');
    if(!first){first=true;onEvent({stage:'firstByte'});}
    consume(decode(chunk.value,{stream:true}));
   }
   if(line)lines.push(line);
   if(lines.length)frame(lines.join('\n'));
-  if(!done||finish!=='stop')fail('CUSTOM_INVALID_RESPONSE');
+  if(!done||finish!=='stop')invalidStream('invalidStreamIncomplete');
   return {choices:[{finish_reason:'stop',message:{role:'assistant',content}}]};
  }finally{
   signal?.removeEventListener('abort',abort);

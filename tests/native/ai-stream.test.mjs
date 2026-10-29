@@ -78,3 +78,19 @@ test('all split points preserve closed Chinese map nodes and reject erroneous te
  const payload=event(content.slice(0,-4))+event(content.slice(-4))+event(null,'stop')+'data: [DONE]\n\n',bytes=new TextEncoder().encode(payload);
  for(let at=1;at<bytes.length;at++){const events=[];const response=new Response(new ReadableStream({start(c){c.enqueue(bytes.slice(0,at));c.enqueue(bytes.slice(at));c.close();}}),{headers:{'content-type':'text/event-stream'}});const result=await readChatStream(response,{mode:'mindmap',input,onEvent:e=>events.push(e)});assert.equal(result.choices[0].message.content,content);assert.ok(events.some(e=>e.preview?.tree.length));}
 });
+
+test('bounded reasoning streams may have large repeated metadata while final text remains small',async()=>{
+ const reasoning=`data: ${JSON.stringify({id:'event-'+ 'm'.repeat(1000),choices:[{index:0,delta:{reasoning_content:'reason'},finish_reason:null}]})}\n\n`;
+ const body=reasoning.repeat(2000)+event({content:'{"text":"Complete"}'})+event({},'stop')+'data: [DONE]\n\n';
+ assert.ok(new TextEncoder().encode(body).length>2000000);
+ const result=await readChatStream(stream(body,8192),{mode:'article',input});assert.equal(result.choices[0].message.content,'{"text":"Complete"}');
+});
+test('stream diagnostics distinguish incomplete termination from oversized content without exporting bodies',async()=>{
+ await assert.rejects(readChatStream(stream(event({content:'{"text":"small"}'}),2048),{mode:'article',input}),e=>e.code==='CUSTOM_INVALID_RESPONSE'&&e.validationPhase==='invalidStreamIncomplete');
+ await assert.rejects(readChatStream(stream(event({content:'x'.repeat(60001)}),65536),{mode:'article',input}),e=>e.code==='CUSTOM_INVALID_RESPONSE'&&e.validationPhase==='invalidStreamContent');
+});
+
+test('wire limit remains bounded independently of decoded content',async()=>{
+ const response=new Response(new ReadableStream({start(c){c.enqueue(new Uint8Array(8*1024*1024+1));c.close();}}),{headers:{'content-type':'text/event-stream'}});
+ await assert.rejects(readChatStream(response,{mode:'article',input}),e=>e.code==='CUSTOM_INVALID_RESPONSE'&&e.validationPhase==='invalidStreamBytes');
+});

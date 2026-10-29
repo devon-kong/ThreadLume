@@ -1,5 +1,6 @@
+import {STREAM_FAILURE_STAGES} from './chat-stream.js';
 // Session-only numeric diagnostics. Never accept arbitrary metadata or text.
-const STAGES=new Set(['invalidStream','invalidEnvelope','invalidJSON','invalidSchema','firstContent','firstChapter','firstNode','admitted','queued','executing','request','response','firstByte','uploadStart','uploadDone','parsed','cacheStart','cacheSaved','done']);
+const STAGES=new Set([...STREAM_FAILURE_STAGES,'invalidStream','invalidEnvelope','invalidJSON','invalidSchema','firstContent','firstChapter','firstNode','admitted','queued','executing','request','response','firstByte','uploadStart','uploadDone','parsed','cacheStart','cacheSaved','done']);
 export const elapsedNumber=value=>typeof value==='number'&&Number.isFinite(value)&&value>=0&&value<=600000?Math.round(value*10)/10:undefined;
 export function createMetrics({clock=()=>performance.now(),limit=60,onChange=()=>{}}={}){
  const rows=[];

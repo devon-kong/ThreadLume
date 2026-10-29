@@ -4,7 +4,7 @@ import {diagnosticCall} from './setup-diagnostics.js';
 // This module is imported by the extension worker only; never by X or settings.
 import {AIError,fail} from './protocol.js';
 import {normalizeEndpoint,prepareChatBuilder,parseChatResponse,probeChatResponse,customError} from './custom-provider.js';
-import {readChatStream} from './chat-stream.js';
+import {readChatStream,STREAM_FAILURE_STAGES} from './chat-stream.js';
 import {protocolConfig} from './transport-policy.js';
 export function createCustomTransport({hasPermission,fetchImpl=globalThis.fetch,timeoutMs=300000,onStage=()=>{}}){
  function bind(descriptor,buildBody,assertCurrent=()=>{},trace){
@@ -35,7 +35,7 @@ export function createCustomTransport({hasPermission,fetchImpl=globalThis.fetch,
   }catch(e){
    if(signal?.aborted)throw new AIError('CANCELLED');
    if(deadline.aborted||e?.name==='TimeoutError')throw new AIError('CUSTOM_TIMEOUT');
-   if(e instanceof AIError){if(e.code==='CUSTOM_INVALID_RESPONSE')onEvent({stage:['invalidJSON','invalidEnvelope'].includes(e.validationPhase)?e.validationPhase:responsePhase});throw e;}
+   if(e instanceof AIError){if(e.code==='CUSTOM_INVALID_RESPONSE'){if(STREAM_FAILURE_STAGES.has(e.validationPhase))onEvent({stage:'invalidStream'});onEvent({stage:(['invalidJSON','invalidEnvelope'].includes(e.validationPhase)||STREAM_FAILURE_STAGES.has(e.validationPhase))?e.validationPhase:responsePhase});}throw e;}
    throw new AIError('CUSTOM_NETWORK');
   }
  }
