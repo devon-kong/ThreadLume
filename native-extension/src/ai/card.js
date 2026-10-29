@@ -111,7 +111,7 @@ export function createCard({document,input,preferences,onRetry=()=>{},onSettings
   progress(mode,text,preview){if(destroyed||!panels.has(mode)||!BUSY.has(states[mode])||typeof text!=='string'||text.length>12000)return;if(preview&&!validPreview(preview,language))return;pending.set(mode,preview||{text,tree:[],highlights:[]});if(!frame)frame=(win.requestAnimationFrame||((fn)=>win.setTimeout(fn,16))).call(win,flushProgress);},
   taskProgress(mode,event){
    const e=taskProgressEvent(event);if(destroyed||!e||!panels.has(mode)||!BUSY.has(states[mode]))return;
-   tasks[mode]={...tasks[mode],...e};if(states[mode]==='queued')states[mode]='loading';
+   tasks[mode]={...tasks[mode],...e};if(states[mode]==='queued'){states[mode]='loading';render(mode);}
    if(e.text!==undefined)this.progress(mode,e.text);chrome();
   },
   stop(){flushProgress();for(const mode of modes())if(states[mode]!=='success')this.set(mode,'error','CANCELLED');},

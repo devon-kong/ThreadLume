@@ -72,3 +72,9 @@ test('complete notes expire and final failure remains explicit without rerunning
  await assert.rejects(runner.generate(make(),'summary','en',undefined,()=>{},send));assert.equal(calls,first+1);
  now=600000;assert.equal(runner.cacheSize(),0);
 });
+
+test('segment output reserve is independent of the visible note allowance for reasoning models',()=>{
+ const config={name:'Test',protocol:'chat-completions',baseURL:'https://example.test',model:'reasoning-model',contextTokens:16384};
+ const plan=planGeneration(prepareChatBuilder(config),16384,make(550),'summary','en');assert.equal(plan.kind,'segmented');
+ for(const chunk of plan.chunks){assert.equal(chunk.body.max_tokens,4096);assert.ok(fitsBudget(chunk.body,16384));}
+});

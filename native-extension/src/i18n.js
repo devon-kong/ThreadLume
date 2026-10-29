@@ -1,4 +1,5 @@
 export const MESSAGES=Object.freeze({
+"未完成":"Incomplete",
 "上下文长度（tokens）":"Context length (tokens)",
 "每次请求的总预算，包含提示词、输入和输出；本地估算并保留 20% 余量。长内容最多分 8 段后整合，会增加请求和费用。请勿超过服务商提供的实际上下文长度。":"Total budget per request, including prompts, input and output. Estimated locally with a 20% reserve. Long sources use up to 8 segments plus integration, adding requests and cost. Do not exceed your service’s actual context window.",
 "计划 {requests} 次请求 · 本地估算":"Planned {requests} requests · locally estimated",
