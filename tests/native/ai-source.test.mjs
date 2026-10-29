@@ -148,3 +148,9 @@ test('cue fallback uses a temporary native VTTCue, or preserves text if parsing 
   globalThis.VTTCue=undefined;const raw='literal <value> & text';const g=video('showing',[{startTime:0,endTime:1,text:raw}]);assert.equal((await collectCaptions(g.v,{settleMs:1})).cues[0].text,raw);
  }finally{if(previous===undefined)delete globalThis.VTTCue;else globalThis.VTTCue=previous;}
 });
+
+test('named source track wins over anonymous rolling display without changing user modes',async()=>{
+ const d=video('hidden',[{startTime:0,endTime:1,text:'Start'},{startTime:140,endTime:149,text:'End'}]);
+ const rolling={kind:'captions',language:'',mode:'showing',cues:[{startTime:0,endTime:1,text:'Start'}]};d.list[1]=rolling;d.list.length=2;
+ const result=await collectCaptions(d.v,{settleMs:1});assert.equal(result.cues.length,2);assert.equal(result.completion,'available-cues-snapshot');assert.equal(rolling.mode,'showing');assert.equal(d.track.mode,'hidden');
+});

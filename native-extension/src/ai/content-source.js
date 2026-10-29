@@ -39,8 +39,14 @@ export function collectCaptions(video,{signal,timeoutMs=8000,settleMs=500,isCurr
       if(!isCurrent()||!video.isConnected)return finish(null,abortError());
       if(!selected){
         const tracks=Array.from(list||[]).filter(t=>['subtitles','captions'].includes(t.kind));
-        tracks.sort((a,b)=>Number(b.mode==='showing')-Number(a.mode==='showing')||Number(/^zh/i.test(b.language))-Number(/^zh/i.test(a.language))||String(a.language).localeCompare(String(b.language)));
-        selected=tracks[0];
+        const named=tracks.filter(t=>t.language&&t.cues?.length);
+        const chosen=named.find(t=>t.mode==='showing');
+        const language=chosen?.language||named.find(t=>/^zh/i.test(t.language))?.language||named.map(t=>t.language).sort()[0];
+        const candidates=language?named.filter(t=>t.language===language):tracks;
+        const loaded=t=>Array.from(video.querySelectorAll?.('track')||[]).some(e=>e.track===t&&e.readyState===2);
+        const coverage=t=>{const cues=Array.from(t.cues||[]);return cues.length?Math.max(...cues.map(c=>c.endTime))-Math.min(...cues.map(c=>c.startTime)):0;};
+        candidates.sort((a,b)=>Number(loaded(b))-Number(loaded(a))||coverage(b)-coverage(a)||(b.cues?.length||0)-(a.cues?.length||0)||Number(b.mode==='showing')-Number(a.mode==='showing'));
+        selected=candidates[0];
         if(!selected)return;
         if(selected.mode==='disabled'){changed=true;selected.mode='hidden';}
         listen(selected,'cuechange',check);

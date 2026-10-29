@@ -1,4 +1,5 @@
 import {fail} from './protocol.js';
+import {cueTimestamp} from './source-references.js';
 import {validPreview} from './preview.js';
 // Decode only a leading top-level text string. The preview remains provisional;
 // the normal schema validator alone may accept a finished result.
@@ -50,7 +51,7 @@ export function structuredPreview(content,mode,input,outputLanguage='zh-CN'){
  try{value([],0);}catch{/* Incomplete prefix is never promoted to a final result. */}
  const exact=(o,keys)=>o&&typeof o==='object'&&!Array.isArray(o)&&Object.keys(o).length===keys.length&&keys.every(k=>Object.hasOwn(o,k));
  const label=value=>{if(typeof value!=='string'||!value.trim()||value.length>1000)throw 0;return value.trim();};
- const timestamp=cue=>{if(!Number.isInteger(cue)||cue<1||cue>(input?.cues?.length||0))throw 0;return Math.round(input.cues[cue-1].start*1000);};
+ const timestamp=cue=>cueTimestamp(input,cue);
  if(input)for(const entry of closed){
   const path=entry.path;
   try{

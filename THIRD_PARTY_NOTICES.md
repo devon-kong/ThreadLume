@@ -13,3 +13,33 @@ The original project is [tuzai-x-popover](https://github.com/xuntianx/tuzai-x-po
 These dependencies and their native binaries are development/build tools, not bundled application frameworks in the unpacked extension. Their full notices remain in the installed npm packages. The lockfile records transitive dependencies.
 
 ThreadLume's release ZIP includes its MIT license and this notice. It does not distribute the official Doubao extension or its business modules.
+
+## Bundled tokenizer
+
+[gpt-tokenizer](https://github.com/niieani/gpt-tokenizer), version 4.1.0, supplies the locally bundled cl100k_base tokenizer and vocabulary. It runs only in the extension worker. Its license follows:
+
+```text
+MIT License
+
+Copyright (c) 2023-2024 Bazyli Brzoska
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+[Acorn](https://github.com/acornjs/acorn), MIT, is used only during build-time JavaScript inspection and is not bundled into the extension.

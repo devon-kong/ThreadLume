@@ -12,12 +12,14 @@ After you explicitly configure and test an AI service, eligible article text or 
 
 Custom services use HTTPS Chat Completions requests. API keys go only to the configured, validated endpoint. Requests omit website cookies, reject redirects and never automatically switch providers or resend failed model requests. Provider retention, billing and usage policies apply separately.
 
+Token counting runs locally in the trusted extension worker; no source is sent to a token-counting endpoint. Long sources may use up to eight segment requests and one integration request to the same configured service, with request counts shown in the reader. Complete segment notes can be retained in worker memory for up to ten minutes (at most four entries and 2 MiB) for reuse across views; they are not persisted and do not resume after refresh.
+
 Streaming displays provisional output. Only fully validated results enter the success cache. Stopping aborts the browser request where possible; it cannot guarantee that the provider stops computing or charging.
 
 ## Local storage
 
 - Preferences: theme, enabled AI features, default view, interface and output language.
-- Provider configuration: names, endpoints, models, binding versions and test timestamps.
+- Provider configuration: names, endpoints, models, context budgets, binding versions and test timestamps.
 - API keys: password input and fixed saved-key masks; keys are not returned to content scripts, diagnostics, exports or sync storage. Only trusted extension contexts can access local/session storage.
 - **Remember on this device** stores the key in browser-local extension storage. This is not system-keychain encryption. With it off, the key is kept in browser-session storage and is lost when that session ends.
 - Validated AI output: a bounded local cache, at most 30 entries, approximately 4 MiB and seven days. Cache identity includes provider/configuration, source, view and output language.

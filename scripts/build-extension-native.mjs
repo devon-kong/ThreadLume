@@ -22,6 +22,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } fr
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
+import {hasXHRAccess} from "./network-identifiers.mjs";
 import { artifactPrologue, buildIdFor } from "./artifact-prologue.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -156,7 +157,7 @@ for (const [file, code] of [["ai-background.js", aiWorker], ["ai-settings.js", a
   const rules = FORBIDDEN.filter(re => !/fetch|scripting/.test(re.source) && !(file === "ai-background.js" && /authorization/.test(re.source)));
   if (file === "ai-settings.js") rules.push(/\bfetch\s*\(/, /chrome\.(tabs|scripting|declarativeNetRequest)/);
   else rules.push(/chrome\.(cookies|webRequest)/, /(?:updateDynamicRules|updateEnabledRulesets|webRequest)\s*\(/);
-  const offenders = rules.filter(re => re.test(code));
+  const offenders = rules.filter(re => file === "ai-background.js" && re.source === "XMLHttpRequest" ? hasXHRAccess(code) : re.test(code));
   if (offenders.length) throw new Error(`${file} violated AI isolation: ${offenders}`);
 }
 // Authorization is permitted only in the custom worker transport. X remains

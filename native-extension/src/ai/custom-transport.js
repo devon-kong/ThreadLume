@@ -1,3 +1,5 @@
+import {createLongContentRunner} from './long-content.js';
+import {assertBudget} from './request-budget.js';
 import {diagnosticCall} from './setup-diagnostics.js';
 // This module is imported by the extension worker only; never by X or settings.
 import {AIError,fail} from './protocol.js';
@@ -6,13 +8,14 @@ import {readChatStream} from './chat-stream.js';
 import {protocolConfig} from './transport-policy.js';
 export function createCustomTransport({hasPermission,fetchImpl=globalThis.fetch,timeoutMs=120000,onStage=()=>{}}){
  function bind(descriptor,buildBody,assertCurrent=()=>{},trace){
- async function request(key,input,mode,signal,onEvent=()=>{},outputLanguage){
+ const contextTokens=descriptor.contextTokens??32768,runner=createLongContentRunner(buildBody,contextTokens);
+ async function request(key,input,mode,signal,onEvent=()=>{},outputLanguage,prepared){
   if(signal?.aborted)fail('CANCELLED');
   assertCurrent(mode);const {endpoint,permission}=descriptor;
   if(mode==='probe')onStage('transport_permission');if(!await diagnosticCall(mode==='probe'?trace:null,'transport_permission',()=>hasPermission(permission,descriptor)))fail('PERMISSION_REQUIRED');
   assertCurrent(mode);
   if(signal?.aborted)fail('CANCELLED');
-  const body=buildBody(input,mode,outputLanguage),deadline=AbortSignal.timeout(timeoutMs),combined=signal?AbortSignal.any([signal,deadline]):deadline;
+  const body=assertBudget(prepared?.body||buildBody(input,mode,outputLanguage),contextTokens),deadline=AbortSignal.timeout(timeoutMs),combined=signal?AbortSignal.any([signal,deadline]):deadline;
   let responsePhase='invalidEnvelope';
   try{
    assertCurrent(mode);if(mode==='probe')onStage('request');onEvent({stage:'request'});const response=await diagnosticCall(mode==='probe'?trace:null,'request',()=>fetchImpl(endpoint,{method:'POST',credentials:'omit',redirect:'error',headers:{'Content-Type':'application/json',Authorization:`Bearer ${key}`},body:JSON.stringify(body),signal:combined}));
@@ -22,13 +25,13 @@ export function createCustomTransport({hasPermission,fetchImpl=globalThis.fetch,
    if(response.ok&&body.stream){
     responsePhase='invalidStream';const envelope=await readChatStream(response,{signal:combined,mode,input,onEvent,outputLanguage});
     if(signal?.aborted)fail('CANCELLED');if(deadline.aborted)fail('CUSTOM_TIMEOUT');assertCurrent(mode);
-    responsePhase='invalidSchema';const result=mode==='probe'?probeChatResponse(envelope):parseChatResponse(envelope,mode,input,outputLanguage);onEvent({stage:'parsed'});return result;
+    responsePhase='invalidSchema';const result=prepared?prepared.parse(envelope):mode==='probe'?probeChatResponse(envelope):parseChatResponse(envelope,mode,input,outputLanguage);onEvent({stage:'parsed'});return result;
    }
    const text=await diagnosticCall(mode==='probe'?trace:null,'response_body',()=>response.text());if(signal?.aborted)fail('CANCELLED');if(deadline.aborted)fail('CUSTOM_TIMEOUT');
    if(text.length>2000000)fail('CUSTOM_INVALID_RESPONSE');
    let envelope;try{envelope=JSON.parse(text);}catch{if(response.ok)fail('CUSTOM_INVALID_RESPONSE');}
    if(!response.ok)fail(customError(response.status,envelope??(text.length<=8192?text:undefined)));
-   responsePhase='invalidSchema';const result=mode==='probe'?probeChatResponse(envelope):parseChatResponse(envelope,mode,input,outputLanguage);onEvent({stage:'parsed'});return result;
+   responsePhase='invalidSchema';const result=prepared?prepared.parse(envelope):mode==='probe'?probeChatResponse(envelope):parseChatResponse(envelope,mode,input,outputLanguage);onEvent({stage:'parsed'});return result;
   }catch(e){
    if(signal?.aborted)throw new AIError('CANCELLED');
    if(deadline.aborted||e?.name==='TimeoutError')throw new AIError('CUSTOM_TIMEOUT');
@@ -36,10 +39,13 @@ export function createCustomTransport({hasPermission,fetchImpl=globalThis.fetch,
    throw new AIError('CUSTOM_NETWORK');
   }
  }
- return {probe:(key,signal)=>request(key,null,'probe',signal),generate:(key,input,mode,signal,onEvent,outputLanguage)=>request(key,input,mode,signal,onEvent,outputLanguage)};
+ return {clear:()=>runner.clear(),probe:(key,signal)=>request(key,null,'probe',signal),generate:(key,input,mode,signal,onEvent=()=>{},outputLanguage='zh-CN')=>{
+  assertCurrent(mode);
+  return runner.generate(input,mode,outputLanguage,signal,event=>{assertCurrent(mode);onEvent(event);},(body,options)=>request(key,options.input,mode,options.signal,event=>{if(options.phase==='single'||event.stage!=='partial')onEvent(event);},outputLanguage,{body,parse:options.parse}));
+ }};
  }
  // Compatibility entry points for direct protocol consumers. Production binds
  // once and calls the returned executor, never these raw-config wrappers.
- const standalone=config=>bind(normalizeEndpoint(config.baseURL),prepareChatBuilder(protocolConfig(config)));
+ const standalone=config=>bind({...normalizeEndpoint(config.baseURL),contextTokens:config.contextTokens??32768},prepareChatBuilder(protocolConfig(config)));
  return {bind,probe:(config,key,signal)=>standalone(config).probe(key,signal),generate:(config,key,input,mode,signal,onEvent,outputLanguage)=>standalone(config).generate(key,input,mode,signal,onEvent,outputLanguage)};
 }

@@ -32,7 +32,7 @@ test('host validation preserves concrete HTTPS domains, IPs, local hosts and nor
 });
 
 test('config requires a user-supplied name, model and single protocol and rejects transport/key fields',()=>{
-  assert.deepEqual(custom.validateProviderConfig({...config,id:'custom_123',baseURL:config.baseURL+'/chat/completions/'}),{id:'custom_123',...config});
+  assert.deepEqual(custom.validateProviderConfig({...config,id:'custom_123',baseURL:config.baseURL+'/chat/completions/'}),{id:'custom_123',...config,contextTokens:32768});
   assert.equal(custom.validateProviderConfig({...config,rememberKey:undefined}).rememberKey,true);
   for(const bad of [{...config,name:''},{...config,model:''},{...config,protocol:'responses'},{...config,rememberKey:'yes'},{...config,id:'../bad'},{...config,apiKey:'SECRET'},{...config,headers:{}},{...config,url:config.baseURL},{...config,body:{}}])throwsCode(()=>custom.validateProviderConfig(bad),'CUSTOM_INVALID_CONFIG');
 });
@@ -43,7 +43,7 @@ test('request uses only common nonstream Chat Completions fields and structured 
   assert.equal(request.model,'user-model');assert.equal(request.stream,false);
   assert.equal(request.messages.length,2);assert.equal(request.messages[0].role,'system');assert.equal(request.messages[1].role,'user');
   const source=JSON.parse(request.messages[1].content);
-  assert.deepEqual(source,{kind:'video',title:'Video',cues:[{cue:1,text:'First cue'},{cue:2,text:'Second cue'}]});
+  assert.deepEqual(source,{kind:'video',title:'Video',cues:[[1,'First cue'],[2,'Second cue']]});
   assert.match(request.messages[0].content,/bullet_points/);assert.match(request.messages[0].content,/cue/);
   assert.equal(JSON.stringify(request).includes('SECRET'),false);
   throwsCode(()=>custom.buildChatRequest(config,article,'invalid'),'CUSTOM_INVALID_INPUT');
@@ -100,10 +100,10 @@ test('timeline chapters, points and aggregate text are bounded without truncatio
   throwsCode(()=>custom.parseChatResponse(envelope({text:'a'.repeat(4000),highlights}),'summary',video),'CUSTOM_INVALID_RESPONSE');
 });
 
-test('oversized articles and cue payloads are explicitly refused before constructing requests',()=>{
-  for(const text of ['a'.repeat(48001),'文'.repeat(35000)])throwsCode(()=>custom.buildChatRequest(config,{...article,text},'article'),'CUSTOM_LOCAL_INPUT_TOO_LONG');
-  const cues=Array.from({length:3000},()=>({start:0,end:1,text:'caption'}));
-  throwsCode(()=>custom.buildChatRequest(config,{...video,cues,text:cues.map(()=>'00:00:00 caption').join('\n')},'summary'),'CUSTOM_LOCAL_INPUT_TOO_LONG');
+test('source protection rejects abnormal original sizes independently of request budgeting',()=>{
+  for(const text of ['a'.repeat(1500001),'文'.repeat(500001)])throwsCode(()=>custom.buildChatRequest(config,{...article,text},'article'),'CUSTOM_INVALID_INPUT');
+  const cues=Array.from({length:20001},()=>({start:0,end:1,text:'caption'}));
+  throwsCode(()=>custom.buildChatRequest(config,{...video,cues,text:cues.map(()=>'00:00:00 caption').join('\n')},'summary'),'CUSTOM_INVALID_INPUT');
 });
 
 test('HTTP error mapping returns only fixed categories regardless of remote secrets',()=>{

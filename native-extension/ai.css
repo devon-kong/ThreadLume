@@ -197,3 +197,5 @@ html[data-peek-lad="on"][data-peek-lad-state="active"] [data-testid="primaryColu
 .pk-settings-top .tl-brand-dark { display:none; }
 [data-peek-ai-theme="dark"] .pk-settings-top .tl-brand-light { display:none; }
 [data-peek-ai-theme="dark"] .pk-settings-top .tl-brand-dark { display:block; }
+
+.pk-ai-task-progress{flex:none;padding-top:4px;overflow-wrap:anywhere}.pk-ai-collapsed .pk-ai-task-progress{display:none}

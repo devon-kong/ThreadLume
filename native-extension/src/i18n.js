@@ -1,4 +1,11 @@
 export const MESSAGES=Object.freeze({
+"上下文长度（tokens）":"Context length (tokens)",
+"每次请求的总预算，包含提示词、输入和输出；本地估算并保留 20% 余量。长内容最多分 8 段后整合，会增加请求和费用。请勿超过服务商提供的实际上下文长度。":"Total budget per request, including prompts, input and output. Estimated locally with a 20% reserve. Long sources use up to 8 segments plus integration, adding requests and cost. Do not exceed your service’s actual context window.",
+"计划 {requests} 次请求 · 本地估算":"Planned {requests} requests · locally estimated",
+"处理第 {current}/{total} 段":"Processing segment {current}/{total}",
+"正在整合":"Integrating",
+" · 局部提要，未完成":" · Partial notes, incomplete",
+
 "读取连接诊断":"Read connection diagnostics","复制连接诊断":"Copy connection diagnostics","清除连接诊断":"Clear connection diagnostics","无法读取诊断，请重试。":"Could not read diagnostics. Try again.","连接诊断仅记录阶段与耗时，最多保留 200 条、24 小时，不包含密钥或正文。":"Connection diagnostics record stages and timing only: up to 200 events for 24 hours, without keys or source content.",
 "{count} 条匹配":"{count} matches",
 "滚动评论，范围为当前已加载内容":"Scroll currently loaded comments","已滚动到右栏并聚焦原生回复框——请亲自输入并发送。":"The native reply field is focused. Enter and send your reply on X.","已在右栏定位原生转推控件并高亮——是否转推由你亲自点击决定。":"The native repost control is highlighted. Choose whether to repost on X.","已在右栏定位原生点赞控件并高亮——是否点赞由你亲自点击决定。":"The native like control is highlighted. Choose whether to like on X.","已在右栏定位原生收藏控件并高亮——是否收藏由你亲自点击决定。":"The native bookmark control is highlighted. Choose whether to save on X.","链接已复制到剪贴板。":"Link copied to clipboard.","未能在右栏找到该帖的原生控件——可手动滚动右栏操作。":"The native control could not be located. Scroll the comments column to use it.","已在右栏定位原生控件，请亲自操作。":"The native control is highlighted. Continue on X.","此帖包含 {media}。请在原生区域查看媒体并操作。":"This post includes {media}. Use its native media and controls.","定位右栏原生互动控件（不会代替你执行）":"Locate native controls in the comments column","滚动到原生回复框，由你输入发送":"Go to the native reply field to write your reply","定位原生转推控件，由你点击":"Locate the native repost control","定位原生点赞控件，由你点击":"Locate the native like control","定位原生收藏控件，由你点击":"Locate the native bookmark control","静态预览，原生播放器接管后播放":"Preview; playback starts in the native player","原生组件接管后显示":"Available in the native view"," 个子主题":" subtopics","ThreadLume 阅读器":"ThreadLume reader","让 ThreadLume 按你的习惯阅读":"Make ThreadLume work your way",

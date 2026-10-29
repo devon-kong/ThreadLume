@@ -48,3 +48,12 @@ test('summary renders safe Markdown across streaming chunks and preserves comple
  c.progress('article','# Heading\n\n**Bold** and *italic*\n\n- item\n- second\n\n> quote\n\n```js\n<img src=x onerror=alert(1)>\n```');c.flushProgress();assert.equal(text.querySelector('h3'),heading);assert.ok(text.querySelector('blockquote'));assert.match(text.querySelector('pre code').textContent,/<img/);assert.equal(text.querySelector('img'),null);
  c.set('article','success',{text:'<script>alert(1)</script>\n\n`inline` and **closed**',highlights:[]});assert.equal(text.querySelector('script'),null);assert.equal(text.querySelector('code').textContent,'inline');assert.equal(text.querySelector('strong').textContent,'closed');}finally{c.destroy();w.close();}
 });
+
+test('segmented map shows incomplete notes without chapters, retains failure and publishes final map once',()=>{
+ const w=new JSDOM('<body></body>',{pretendToBeVisual:true}).window,d=w.document,c=createCard({document:d,input:{kind:'video',completion:'available-cues-snapshot'},preferences:DEFAULTS});d.body.append(c.root);
+ d.getElementById('pk-ai-tab-mindmap').click();c.set('mindmap','loading');
+ c.taskProgress('mindmap',{stage:'plan',total:3,requests:4});c.taskProgress('mindmap',{stage:'segment',completed:1,total:3,text:'• A condition, not a guarantee'});c.flushProgress();
+ assert.equal(d.querySelector('#pk-ai-view-mindmap .pk-ai-summary').hidden,false);assert.equal(d.querySelectorAll('.pk-ai-chapter').length,0);assert.match(d.body.textContent,/未完成/);assert.match(d.body.textContent,/4/);
+ c.set('mindmap','error','CUSTOM_TIMEOUT');assert.match(d.body.textContent,/A condition/);
+ c.set('mindmap','success',{text:'Overview',tree:[{text:'Final',children:[]}],highlights:[]});assert.equal(d.querySelector('#pk-ai-view-mindmap .pk-ai-summary').hidden,true);assert.equal(d.getElementById('pk-ai-task-progress').hidden,true);c.destroy();w.close();
+});

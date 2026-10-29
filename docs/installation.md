@@ -88,4 +88,10 @@ npm run build:native  # same output as npm run build
 
 In Settings, expand the diagnostics section and use **Read connection diagnostics**, **Copy connection diagnostics**, or **Clear connection diagnostics**. The bounded log includes permission requests, permission events, background readiness, rule preparation, model probes and configuration commits. It excludes keys and response/source content. Copy it before uninstalling: removal deletes the log along with other extension data. These diagnostics help identify first-install failures; they do not fix or bypass a stalled browser rule operation.
 
-If a source exceeds the extension's local single-request limit, no AI request is sent. A separate message identifies length rejection returned by the service. Native subtitle markup is removed when the browser's cue parser is available; genuinely long transcripts remain subject to the existing limits.
+Set **Context length (tokens)** for each service/model: 32,768 by default, from 4,096 to 2,000,000. This is a per-request total budget for prompts, input and reserved output; it does not change the provider's actual capacity. Existing services receive the default without losing their saved keys. Changing the budget creates a new configuration version and stops old work.
+
+ThreadLume counts locally with a generic tokenizer and reserves 20% of the window (at least 512 tokens), plus output space. Counts are estimates for custom models. Content that fits uses one request. Longer content uses at most eight segments and one integration request, planned before sending. This can increase time and cost. The reader shows request counts, segment progress and incomplete notes; chapters and the map appear after final validation. Complete notes can be reused for another view during the same worker session.
+
+If planning cannot fit the content, edit the service budget or choose a larger-window model. A provider rejection is distinct: verify its real limits, or reduce the per-request budget to use smaller segments. Failed requests never trigger an automatic retry or fallback. There is no recursive summarization or resume after refresh. Each request has a 120-second deadline; a segmented task has a ten-minute deadline.
+
+原有服务默认使用 32,768 tokens，可在服务设置中调整“上下文长度”。此数值包括提示、输入和输出；估算保留 20% 余量，并不扩大模型真实能力。长内容最多分 8 段后整合，增加请求与费用；停止会阻止后续派发，失败不会自动重试。原始字幕与时间映射保持不变。

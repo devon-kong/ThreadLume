@@ -24,3 +24,15 @@ test('权限未授予/取消零请求；HTTP/网络/超时为固定类别，不�
 test('403 CORS 明确分类，普通403不臆测原因且不泄露服务报文',async()=>{for(const [text,expected] of [['Invalid CORS request','CUSTOM_ORIGIN_REJECTED'],['  Invalid CORS request\n','CUSTOM_ORIGIN_REJECTED'],['Forbidden: private echoed credential','CUSTOM_FORBIDDEN']]){const transport=createCustomTransport({hasPermission:async()=>true,fetchImpl:async()=>({ok:false,status:403,text:async()=>text})});await assert.rejects(transport.probe(config,'test-secret'),e=>e.code===expected&&!e.message.includes('private')&&!e.message.includes('credential'));}});
 
 test('最小检测兼容先消耗少量预算再输出 OK 的模型，仍校验正常结束',async()=>{let request;const transport=createCustomTransport({hasPermission:async()=>true,fetchImpl:async(_,options)=>{request=JSON.parse(options.body);return response({choices:[{finish_reason:request.max_tokens<=8?'length':'stop',message:{role:'assistant',content:request.max_tokens<=8?'':'OK'}}]});}});assert.equal(await transport.probe(config,'test-secret'),true);assert.ok(request.max_tokens<=256,'探测预算保持有界');assert.equal(request.messages.some(m=>m.content.includes('Full article')),false);});
+
+test('long content is preplanned before fetch, each request is budgeted and aborted segments never retry',async()=>{
+ const long={...input,text:'A fact with a condition, not a guarantee. '.repeat(1800)},calls=[];
+ const small={...config,contextTokens:8192};
+ const transport=createCustomTransport({hasPermission:async()=>true,fetchImpl:async(_,o)=>{
+  const body=JSON.parse(o.body);calls.push(body);const source=JSON.parse(body.messages[1].content);
+  return response(envelope(JSON.stringify(source.core?{points:[{text:'Conditions matter',refs:[source.core[0][0]]}]}:{text:'Overview'})));
+ }});
+ assert.equal((await transport.generate(small,'key',long,'article',undefined,()=>{},'en')).text,'Overview');
+ assert.ok(calls.length>1&&calls.length<=9);
+ const {fitsBudget}=await import('../../native-extension/src/ai/request-budget.js');calls.forEach(b=>assert.ok(fitsBudget(b,8192)));
+});

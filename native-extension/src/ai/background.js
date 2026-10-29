@@ -1,3 +1,4 @@
+import {taskProgressEvent} from './generation-progress.js';
 import {createSetupDiagnostics,diagnosticCall,diagnosticError,validSetupEvent} from './setup-diagnostics.js';
 import {validPreview} from './preview.js';
 import {AIService,allowedSender} from './service.js';
@@ -100,6 +101,7 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
  };
  const progress=event=>{
   if(progressClosed||!m.requestId||!Number.isInteger(sender.tab?.id))return;
+  const taskEvent=taskProgressEvent(event);if(taskEvent){clearTimeout(progressTimer);progressTimer=null;latestProgress=taskEvent;deliverProgress();return;}
   if(event.stage==='partial'&&typeof event.text==='string'&&event.text.length<=12000){
    latestProgress={stage:'partial',text:event.text,...(validPreview(event.preview,m.outputLanguage||'zh-CN')?{preview:event.preview}:{}),outputLanguage:m.outputLanguage||'zh-CN'};if(!progressTimer)progressTimer=setTimeout(deliverProgress,80);
   }else if(['request','uploadStart'].includes(event.stage)){

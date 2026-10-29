@@ -89,3 +89,11 @@ test('failed Copy does not use previous diagnostics and Clear rejects a late old
   release({ok:true,value:{schema:1,events:[{stage:'old-history'}]}});await tick();assert.equal(JSON.parse(f.d.getElementById('pk-setup-history').textContent).events.length,0);
  }finally{f.close();}
 });
+
+test('context field defaults, rejects invalid input before permissions and preserves edits after dismissal',async()=>{
+ const f=await fixture({custom:true});try{
+  f.d.getElementById('pk-provider-edit').click();let field=f.d.getElementById('pk-provider-contextTokens');assert.ok(field);assert.equal(field.value,'32768');
+  for(const value of ['', '4095','1.5','2000001']){field.value=value;submit(f);assert.equal(f.calls.filter(m=>m.action==='saveProvider').length,0);assert.equal(f.grants.length,0);}
+  field.value='65536';field.dispatchEvent(new f.w.Event('input',{bubbles:true}));f.d.getElementById('pk-provider-cancel').click();f.d.getElementById('pk-provider-edit').click();field=f.d.getElementById('pk-provider-contextTokens');assert.equal(field.value,'65536');submit(f);await until(()=>f.calls.some(m=>m.action==='saveProvider'));assert.equal(f.calls.find(m=>m.action==='saveProvider').config.contextTokens,65536);
+ }finally{f.close();}
+});

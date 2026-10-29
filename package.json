@@ -20,8 +20,12 @@
     "test:native": "npm run build && node --test tests/native/*.test.mjs"
   },
   "devDependencies": {
+    "acorn": "8.15.0",
     "esbuild": "^0.25.12",
     "jsdom": "^30.1.2",
     "sharp": "^0.35.3"
+  },
+  "dependencies": {
+    "gpt-tokenizer": "4.1.0"
   }
 }

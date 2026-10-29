@@ -1,3 +1,4 @@
+import {taskProgressEvent} from './generation-progress.js';
 import {t,setUILanguage} from '../i18n.js';
 import {attachCommentScrollbar} from './comment-scrollbar.js';
 import {validPreview} from './preview.js';
@@ -17,6 +18,7 @@ export function initAIReader(){
    const s=current,job=s?.progress?.get(m.mode);
    if(!job||!s.valid()||s.stopped||(m.outputLanguage||'zh-CN')!==s.outputLanguage||m.instance!==s.instance||m.connectionId!==s.connectionId||m.requestId!==job.id||!Number.isSafeInteger(m.sequence)||m.sequence<=job.sequence||!modesFor(s.input,s.prefs).includes(m.mode))return false;
    if(m.preview&&!validPreview(m.preview,s.outputLanguage))return false;job.sequence=m.sequence;
+   const taskEvent=taskProgressEvent(m);if(taskEvent){s.card.taskProgress(m.mode,taskEvent);return false;}
    if(m.stage==='partial'&&typeof m.text==='string'&&m.text.length<=12000){job.previewReadable=!!(m.mode==='mindmap'?m.preview?.tree.length:m.preview?.highlights.length);job.text=m.mode==='mindmap'?(m.preview?.tree||[]).map(node=>node.text).join('\n'):m.text;s.card.progress(m.mode,m.text,m.preview);recordVisible(s,m.mode,job,false,job.text);}
    else if(m.stage==='request'&&s.card.snapshot().states[m.mode]==='queued')s.card.set(m.mode,'loading');
    return false;

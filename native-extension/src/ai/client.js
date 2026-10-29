@@ -5,6 +5,12 @@ export async function send(action,data={}){
  if(!response?.ok)throw Error(response?.error||'NO_RESPONSE');return response.value;
 }
 export const ERROR_TEXT={
+ "CUSTOM_INVALID_CONTEXT": "请输入 4,096～2,000,000 之间的整数作为模型上下文长度（tokens）。",
+ "CUSTOM_CONTEXT_BUDGET": "当前上下文预算不足。请编辑服务，核对模型支持的长度并提高预算，或切换更大窗口的模型；本次未自动重试。",
+ "CUSTOM_LONG_CONTENT_LIMIT": "当前预算需要超过 8 段才能处理。请提高服务的上下文预算或换用更大窗口模型；本次未发送生成请求。",
+ "CUSTOM_NOTES_TOO_LONG": "模型返回的分段笔记超过整合预算，任务未完成。请编辑服务核对上下文长度，或手动重试。",
+ "CUSTOM_TASK_TIMEOUT": "长内容任务超过 10 分钟，后续请求已停止，当前内容未完成。",
+
  "OUTPUT_LANGUAGE_MISMATCH": "服务返回的内容明显不符合所选语言，未保存为成功结果。请重试，或切换输出语言后重新生成。",
  "BRIDGE_UNAVAILABLE": "豆包桥接已停用。请添加或选择其他 AI 服务；原有设置已保留。",
  "BRIDGE_CLOSED": "豆包桥接已停用。请添加或选择其他 AI 服务；原有设置已保留。",
@@ -45,7 +51,7 @@ export const ERROR_TEXT={
  "CUSTOM_REQUEST_REJECTED": "服务未接受请求参数，请核对模型名称、账号可用模型与 API 地址；仍失败时请联系服务商确认兼容参数。",
  "CUSTOM_INVALID_RESPONSE": "服务返回的内容格式不符合要求，未保存为成功结果。请重试；若反复出现，请在设置中检查模型与服务地址。",
  "CUSTOM_LOCAL_INPUT_TOO_LONG": "当前内容超过扩展单次处理上限，本次未发送到 AI 服务。",
- "CUSTOM_INPUT_TOO_LONG": "AI 服务拒绝了请求长度，请检查该服务的上下文、输出或请求大小限制。",
+ "CUSTOM_INPUT_TOO_LONG": "AI 服务拒绝了请求长度。请编辑服务核对实际上下文与输出限制；可降低单次上下文预算后手动重试，本次不会自动重发。",
  "CUSTOM_INVALID_INPUT": "当前内容无法用于生成，请刷新阅读器后重试。",
  "GENERATION_DISABLED": "此项自动生成已关闭。",
  "CONNECTION_CHANGED": "连接已变化，旧任务已停止。请刷新阅读器后重试。",
@@ -76,6 +82,12 @@ export const ERROR_TEXT={
  "DOUBAO_UNAVAILABLE": "豆包桥接已停用。请添加或选择其他 AI 服务；原有设置已保留。"
 };
 const EN_ERRORS={
+"CUSTOM_INVALID_CONTEXT":"Enter a whole-number context length from 4,096 to 2,000,000 tokens.",
+"CUSTOM_CONTEXT_BUDGET":"The configured context budget is insufficient. Edit the service to check its supported context length, increase the budget, or choose a larger-window model. No automatic retry was made.",
+"CUSTOM_LONG_CONTENT_LIMIT":"This source needs more than 8 segments at the current budget. Increase the service context budget or choose a larger-window model. No generation request was sent.",
+"CUSTOM_NOTES_TOO_LONG":"Segment notes exceed the integration budget. This result is incomplete. Check the service context length or retry explicitly.",
+"CUSTOM_TASK_TIMEOUT":"The long-content task exceeded 10 minutes. Further requests stopped and this result is incomplete.",
+
  "AI_NOT_CONFIGURED": "Add an AI service to generate summaries and mind maps. The reader works without AI.",
  "DOUBAO_UNAVAILABLE": "The Doubao bridge has been retired. Add or select another AI service. Your previous settings are retained.",
  "OUTPUT_LANGUAGE_MISMATCH": "The response did not match the selected language and was not cached. Retry or choose another output language.",
@@ -110,7 +122,7 @@ const EN_ERRORS={
  "CUSTOM_REQUEST_REJECTED": "The service rejected the request. Check the model, account access and Base URL; ask the provider which compatible parameters it supports.",
  "CUSTOM_INVALID_RESPONSE": "The response format was invalid and was not cached. Retry; if it persists, check the model and Base URL.",
  "CUSTOM_LOCAL_INPUT_TOO_LONG": "This source exceeds the extension’s single-request limit. No request was sent to your AI service.",
- "CUSTOM_INPUT_TOO_LONG": "Your AI service rejected the request length. Check its context, output or request-size limits.",
+ "CUSTOM_INPUT_TOO_LONG": "Your service rejected the request length. Edit the service to check its context and output limits, or lower the per-request context budget before retrying explicitly. No automatic retry was made.",
  "CUSTOM_INVALID_INPUT": "This source cannot be used. Refresh the reader and try again.",
  "GENERATION_DISABLED": "Automatic generation for this view is turned off.",
  "CONNECTION_CHANGED": "The connection changed and the previous task stopped. Refresh the reader to continue.",

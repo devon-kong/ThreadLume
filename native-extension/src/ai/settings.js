@@ -96,7 +96,7 @@ async function activateProvider(id){
 function cancelProviderCheck(){recordSetup(setupOperation,'cancel','cancelled');setupOperation=null;++providerRevision;providerBusy=false;notice=t("已取消检测，保留原服务与草稿。");send('cancelProviderCheck').catch(()=>{});render();}
 function openProviderDialog(service){
  if(providerDialog||providerBusy||busy)return;++refreshRevision;
- const draftId=service?.id||'new',prior=d.activeElement,draft=providerDrafts.get(draftId)||{name:service?.name||'',baseURL:service?.baseURL||'',model:service?.model||'',key:'',rememberKey:service?.rememberKey!==false,stream:service?.stream===true};
+ const draftId=service?.id||'new',prior=d.activeElement,draft=providerDrafts.get(draftId)||{name:service?.name||'',baseURL:service?.baseURL||'',model:service?.model||'',contextTokens:String(service?.contextTokens??32768),key:'',rememberKey:service?.rememberKey!==false,stream:service?.stream===true};
  const dialog=el(d,'dialog',{id:'pk-provider-dialog',class:'pk-provider-dialog','aria-labelledby':'pk-provider-title'}),form=el(d,'form',{id:'pk-provider-form',novalidate:true});providerDialog=dialog;
  const close=identified(button(d,'×',()=>dismiss()),'pk-provider-close');close.setAttribute('aria-label',t("关闭服务设置"));
  form.append(el(d,'header',{},el(d,'div',{},el(d,'h2',{id:'pk-provider-title',text:service?t("编辑 AI 服务"):t("添加 AI 服务")}),el(d,'p',{class:'pk-ai-muted',text:t("连接兼容 API，选择你习惯的模型。")})),close));
@@ -107,11 +107,13 @@ function openProviderDialog(service){
  form.append(name.wrap,url.wrap,endpoint,el(d,'div',{class:'pk-provider-columns'},protocol,model.wrap));
  if(service)form.append(el(d,'div',{class:'pk-provider-mask'},el(d,'span',{text:service.hasKey?t("已保存 API Key："):t("未保存 API Key")}),el(d,'span',{id:'pk-provider-key-mask',text:service.hasKey?'••••••••':''})));
  form.append(key.wrap);
+ const context=field('contextTokens',t("上下文长度（tokens）"),'number');context.input.min='4096';context.input.max='2000000';context.input.step='1';context.input.required=true;
+ form.append(context.wrap,el(d,'small',{class:'pk-ai-muted',text:t("每次请求的总预算，包含提示词、输入和输出；本地估算并保留 20% 余量。长内容最多分 8 段后整合，会增加请求和费用。请勿超过服务商提供的实际上下文长度。")}));
  const remember=el(d,'input',{id:'pk-provider-rememberKey',type:'checkbox'});remember.checked=draft.rememberKey;
  form.append(el(d,'label',{class:'pk-provider-remember',for:remember.id},remember,el(d,'span',{text:t("记住在此设备")})),el(d,'small',{class:'pk-ai-muted',text:t("保存在浏览器本地存储，并非系统钥匙串加密。关闭后，Key 只在本次浏览器会话内保存。")}),el(d,'p',{class:'pk-ai-muted',text:t("保存时会请求访问此 API 域名，并发送一条最小测试请求，不发送当前文章。连接成功后，当前字幕或正文仅发送至你选择的服务。")}));
  const stream=el(d,'input',{id:'pk-provider-stream',type:'checkbox'});stream.checked=draft.stream===true;form.append(el(d,'label',{class:'pk-provider-remember',for:stream.id},stream,el(d,'span',{text:t("渐进显示摘要与脑图（流式）")})),el(d,'small',{class:'pk-ai-muted',text:t("更早开始阅读；保存时验证服务的流式兼容性。失败不自动重发，关闭后恢复完整结果方式。")}));
  const error=el(d,'p',{id:'pk-provider-error',class:'pk-provider-error',role:'alert'}),cancel=identified(button(d,t("取消"),()=>dismiss()),'pk-provider-cancel'),submit=el(d,'button',{id:'pk-provider-submit',type:'submit',class:'pk-provider-primary',text:t("保存、检测并启用")});form.append(error,el(d,'footer',{},cancel,submit));dialog.append(form);d.body.append(dialog);
- const capture=()=>{const value={name:name.input.value,baseURL:url.input.value,model:model.input.value,key:key.input.value,rememberKey:remember.checked,stream:stream.checked};providerDrafts.set(draftId,value);return value;};
+ const capture=()=>{const value={name:name.input.value,baseURL:url.input.value,model:model.input.value,contextTokens:context.input.value,key:key.input.value,rememberKey:remember.checked,stream:stream.checked};providerDrafts.set(draftId,value);return value;};
  const preview=()=>{capture();try{endpoint.textContent=t("请求地址：")+normalizeEndpoint(url.input.value).endpoint+(providerPermissions(url.input.value).permissions?t("。此服务使用兼容网络规则，仅在该准确 API 地址移除 Origin 请求头。"):'');}catch{endpoint.textContent=url.input.value?t("仅支持 HTTPS Base URL，不含账号、查询参数或片段。"):t("填写服务商提供的 Base URL；请求路径会自动规范化。");}};
  form.addEventListener('input',preview);form.addEventListener('change',capture);preview();
  let checking=false,revision=0;
@@ -121,7 +123,7 @@ function openProviderDialog(service){
  window.addEventListener('keydown',keydown,true);dialog.addEventListener('cancel',e=>{e.preventDefault();dismiss();});dialog.addEventListener('close',()=>{window.removeEventListener('keydown',keydown,true);dialog.remove();providerDialog=null;if(prior?.isConnected)prior.focus({preventScroll:true});},{once:true});
  form.addEventListener('submit',async event=>{
   event.preventDefault();if(checking)return;const value=capture();let config,normalized;
-  try{config=validateProviderConfig({...(service?{id:service.id}:{}),name:value.name,protocol:'chat-completions',baseURL:value.baseURL,model:value.model,rememberKey:value.rememberKey,stream:value.stream});normalized=normalizeEndpoint(value.baseURL);if(!value.key&&!service?.hasKey)throw Error('CUSTOM_KEY_REQUIRED');}
+  try{config=validateProviderConfig({...(service?{id:service.id}:{}),name:value.name,protocol:'chat-completions',baseURL:value.baseURL,model:value.model,contextTokens:Number(value.contextTokens),rememberKey:value.rememberKey,stream:value.stream});normalized=normalizeEndpoint(value.baseURL);if(!value.key&&!service?.hasKey)throw Error('CUSTOM_KEY_REQUIRED');}
   catch(e){error.textContent=errorText(e.code||e.message);return;}
   const token=++revision;setChecking(true);const operationId=beginSetup();error.textContent='';
   // This call must remain before the first await, within the submit gesture.

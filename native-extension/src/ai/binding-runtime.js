@@ -14,7 +14,7 @@ export function createBindingRuntime({transport,rules,hasPermission,onStage=()=>
   const binding={descriptor,executor:null,publish(){
    if(released||signal?.aborted)fail('CANCELLED');const previous=active;active=binding;published=true;error=null;revision++;signal?.removeEventListener('abort',cancel);return previous;
   },release(){
-   if(released)return Promise.resolve();released=true;signal?.removeEventListener('abort',cancel);
+   if(released)return Promise.resolve();released=true;binding.executor?.clear?.();signal?.removeEventListener('abort',cancel);
    return lease.release().catch(e=>{error='CUSTOM_RULE_CLEANUP_REQUIRED';throw e;});
   }};
   const cancel=()=>{if(!published)binding.release().catch(()=>{});};signal?.addEventListener('abort',cancel,{once:true});
