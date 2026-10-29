@@ -2,7 +2,7 @@
 import {fail,md5} from './protocol.js';
 import {validatedSource,responseContent,parseChatResponse,PROMPT_VERSION} from './custom-provider.js';
 import {ESTIMATOR_VERSION,estimateTokens,requestTokens,budgetFor,fitsBudget,assertBudget} from './request-budget.js';
-export const NOTES_VERSION='source-notes-v1';
+export const NOTES_VERSION='source-notes-v2-balanced';
 const MAX_CHUNKS=8,TTL=600000;
 const bytes=text=>new TextEncoder().encode(text).length;
 const exact=(o,keys)=>o&&typeof o==='object'&&!Array.isArray(o)&&Object.keys(o).length===keys.length&&keys.every(k=>Object.hasOwn(o,k));
@@ -43,14 +43,31 @@ export function planGeneration(build,contextTokens,input,mode,language){
    if(requestTokens(body)<=coreLimit){best=end;low=end+1;}else high=end-1;
   }
   if(best===start)fail('CUSTOM_CONTEXT_BUDGET');
-  const core=units.slice(start,best),before=[],after=[];
-  const candidates=[];for(let distance=1;distance<=2;distance++){if(start-distance>=0)candidates.push(['before',units[start-distance]]);if(best+distance-1<units.length)candidates.push(['after',units[best+distance-1]]);}
+  chunks.push({start,end:best,core:units.slice(start,best)});start=best;
+ }
+ // Keep the same bounded number of requests, but distribute work by token
+ // weight. Greedy saturation can leave a 50-minute first chunk and 6-minute tail.
+ if(chunks.length>1){
+  const weights=units.map(u=>estimateTokens(JSON.stringify(u))),balanced=[];
+  let at=0,remaining=weights.reduce((a,b)=>a+b,0);
+  for(let index=0;index<chunks.length;index++){
+   const groups=chunks.length-index,target=remaining/groups,begin=at;let weight=0;
+   if(groups===1){at=units.length;}else{
+    while(at<units.length-groups+1){const next=weights[at];if(at>begin&&Math.abs(weight-target)<=Math.abs(weight+next-target))break;weight+=next;at++;}
+   }
+   const core=units.slice(begin,at);balanced.push({start:begin,end:at,core});remaining-=weight;
+  }
+  if(balanced.every(c=>c.core.length&&requestTokens(mapBody(template,source.title,c.core,[],[],language,2048,mapOutput))<=coreLimit))chunks.splice(0,chunks.length,...balanced);
+ }
+ for(const chunk of chunks){
+  const {start,end,core}=chunk,before=[],after=[];
+  const candidates=[];for(let distance=1;distance<=2;distance++){if(start-distance>=0)candidates.push(['before',units[start-distance]]);if(end+distance-1<units.length)candidates.push(['after',units[end+distance-1]]);}
   const coreTokens=requestTokens(mapBody(template,source.title,core,[],[],language,2048,mapOutput));
   for(const [side,unit] of candidates){const b=side==='before'?[unit,...before]:before,a=side==='after'?[...after,unit]:after;
    const body=mapBody(template,source.title,core,b,a,language,2048,mapOutput);
    if(requestTokens(body)-coreTokens<=Math.floor(available*.1)&&fitsBudget(body,contextTokens)){before.splice(0,before.length,...b);after.splice(0,after.length,...a);}
   }
-  chunks.push({core,before,after});start=best;
+  Object.assign(chunk,{before,after});
  }
  const reducers=[source.kind==='video'?'summary':'article','mindmap'].map(m=>reducerBody(build(source,m,language),source.title,[]));
  const fixed=Math.max(...reducers.map(requestTokens));

@@ -78,3 +78,9 @@ test('segment output reserve is independent of the visible note allowance for re
  const plan=planGeneration(prepareChatBuilder(config),16384,make(550),'summary','en');assert.equal(plan.kind,'segmented');
  for(const chunk of plan.chunks){assert.equal(chunk.body.max_tokens,4096);assert.ok(fitsBudget(chunk.body,16384));}
 });
+
+test('segmented requests balance source work instead of filling the first request and leaving a tiny tail',()=>{
+ const cfg={...config,contextTokens:16384},plan=planGeneration(prepareChatBuilder(cfg),16384,make(550),'summary','en');
+ const sizes=plan.chunks.map(c=>c.core.length);assert.ok(Math.max(...sizes)/Math.min(...sizes)<1.5,JSON.stringify(sizes));
+ assert.equal(plan.chunks.flatMap(c=>c.core).length,550);plan.chunks.forEach(c=>assert.ok(fitsBudget(c.body,16384)));
+});
