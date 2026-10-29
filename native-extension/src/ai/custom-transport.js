@@ -6,7 +6,7 @@ import {AIError,fail} from './protocol.js';
 import {normalizeEndpoint,prepareChatBuilder,parseChatResponse,probeChatResponse,customError} from './custom-provider.js';
 import {readChatStream} from './chat-stream.js';
 import {protocolConfig} from './transport-policy.js';
-export function createCustomTransport({hasPermission,fetchImpl=globalThis.fetch,timeoutMs=120000,onStage=()=>{}}){
+export function createCustomTransport({hasPermission,fetchImpl=globalThis.fetch,timeoutMs=300000,onStage=()=>{}}){
  function bind(descriptor,buildBody,assertCurrent=()=>{},trace){
  const contextTokens=descriptor.contextTokens??32768,runner=createLongContentRunner(buildBody,contextTokens);
  async function request(key,input,mode,signal,onEvent=()=>{},outputLanguage,prepared){
