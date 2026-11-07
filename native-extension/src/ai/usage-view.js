@@ -184,30 +184,21 @@ export function createUsageDisplay(document) {
     root,
     update(
       record,
-      {
-        busy = false,
-        elapsedMs = record?.elapsedMs ?? 0,
-        cached = false,
-        warning = false,
-      } = {},
+      { busy = false, elapsedMs = record?.elapsedMs ?? 0, warning = false } = {},
     ) {
       const totals = usageTotals(record);
       root.hidden = false;
-      const parts = cached ? [t("缓存结果 · 本次新增请求 0")] : [];
+      const parts = [];
       if (record || busy) {
         parts.push(
           format("耗时 {seconds} 秒", {
             seconds: (elapsedMs / 1000).toFixed(1),
           }),
-          t("输入 Token") +
-            " " +
-            tokenText(totals.inputTokens, totals.inputSource),
+          t("输入") + " " + tokenText(totals.inputTokens, totals.inputSource),
         );
         if (!busy)
           parts.push(
-            t("输出 Token") +
-              " " +
-              tokenText(totals.outputTokens, totals.outputSource),
+            t("输出") + " " + tokenText(totals.outputTokens, totals.outputSource),
           );
         if (!busy && record && !totals.outputComplete)
           parts.push(t("用量可能不完整"));

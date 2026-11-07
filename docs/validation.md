@@ -163,3 +163,11 @@ Before JSON mode was enabled, two GPT-5 nano streaming maps and one GPT-4o mini 
 Real captioned-video generation, segmented long inputs, native media continuity, full browser restart and the 30-day retention boundary remain **NOT_TESTED live** in this pass. Automated fixtures cover the corresponding storage, transport and lifecycle cases.
 
 Final browser configuration uses GPT-4o mini, non-stream output, English UI/output, session-only key retention and history saving off. Ten test records remain available, including pre-fix failures and stopped/probe records. The Data model-comparison view was left open.
+
+## Reader chrome compaction — 7 November 2026
+
+The reader AI card now keeps every persistent line single-row. The standalone generation-statistics row was removed: elapsed time, input and output tokens render in the bottom footer before the action buttons, and the Details disclosure opens upward from the footer. The cached-result marker moved into the toolbar status line ("Complete · Cached"). The footer dropped the "AI ·" prefix, the "check against the source" reminder and the caption-snapshot note; the cannot-cache warning and the model name remain. Footer text and statistics truncate with ellipsis on narrow panels instead of wrapping. Estimated width budget: about 515 px for the full footer line against roughly 634 px available at a 1,280 px window; only the 480 px minimum pane truncates.
+
+`npm run test:native` passed **721 tests, 0 failed, 0 skipped**, including the single-output Native build and network-isolation checks. Updated coverage asserts the cached marker in the status line, the unavailable-statistics line for cached output without records, per-view provider-name isolation in the footer without a generic AI fallback, the absent caption-snapshot note and the compact statistics wording. String cleanup removed the retired entries from the message table.
+
+Rendering the compacted chrome in a real browser on a live X page is **NOT_TESTED** in this pass; layout behavior beyond the jsdom fixtures (popover upward placement, collapsed-state hiding, ellipsis degradation) needs one unpacked-extension reload to confirm visually.

@@ -61,7 +61,7 @@ export function createCard({document,input,preferences,onRetry=()=>{},onSettings
  }
  bar.append(el(document,'span',{class:'pk-ai-heading'},el(document,'span',{text:input.kind==='video'?t("视频解读"):t("长文解读")}),status),search,el(document,'div',{class:'pk-ai-language-anchor'},languageButton,languagePanel),tablist);
  const copyLabel=()=>view==='mindmap'?t("复制大纲"):t("复制"),copy=button(document,t("复制"),async()=>{try{const data=results[view]||drafts[view],text=view==='mindmap'&&(!tasks[view]||results[view])?treeOutline(data?.tree||[]):data?.text||'';await (win.navigator.clipboard||globalThis.navigator?.clipboard).writeText((results[view]?'':t("未完成\n"))+text);if(destroyed)return;copy.textContent=t("已复制");clearTimeout(copyTimer);copyTimer=setTimeout(()=>copy.textContent=copyLabel(),1500);}catch{if(!destroyed)copy.textContent=t("复制失败");}},'pk-ai-icon');
- footer.append(el(document,'span',{text:t("AI 生成 · 请结合原文阅读")}),stop,copy,expand,fold);root.append(bar,usageDisplay.root,taskInfo,searchPanel,body,footer);
+ const footerText=el(document,'span',{});footer.append(footerText,usageDisplay.root,stop,copy,expand,fold);root.append(bar,taskInfo,searchPanel,body,footer);
  function geometry(){
   closeLanguage();
   const available=win.innerHeight-68-8-160-16;if(available<180)collapsed=true;
@@ -72,7 +72,7 @@ export function createCard({document,input,preferences,onRetry=()=>{},onSettings
   if(!entry&&!results[view]){usageDisplay.hide();return;}
   let elapsedMs=entry?.record?.elapsedMs??0;
   if(busy){elapsedMs+=!entry?.record||USAGE_BUSY.has(entry.record.status)?Math.max(0,win.performance.now()-(entry?.receivedAt??win.performance.now())):0;entry.displayedElapsed=Math.max(entry.displayedElapsed||0,elapsedMs);elapsedMs=entry.displayedElapsed;}
-  usageDisplay.update(entry?.record||null,{busy,elapsedMs,cached:results[view]?.cached===true,warning:entry?.warning===true});
+  usageDisplay.update(entry?.record||null,{busy,elapsedMs,warning:entry?.warning===true});
  }
  function manageUsageTimer(){
   const busy=Object.values(states).some(state=>BUSY.has(state));
@@ -90,11 +90,11 @@ export function createCard({document,input,preferences,onRetry=()=>{},onSettings
   if(task&&!results[view])taskInfo.textContent=(!BUSY.has(states[view])?(errors[view]==='CANCELLED'?t("已停止"):t("未完成")):task.stage==='integrate'?t("正在整合"):format('处理第 {current}/{total} 段',{current:Math.min(task.total,(task.completed||0)+1),total:task.total}))+' · '+format('计划 {requests} 次请求 · 本地估算',{requests:task.requests})+(drafts[view]?t(" · 局部提要，未完成"):'');
   const running=enabled.find(m=>BUSY.has(states[m]));
   const partial=!!drafts[view]&&!results[view],state=states[view];
-  const label=(state==='success'?t("已完成"):state==='error'?(errors[view]==='CANCELLED'?t("已停止"):t("生成失败")):state==='queued'?t("排队中"):BUSY.has(state)?t("生成中"):t("未生成"))+(partial?t(" · 未完成"):'');
+  const label=(state==='success'?t("已完成"):state==='error'?(errors[view]==='CANCELLED'?t("已停止"):t("生成失败")):state==='queued'?t("排队中"):BUSY.has(state)?t("生成中"):t("未生成"))+(results[view]?.cached?' · '+t("缓存结果"):'')+(partial?t(" · 未完成"):'');
   if(status.textContent!==label)status.textContent=label;status.dataset.state=state||'waiting';
   status.setAttribute('aria-label',(view==='mindmap'?t("脑图"):t("摘要"))+'：'+label);
-  stop.hidden=!running;copy.disabled=!results[view]&&!drafts[view];copy.textContent=copyLabel();const result=results[view],source=result?(result.providerName||'AI'):null;
-  footer.firstElementChild.textContent=(source?`AI · ${source} · ${result.cacheWarning?t("本次结果未能缓存"):t("请结合原文阅读")}`:t("AI 生成 · 请结合原文阅读"))+(input.kind==='video'&&input.completion==='available-cues-snapshot'?t(" · 基于当前可用字幕"):'');
+  stop.hidden=!running;copy.disabled=!results[view]&&!drafts[view];copy.textContent=copyLabel();const result=results[view],source=result?.providerName||'';
+  footerText.textContent=[source,result?.cacheWarning?t("本次结果未能缓存"):''].filter(Boolean).join(' · ');
  }
  function select(mode,notify=true){if(destroyed||!modes().includes(mode))return;positions.set(view,{top:body.scrollTop,left:body.scrollLeft});view=mode;for(const [key,panel] of panels)panel.hidden=key!==view;const position=positions.get(view);body.scrollTop=position?.top||0;body.scrollLeft=position?.left||0;chrome();const map=contents.get(mode)?.map;if(map)map.update((results[mode]||drafts[mode])?.tree||[]);if(notify){onPresentationChange();onSelect(mode);}}
  function contentFor(mode){

@@ -82,7 +82,7 @@ test('card repairs: full outline copy, settings-only recovery, stable retry focu
   card=createCard({document:d,input:{kind:'video',completion:'available-cues-snapshot'},preferences:DEFAULTS,onRetry:m=>card.set(m,'queued'),onSettings:()=>{}});d.body.append(card.root);
   card.set('mindmap','success',{text:'overview',tree:[{text:'root',children:[{text:'leaf',children:[]}]}]});d.getElementById('pk-ai-tab-mindmap').click();
   [...d.querySelectorAll('button')].find(n=>n.textContent==='复制大纲').click();await wait(0);assert.equal(copied,'- root\n  - leaf');
-  assert.ok(d.body.textContent.includes('当前可用字幕'));
+  assert.equal(d.body.textContent.includes('当前可用字幕'),false);
   const fold=[...d.querySelectorAll('button')].find(n=>n.textContent==='收起 AI 辅助');assert.equal(fold.getAttribute('aria-expanded'),'true');fold.click();assert.equal(fold.getAttribute('aria-expanded'),'false');
   card.set('summary','error','CUSTOM_AUTH');d.getElementById('pk-ai-tab-summary').click();
   assert.ok(d.getElementById('pk-ai-view-summary').textContent.includes('编辑服务'));assert.equal(d.getElementById('pk-ai-view-summary').textContent.includes('重试摘要'),false);
@@ -162,7 +162,7 @@ test('Stop receives bounded final statistics through its cancellation response w
  try{
   await until(()=>r.pending.length===1);const job=r.pending[0];r.progress(job,'Received draft');await wait(25);
   w.document.getElementById('pk-ai-stop').click();await until(()=>w.document.querySelector('.pk-ai-usage-summary').textContent.includes('45'));
-  assert.match(w.document.querySelector('.pk-ai-usage-summary').textContent,/输出 Token/);assert.match(w.document.querySelector('.pk-ai-toolbar [role=status]').textContent,/已停止/);
+  assert.match(w.document.querySelector('.pk-ai-usage-summary').textContent,/输出/);assert.match(w.document.querySelector('.pk-ai-toolbar [role=status]').textContent,/已停止/);
   r.progress(job,'LATE',{sequence:2});job.resolve({ok:true,value:{text:'LATE',highlights:[]}});await wait(25);assert.equal(w.document.body.textContent.includes('LATE'),false);
  }finally{w.close();}
 });

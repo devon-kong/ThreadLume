@@ -93,7 +93,7 @@ test("reader shows elapsed and input while running, reveals output on completion
     w.close();
   }
 });
-test("old cached output is clearly labeled with no new requests and unavailable original statistics", () => {
+test("cached output is labeled in the reader status while the statistics line stays unavailable", () => {
   const w = new JSDOM("<body></body>", { url: "https://x.com" }).window;
   const card = createCard({
     document: w.document,
@@ -104,17 +104,12 @@ test("old cached output is clearly labeled with no new requests and unavailable 
   try {
     card.set("article", "success", { text: "Old", cached: true });
     assert.match(
-      w.document.querySelector(".pk-ai-usage-summary")?.textContent || "",
+      w.document.querySelector(".pk-ai-toolbar [role=status]").textContent,
       /Cached/,
     );
-    assert.match(
-      w.document.querySelector(".pk-ai-usage-summary").textContent,
-      /0/,
-    );
-    assert.match(
-      w.document.querySelector(".pk-ai-usage-summary").textContent,
-      /unavailable/i,
-    );
+    const line = w.document.querySelector(".pk-ai-usage-summary");
+    assert.doesNotMatch(line.textContent, /Cached/);
+    assert.match(line.textContent, /unavailable/i);
   } finally {
     card.destroy();
     w.close();
