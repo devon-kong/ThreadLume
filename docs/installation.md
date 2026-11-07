@@ -95,3 +95,16 @@ ThreadLume counts locally with a generic tokenizer and reserves 20% of the windo
 If planning cannot fit the content, edit the service budget or choose a larger-window model. A provider rejection is distinct: verify its real limits, or reduce the per-request budget to use smaller segments. Failed requests never trigger an automatic retry or fallback. There is no recursive summarization or resume after refresh. Each request has a 300-second deadline; a segmented task has a ten-minute deadline. Output truncation means the provider did not finish within the reserved output allowance; increasing the context setting does not increase the 8,192-token output ceiling. Check the provider's output/thinking rules or select a suitable model before another attempt.
 
 原有服务默认使用 32,768 tokens，可在服务设置中调整“上下文长度”。此数值包括提示、输入和输出；估算保留 20% 余量，并不扩大模型真实能力。长内容最多分 8 段后整合，增加请求与费用；停止会阻止后续派发，失败不会自动重试。原始字幕与时间映射保持不变。
+
+
+## Generation statistics and model comparison
+
+The reader shows elapsed time and sent input tokens while generating a summary or mind map. Output tokens appear after the task ends. Estimates use `≈`. When the same response supplies valid usage counters, those counters take precedence independently for input and output. Requests keep their existing parameters. The generic local tokenizer counts complete messages for input and received completion content for output. Hidden reasoning requires provider-reported details.
+
+Open **Settings → Data** to enable **Save call history**. It is off by default. Turning it off affects new tasks; tasks already being recorded finish their current record. With collection off, new statistics stay in memory. Saved history retains at most 500 tasks for 30 days, checked on startup, reading and writing. Connection tests share this limit and have their own task category.
+
+Call history supports date, service/model, task and status filters, with additional source, language, processing, reuse, input-range and source-ID filters. Sort by time, elapsed time, input or output, with 50 records per page. Expand a record to inspect its configuration snapshot and per-request measurements. Long tasks include segment and integration requests. A shared execution counts once. Cached results show zero new requests and resolve their original measurements from retained history or worker memory.
+
+Model comparison groups by service and model. Success rate uses successful and failed generations that issued requests. Timing medians and token means default to successful fresh generations with complete received output. Stopped and interrupted tasks appear separately. Coverage indicates the samples available for each statistic. Use source IDs and filters to compare similar inputs, and assess output quality alongside usage and speed.
+
+**Clear history** asks for confirmation. It clears call history and saved generation timing diagnostics and prevents earlier tasks from restoring their measurements. Existing output caches resolve cleared measurements as unavailable. A storage error is shown in the Data view, while current in-memory measurements remain usable.

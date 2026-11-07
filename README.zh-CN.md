@@ -13,6 +13,8 @@ https://github.com/user-attachments/assets/41f6f284-f99a-4dd9-9912-e6faaac70f3e
 
 **桌面 Chromium 预览版。** 基础阅读无需配置 AI；AI 功能需要自己的兼容 API 服务，费用由所选服务收取。下载 ZIP 后加载即可，无需 Node.js 或构建工具。
 
+阅读器还可显示生成耗时与输入／输出 Token。**设置 → 数据**提供可选的本地调用记录和模型对比，最多保留 30 天、500 条任务。[统计与记录说明](docs/installation.md#generation-statistics-and-model-comparison)。
+
 ## 实际效果
 
 **把原帖与讨论放在一起阅读**

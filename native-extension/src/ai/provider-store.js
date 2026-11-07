@@ -8,8 +8,8 @@ const REGISTRY='aiProvidersV8',LEGACY_KEYS='aiProviderKeysV8',MAX_SERVICES=20;
 export const KEY_PREFIX='aiProviderKeyV9:';
 const cancelled=()=>fail('CANCELLED');
 export class ProviderStore {
- constructor({storage,probe,onChange=()=>{},verifyPermission=async()=>true,bindings,onStage=()=>{}}){
-  Object.assign(this,{storage,probe,onChange,verifyPermission,bindings,onStage});this.registry={schema:2,activeId:'doubao',services:[]};this.records={local:{},session:{}};this.tail=Promise.resolve();this.descriptorStates=new WeakMap();
+ constructor({storage,probe,onChange=()=>{},verifyPermission=async()=>true,bindings,onStage=()=>{},measureProbe=(_config,execute)=>execute(()=>{})}){
+  Object.assign(this,{storage,probe,onChange,verifyPermission,bindings,onStage,measureProbe});this.registry={schema:2,activeId:'doubao',services:[]};this.records={local:{},session:{}};this.tail=Promise.resolve();this.descriptorStates=new WeakMap();
  }
  init(){return this.initialized??=(async()=>{
   const [local,session]=await Promise.all([this.storage.local.get(null),this.storage.session.get(null)]);
@@ -90,7 +90,7 @@ export class ProviderStore {
   let prepared,published=false;
   try{
    stage('prepare');prepared=await this.bindings?.prepare(candidate,{signal,trace});check();
-   stage('probe');await diagnosticCall(trace,'model_probe',()=>prepared?prepared.executor.probe(secret,signal):this.probe(candidate,secret,signal));check();stage('probe_ok');
+   stage('probe');await diagnosticCall(trace,'model_probe',()=>this.measureProbe(candidate,onEvent=>prepared?prepared.executor.probe(secret,signal,onEvent):this.probe(candidate,secret,signal,onEvent)));check();stage('probe_ok');
    stage('commit');return await diagnosticCall(trace,'commit',()=>this.commit(async()=>{
     check();if(this.registry!==before)cancelled();if(!await this.verifyPermission(candidate))fail('PERMISSION_REQUIRED');check();
     const registry={schema:2,activeId:candidate.id,services:[...before.services.filter(s=>s.id!==candidate.id),candidate]};

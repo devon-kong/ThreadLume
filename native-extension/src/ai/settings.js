@@ -1,3 +1,4 @@
+import {createUsageSettings} from './usage-settings.js';
 import {t,setUILanguage,localizeUI} from '../i18n.js';
 import {send,errorText} from './client.js';
 import {DEFAULTS,normalizePreferences} from './preferences.js';
@@ -6,9 +7,13 @@ import {normalizeEndpoint,validateProviderConfig} from './custom-provider.js';
 import {providerPermissions} from './transport-policy.js';
 const d=document,root=d.getElementById('peek-settings');let prefs={...DEFAULTS},connection={state:'DISCONNECTED'},busy=false,notice='',undo=null,lastFailed=null,saveQueue=Promise.resolve(),saveRevision=0,pendingSaves=0,refreshRevision=0,confirmedPrefs={...DEFAULTS},providers={activeId:'doubao',services:[]},providerBusy=false,providerRevision=0,providerDialog=null;
 const providerDrafts=new Map();
+let settingsPage='settings';
+const usageSettings=createUsageSettings({document:d,preferences:()=>prefs,onSave:save,onChange:render,send});
 chrome.runtime.onMessage?.addListener((m,sender)=>{
- if(sender.id!==chrome.runtime.id||sender.tab||m?.ns!=='peek-ai-v7'||m.action!=='stateChanged')return;
- refresh();
+ if(sender.id!==chrome.runtime.id||sender.tab||m?.ns!=='peek-ai-v7')return;
+ if(m.action==='usageHistoryChanged'){if(settingsPage==='data')void usageSettings.load();return;}
+ if(m.action!=='stateChanged')return;
+ refresh();if(settingsPage==='data')void usageSettings.load();
 });
 let setupOperation=null,setupStage='',setupHistory=null,setupHistoryRevision=0,setupHistoryClearing=false,settingsLoaded=false;const setupTimes=new Map();
 function recordSetup(operationId,stage,status,extra={}){if(!operationId)return;send('recordSetupDiagnostic',{event:{operationId,stage,status,elapsedMs:Math.max(0,Math.round(performance.now()-(setupTimes.get(operationId)||performance.now()))),...extra}}).catch(()=>{});}
@@ -168,6 +173,10 @@ function render(){
  setUILanguage(prefs.uiLanguage);d.documentElement.lang=prefs.uiLanguage;d.title='ThreadLume — '+t('设置');
  const active=root.contains(d.activeElement)?d.activeElement:null,view=d.createDocumentFragment();
  view.append(el(d,'h1',{text:t("设置")}),el(d,'p',{class:'pk-ai-muted',text:t("让 ThreadLume 按你的习惯阅读")}));
+ const navigation=el(d,'nav',{class:'pk-settings-navigation','aria-label':t('设置')});
+ for(const [name,label] of [['settings','设置'],['data','数据']]){const tab=button(d,t(label),()=>{settingsPage=name;render();if(name==='data')void usageSettings.load();});tab.id='pk-settings-tab-'+name;tab.setAttribute('aria-current',name===settingsPage?'page':'false');navigation.append(tab);}
+ view.append(navigation);d.body.classList.toggle('pk-settings-data',settingsPage==='data');
+ if(settingsPage==='data'){view.append(usageSettings.render());patchChildren(root,view);return;}
  view.append(providerSection());
  view.append(el(d,'section',{id:'pk-languages',class:'pk-settings-card'},el(d,'h2',{text:t('语言')}),el(d,'div',{class:'pk-settings-row'},el(d,'strong',{text:t('界面语言')}),segmented('uiLanguage',[['en','English'],['zh-CN','中文（简体）']])),el(d,'div',{class:'pk-settings-row'},el(d,'strong',{text:t('输出语言')}),segmented('outputLanguage',[['en','English'],['zh-CN','中文（简体）']]))));
  const intelligence=el(d,'section',{id:'pk-intelligence',class:'pk-settings-card'},el(d,'h2',{text:t("智能阅读")}),toggle('summary',t("摘要"),t("优先生成当前视图，普通短帖不生成")),toggle('timeline',t("视频时间轴"),prefs.summary?t("在 摘要 下方展示章节"):t("开启 摘要 后可使用"),!prefs.summary),toggle('mindmap',t("思维导图"),t("选择脑图视图时生成，已有结果直接显示")));

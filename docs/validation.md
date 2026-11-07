@@ -110,3 +110,56 @@ The actual Andy video (`https://x.com/AndyL5cc/status/2115133828650213693`) expo
 Live provider validation is **BLOCKED: not yet a successful long-video generation acceptance**. The initial 2,048-token map output was truncated. After separating visible-note limits from total output reserve, the 65,536 direct request and the first map requests in the 32,768 greedy/balanced plans reached the existing 120-second deadline. Later requests were not dispatched, partial output was marked incomplete, and no final success result was cached. The user then approved a 300-second request deadline (the segmented-task deadline remains 600 seconds). The next map failed stream validation at about 157 seconds; the old aggregate diagnostic cannot establish its exact cause. Stream wire traffic now has an independent 8 MiB bound, with the visible completion limit unchanged at 60,000 characters, and fixed diagnostic phases distinguish future stream failures. The following map returned an explicit truncated-output finish at about 196 seconds with an 8,192-token output allowance. Longer waiting alone therefore does not resolve this sample. No provider-specific thinking parameter has been sent. Live success of summary integration, mind map, and final chapter interactions remains blocked by service output completion. API keys were neither read nor re-entered, and the temporary context setting was restored to 32,768 through Settings. These observations do not establish the provider's reasoning-token behavior or the accuracy of generic token estimates for that model.
 
 This follow-up used **6 of 12 generation requests and 2 of 2 connection probes**. The user then ended further live calls and retained the implementation; no new service or thinking-mode setting was configured. Later stages were never dispatched after a failure. Truncated-output feedback now links to service editing rather than offering only an unchanged retry. The available-caption search/time mapping passed live; semantic preservation across segment boundaries, successful final chapter focus/scroll behavior, and notes-reused mind-map generation are **NOT_TESTED live** because no complete note set was produced. Automated fixtures cover these orchestration and mapping paths; they are not substitutes for live model quality checks.
+
+## Generation statistics and call history — 4 November 2026
+
+Automated verification passed **719 Native tests, 0 failed, 0 skipped** using `npm run test:native`, including the single-output build and network-isolation checks. Added coverage exercises reported and estimated usage, usage-only SSE terminal frames, repeated counters, real segmented orchestration and note reuse, physical-job sharing, optional persistence, old cache entries, 30-day/500-task retention, restart interruption, settings-only access and connection tests. Fault injection verifies failed reads preserve unknown durable data, newer clears survive an older failed write, and clear cannot be undone by in-flight session writes or task callbacks.
+
+An independent read-only review identified missing stopped-reader usage, a failed-write/clear race and a live-clock backward adjustment. Each received a reproducing regression test and a passing fix. Cancellation now returns a bounded numeric snapshot to the still-current stopped card, while late generation content remains rejected. Active clock display preserves its elapsed lower bound; terminal elapsed uses the backend measurement.
+
+Actual Ego Lite browser rendering was checked with the built settings bundle and the actual reader, service and transport code, using local browser-I/O doubles and synthetic model responses. This is an offline fixture, separate from Native X acceptance.
+
+| Scenario | Result |
+| --- | --- |
+| Default history switch off | PASS in browser fixture |
+| Running summary shows elapsed/input and hides output | PASS in browser fixture |
+| Completed summary and map show reported input/output; map renders nodes | PASS in browser fixture |
+| Comment-field focus survives summary completion | PASS in browser fixture |
+| 53 synthetic records paginate as 50 plus 3; failure filter returns one | PASS in browser fixture |
+| Model comparison shows medians, success rate, coverage and estimate markers | PASS in browser fixture |
+| English/Simplified Chinese Data controls | PASS in browser fixture |
+| Retained history after backend reconstruction and page reload | PASS in browser fixture with storage double |
+| Confirmed clear and a subsequent disabled generation leave zero saved records | PASS in browser fixture |
+| Updated unpacked extension on a real X page | NOT_TESTED; the browser wrapper could not load the worktree extension |
+| Real service token counts, hidden reasoning usage, billing and native media continuity with this build | NOT_TESTED live; transport/lifecycle cases use explicit doubles |
+
+The existing installed extension was an older build. No live provider call or key access was used for this feature verification. Prior release observations above describe their recorded builds and dates.
+
+## OpenAI live generation statistics — 7 November 2026
+
+The generation-usage worktree build was loaded as an unpacked extension in Ego Lite and exercised on a real, signed-in X page. The source was a 1,816-character public Karpathy post. Live calls used user-authorized OpenAI credentials entered through trusted Settings with session-only key retention. [Public test source](https://x.com/karpathy/status/2105819303471976479)
+
+Live checks exposed three compatibility issues. OpenAI rejected `max_tokens` for GPT-5 nano, a normally completed `OK.` probe acknowledgement failed the exact-text check, and unconstrained mind-map responses could contain malformed JSON. The official OpenAI endpoint now receives the existing output allowance as `max_completion_tokens`, with JSON-object mode for generation. Probes accept `OK` or `OK.` after whitespace trimming. Completed results still require the existing schema validation. Other endpoints retain their request parameters.
+
+After these fixes, `npm run test:native` passed **721 tests, 0 failed, 0 skipped**, including the Native build and isolation checks. Regression coverage checks the official endpoint's token parameter and JSON mode, third-party endpoint isolation, and the probe acknowledgement.
+
+| Real X / OpenAI scenario | Result |
+| --- | --- |
+| Non-stream GPT-4o mini summary | PASS — 3.467 s, 650 reported input tokens, 147 reported output tokens |
+| Non-stream GPT-4o mini mind map | PASS — 3.802 s, 725 reported input tokens, 229 reported output tokens |
+| Running statistics | PASS — elapsed time and estimated sent input visible, output hidden until termination |
+| Reported usage and reasoning details | PASS with GPT-5 nano — summary 649 / 2,662 input/output tokens, mind map 724 / 5,282; reasoning shown within provider totals |
+| Reader statistics, saved request details and model comparison | PASS — counts agree, median and means match the two initial completed tasks |
+| Full-result cache after page reload | PASS — both views report zero new requests and retain original measurements; history count unchanged |
+| Stop, focus changes and interface-language changes | PASS — stopped task remains stopped, frozen statistics retained, no implicit generation |
+| Comment input focus | PASS — focus remains in the native reply field after mind-map completion |
+| Extension reload | PASS — five saved records survived reload; session-only credentials were re-entered through Settings |
+| Generation with history disabled | PASS — statistics remain available and saved-record count stays unchanged |
+| GPT-4o mini streaming summary and mind map after JSON-mode fix | PASS — 3.7 s and 4.6 s; missing service counters are visibly estimated |
+| Explicit background-worker stop and reconstruction | PASS — worker start time changed, all 10 records remained readable and the service returned ready |
+
+Before JSON mode was enabled, two GPT-5 nano streaming maps and one GPT-4o mini non-stream map failed validation. The reader retained their partial output in incomplete/failed state. GPT-5 nano also exhausted the 256-token connection-probe allowance on two explicit checks. The selected service was changed to GPT-4o mini for the remaining acceptance checks. These observations cover one short article and the requests listed above.
+
+Real captioned-video generation, segmented long inputs, native media continuity, full browser restart and the 30-day retention boundary remain **NOT_TESTED live** in this pass. Automated fixtures cover the corresponding storage, transport and lifecycle cases.
+
+Final browser configuration uses GPT-4o mini, non-stream output, English UI/output, session-only key retention and history saving off. Ten test records remain available, including pre-fix failures and stopped/probe records. The Data model-comparison view was left open.

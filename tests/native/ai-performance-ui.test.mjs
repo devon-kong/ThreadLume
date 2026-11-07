@@ -5,11 +5,11 @@ const DEFAULTS={...PRODUCT_DEFAULTS,uiLanguage:'zh-CN',outputLanguage:'zh-CN'};
 
 const wait=ms=>new Promise(r=>setTimeout(r,ms));async function until(f){for(let i=0;i<100&&!f();i++)await wait(10);assert.ok(f(),'bounded checkpoint');}
 const code=(await build({stdin:{contents:'import {initAIReader} from "./native-extension/src/ai/controller.js";initAIReader();',resolveDir:process.cwd()},bundle:true,write:false,format:'iife'})).outputFiles[0].text;
-function reader({cached=false,deferCache=false}={}){
+function reader({cached=false,deferCache=false,cancelStatistics=null}={}){
  const w=new JSDOM('<html data-peek-lad="on" data-peek-lad-state="active"><body><div data-testid="primaryColumn"><div data-testid="cellInnerDiv"><article data-testid="tweet"><a href="/a/status/123"><time>now</time></a><div data-testid="tweetText">Video</div><video></video></article></div></div><button id="comment">Comment</button></body></html>',{url:'https://x.com/a/status/123',runScripts:'dangerously',pretendToBeVisual:true}).window;
  w.innerWidth=1200;const video=w.document.querySelector('video');Object.defineProperty(video,'duration',{value:10});Object.defineProperty(video,'textTracks',{value:[{kind:'subtitles',language:'en',mode:'disabled',cues:[{startTime:0,endTime:9,text:'caption'}]}]});
  const calls=[],pending=[],listeners=[],cachePending=[];
- w.chrome={runtime:{id:'ours',onMessage:{addListener:f=>listeners.push(f)},sendMessage:async m=>{calls.push(m);if(m.action==='preferences')return {ok:true,value:DEFAULTS};if(m.action==='status')return {ok:true,value:{state:'ready',connectionId:'one'}};if(m.action==='cached'){if(deferCache)return new Promise(resolve=>cachePending.push({m,resolve}));if(cached)return {ok:true,value:m.mode==='mindmap'?{text:'map',tree:[{text:'topic',children:[]}]}:{text:'summary',highlights:[]}};}if(m.action==='generate')return new Promise(resolve=>pending.push({m,resolve}));return {ok:true,value:null};}}};
+ w.chrome={runtime:{id:'ours',onMessage:{addListener:f=>listeners.push(f)},sendMessage:async m=>{calls.push(m);if(m.action==='preferences')return {ok:true,value:DEFAULTS};if(m.action==='status')return {ok:true,value:{state:'ready',connectionId:'one'}};if(m.action==='cached'){if(deferCache)return new Promise(resolve=>cachePending.push({m,resolve}));if(cached)return {ok:true,value:m.mode==='mindmap'?{text:'map',tree:[{text:'topic',children:[]}]}:{text:'summary',highlights:[]}};}if(m.action==='generate')return new Promise(resolve=>pending.push({m,resolve}));if(m.action==='cancel')return {ok:true,value:typeof cancelStatistics==='function'?await cancelStatistics():cancelStatistics};return {ok:true,value:null};}}};
  const progress=(job,text,overrides={},sender={id:'ours'})=>listeners.forEach(f=>f({ns:'peek-ai-v7',action:'generationProgress',instance:job.m.instance,requestId:job.m.requestId,connectionId:'one',mode:job.m.mode,sequence:1,stage:'partial',text,...overrides},sender,()=>{}));
  w.eval(code);return {w,calls,pending,progress,cachePending};
 }
@@ -153,5 +153,25 @@ test('mindmap timing ignores hidden summary text and starts only when a visible 
   assert.equal(r.calls.filter(m=>m.action==='displayed'&&m.requestId===map.m.requestId&&m.renderMs!==undefined).length,0);
   r.progress(map,text,{sequence:2,preview:{version:1,outputLanguage:'zh-CN',text,tree:[{id:'0',text:'主题',children:[]}],highlights:[]}});await wait(30);
   const visible=r.calls.find(m=>m.action==='displayed'&&m.requestId===map.m.requestId&&m.firstReadableMs!==undefined);assert.ok(visible);assert.ok(w.document.querySelector('.pk-ai-node'));
+ }finally{w.close();}
+});
+
+const stoppedStatistics={id:'stopped-task',startedAt:1800000000000,status:'cancelled',operation:'generate',mode:'summary',kind:'video',providerId:'p',providerName:'Example',model:'m',configVersion:'v',contextTokens:32768,stream:true,outputLanguage:'zh-CN',sourceId:'a'.repeat(32),sourceTokens:10,elapsedMs:3000,queueMs:0,segmented:false,reusedNotes:false,requests:[{index:1,phase:'single',status:'cancelled',elapsedMs:3000,inputTokens:123,inputSource:'estimated',outputTokens:45,outputSource:'estimated',outputComplete:false}]};
+test('Stop receives bounded final statistics through its cancellation response while rejecting late content',async()=>{
+ const r=reader({cancelStatistics:[stoppedStatistics]}),{w}=r;
+ try{
+  await until(()=>r.pending.length===1);const job=r.pending[0];r.progress(job,'Received draft');await wait(25);
+  w.document.getElementById('pk-ai-stop').click();await until(()=>w.document.querySelector('.pk-ai-usage-summary').textContent.includes('45'));
+  assert.match(w.document.querySelector('.pk-ai-usage-summary').textContent,/输出 Token/);assert.match(w.document.querySelector('.pk-ai-toolbar [role=status]').textContent,/已停止/);
+  r.progress(job,'LATE',{sequence:2});job.resolve({ok:true,value:{text:'LATE',highlights:[]}});await wait(25);assert.equal(w.document.body.textContent.includes('LATE'),false);
+ }finally{w.close();}
+});
+test('a delayed cancellation snapshot cannot overwrite a newer explicit retry',async()=>{
+ let resolveCancel;const r=reader({cancelStatistics:()=>new Promise(resolve=>resolveCancel=resolve)}),{w}=r;
+ try{
+  await until(()=>r.pending.length===1);w.document.getElementById('pk-ai-stop').click();await until(()=>resolveCancel);
+  [...w.document.querySelectorAll('button')].find(b=>b.textContent==='重试摘要').click();await until(()=>r.pending.length===2);
+  resolveCancel([{...stoppedStatistics,requests:[{...stoppedStatistics.requests[0],outputTokens:99999}]}]);await wait(25);
+  assert.equal(w.document.querySelector('.pk-ai-usage-summary').textContent.includes('99,999'),false);assert.match(w.document.querySelector('.pk-ai-toolbar [role=status]').textContent,/排队中|生成中/);
  }finally{w.close();}
 });

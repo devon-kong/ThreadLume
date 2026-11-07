@@ -1,4 +1,5 @@
 import {taskProgressEvent} from './generation-progress.js';
+import {cleanUsageRecord} from './usage.js';
 import {createSetupDiagnostics,diagnosticCall,diagnosticError,validSetupEvent} from './setup-diagnostics.js';
 import {validPreview} from './preview.js';
 import {AIService,allowedSender} from './service.js';
@@ -23,8 +24,8 @@ const networkRules=createNetworkRuleManager({onStage:bindingStage,extensionId:ch
 const bindings=createBindingRuntime({onStage:bindingStage,transport:customTransport,rules:networkRules,hasPermission});
 let bindingRevision=0,providerAdmission=0;
 let service,providerCheck=null;
-const providers=new ProviderStore({onStage:bindingStage,storage:chrome.storage,bindings,verifyPermission:config=>config?hasPermission(descriptorPermissions(config.binding)):Promise.resolve(false),onChange:change=>{if(change.invalidate||change.bindingChanged){service.providerChanged();if(providerCheck)cancelConnectionWork();}notifyState({connectionChanged:change.invalidate||change.bindingChanged});}});
-service=new AIService({storage:chrome.storage,providers,requestCustom:(provider,key,input,mode,signal,binding,onEvent,outputLanguage)=>{if(!binding||binding!==bindings.current()||binding.descriptor.configVersion!==provider.version||binding.descriptor.keyRef!==provider.keyRef)fail('CONNECTION_CHANGED');return binding.executor.generate(key,input,mode,signal,onEvent,outputLanguage);}});
+const providers=new ProviderStore({measureProbe:(config,execute)=>service.probeMeasured(config,execute),onStage:bindingStage,storage:chrome.storage,bindings,verifyPermission:config=>config?hasPermission(descriptorPermissions(config.binding)):Promise.resolve(false),onChange:change=>{if(change.invalidate||change.bindingChanged){service.providerChanged();if(providerCheck)cancelConnectionWork();}notifyState({connectionChanged:change.invalidate||change.bindingChanged});}});
+service=new AIService({onUsageChange:()=>{chrome.runtime.sendMessage?.({ns:'peek-ai-v7',action:'usageHistoryChanged'})?.catch(()=>{});},storage:chrome.storage,providers,requestCustom:(provider,key,input,mode,signal,binding,onEvent,outputLanguage)=>{if(!binding||binding!==bindings.current()||binding.descriptor.configVersion!==provider.version||binding.descriptor.keyRef!==provider.keyRef)fail('CONNECTION_CHANGED');return binding.executor.generate(key,input,mode,signal,onEvent,outputLanguage);}});
 async function notifyState(extra={}){
  try{
   const preferences=await service.preferences();
@@ -55,7 +56,7 @@ function cancelTabRequests(tabId,nextUrl){
 }
 const ready=diagnosticCall(startupTrace,'worker_ready',async()=>{await diagnosticCall(startupTrace,'worker_access',()=>chrome.storage.local.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'}));await diagnosticCall(startupTrace,'worker_access',()=>chrome.storage.session.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'}));allowDiagnosticStorage();await diagnosticCall(startupTrace,'worker_init',()=>service.init());await bindings.restore(providers.active(),providers.bindingState(),{trace:startupTrace});});
 chrome.action.onClicked.addListener(()=>chrome.runtime.openOptionsPage());
-function safeError(e){return {ok:false,error:e.name==='AbortError'?'CANCELLED':e instanceof AIError?e.code:'INTERNAL_ERROR'};}
+function safeError(e){const statistics=cleanUsageRecord(e.statistics);return {ok:false,error:e.name==='AbortError'?'CANCELLED':e instanceof AIError?e.code:'INTERNAL_ERROR',...(statistics?{statistics}:{})};}
 async function status(){
  const connection=await service.status();
  const custom=providers.active();
@@ -101,6 +102,10 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
  };
  const progress=event=>{
   if(progressClosed||!m.requestId||!Number.isInteger(sender.tab?.id))return;
+  if(event.stage==='statistics'){
+   const statistics=cleanUsageRecord(event.statistics);if(!statistics)return;
+   clearTimeout(progressTimer);if(latestProgress)deliverProgress();latestProgress={stage:'statistics',statistics,historyWarning:event.historyWarning===true};deliverProgress();return;
+  }
   const taskEvent=taskProgressEvent(event);if(taskEvent){clearTimeout(progressTimer);progressTimer=null;latestProgress=taskEvent;deliverProgress();return;}
   if(event.stage==='partial'&&typeof event.text==='string'&&event.text.length<=12000){
    latestProgress={stage:'partial',text:event.text,...(validPreview(event.preview,m.outputLanguage||'zh-CN')?{preview:event.preview}:{}),outputLanguage:m.outputLanguage||'zh-CN'};if(!progressTimer)progressTimer=setTimeout(deliverProgress,80);
@@ -139,6 +144,10 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
   if(!sender.url?.startsWith('chrome-extension://')&&Object.keys(m).some(key=>!['ns','action',...(fields[m.action]||[])].includes(key)))fail('INVALID_MESSAGE');
 
   switch(m.action){
+   case 'getUsageHistory':case 'clearUsageHistory':{
+    if(Object.keys(m).some(key=>!['ns','action'].includes(key)))fail('INVALID_MESSAGE');
+    return m.action==='clearUsageHistory'?service.clearUsageHistory():service.usageSnapshot();
+   }
    case 'status':if(sender.tab&&['light','dark'].includes(m.xTheme))await chrome.storage.session.set({aiXTheme:m.xTheme});return status();
    case 'preferences':return service.preferences();
    case 'savePreferences':{const value=await service.savePreferences(m.preferences);notifyState();return value;}
@@ -155,7 +164,7 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
    case 'openSettings':await chrome.runtime.openOptionsPage();return null;
    case 'openSetup':case 'connect':case 'capture':case 'check':case 'disconnect':fail('DOUBAO_UNAVAILABLE');
    case 'cancelCheck':return null;
-   case 'cancel':service.cancel(owner);return null;
+   case 'cancel':return service.cancel(owner);
    case 'displayed':return service.recordDisplay(owner,m.requestId,{visibilityInterrupted:m.visibilityInterrupted,displayMs:m.displayMs,firstVisibleMs:m.firstVisibleMs,firstReadableMs:m.firstReadableMs,renderMs:m.renderMs});
    case 'cached':
    case 'generate':{

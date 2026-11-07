@@ -41,6 +41,7 @@ test('public generation timings cover any custom provider, de-duplication, cache
 });
 test('worker reconstruction preserves numeric timing in session only, without reopening network work',async()=>{
  const f=await fixture(async()=>({text:'private output',finished:true,highlights:[]}));
+ await f.service.savePreferences({...await f.service.preferences(),saveUsageHistory:true});
  await f.service.generate('owner',input,'article',{requestId:'persisted',contentMs:500});
  await new Promise(r=>setTimeout(r,0));await f.service.metricsWrite;
  assert.equal(f.storage.local.data.aiPerformanceV12,undefined);

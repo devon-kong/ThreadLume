@@ -1,7 +1,7 @@
-export const DEFAULTS=Object.freeze({summary:true,timeline:true,mindmap:true,defaultView:'summary',theme:'system',uiLanguage:'en',outputLanguage:'en'});
+export const DEFAULTS=Object.freeze({summary:true,timeline:true,mindmap:true,defaultView:'summary',theme:'system',uiLanguage:'en',outputLanguage:'en',saveUsageHistory:false});
 export function normalizePreferences(value={}){
  const p={...DEFAULTS};
- for(const k of ['summary','timeline','mindmap'])if(typeof value[k]==='boolean')p[k]=value[k];
+ for(const k of ['summary','timeline','mindmap','saveUsageHistory'])if(typeof value[k]==='boolean')p[k]=value[k];
  if(['summary','mindmap'].includes(value.defaultView))p.defaultView=value.defaultView;
  if(['system','light','dark'].includes(value.theme))p.theme=value.theme;
  for(const k of ['uiLanguage','outputLanguage'])if(['en','zh-CN'].includes(value[k]))p[k]=value[k];

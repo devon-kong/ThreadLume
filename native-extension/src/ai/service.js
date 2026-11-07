@@ -2,6 +2,8 @@ import {AIError,fail,validateInput,md5,buildResource,buildRequest,parseSSE,class
 import {PROMPT_VERSION} from './custom-provider.js';
 import {DEFAULTS,normalizePreferences} from './preferences.js';
 import {createMetrics} from './metrics.js';
+import {createUsageHistory} from './usage-history.js';
+import {createUsageTask} from './usage-meter.js';
 export const PARAM_KEYS=['version_code','language','device_platform','doubao_device_platform','aid','real_aid','pkg_type','device_id','pc_version','doubao_pc_version','web_id','tea_uuid','region','sys_region','samantha_web','use-olympus-account'];
 export function validateParams(params){
  if(!params||typeof params!=='object'||Array.isArray(params)||Object.keys(params).some(k=>!PARAM_KEYS.includes(k))||Object.values(params).some(v=>typeof v!=='string'||v.length>256||/[\r\n]/.test(v)))fail('INVALID_PARAMETERS');
@@ -10,7 +12,7 @@ export function validateParams(params){
 export function allowedSender(sender,id,action){
  if(sender?.id!==id)return false;
  const settings=sender.url===`chrome-extension://${id}/settings.html`;
- if(['recordSetupDiagnostic','getSetupDiagnostics','clearSetupDiagnostics','status','preferences','savePreferences','connect','capture','disconnect','cancelCheck','check','openSetup','providers','saveProvider','activateProvider','cancelProviderCheck'].includes(action)&&settings)return true;
+ if(['getUsageHistory','clearUsageHistory','recordSetupDiagnostic','getSetupDiagnostics','clearSetupDiagnostics','status','preferences','savePreferences','connect','capture','disconnect','cancelCheck','check','openSetup','providers','saveProvider','activateProvider','cancelProviderCheck'].includes(action)&&settings)return true;
  if(!['status','preferences','setOutputLanguage','generate','cached','cancel','displayed','openSettings'].includes(action)||!Number.isInteger(sender.tab?.id)||sender.frameId!==0)return false;
  try{const u=new URL(sender.url);return u.protocol==='https:'&&['x.com','twitter.com'].includes(u.hostname);}catch{return false;}
 }
@@ -24,11 +26,12 @@ const outputCharacters=result=>{
  return count;
 };
 export class AIService {
- constructor({storage,request,providers,requestCustom}){this.connectionKey='aiConnection';this.contextKey='aiContext';this.blockKey='aiBlock';this.storage=storage;this.request=request;this.providers=providers;this.requestCustom=requestCustom;this.metrics=createMetrics({onChange:rows=>this.saveMetrics(rows)});this.jobs=new Map();this.cancelledOwners=new Map();this.resources=new Map();this.tail=Promise.resolve();this.epoch=0;this.context=null;this.connection={enabled:false,partition:''};this.cache={};this.error=null;this.errorRevision=0;this.preferenceRevision=0;this.preferencePending=0;this.modeRevision={summary:0,mindmap:0};}
+ constructor({storage,request,providers,requestCustom,onUsageChange=()=>{}}){this.usageHistory=createUsageHistory({storage:storage.local,onChange:onUsageChange});this.runtimeUsage=new Map();this.connectionKey='aiConnection';this.contextKey='aiContext';this.blockKey='aiBlock';this.storage=storage;this.request=request;this.providers=providers;this.requestCustom=requestCustom;this.metrics=createMetrics({onChange:rows=>this.saveMetrics(rows)});this.jobs=new Map();this.cancelledOwners=new Map();this.resources=new Map();this.tail=Promise.resolve();this.epoch=0;this.context=null;this.connection={enabled:false,partition:''};this.cache={};this.error=null;this.errorRevision=0;this.preferenceRevision=0;this.preferencePending=0;this.modeRevision={summary:0,mindmap:0};}
  init(){return this.initialized??=(async()=>{
   await this.providers?.init();
   const local=await this.storage.local.get([this.connectionKey,'aiDoubaoBridgeConnectionV1','aiProvidersV8','aiCache']);this.retiredDoubao=local.aiProvidersV8?.activeId==='doubao'||!!local.aiConnection||!!local.aiDoubaoBridgeConnectionV1;this.connection=local[this.connectionKey]||this.connection;this.cache=local.aiCache||{};
-  const session=await this.storage.session.get([this.contextKey,this.blockKey,'aiPerformanceV12']);this.metrics.restore(session.aiPerformanceV12);
+  await this.usageHistory.init();
+  const session=await this.storage.session.get([this.contextKey,this.blockKey,'aiPerformanceV12']);this.hasSavedMetrics=Array.isArray(session.aiPerformanceV12)&&session.aiPerformanceV12.length>0;this.metrics.restore(session.aiPerformanceV12);
   // A legacy request dependency is supplied only by compatibility tests. The
   // production worker never provides one, so old state is left untouched.
   if(!this.request)return;
@@ -80,7 +83,7 @@ export class AIService {
   return this.preferenceWrite=(this.preferenceWrite||Promise.resolve()).catch(()=>{}).then(save);
  }
  modeEnabled(mode,p){return mode==='mindmap'?p.mindmap:p.summary;}
- abortJob(job){job.abort.abort();for(const rejects of job.rejects.values())for(const reject of rejects)reject(aborted());}
+ abortJob(job){job.abort.abort();job.meter?.finish('cancelled');for(const rejects of job.rejects.values())for(const reject of rejects)reject(aborted());}
  writeContext(context,epoch=this.epoch){
   return this.contextWrite=(this.contextWrite||Promise.resolve()).catch(()=>{}).then(async()=>{if(epoch!==this.epoch||context!==this.context)return;context?await this.storage.session.set({[this.contextKey]:context}):await this.storage.session.remove(this.contextKey);});
  }
@@ -124,14 +127,40 @@ export class AIService {
  async invalidateContext(){await this.init();this.pendingConnection?.abort.abort();this.clearJobs();this.epoch++;this.context=null;this.error='CONTEXT_CHANGED';this.errorRevision++;this.resources.clear();this.connection={enabled:this.connection.enabled,partition:crypto.randomUUID()};await this.writeBlock(null);await this.writeContext(null);await this.writeConnection();}
  async disconnect(){await this.init();this.pendingConnection?.abort.abort();this.clearJobs();this.epoch++;this.context=null;this.error=null;this.errorRevision++;this.resources.clear();this.connection.enabled=false;await this.writeBlock(null);await this.writeContext(null);await this.writeConnection();return this.status();}
  key(input,mode,outputLanguage='zh-CN'){validateLanguage(outputLanguage);const provider=this.providers?.active(),partition=provider?`${provider.id}:${provider.version}:${provider.model}:${PROMPT_VERSION}${provider.binding&&(provider.binding.policyId!=='standard'||provider.binding.policyVersion!==1)?':'+provider.binding.policyId+':'+provider.binding.policyVersion:''}`:this.connection.partition;return `${partition}:${RESULT_VERSION}:${outputLanguage}:${md5(JSON.stringify([input.kind,input.url,input.title,input.text,input.duration||0,input.cues||null]))}:${mode}`;}
- async cached(raw,mode,outputLanguage='zh-CN'){validateLanguage(outputLanguage);const epoch=this.epoch;await this.init();if(epoch!==this.epoch)throw aborted();const input=validateInput(raw);if((input.kind==='article'&&!['article','mindmap'].includes(mode))||(input.kind==='video'&&!['summary','mindmap'].includes(mode)))fail('INVALID_MODE');const provider=this.providers?.active();if(!provider&&!this.request)fail(this.retiredDoubao?'DOUBAO_UNAVAILABLE':'AI_NOT_CONFIGURED');if(provider){const state=this.providers.bindingState(provider)!=='ready'?this.providers.bindingState(provider):(this.providers.bindings?.state()||'ready');if(state!=='ready')fail(state);}const entry=this.cache[this.key(input,mode,outputLanguage)];return entry&&Date.now()-entry.at<TTL?entry.result:null;}
- cancel(owner){this.cancelledOwners.set(owner,Date.now());for(const [id,at] of this.cancelledOwners)if(Date.now()-at>300000)this.cancelledOwners.delete(id);for(const job of this.jobs.values())if(job.owners.has(owner)){job.owners.delete(owner);for(const reject of job.rejects.get(owner)||[])reject(aborted());job.rejects.delete(owner);if(!job.owners.size)job.abort.abort();}}
+ async cached(raw,mode,outputLanguage='zh-CN'){validateLanguage(outputLanguage);const epoch=this.epoch;await this.init();if(epoch!==this.epoch)throw aborted();const input=validateInput(raw);if((input.kind==='article'&&!['article','mindmap'].includes(mode))||(input.kind==='video'&&!['summary','mindmap'].includes(mode)))fail('INVALID_MODE');const provider=this.providers?.active();if(!provider&&!this.request)fail(this.retiredDoubao?'DOUBAO_UNAVAILABLE':'AI_NOT_CONFIGURED');if(provider){const state=this.providers.bindingState(provider)!=='ready'?this.providers.bindingState(provider):(this.providers.bindings?.state()||'ready');if(state!=='ready')fail(state);}const key=this.key(input,mode,outputLanguage),entry=this.cache[key];return entry&&Date.now()-entry.at<TTL?this.statisticsFor(entry.result,key):null;}
+ cancel(owner){
+  const snapshots=[];this.cancelledOwners.set(owner,Date.now());
+  for(const [id,at] of this.cancelledOwners)if(Date.now()-at>300000)this.cancelledOwners.delete(id);
+  for(const job of this.jobs.values())if(job.owners.has(owner)){
+   job.owners.delete(owner);
+   if(!job.owners.size){job.abort.abort();job.meter.finish('cancelled');}
+   const statistics={...job.meter.snapshot(),status:'cancelled'};snapshots.push(statistics);
+   for(const reject of job.rejects.get(owner)||[]){const error=aborted();error.statistics=statistics;reject(error);}
+   job.rejects.delete(owner);
+  }
+  return snapshots;
+ }
  clearJobs(){for(const job of this.jobs.values())this.abortJob(job);this.jobs.clear();}
  performanceSnapshot(){return this.metrics.snapshot();}
+ async usageSnapshot(){await this.init();return this.usageHistory.snapshot();}
+ async clearUsageHistory(){await this.init();this.runtimeUsage.clear();this.metrics.clearSaved();await this.usageHistory.clear();await this.metricsWrite;return this.usageHistory.snapshot();}
+ async probeMeasured(provider,execute){
+  await this.usageHistory.init();const prefs=await this.preferences();
+  const meter=createUsageTask({provider,mode:'probe',history:this.usageHistory,save:prefs.saveUsageHistory});
+  meter.event({stage:'executing'});
+  try{const result=await execute(event=>meter.event(event));meter.finish('success');return result;}
+  catch(error){meter.finish(error.name==='AbortError'||error.code==='CANCELLED'?'cancelled':'error');throw error;}
+ }
+ statisticsFor(result,key){
+  const record=result.usageId?this.usageHistory.find(result.usageId):this.runtimeUsage.get(key);
+  return {...result,statistics:record||null};
+ }
  saveMetrics(rows){
+  if(rows.length)this.hasSavedMetrics=true;
+  if(!rows.length&&!this.hasSavedMetrics)return;
   this.pendingMetrics=rows;if(this.metricsScheduled)return;this.metricsScheduled=true;
   Promise.resolve().then(()=>{this.metricsScheduled=false;const snapshot=this.pendingMetrics;
-   this.metricsWrite=(this.metricsWrite||Promise.resolve()).catch(()=>{}).then(()=>this.storage.session.set({aiPerformanceV12:snapshot})).catch(()=>{});
+   this.metricsWrite=(this.metricsWrite||Promise.resolve()).catch(()=>{}).then(async()=>{if(snapshot.length){await this.storage.session.set({aiPerformanceV12:snapshot});this.hasSavedMetrics=true;}else{await this.storage.session.remove('aiPerformanceV12');this.hasSavedMetrics=false;}}).catch(()=>{});
   });
  }
  recordDisplay(owner,requestId,timing){return this.metrics.display(owner,requestId,timing);}
@@ -162,14 +191,16 @@ export class AIService {
   trace.mark('queued');
   if(job)trace.cache('shared');
   if(!job){
-   job={id:crypto.randomUUID(),mode,abort:new AbortController(),owners:new Set(),rejects:new Map(),observers:new Set()};const epoch=this.epoch,context=this.context,provider=this.providers?.active(),binding=this.providers?.bindings?.current(),identity=this.activeIdentity();
-   const emit=event=>{
+   job={id:crypto.randomUUID(),mode,abort:new AbortController(),owners:new Set(),rejects:new Map(),observers:new Set(),recordingEpoch:this.usageHistory.ticket()};const epoch=this.epoch,context=this.context,provider=this.providers?.active(),binding=this.providers?.bindings?.current(),identity=this.activeIdentity();
+   const notify=event=>{
     if(job.abort.signal.aborted||epoch!==this.epoch||identity!==this.activeIdentity())return;
     for(const o of job.observers)if(job.owners.has(o.owner)){
      o.trace.mark(event.stage);if(event.stage==='partial'){if(event.text||event.preview?.tree.length||event.preview?.highlights.length)o.trace.mark('firstContent');if(event.preview?.tree.length)o.trace.mark('firstNode');if(event.preview?.highlights.length)o.trace.mark('firstChapter');}
      try{o.progress(event);}catch{/* A closed recipient cannot fail another owner's request. */}
     }
    };
+   job.meter=createUsageTask({id:job.id,provider,input,mode,outputLanguage,history:this.usageHistory,save:prefs.saveUsageHistory,onChange:statistics=>notify({stage:'statistics',statistics,historyWarning:job.meter?.warning===true})});
+   const emit=event=>{job.meter.event(event);notify(event);};
    const execute=async()=>{
     const signal=job.abort.signal,isStale=()=>signal.aborted||epoch!==this.epoch||identity!==this.activeIdentity()||(!provider&&context!==this.context),check=()=>{if(isStale())throw aborted();};check();
     const permit=async()=>{const p=await this.preferences();check();if(!this.modeEnabled(mode,p))fail('GENERATION_DISABLED');if(!provider&&this.error)fail(this.error);};
@@ -185,7 +216,8 @@ export class AIService {
     await permit();check();emit({stage:'request'});const text=await this.request('/samantha/chat/completion',buildRequest(resource,mode,input,outputLanguage),signal,context.params,event=>{if(event.stage==='sse'){const preview=previewSSE(event.text,mode,input,outputLanguage);if(preview.text||preview.tree.length||preview.highlights.length)emit({stage:'partial',text:preview.text,preview});}else emit(event);});check();
     parsed=parseSSE(text,mode,input.duration);
     }
-    emit({stage:'parsed'});const result={...parsed,mode,outputLanguage,resultVersion:RESULT_VERSION,createdAt:Date.now(),providerId:provider?.id||'doubao',providerName:provider?.name||'豆包'};
+    emit({stage:'parsed'});const result={...parsed,mode,outputLanguage,resultVersion:RESULT_VERSION,createdAt:Date.now(),providerId:provider?.id||'doubao',providerName:provider?.name||'豆包',...(job.meter.saved?{usageId:job.id}:{})};
+    if(!this.usageHistory.current(job.recordingEpoch))delete result.usageId;
     const entries=Object.entries({...this.cache,[key]:{at:Date.now(),result}}).filter(([,v])=>Date.now()-v.at<TTL).sort(([,a],[,b])=>b.at-a.at);
     const candidate={};let bytes=0;for(const [k,v] of entries){const size=new TextEncoder().encode(JSON.stringify([k,v])).length;if(Object.keys(candidate).length>=30||bytes+size>4*1024*1024)continue;candidate[k]=v;bytes+=size;}
     emit({stage:'cacheStart'});try{await this.storage.local.set({aiCache:candidate});
@@ -194,12 +226,16 @@ export class AIService {
      if(isStale()){await this.storage.local.set({aiCache:this.cache});check();}
      check();this.cache=candidate;emit({stage:'cacheSaved'});
     }catch(e){check();result.cacheWarning=true;}
-    check();return result;
+    check();job.meter.finish('success');
+    const statistics=job.meter.snapshot();
+    if(!job.meter.saved&&!prefs.saveUsageHistory){this.runtimeUsage.set(key,statistics);while(this.runtimeUsage.size>30)this.runtimeUsage.delete(this.runtimeUsage.keys().next().value);}
+    return {...result,statistics,historyWarning:job.meter.warning};
    };
-   job.promise=this.tail.then(execute).catch(async e=>{if(!provider&&!job.abort.signal.aborted&&AUTH_BLOCKS.has(e.code))await this.setError(e.code,epoch,context);throw e;}).finally(()=>{if(this.jobs.get(key)===job)this.jobs.delete(key);});
+   job.promise=this.tail.then(execute).catch(async e=>{job.meter.finish(e.name==='AbortError'||e.code==='CANCELLED'?'cancelled':'error');e.statistics=job.meter.snapshot();if(!provider&&!job.abort.signal.aborted&&AUTH_BLOCKS.has(e.code))await this.setError(e.code,epoch,context);throw e;}).finally(()=>{if(this.jobs.get(key)===job)this.jobs.delete(key);});
    this.tail=job.promise.catch(()=>{});this.jobs.set(key,job);
   }
-  job.owners.add(owner);trace.job(job.id);
+  job.owners.add(owner);trace.job(job.id);trace.persist(job.meter.saved);
+  try{onProgress({stage:'statistics',statistics:job.meter.snapshot(),historyWarning:job.meter.warning});}catch{/* A closed observer does not own the shared task. */}
   const observer={owner,trace,progress:onProgress};job.observers.add(observer);
   try{return await new Promise((resolve,reject)=>{const list=job.rejects.get(owner)||[];list.push(reject);job.rejects.set(owner,list);job.promise.then(result=>{if(job.owners.has(owner))resolve(result);else reject(aborted());},reject);});}
   finally{job.observers.delete(observer);}

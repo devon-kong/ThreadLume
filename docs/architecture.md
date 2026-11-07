@@ -63,3 +63,27 @@ Progress uses bounded data-only stage messages. Segment notes are explicitly inc
 Complete notes are cached only in the immutable provider executor's memory (therefore partitioned by provider/configuration version), further keyed by source, language, context, estimator and note/prompt versions. Limits are four entries, 2 MiB and ten minutes; expiry is checked on access. Worker recreation loses them. A failed integration may reuse complete validated notes on explicit retry; an incomplete map set is discarded. Summary and mind map remain separate requested outputs.
 
 Stream wire traffic (including repeated metadata and reasoning fields) is bounded separately at 8 MiB; accepted visible completion content remains capped at 60,000 characters. Non-stream response bodies retain their existing 2,000,000-character limit. Stream failures record only fixed phase names and timings, never raw response text.
+
+
+## Usage measurement and history
+
+The worker owns request tokenization, physical-task identity and persistence. `usage.js` defines the bounded data-only contract shared with the reader and settings. The transport emits numeric request observations before dispatch and at completion, including on failures. Streaming usage-only terminal frames are retained. Repeated counters replace the same request observation. Usage metadata is read before output-schema validation, so a rejected result can still have known consumption. The planner keeps its bounded output allowance. At the exact official OpenAI endpoint `https://api.openai.com/v1/chat/completions`, the transport sends that allowance as `max_completion_tokens` and requests `response_format: {type: "json_object"}` for generation. Finished responses still pass the existing schema validation. Other endpoints use `max_tokens`. A connection probe accepts only a normally completed `OK` or `OK.` acknowledgement after trimming whitespace.
+
+One task meter owns the queue clock and all direct, segment and integration observations. Elapsed time uses a monotonic clock; calendar timestamps use epoch milliseconds. Shared observers receive the same task ID. Progress snapshots retain the existing document, instance, request, connection, language and sequence guards. The reader updates statistics nodes independently of source/result rendering.
+
+The `saveUsageHistory` preference defaults to false and is captured when a physical task or connection test is created. `aiUsageHistoryV1` in trusted `chrome.storage.local` contains `{schema: 1, records: [...]}`. Tasks are sorted newest first and bounded to 500 and 30 days by `startedAt`. Reads, writes and initialization prune expired records. Writes are serialized and coalesced. Restart converts unfinished tasks and requests to `interrupted`. A clear epoch prevents late callbacks from restoring deleted history. A failed initial read prevents writes over unknown durable history.
+
+| Record fields | Meaning |
+| --- | --- |
+| `id`, `startedAt`, `status`, `operation`, `mode`, `kind` | Physical task identity, epoch time, lifecycle and task/source categories |
+| `providerId`, `providerName`, `model`, `configVersion`, `contextTokens`, `stream`, `outputLanguage` | Configuration snapshot with no key or endpoint |
+| `sourceId`, `sourceTokens` | Fingerprint of the original source snapshot and locally estimated source token count |
+| `elapsedMs`, `queueMs`, `segmented`, `reusedNotes` | Task timing and execution strategy |
+| `requests[]` | Up to nine request observations, identified by `index` and `phase` |
+| Request `inputTokens`, `outputTokens`, `inputSource`, `outputSource` | Nullable counts and `reported`, `estimated` or `unknown` provenance |
+| Request `reasoningTokens`, `cachedInputTokens` | Nullable reported details, without adding them again to the main counters |
+| Request `elapsedMs`, `status`, `outputComplete` | Request timing, lifecycle and whether the received completion finished |
+
+Unknown counts use `null`; zero is a real reported or estimated count. Aggregates retain coverage and estimate provenance. Estimation uses `cl100k_base` and received completion content, including JSON framing. It cannot reconstruct hidden reasoning. Stored fields are reconstructed from a whitelist, excluding arbitrary provider/source/response properties.
+
+The existing `aiPerformanceV12` session diagnostics persist only for opted-in tasks. Success-cache metadata contains only a `usageId` for a saved task. Runtime results and validated progress may carry `statistics`; numeric statistics are not copied into the persistent success cache. Older cache entries remain readable and show unavailable original measurements. The settings-only `getUsageHistory` and `clearUsageHistory` messages expose the bounded history. X-facing contexts receive only their current task’s validated statistics.

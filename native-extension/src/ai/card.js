@@ -1,3 +1,5 @@
+import {cleanUsageRecord,USAGE_BUSY} from './usage.js';
+import {createUsageDisplay} from './usage-view.js';
 import {taskProgressEvent} from './generation-progress.js';
 import {t,setUILanguage,localizeUI,format} from '../i18n.js';
 import {renderMarkdown} from './markdown.js';
@@ -27,9 +29,10 @@ export function createCard({document,input,preferences,onRetry=()=>{},onSettings
  setUILanguage(preferences.uiLanguage);
  const win=document.defaultView;
  let prefs=preferences,view=input.kind==='article'?(prefs.summary?'article':'mindmap'):(prefs.summary&&prefs.mindmap?prefs.defaultView:prefs.summary?'summary':'mindmap'),collapsed=false,expanded=false,destroyed=false,copyTimer=null,language=preferences.outputLanguage||'en',frame=0;
- const results={},states={},errors={},drafts={},tasks={},positions=new Map(),panels=new Map(),tabs=new Map(),contents=new Map(),pending=new Map();
+ const statistics={},results={},states={},errors={},drafts={},tasks={},positions=new Map(),panels=new Map(),tabs=new Map(),contents=new Map(),pending=new Map();
  const allModes=input.kind==='article'?['article','mindmap']:['summary','mindmap'],modes=()=>allModes.filter(m=>m==='mindmap'?prefs.mindmap:prefs.summary);
  const root=el(document,'section',{id:'peek-ai-card','aria-label':t("AI 阅读辅助")}),bar=el(document,'div',{class:'pk-ai-toolbar'}),tablist=el(document,'div',{class:'pk-ai-tabs',role:'tablist','aria-label':t("AI 视图")}),body=el(document,'div',{class:'pk-ai-body',id:'pk-ai-body',tabindex:'0'}),footer=el(document,'footer',{class:'pk-ai-footer'}),status=el(document,'span',{'aria-live':'polite',role:'status'});
+ const usageDisplay=createUsageDisplay(document);let usageTimer=null;
  const taskInfo=el(document,'div',{id:'pk-ai-task-progress',class:'pk-ai-muted pk-ai-task-progress',hidden:true,'aria-live':'polite'});
  let modal=null,modalMap=null;
  const searchIndex=createSourceSearch(input,document),searchPanel=el(document,'div',{class:'pk-ai-search-panel',hidden:true}),searchResults=el(document,'div',{class:'pk-ai-search-results'}),query=el(document,'input',{id:'pk-ai-search-input',type:'search',placeholder:input.kind==='video'?t("搜索已读取字幕"):t("搜索当前原文"),'aria-label':t("搜索当前内容"),maxlength:200}),matchStatus=el(document,'span',{role:'status'});let matches=[],matchIndex=-1;
@@ -58,16 +61,29 @@ export function createCard({document,input,preferences,onRetry=()=>{},onSettings
  }
  bar.append(el(document,'span',{class:'pk-ai-heading'},el(document,'span',{text:input.kind==='video'?t("视频解读"):t("长文解读")}),status),search,el(document,'div',{class:'pk-ai-language-anchor'},languageButton,languagePanel),tablist);
  const copyLabel=()=>view==='mindmap'?t("复制大纲"):t("复制"),copy=button(document,t("复制"),async()=>{try{const data=results[view]||drafts[view],text=view==='mindmap'&&(!tasks[view]||results[view])?treeOutline(data?.tree||[]):data?.text||'';await (win.navigator.clipboard||globalThis.navigator?.clipboard).writeText((results[view]?'':t("未完成\n"))+text);if(destroyed)return;copy.textContent=t("已复制");clearTimeout(copyTimer);copyTimer=setTimeout(()=>copy.textContent=copyLabel(),1500);}catch{if(!destroyed)copy.textContent=t("复制失败");}},'pk-ai-icon');
- footer.append(el(document,'span',{text:t("AI 生成 · 请结合原文阅读")}),stop,copy,expand,fold);root.append(bar,taskInfo,searchPanel,body,footer);
+ footer.append(el(document,'span',{text:t("AI 生成 · 请结合原文阅读")}),stop,copy,expand,fold);root.append(bar,usageDisplay.root,taskInfo,searchPanel,body,footer);
  function geometry(){
   closeLanguage();
   const available=win.innerHeight-68-8-160-16;if(available<180)collapsed=true;
   const height=collapsed?68:Math.max(68,Math.min(expanded?560:320,available));root.style.height=height+'px';root.classList.toggle('pk-ai-collapsed',collapsed);root.dataset.size=collapsed?'collapsed':expanded?'expanded':'overview';fold.textContent=collapsed?t("展开 AI 辅助"):t("收起 AI 辅助");fold.setAttribute('aria-expanded',String(!collapsed));expand.textContent=expanded?t("返回概览"):t("展开阅读");document.documentElement.style.setProperty('--peek-ai-space',`calc(${height}px + var(--peek-reader-gap, 8px))`);
  }
+ function updateUsage(){
+  const entry=statistics[view],busy=BUSY.has(states[view]);
+  if(!entry&&!results[view]){usageDisplay.hide();return;}
+  let elapsedMs=entry?.record?.elapsedMs??0;
+  if(busy){elapsedMs+=!entry?.record||USAGE_BUSY.has(entry.record.status)?Math.max(0,win.performance.now()-(entry?.receivedAt??win.performance.now())):0;entry.displayedElapsed=Math.max(entry.displayedElapsed||0,elapsedMs);elapsedMs=entry.displayedElapsed;}
+  usageDisplay.update(entry?.record||null,{busy,elapsedMs,cached:results[view]?.cached===true,warning:entry?.warning===true});
+ }
+ function manageUsageTimer(){
+  const busy=Object.values(states).some(state=>BUSY.has(state));
+  if(busy&&!usageTimer)usageTimer=win.setInterval(updateUsage,250);
+  if(!busy&&usageTimer){win.clearInterval(usageTimer);usageTimer=null;}
+ }
  function chrome(){
   setUILanguage(prefs.uiLanguage);localizeUI(root,prefs.uiLanguage);localizeUI(modal,prefs.uiLanguage);
   languageButton.setAttribute('aria-label',t('输出语言：')+(language==='en'?'English':t('简体中文')));
   if(query.value&&matches.length&&matchIndex<0)matchStatus.textContent=format('{count} 条匹配',{count:matches.length});
+  updateUsage();manageUsageTimer();
   const enabled=modes();root.hidden=!enabled.length;
   for(const [key,tab] of tabs){tab.hidden=!enabled.includes(key);tab.setAttribute('aria-selected',String(key===view));tab.tabIndex=key===view?0:-1;}
   const task=tasks[view];taskInfo.hidden=!task||!!results[view];
@@ -102,12 +118,16 @@ export function createCard({document,input,preferences,onRetry=()=>{},onSettings
  }
  function renderError(parent,mode){parent.append(el(document,'p',{text:errorText(errors[mode])}));parent.append(SETTINGS_ERRORS.has(errors[mode])?button(document,['AI_NOT_CONFIGURED','DOUBAO_UNAVAILABLE'].includes(errors[mode])?t("添加 AI 服务"):errors[mode].startsWith('CUSTOM_')?t("编辑服务"):t("前往设置"),onSettings,'pk-ai-link'):button(document,t("重试")+(mode==='mindmap'?t("脑图"):t("摘要")),()=>onRetry(mode)));}
  function openMap(){if(modal||destroyed)return;const prior=document.activeElement;modal=el(document,'dialog',{class:'pk-ai-map-dialog','aria-label':t("展开思维导图")});const initialTree=(results.mindmap||drafts.mindmap)?.tree||[];modalMap=createMindmap(document,{expandedDepth:initialExpandedDepth(initialTree)});const close=button(document,t("返回阅读 ×"),()=>modal.close()),tools=el(document,'div',{class:'pk-ai-map-tools'},el(document,'span',{class:'pk-ai-map-hint',text:t("双指滑动 / 拖动平移 · 捏合缩放 · 点击分支展开 / 收起")}),button(document,t("缩小"),()=>modalMap.zoom(-.1)),button(document,t("放大"),()=>modalMap.zoom(.1)),button(document,t("适应"),()=>modalMap.fit()));modal.append(el(document,'header',{},el(document,'h2',{text:input.title,translate:'no'}),close),modalMap.root,tools);document.body.append(modal);const dialog=modal,escape=e=>{if(e.key==='Escape'&&dialog.open){e.preventDefault();e.stopImmediatePropagation();dialog.close();}};win.addEventListener('keydown',escape,true);dialog.addEventListener('close',()=>{win.removeEventListener('keydown',escape,true);modalMap?.destroy();modalMap=null;dialog.remove();modal=null;if(!destroyed&&prior?.isConnected)prior.focus({preventScroll:true});},{once:true});dialog.showModal();modalMap.update((results.mindmap||drafts.mindmap)?.tree||[]);modalMap.fit();close.focus();}
- function resetLanguage(value){if(!['zh-CN','en'].includes(value))return;language=value;modal?.close();pending.clear();for(const object of [results,drafts,states,errors,tasks])for(const key of Object.keys(object))delete object[key];for(const c of contents.values())c.map?.destroy();contents.clear();positions.clear();for(const mode of allModes)render(mode);for(const b of languagePanel.querySelectorAll('button')){b.setAttribute('aria-checked',String(b.dataset.language===value));b.tabIndex=b.dataset.language===value?0:-1;}languageButton.setAttribute('aria-label',t("输出语言：")+(value==='en'?'English':t("简体中文")));chrome();}
+ function resetLanguage(value){if(!['zh-CN','en'].includes(value))return;language=value;modal?.close();pending.clear();for(const object of [results,drafts,states,errors,tasks,statistics])for(const key of Object.keys(object))delete object[key];for(const c of contents.values())c.map?.destroy();contents.clear();positions.clear();for(const mode of allModes)render(mode);for(const b of languagePanel.querySelectorAll('button')){b.setAttribute('aria-checked',String(b.dataset.language===value));b.tabIndex=b.dataset.language===value?0:-1;}languageButton.setAttribute('aria-label',t("输出语言：")+(value==='en'?'English':t("简体中文")));chrome();}
  function flushProgress(){if(frame){(win.cancelAnimationFrame||win.clearTimeout).call(win,frame);frame=0;}if(destroyed)return;for(const [mode,data] of pending){if(BUSY.has(states[mode])){const started=win.performance.now();drafts[mode]=data;states[mode]='streaming';render(mode);if(mode==='mindmap'?data.tree?.length:data.text||data.highlights?.length)onRender(win.performance.now()-started,mode);}}pending.clear();chrome();}
  const playback=()=>{const chapters=[...root.querySelectorAll('.pk-ai-chapter')],time=(input.video?.currentTime||0)*1000;let current=null;for(const c of chapters)if(Number(c.dataset.timestamp)<=time)current=c;for(const c of chapters){if(c===current)c.setAttribute('aria-current','true');else c.removeAttribute('aria-current');}};
  input.video?.addEventListener?.('timeupdate',playback);win.addEventListener('resize',geometry);for(const mode of allModes)render(mode);select(view,false);geometry();
  return {root,flushProgress,resetLanguage,
-  set(mode,state,value){if(destroyed||!panels.has(mode))return;flushProgress();states[mode]=state;if(state==='queued'||state==='success')delete tasks[mode];if(state==='success'){results[mode]=value;delete errors[mode];delete drafts[mode];}else{delete results[mode];if(state==='error'){errors[mode]=value;}else{delete drafts[mode];}}const started=win.performance.now();render(mode);chrome();if(state==='success')onRender(win.performance.now()-started,mode);},
+  statistics(mode,value,warning=false){const record=cleanUsageRecord(value);if(destroyed||!panels.has(mode)||!record||record.mode!==mode||record.outputLanguage!==language)return;statistics[mode]={record,receivedAt:win.performance.now(),warning,displayedElapsed:statistics[mode]?.record?.id===record.id?statistics[mode].displayedElapsed||0:0};if(mode===view)updateUsage();},
+  set(mode,state,value){if(destroyed||!panels.has(mode))return;flushProgress();if(state==='queued')statistics[mode]={record:null,receivedAt:win.performance.now()};
+   if(state==='success')statistics[mode]={record:cleanUsageRecord(value?.statistics),receivedAt:win.performance.now(),warning:value?.historyWarning===true};
+   if(state==='error'&&statistics[mode]){const entry=statistics[mode],record=entry.record;if(record&&USAGE_BUSY.has(record.status))entry.record={...record,status:value==='CANCELLED'?'cancelled':'error',elapsedMs:record.elapsedMs+Math.max(0,win.performance.now()-entry.receivedAt)};}
+   states[mode]=state;if(state==='queued'||state==='success')delete tasks[mode];if(state==='success'){results[mode]=value;delete errors[mode];delete drafts[mode];}else{delete results[mode];if(state==='error'){errors[mode]=value;}else{delete drafts[mode];}}const started=win.performance.now();render(mode);chrome();if(state==='success')onRender(win.performance.now()-started,mode);},
   progress(mode,text,preview){if(destroyed||!panels.has(mode)||!BUSY.has(states[mode])||typeof text!=='string'||text.length>12000)return;if(preview&&!validPreview(preview,language))return;pending.set(mode,preview||{text,tree:[],highlights:[]});if(!frame)frame=(win.requestAnimationFrame||((fn)=>win.setTimeout(fn,16))).call(win,flushProgress);},
   taskProgress(mode,event){
    const e=taskProgressEvent(event);if(destroyed||!e||!panels.has(mode)||!BUSY.has(states[mode]))return;
@@ -116,7 +136,7 @@ export function createCard({document,input,preferences,onRetry=()=>{},onSettings
   },
   stop(){flushProgress();for(const mode of modes())if(states[mode]!=='success')this.set(mode,'error','CANCELLED');},
   updatePreferences(value){prefs=value;setUILanguage(prefs.uiLanguage);localizeUI(root,prefs.uiLanguage);localizeUI(modal,prefs.uiLanguage);for(const mode of allModes)if(!modes().includes(mode)&&BUSY.has(states[mode])){states[mode]='waiting';pending.delete(mode);render(mode);}const timeline=contents.get('summary')?.timeline;if(timeline)timeline.hidden=!prefs.timeline;for(const mode of allModes)if(states[mode]==='error')render(mode);for(const c of contents.values())c.map?.localize();modalMap?.localize();if(!prefs.mindmap)modal?.close();if(!modes().includes(view)&&modes().length)select(modes()[0]);chrome();},
-  destroy(){if(destroyed)return;destroyed=true;document.removeEventListener('pointerdown',dismissLanguage,true);document.removeEventListener('focusin',dismissLanguage);clearTimeout(copyTimer);if(frame)(win.cancelAnimationFrame||win.clearTimeout).call(win,frame);modal?.close();for(const c of contents.values())c.map?.destroy();searchIndex.destroy();input.video?.removeEventListener?.('timeupdate',playback);win.removeEventListener('resize',geometry);root.remove();pending.clear();onClose?.();},
+  destroy(){if(destroyed)return;destroyed=true;document.removeEventListener('pointerdown',dismissLanguage,true);document.removeEventListener('focusin',dismissLanguage);clearTimeout(copyTimer);win.clearInterval(usageTimer);if(frame)(win.cancelAnimationFrame||win.clearTimeout).call(win,frame);modal?.close();for(const c of contents.values())c.map?.destroy();searchIndex.destroy();input.video?.removeEventListener?.('timeupdate',playback);win.removeEventListener('resize',geometry);root.remove();pending.clear();onClose?.();},
   snapshot:()=>({view,outputLanguage:language,states:{...states},results:{...results}})
  };
 }

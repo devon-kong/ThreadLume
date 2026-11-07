@@ -1,3 +1,4 @@
+import {cleanUsageRecord} from './usage.js';
 import {taskProgressEvent} from './generation-progress.js';
 import {t,setUILanguage} from '../i18n.js';
 import {attachCommentScrollbar} from './comment-scrollbar.js';
@@ -18,6 +19,7 @@ export function initAIReader(){
    const s=current,job=s?.progress?.get(m.mode);
    if(!job||!s.valid()||s.stopped||(m.outputLanguage||'zh-CN')!==s.outputLanguage||m.instance!==s.instance||m.connectionId!==s.connectionId||m.requestId!==job.id||!Number.isSafeInteger(m.sequence)||m.sequence<=job.sequence||!modesFor(s.input,s.prefs).includes(m.mode))return false;
    if(m.preview&&!validPreview(m.preview,s.outputLanguage))return false;job.sequence=m.sequence;
+   if(m.stage==='statistics'){const statistics=cleanUsageRecord(m.statistics);if(statistics)s.card.statistics(m.mode,statistics,m.historyWarning===true);return false;}
    const taskEvent=taskProgressEvent(m);if(taskEvent){s.card.taskProgress(m.mode,taskEvent);return false;}
    if(m.stage==='partial'&&typeof m.text==='string'&&m.text.length<=12000){job.previewReadable=!!(m.mode==='mindmap'?m.preview?.tree.length:m.preview?.highlights.length);job.text=m.mode==='mindmap'?(m.preview?.tree||[]).map(node=>node.text).join('\n'):m.text;s.card.progress(m.mode,m.text,m.preview);recordVisible(s,m.mode,job,false,job.text);}
    else if(m.stage==='request'&&s.card.snapshot().states[m.mode]==='queued')s.card.set(m.mode,'loading');
@@ -140,9 +142,13 @@ function relevantMutation(records,article,focusId){
 }
 function stopGeneration(s){
  if(!s.valid()||s.stopped)return;
- s.stopped=true;const old=s.instance;s.instance=crypto.randomUUID();
+ s.stopped=true;const old=s.instance,card=s.card,modes=new Set(s.progress.keys());s.instance=crypto.randomUUID();const stoppedInstance=s.instance;
  s.progress.clear();s.displayJobs.clear();s.cacheReads.clear();for(const mode of s.runs.keys())s.runs.set(mode,s.runs.get(mode)+1);
- send('cancel',{instance:old}).catch(()=>{});s.card.stop();
+ s.card.stop();
+ send('cancel',{instance:old}).then(snapshots=>{
+  if(!s.valid()||!s.stopped||s.instance!==stoppedInstance||s.card!==card||!Array.isArray(snapshots))return;
+  for(const value of snapshots.slice(0,2)){const record=cleanUsageRecord(value);if(record&&record.status==='cancelled'&&modes.has(record.mode)&&record.outputLanguage===s.outputLanguage)card.statistics(record.mode,record);}
+ }).catch(()=>{});
 }
 function changeLanguage(s,value,persist=true){
  if(!s.valid()||!['zh-CN','en'].includes(value)||value===s.outputLanguage)return;
@@ -194,7 +200,7 @@ function readCached(s,mode){
  const active=()=>s.valid()&&s.card===card&&s.input===input&&s.instance===instance&&s.connectionId===connectionId&&s.connectionRevision===connectionRevision&&s.runs.get(mode)===run&&modesFor(input,s.prefs).includes(mode);
  const pending=(async()=>{
   const job=displayJob(s,mode);
-  try{const result=await send('cached',{instance,connectionId,input:requestInput(input),mode,requestId:job.id,contentMs:s.contentMs,outputLanguage:s.outputLanguage});if(result&&active()){job.complete=true;card.set(mode,'success',result);recordVisible(s,mode,job,true);}}
+  try{const result=await send('cached',{instance,connectionId,input:requestInput(input),mode,requestId:job.id,contentMs:s.contentMs,outputLanguage:s.outputLanguage});if(result&&active()){job.complete=true;card.set(mode,'success',{...result,cached:true});recordVisible(s,mode,job,true);}}
   catch{/* Cache lookup failure must not block the normal generation path. */}
   finally{if(!job.complete)s.displayJobs.delete(job.id);}
  })();s.cacheReads.set(mode,pending);return pending;
@@ -208,6 +214,6 @@ async function generate(s,mode,automatic=false){
  const card=s.card;card.set(mode,'queued');const job=displayJob(s,mode);s.progress.set(mode,job);
  const active=()=>s.valid()&&s.instance===instance&&s.card===card&&s.connectionRevision===connectionRevision&&s.runs.get(mode)===run&&modesFor(s.input,s.prefs).includes(mode);
  try{const result=await send('generate',{instance,connectionId:s.connectionId,input:requestInput(s.input),mode,requestId:job.id,contentMs:s.contentMs,outputLanguage:s.outputLanguage});if(active()){job.complete=true;card.set(mode,'success',result);recordVisible(s,mode,job,true);}}
- catch(e){if(active())card.set(mode,'error',e.message);}
+ catch(e){if(active()){if(!s.stopped&&e.statistics)card.statistics(mode,e.statistics);card.set(mode,'error',e.message);}}
  finally{if(s.progress.get(mode)===job)s.progress.delete(mode);if(!job.complete)s.displayJobs.delete(job.id);}
 }

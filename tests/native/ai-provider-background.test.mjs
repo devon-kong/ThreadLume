@@ -264,3 +264,20 @@ test('diagnostics report a swallowed restore failure as failed, never as a succe
  await w.send({action:'status'});const rows=(await w.send({action:'getSetupDiagnostics'})).value.events.filter(r=>r.origin==='startup'&&r.stage==='restore');
  assert.ok(rows.some(r=>r.status==='failed'&&r.errorCode==='CUSTOM_RULE_CONFLICT'));assert.equal(rows.some(r=>r.status==='success'),false);
 });
+
+test('usage history is settings-only and connection probes obey the opt-in flag',async()=>{
+ const w=await fixture();
+ assert.equal((await w.send({action:'getUsageHistory'},w.x)).rejected,true);
+ assert.equal((await w.send({action:'clearUsageHistory'},w.x)).rejected,true);
+ await w.send({action:'savePreferences',preferences:{saveUsageHistory:true}});
+ const saved=await w.send({action:'saveProvider',config:cfg,key:'synthetic-key'});assert.equal(saved.ok,true);
+ await new Promise(r=>setTimeout(r,0));
+ const history=(await w.send({action:'getUsageHistory'})).value;
+ assert.equal(history.records.length,1);assert.equal(history.records[0].operation,'probe');assert.equal(history.records[0].status,'success');assert.equal(history.records[0].requests.length,1);
+ assert.equal(JSON.stringify(history).includes('synthetic-key'),false);
+ const status=(await w.send({action:'status'})).value;
+ const generated=await w.send({action:'generate',instance:'usage-owner',requestId:'usage-request',connectionId:status.connectionId,input,mode:'article'},w.x);
+ assert.equal(generated.ok,true);assert.equal(generated.value.statistics.requests.length,1);
+ assert.ok(w.progress.some(p=>p.m.stage==='statistics'));
+ await w.send({action:'clearUsageHistory'});assert.equal((await w.send({action:'getUsageHistory'})).value.records.length,0);
+});

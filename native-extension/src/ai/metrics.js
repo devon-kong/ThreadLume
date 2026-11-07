@@ -4,22 +4,23 @@ const STAGES=new Set([...STREAM_FAILURE_STAGES,'invalidStream','invalidEnvelope'
 export const elapsedNumber=value=>typeof value==='number'&&Number.isFinite(value)&&value>=0&&value<=600000?Math.round(value*10)/10:undefined;
 export function createMetrics({clock=()=>performance.now(),limit=60,onChange=()=>{}}={}){
  const rows=[];
- const exportRows=()=>rows.map(({owner,row})=>({owner,row:{...row,stages:{...row.stages}}}));
+ const exportRows=()=>rows.filter(entry=>entry.persist).map(({owner,row})=>({owner,row:{...row,stages:{...row.stages}}}));
  const changed=()=>onChange(exportRows());
  function start(owner,requestId,{kind,mode,provider,providerId,configVersion,contentMs,inputCharacters,operation='generate'}={}){
   const row={measurementVersion:4,requestId,kind,mode,provider,operation,cache:'miss',stages:{}},started=clock();
-  const entry={owner,row};rows.push(entry);if(rows.length>limit)rows.shift();
+  const entry={owner,row,persist:false};rows.push(entry);if(rows.length>limit)rows.shift();
   if(elapsedNumber(contentMs)!==undefined)row.contentMs=elapsedNumber(contentMs);
   if(Number.isSafeInteger(inputCharacters)&&inputCharacters>=0)row.inputCharacters=inputCharacters;
   for(const [key,value] of Object.entries({providerId,configVersion}))if(typeof value==='string'&&/^[\w-]{1,100}$/.test(value))row[key]=value;
   changed();
   return {mark(stage){if(STAGES.has(stage)&&row.stages[stage]===undefined){row.stages[stage]=elapsedNumber(clock()-started);changed();}},
    job(id){row.jobId=id;changed();},
+   persist(value){entry.persist=value===true;changed();},
    output(count){if(Number.isSafeInteger(count)&&count>=0){row.outputCharacters=count;changed();}},
    cache(value){if(['hit','miss','shared'].includes(value)){row.cache=value;changed();}},
    finish(outcome){row.outcome=['success','cancelled','error'].includes(outcome)?outcome:'error';this.mark('done');}};
  }
- return {start,snapshot:()=>rows.map(({row})=>({...row,stages:{...row.stages}})),
+ return {start,snapshot:()=>rows.map(({row})=>({...row,stages:{...row.stages}})),clearSaved(){for(const entry of rows)entry.persist=false;changed();},
   restore(saved){
    if(!Array.isArray(saved))return;
    for(const entry of saved.slice(-limit)){
@@ -32,7 +33,7 @@ export function createMetrics({clock=()=>performance.now(),limit=60,onChange=()=
     if(typeof r.jobId==='string'&&/^[\w-]{1,100}$/.test(r.jobId))row.jobId=r.jobId;
     for(const key of ['providerId','configVersion'])if(typeof r[key]==='string'&&/^[\w-]{1,100}$/.test(r[key]))row[key]=r[key];
     for(const key of STAGES)if(elapsedNumber(r.stages?.[key])!==undefined)row.stages[key]=elapsedNumber(r.stages[key]);
-    rows.push({owner:entry.owner,row});
+    rows.push({owner:entry.owner,row,persist:true});
    }
    if(rows.length>limit)rows.splice(0,rows.length-limit);
   },

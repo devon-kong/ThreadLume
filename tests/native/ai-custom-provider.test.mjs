@@ -50,10 +50,11 @@ test('request uses only common nonstream Chat Completions fields and structured 
   throwsCode(()=>custom.buildChatRequest(config,{...video,text:'wrong transcript'},'summary'),'CUSTOM_INVALID_INPUT');
 });
 
-test('probe request never includes current article and accepts only a stopped exact OK response',()=>{
+test('probe request never includes current article and accepts a stopped OK acknowledgement with optional period',()=>{
   const request=custom.buildChatRequest(config,{...article,text:'PRIVATE ARTICLE'},'probe');
   assert.equal(JSON.stringify(request).includes('PRIVATE ARTICLE'),false);assert.equal(request.max_tokens<=256,true);
   assert.equal(custom.probeChatResponse(envelope(' OK ')),true);
+  assert.equal(custom.probeChatResponse(envelope('OK.')),true);
   throwsCode(()=>custom.probeChatResponse(envelope('OK, connected')),'CUSTOM_INVALID_RESPONSE');
   throwsCode(()=>custom.probeChatResponse(envelope('OK','length')),'CUSTOM_TRUNCATED');
 });

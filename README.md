@@ -13,6 +13,8 @@ Turn long X posts and captioned videos into clear summaries, interactive mind ma
 
 **Desktop Chromium preview.** Basic reading works without AI setup. AI features require your own compatible API service and are subject to that service's charges. Install the ZIP as an unpacked extension; no Node.js or build tools are needed.
 
+The reader also shows elapsed time and input/output token usage. **Settings → Data** provides optional local call history and model comparison, retaining up to 500 tasks for 30 days. [Statistics and history](docs/installation.md#generation-statistics-and-model-comparison).
+
 ## See it in use
 
 **Read the post and its conversation together**

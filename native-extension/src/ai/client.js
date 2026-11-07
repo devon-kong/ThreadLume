@@ -1,8 +1,9 @@
 import {getUILanguage} from '../i18n.js';
+import {cleanUsageRecord} from './usage.js';
 export async function send(action,data={}){
  if(!globalThis.chrome?.runtime?.id)throw Error('EXTENSION_UNAVAILABLE');
  let response;try{response=await chrome.runtime.sendMessage({ns:'peek-ai-v7',action,...data});}catch{throw Error('EXTENSION_UNAVAILABLE');}
- if(!response?.ok)throw Error(response?.error||'NO_RESPONSE');return response.value;
+ if(!response?.ok){const error=Error(response?.error||'NO_RESPONSE');error.statistics=cleanUsageRecord(response?.statistics);throw error;}return response.value;
 }
 export const ERROR_TEXT={
  "CUSTOM_INVALID_CONTEXT": "请输入 4,096～2,000,000 之间的整数作为模型上下文长度（tokens）。",

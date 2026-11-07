@@ -4,6 +4,44 @@ const config={id:'custom',name:'测试',protocol:'chat-completions',baseURL:'htt
 const input={kind:'article',focusId:'123',url:'https://x.com/a/status/123',title:'Title',text:'Full article'};
 const envelope=text=>({choices:[{finish_reason:'stop',message:{role:'assistant',content:text}}]});
 const response=(body,status=200)=>({ok:status>=200&&status<300,status,text:async()=>JSON.stringify(body)});
+
+test('OpenAI requests use max_completion_tokens for probes and generation', async () => {
+ const calls = [];
+ const transport = createCustomTransport({
+  hasPermission: async () => true,
+  fetchImpl: async (url, options) => {
+   const body = JSON.parse(options.body);
+   calls.push({url, body});
+   return response(envelope(calls.length === 1 ? 'OK' : '{"text":"Summary"}'));
+  },
+ });
+ const openai = {...config, baseURL: 'https://api.openai.com/v1', model: 'gpt-5-nano'};
+ assert.equal(await transport.probe(openai, 'test-secret'), true);
+ assert.equal((await transport.generate(openai, 'test-secret', input, 'article')).text, 'Summary');
+ assert.equal(calls.length, 2);
+ for (const [index, call] of calls.entries()) {
+  assert.equal(call.url, 'https://api.openai.com/v1/chat/completions');
+  assert.equal(Object.hasOwn(call.body, 'max_tokens'), false);
+  assert.equal(call.body.max_completion_tokens, index === 0 ? 256 : 8192);
+  assert.deepEqual(call.body.response_format, index === 0 ? undefined : {type: 'json_object'});
+ }
+});
+
+test('OpenAI token parameter mapping is limited to the official endpoint', async () => {
+ for (const baseURL of ['https://api.example.test/v1', 'https://api.openai.com/custom/v1']) {
+  const transport = createCustomTransport({
+   hasPermission: async () => true,
+   fetchImpl: async (_, options) => {
+    const body = JSON.parse(options.body);
+    assert.equal(body.max_tokens, 256);
+    assert.equal(Object.hasOwn(body, 'max_completion_tokens'), false);
+    return response(envelope('OK'));
+   },
+  });
+  assert.equal(await transport.probe({...config, baseURL, model: 'gpt-5-nano'}, 'test-secret'), true);
+ }
+});
+
 test('自定义后台仅请求保存服务的固定POST，最小检测不含文章、拒绝Cookie和重定向',async()=>{
  const calls=[],transport=createCustomTransport({hasPermission:async origin=>origin==='https://api.example.test/*',fetchImpl:async(url,options)=>{calls.push({url,options});return response(envelope(calls.length===1?'OK':'{"text":"摘要"}'));}});
  assert.equal(await transport.probe(config,'test-secret',new AbortController().signal),true);assert.equal((await transport.generate(config,'test-secret',input,'article',new AbortController().signal)).text,'摘要');

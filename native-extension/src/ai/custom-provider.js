@@ -85,7 +85,7 @@ export function responseContent(envelope){
 }
 
 export function probeChatResponse(envelope){
- if(responseContent(envelope).trim()!=='OK')fail(INVALID);
+ if(!['OK','OK.'].includes(responseContent(envelope).trim()))fail(INVALID);
  return true;
 }
 

@@ -3,6 +3,7 @@ export const STREAM_FAILURE_STAGES=new Set(['invalidStreamBytes','invalidStreamI
 const invalidStream=phase=>{const error=new AIError('CUSTOM_INVALID_RESPONSE');error.validationPhase=phase;throw error;};
 import {cueTimestamp} from './source-references.js';
 import {validPreview} from './preview.js';
+import {reportedUsage} from './usage.js';
 // Decode only a leading top-level text string. The preview remains provisional;
 // the normal schema validator alone may accept a finished result.
 export function previewText(content){
@@ -71,12 +72,12 @@ export function structuredPreview(content,mode,input,outputLanguage='zh-CN'){
  if(!validPreview(result,outputLanguage))return {version:1,outputLanguage,text:result.text,highlights:[],tree:[]};
  return result;
 }
-export async function readChatStream(response,{signal,onEvent=()=>{},mode,input,outputLanguage='zh-CN'}={}){
+export async function readChatStream(response,{signal,onEvent=()=>{},onMeasurement=()=>{},mode,input,outputLanguage='zh-CN'}={}){
  if(!response.headers?.get('content-type')?.toLowerCase().includes('text/event-stream')||!response.body?.getReader)fail('CUSTOM_STREAM_UNSUPPORTED');
  const reader=response.body.getReader(),decoder=new TextDecoder('utf-8',{fatal:true});
  const decode=(value,options)=>{try{return decoder.decode(value,options);}catch{invalidStream('invalidStreamEncoding');}};
- let line='',lines=[],skipLF=false,content='',finish=null,done=false,bytes=0,first=false,preview='';
- const abort=()=>{reader.cancel().catch(()=>{});};
+ let line='',lines=[],skipLF=false,content='',finish=null,done=false,bytes=0,first=false,preview='';const usage={};
+ const abort=()=>{onMeasurement({content,usage,complete:false});reader.cancel().catch(()=>{});};
  signal?.addEventListener('abort',abort,{once:true});
  const check=()=>{if(signal?.aborted)throw signal.reason||new DOMException('Cancelled','AbortError');};
  function frame(block){
@@ -86,6 +87,7 @@ export async function readChatStream(response,{signal,onEvent=()=>{},mode,input,
   if(data==='[DONE]'){done=true;return;}
   let e;try{e=JSON.parse(data);}catch{invalidStream('invalidStreamJSON');}
   if(!e||e.error||!Array.isArray(e.choices))invalidStream('invalidStreamEnvelope');
+  Object.assign(usage,reportedUsage(e.usage));
   if(!e.choices.length)return; // standard usage-only terminal event
   if(e.choices.length!==1)invalidStream('invalidStreamEnvelope');
   const c=e.choices[0],d=c.delta;
@@ -129,6 +131,7 @@ export async function readChatStream(response,{signal,onEvent=()=>{},mode,input,
   if(!done||finish!=='stop')invalidStream('invalidStreamIncomplete');
   return {choices:[{finish_reason:'stop',message:{role:'assistant',content}}]};
  }finally{
+  onMeasurement({content,usage,complete:done&&finish==='stop'});
   signal?.removeEventListener('abort',abort);
   // A malformed/aborted stream must not keep consuming data in the background.
   reader.cancel().catch(()=>{});reader.releaseLock();
