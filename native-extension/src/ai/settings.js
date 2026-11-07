@@ -3,6 +3,7 @@ import {t,setUILanguage,localizeUI} from '../i18n.js';
 import {send,errorText} from './client.js';
 import {DEFAULTS,normalizePreferences} from './preferences.js';
 import {el,button} from './dom.js';
+import {icon} from './icons.js';
 import {normalizeEndpoint,validateProviderConfig} from './custom-provider.js';
 import {providerPermissions} from './transport-policy.js';
 const d=document,root=d.getElementById('peek-settings');let prefs={...DEFAULTS},connection={state:'DISCONNECTED'},busy=false,notice='',undo=null,lastFailed=null,saveQueue=Promise.resolve(),saveRevision=0,pendingSaves=0,refreshRevision=0,confirmedPrefs={...DEFAULTS},providers={activeId:'doubao',services:[]},providerBusy=false,providerRevision=0,providerDialog=null;
@@ -110,7 +111,25 @@ function openProviderDialog(service){
  name.input.maxLength=80;model.input.maxLength=200;url.input.maxLength=2048;key.input.setAttribute('autocomplete','new-password');key.input.placeholder=service?.hasKey?t("输入新 Key 以替换"):t("输入 API Key");
  const endpoint=el(d,'small',{id:'pk-provider-endpoint',class:'pk-ai-muted'}),protocol=el(d,'div',{class:'pk-provider-field'},el(d,'span',{text:t("调用方式")}),el(d,'p',{class:'pk-provider-protocol',text:t("Chat Completions · OpenAI 兼容")}));
  form.append(name.wrap,url.wrap,endpoint,el(d,'div',{class:'pk-provider-columns'},protocol,model.wrap));
- if(service)form.append(el(d,'div',{class:'pk-provider-mask'},el(d,'span',{text:service.hasKey?t("已保存 API Key："):t("未保存 API Key")}),el(d,'span',{id:'pk-provider-key-mask',text:service.hasKey?'••••••••':''})));
+ if(service){
+  const mask=el(d,'span',{id:'pk-provider-key-mask',translate:'no',text:service.hasKey?'••••••••':''});
+  let revealed=false,revealPending=false;
+  const eye=identified(button(d,'',async()=>{
+   if(revealPending)return;revealPending=true;
+   try{
+    if(!revealed){
+     let secret=null;try{secret=await send('revealProviderKey',{id:service.id});}catch{secret=null;}
+     if(typeof secret!=='string'||!secret)return;
+     mask.textContent=secret;revealed=true;
+    }else{mask.textContent='••••••••';revealed=false;}
+    eye.replaceChildren(icon(d,revealed?'eyeoff':'eye'));
+    const label=t(revealed?"隐藏 API Key":"显示 API Key");
+    eye.title=label;eye.setAttribute('aria-label',label);eye.setAttribute('aria-pressed',String(revealed));
+   }finally{revealPending=false;}
+  }),'pk-provider-key-eye');
+  eye.title=t("显示 API Key");eye.setAttribute('aria-label',t("显示 API Key"));eye.setAttribute('aria-pressed','false');eye.append(icon(d,'eye'));
+  form.append(el(d,'div',{class:'pk-provider-mask'},el(d,'span',{text:service.hasKey?t("已保存 API Key："):t("未保存 API Key")}),mask,service.hasKey?eye:null));
+ }
  form.append(key.wrap);
  const context=field('contextTokens',t("上下文长度（tokens）"),'number');context.input.min='4096';context.input.max='2000000';context.input.step='1';context.input.required=true;
  form.append(context.wrap,el(d,'small',{class:'pk-ai-muted',text:t("每次请求的总预算，包含提示词、输入和输出；本地估算并保留 20% 余量。长内容最多分 8 段后整合，会增加请求和费用。请勿超过服务商提供的实际上下文长度。")}));

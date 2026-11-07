@@ -140,7 +140,7 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
   if(['saveProvider','activateProvider'].includes(m.action)){if(m.operationId!==undefined&&(typeof m.operationId!=='string'||!/^[-\w]{1,100}$/.test(m.operationId)))fail('INVALID_MESSAGE');setupStage('background');setupTrace.event('save','started');}
   await diagnosticCall(setupTrace,'worker_ready',()=>ready);
   if(['saveProvider','activateProvider'].includes(m.action)&&checkAdmission!==providerAdmission)fail('CANCELLED');
-  const fields={status:['xTheme'],preferences:[],savePreferences:['preferences'],setOutputLanguage:['outputLanguage'],providers:[],saveProvider:['config','key','operationId'],activateProvider:['id','operationId'],cancelProviderCheck:[],generate:['connectionId','input','mode','instance','requestId','contentMs','outputLanguage'],cached:['connectionId','input','mode','instance','requestId','contentMs','outputLanguage'],cancel:['instance'],displayed:['instance','requestId','displayMs','firstVisibleMs','firstReadableMs','renderMs','visibilityInterrupted'],openSettings:[],openSetup:[],connect:[],capture:[],check:[],cancelCheck:[],disconnect:[]};
+  const fields={status:['xTheme'],preferences:[],savePreferences:['preferences'],setOutputLanguage:['outputLanguage'],providers:[],saveProvider:['config','key','operationId'],activateProvider:['id','operationId'],cancelProviderCheck:[],revealProviderKey:['id'],generate:['connectionId','input','mode','instance','requestId','contentMs','outputLanguage'],cached:['connectionId','input','mode','instance','requestId','contentMs','outputLanguage'],cancel:['instance'],displayed:['instance','requestId','displayMs','firstVisibleMs','firstReadableMs','renderMs','visibilityInterrupted'],openSettings:[],openSetup:[],connect:[],capture:[],check:[],cancelCheck:[],disconnect:[]};
   if(!sender.url?.startsWith('chrome-extension://')&&Object.keys(m).some(key=>!['ns','action',...(fields[m.action]||[])].includes(key)))fail('INVALID_MESSAGE');
 
   switch(m.action){
@@ -153,6 +153,15 @@ chrome.runtime.onMessage.addListener((m,sender,respond)=>{
    case 'savePreferences':{const value=await service.savePreferences(m.preferences);notifyState();return value;}
    case 'setOutputLanguage':{if(Object.keys(m).some(k=>!['ns','action','outputLanguage'].includes(k)))fail('INVALID_MESSAGE');const outputLanguage=validateLanguage(m.outputLanguage);const value=await service.saveOutputLanguage(outputLanguage);notifyState();return value;}
    case 'providers':return providers.list();
+   case 'revealProviderKey':{
+    // Settings-only reveal for the trusted dialog's eye toggle (allowedSender
+    // rejects every other context). The secret is returned on explicit request,
+    // never logged, traced or persisted outside its owned storage record.
+    if(Object.keys(m).some(k=>!['ns','action','id'].includes(k)))fail('INVALID_MESSAGE');
+    if(typeof m.id!=='string'||!/^[\w-]{1,100}$/.test(m.id))fail('INVALID_MESSAGE');
+    const target=providers.registry.services.find(s=>s.id===m.id);
+    return target?providers.ownedKey(target):null;
+   }
    case 'saveProvider':{if(Object.keys(m).some(k=>!['ns','action','config','key','operationId'].includes(k)))fail('INVALID_MESSAGE');return checkProvider(signal=>providers.save(m.config,m.key,{signal,onStage:storeStage,trace:setupTrace}),m.config);}
    case 'activateProvider':{if(Object.keys(m).some(k=>!['ns','action','id','operationId'].includes(k)))fail('INVALID_MESSAGE');return checkProvider(signal=>providers.activate(m.id,{signal,onStage:storeStage,trace:setupTrace}),providers.registry.services.find(s=>s.id===m.id));}
    case 'cancelProviderCheck':{

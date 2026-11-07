@@ -168,6 +168,8 @@ export const MESSAGES=Object.freeze({
  "Chat Completions · OpenAI 兼容": "Chat Completions · OpenAI compatible",
  "已保存 API Key：": "Saved API key:",
  "未保存 API Key": "No API key saved",
+ "显示 API Key": "Show API key",
+ "隐藏 API Key": "Hide API key",
  "记住在此设备": "Remember on this device",
  "保存在浏览器本地存储，并非系统钥匙串加密。关闭后，Key 只在本次浏览器会话内保存。": "Stored locally in this browser, not encrypted by the system keychain. Turn off to keep the key only for this browser session.",
  "保存时会请求访问此 API 域名，并发送一条最小测试请求，不发送当前文章。连接成功后，当前字幕或正文仅发送至你选择的服务。": "Saving requests access to this API host and sends a minimal test, without your article. Once connected, eligible article text or available captions are sent only to your selected service.",

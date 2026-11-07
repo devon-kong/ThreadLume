@@ -63,6 +63,15 @@ test('实际后台：自定义当前时豆包不初始化/探测，可信存储�
  assert.equal(w.calls[0].options.credentials,'omit');assert.equal(w.calls[0].options.redirect,'error');
  await w.send({action:'savePreferences',preferences:{summary:false,mindmap:false}});await new Promise(r=>setTimeout(r,5));assert.equal(w.notified.length>0,true);assert.equal(JSON.stringify(w.notified).includes('synthetic-key'),false);
 });
+test('实际后台：Key 明文只回设置页眼睛请求，内容页拒绝、未知服务为空且不入诊断',async()=>{
+ const w=await fixture({current:true});
+ assert.equal((await w.send({action:'revealProviderKey',id:'custom-one'},w.x)).rejected,true);
+ const revealed=await w.send({action:'revealProviderKey',id:'custom-one'});assert.equal(revealed.value,'synthetic-key');
+ assert.equal((await w.send({action:'revealProviderKey',id:'missing'})).value,null);
+ const extra=await w.send({action:'revealProviderKey',id:'custom-one',key:'x'});assert.equal(extra.error,'INVALID_MESSAGE');
+ assert.equal(JSON.stringify(w.storage.local.data.aiSetupDiagnosticsV1||{}).includes('synthetic-key'),false);
+ assert.equal((await w.send({action:'providers'})).value.services[0].hasKey,true);
+});
 test('实际后台：检测成功才启用；权限拒绝与取消/迟到响应保留原服务',async()=>{
  const w=await fixture();const save=await w.send({action:'saveProvider',config:cfg,key:'synthetic-key'});assert.equal(save.ok,true);assert.notEqual(save.value.activeId,'doubao');assert.equal(w.created.length,0);assert.equal(w.calls.length,1);assert.equal(w.calls[0].options.body.includes('Full body'),false);
  const no=await fixture({permission:false});const denied=await no.send({action:'saveProvider',config:cfg,key:'synthetic-key'});assert.equal(denied.error,'PERMISSION_REQUIRED');assert.equal((await no.send({action:'providers'})).value.activeId,'doubao');assert.equal(no.calls.length,0);

@@ -9,6 +9,8 @@ test('来源与参数白名单，拒绝任意外部消息/URL/签名字段',()=>
  assert.equal(allowedSender({id:'evil',tab:{id:1},frameId:0,url:input.url},'ours','generate'),false);
  assert.equal(allowedSender({id:'ours',tab:{id:1},frameId:2,url:input.url},'ours','generate'),false);
  assert.equal(allowedSender({id:'ours',tab:{id:1},frameId:0,url:input.url},'ours','connect'),false);
+ assert.equal(allowedSender({id:'ours',url:'chrome-extension://ours/settings.html'},'ours','revealProviderKey'),true);
+ assert.equal(allowedSender({id:'ours',tab:{id:1},frameId:0,url:input.url},'ours','revealProviderKey'),false);
  assert.throws(()=>validateParams({aid:'586864'}),/APPLICATION_CHANGED/);assert.throws(()=>validateParams({aid:'497858',msToken:'bad'}),/INVALID_PARAMETERS/);
 });
 test('去重/缓存/输入变化、Worker 重建内存恢复、断开保留结果、新分区隔离',async()=>{

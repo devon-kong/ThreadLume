@@ -20,7 +20,7 @@ Streaming displays provisional output. Only fully validated results enter the su
 
 - Preferences: theme, enabled AI features, default view, interface and output language, and the opt-in call-history switch.
 - Provider configuration: names, endpoints, models, context budgets, binding versions and test timestamps.
-- API keys: password input and fixed saved-key masks; keys are not returned to content scripts, diagnostics, exports or sync storage. Only trusted extension contexts can access local/session storage.
+- API keys: password input. The saved key stays masked and is shown in plain text only through the explicit reveal toggle in the trusted settings dialog, which fetches it from the background worker on demand. Keys are not returned to content scripts, diagnostics, exports or sync storage. Only trusted extension contexts can access local/session storage.
 - **Remember on this device** stores the key in browser-local extension storage. This is not system-keychain encryption. With it off, the key is kept in browser-session storage and is lost when that session ends.
 - Validated AI output: a bounded local cache, at most 30 entries, approximately 4 MiB and seven days. Cache identity includes provider/configuration, source, view and output language.
 - Generation statistics are available in memory for the current task. **Save call history** is off by default. When enabled at task creation, numeric generation diagnostics may also be saved in session storage, and a bounded call history is saved in local storage. A task already being recorded completes its record after the switch is turned off.
