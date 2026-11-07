@@ -93,6 +93,31 @@ test("reader shows elapsed and input while running, reveals output on completion
     w.close();
   }
 });
+test("footer shows the configured service name from reader open; record and result names take precedence", () => {
+  const w = new JSDOM("<body></body>", { url: "https://x.com" }).window;
+  const card = createCard({
+    document: w.document,
+    input: { kind: "article" },
+    preferences: DEFAULTS,
+    providerName: "gpt-4o-mini",
+  });
+  w.document.body.append(card.root);
+  try {
+    const footer = w.document.querySelector(".pk-ai-footer");
+    assert.match(footer.textContent, /gpt-4o-mini/);
+    card.set("article", "success", {
+      text: "Summary",
+      statistics: { ...record(), status: "success" },
+    });
+    assert.match(
+      w.document.querySelector(".pk-ai-footer").textContent,
+      /Example/,
+    );
+  } finally {
+    card.destroy();
+    w.close();
+  }
+});
 test("cached output is labeled in the reader status while the statistics line stays unavailable", () => {
   const w = new JSDOM("<body></body>", { url: "https://x.com" }).window;
   const card = createCard({

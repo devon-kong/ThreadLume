@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- Added an API key reveal toggle in the trusted service dialog: an eye button unmasks the saved key on demand and masks it again on the second click. The key is fetched from the background worker only for the settings page, is never logged, traced or exported, and content scripts are rejected.
+- Reworked the service dialog key field to standard form semantics: the saved key is prefilled into the masked password input (fetched from the background worker on demand, settings-only, never logged or exported), an eye inside the input toggles visibility, and edits overwrite the stored key on save. The separate mask row and its standalone eye are gone.
+- Show the configured model name in the reader footer from the moment the reader opens; generation records and results keep precedence over the creation-time name.
 - Compacted the reader AI chrome into single lines: generation statistics (elapsed, input and output tokens) render in the bottom footer directly after the model name, the cached-result marker moved into the status line, and the footer dropped the AI prefix, the source-check reminder, the caption-snapshot note and the inline Details disclosure. Full request details remain in Settings → Data call history. Narrow panels now truncate the statistics gracefully instead of wrapping.
 - Put real reading results and ZIP installation first in the English and Chinese README.
 - Refreshed product screenshots, including a readable mind-map branch detail.

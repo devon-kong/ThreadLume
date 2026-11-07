@@ -84,7 +84,7 @@ async function sync(refresh=false){
    if(s.card){s.card.destroy();send('cancel',{instance:s.instance}).catch(()=>{});}
    s.instance=crypto.randomUUID();
    s.input=input;s.sourceStamp=stamp;s.cacheReads=new Map();s.progress.clear();s.displayJobs.clear();s.stopped=false;s.contentMs=performance.now()-contentStarted;
-   s.card=createCard({document,input,preferences:s.prefs,onRetry:mode=>{s.stopped=false;generate(s,mode);},onSelect:mode=>generate(s,mode,true),onPresentationChange:()=>presentationChanged(s),onStop:()=>stopGeneration(s),onSettings:()=>send('openSettings').catch(()=>{}),onLanguage:value=>changeLanguage(s,value),onRender:(renderMs,mode)=>{const job=s.progress.get(mode);if(job)send('displayed',{instance:s.instance,requestId:job.id,renderMs}).catch(()=>{});}});
+   s.card=createCard({document,input,preferences:s.prefs,providerName:connection.providerName||'',onRetry:mode=>{s.stopped=false;generate(s,mode);},onSelect:mode=>generate(s,mode,true),onPresentationChange:()=>presentationChanged(s),onStop:()=>stopGeneration(s),onSettings:()=>send('openSettings').catch(()=>{}),onLanguage:value=>changeLanguage(s,value),onRender:(renderMs,mode)=>{const job=s.progress.get(mode);if(job)send('displayed',{instance:s.instance,requestId:job.id,renderMs}).catch(()=>{});}});
    s.card.resetLanguage(s.outputLanguage);s.card.root.dataset.kind=input.kind;s.card.root.dataset.focusId=focusId;
    if(input.cues){s.card.root.dataset.cueCount=input.cues.length;s.card.root.dataset.firstCue=input.cues[0].start;s.card.root.dataset.lastCue=input.cues.at(-1).end;s.card.root.dataset.completion=input.completion;}
    if(s.connectionRevision>0&&s.connectionState!=='ready')endConnectionWait(s);

@@ -25,7 +25,7 @@ export function renderTree(document,tree){
   }else li.append(el(document,'span',{class:'pk-ai-node',text:node.text}));ul.append(li);
  }return ul;
 }
-export function createCard({document,input,preferences,onRetry=()=>{},onSettings=()=>{},onClose,onSelect=()=>{},onStop=()=>{},onLanguage=()=>{},onPresentationChange=()=>{},onRender=()=>{}}){
+export function createCard({document,input,preferences,providerName='',onRetry=()=>{},onSettings=()=>{},onClose,onSelect=()=>{},onStop=()=>{},onLanguage=()=>{},onPresentationChange=()=>{},onRender=()=>{}}){
  setUILanguage(preferences.uiLanguage);
  const win=document.defaultView;
  let prefs=preferences,view=input.kind==='article'?(prefs.summary?'article':'mindmap'):(prefs.summary&&prefs.mindmap?prefs.defaultView:prefs.summary?'summary':'mindmap'),collapsed=false,expanded=false,destroyed=false,copyTimer=null,language=preferences.outputLanguage||'en',frame=0;
@@ -93,7 +93,7 @@ export function createCard({document,input,preferences,onRetry=()=>{},onSettings
   const label=(state==='success'?t("已完成"):state==='error'?(errors[view]==='CANCELLED'?t("已停止"):t("生成失败")):state==='queued'?t("排队中"):BUSY.has(state)?t("生成中"):t("未生成"))+(results[view]?.cached?' · '+t("缓存结果"):'')+(partial?t(" · 未完成"):'');
   if(status.textContent!==label)status.textContent=label;status.dataset.state=state||'waiting';
   status.setAttribute('aria-label',(view==='mindmap'?t("脑图"):t("摘要"))+'：'+label);
-  stop.hidden=!running;copy.disabled=!results[view]&&!drafts[view];copy.textContent=copyLabel();const result=results[view],source=result?.providerName||'';
+  stop.hidden=!running;copy.disabled=!results[view]&&!drafts[view];copy.textContent=copyLabel();const result=results[view],source=result?.providerName||statistics[view]?.record?.providerName||providerName||'';
   footerText.textContent=[source,result?.cacheWarning?t("本次结果未能缓存"):''].filter(Boolean).join(' · ');
  }
  function select(mode,notify=true){if(destroyed||!modes().includes(mode))return;positions.set(view,{top:body.scrollTop,left:body.scrollLeft});view=mode;for(const [key,panel] of panels)panel.hidden=key!==view;const position=positions.get(view);body.scrollTop=position?.top||0;body.scrollLeft=position?.left||0;chrome();const map=contents.get(mode)?.map;if(map)map.update((results[mode]||drafts[mode])?.tree||[]);if(notify){onPresentationChange();onSelect(mode);}}

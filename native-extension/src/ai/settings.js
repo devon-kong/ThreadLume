@@ -107,29 +107,23 @@ function openProviderDialog(service){
  const close=identified(button(d,'×',()=>dismiss()),'pk-provider-close');close.setAttribute('aria-label',t("关闭服务设置"));
  form.append(el(d,'header',{},el(d,'div',{},el(d,'h2',{id:'pk-provider-title',text:service?t("编辑 AI 服务"):t("添加 AI 服务")}),el(d,'p',{class:'pk-ai-muted',text:t("连接兼容 API，选择你习惯的模型。")})),close));
  const field=(name,label,type='text')=>{const input=el(d,'input',{id:'pk-provider-'+name,type,autocomplete:'off',...(name==='key'?{'data-lpignore':'true'}:{})});input.value=draft[name];const wrap=el(d,'label',{class:'pk-provider-field',for:input.id},el(d,'span',{text:label}),input);return {input,wrap};};
- const name=field('name',t("服务名称")),url=field('baseURL',t("API 地址（Base URL）"),'url'),model=field('model',t("模型名称")),key=field('key',service?.hasKey?t("替换 API Key（留空保留已有 Key）"):'API Key','password');
- name.input.maxLength=80;model.input.maxLength=200;url.input.maxLength=2048;key.input.setAttribute('autocomplete','new-password');key.input.placeholder=service?.hasKey?t("输入新 Key 以替换"):t("输入 API Key");
+ const name=field('name',t("服务名称")),url=field('baseURL',t("API 地址（Base URL）"),'url'),model=field('model',t("模型名称")),key=field('key',t("API Key"),'password');
+ name.input.maxLength=80;model.input.maxLength=200;url.input.maxLength=2048;key.input.setAttribute('autocomplete','new-password');key.input.placeholder=t("输入 API Key");
  const endpoint=el(d,'small',{id:'pk-provider-endpoint',class:'pk-ai-muted'}),protocol=el(d,'div',{class:'pk-provider-field'},el(d,'span',{text:t("调用方式")}),el(d,'p',{class:'pk-provider-protocol',text:t("Chat Completions · OpenAI 兼容")}));
  form.append(name.wrap,url.wrap,endpoint,el(d,'div',{class:'pk-provider-columns'},protocol,model.wrap));
- if(service){
-  const mask=el(d,'span',{id:'pk-provider-key-mask',translate:'no',text:service.hasKey?'••••••••':''});
-  let revealed=false,revealPending=false;
-  const eye=identified(button(d,'',async()=>{
-   if(revealPending)return;revealPending=true;
-   try{
-    if(!revealed){
-     let secret=null;try{secret=await send('revealProviderKey',{id:service.id});}catch{secret=null;}
-     if(typeof secret!=='string'||!secret)return;
-     mask.textContent=secret;revealed=true;
-    }else{mask.textContent='••••••••';revealed=false;}
-    eye.replaceChildren(icon(d,revealed?'eyeoff':'eye'));
-    const label=t(revealed?"隐藏 API Key":"显示 API Key");
-    eye.title=label;eye.setAttribute('aria-label',label);eye.setAttribute('aria-pressed',String(revealed));
-   }finally{revealPending=false;}
-  }),'pk-provider-key-eye');
-  eye.title=t("显示 API Key");eye.setAttribute('aria-label',t("显示 API Key"));eye.setAttribute('aria-pressed','false');eye.append(icon(d,'eye'));
-  form.append(el(d,'div',{class:'pk-provider-mask'},el(d,'span',{text:service.hasKey?t("已保存 API Key："):t("未保存 API Key")}),mask,service.hasKey?eye:null));
+ // The saved key is prefilled into the masked input; the inline eye only
+ // toggles its visibility, and edits overwrite the stored key on save.
+ const keyEye=identified(button(d,'',()=>setKeyVisible(!keyVisible)),'pk-provider-key-eye');
+ function setKeyVisible(value){
+  keyVisible=value;key.input.type=value?'text':'password';keyEye.replaceChildren(icon(d,value?'eyeoff':'eye'));
+  const label=t(value?"隐藏 API Key":"显示 API Key");keyEye.title=label;keyEye.setAttribute('aria-label',label);keyEye.setAttribute('aria-pressed',String(value));
  }
+ let keyVisible=false;setKeyVisible(false);
+ key.wrap.append(el(d,'div',{class:'pk-provider-keybox'},key.input,keyEye));
+ if(service?.hasKey)send('revealProviderKey',{id:service.id}).then(secret=>{
+  if(typeof secret!=='string'||!secret||key.input.value||!dialog.open)return;
+  key.input.value=secret;
+ }).catch(()=>{});
  form.append(key.wrap);
  const context=field('contextTokens',t("上下文长度（tokens）"),'number');context.input.min='4096';context.input.max='2000000';context.input.step='1';context.input.required=true;
  form.append(context.wrap,el(d,'small',{class:'pk-ai-muted',text:t("每次请求的总预算，包含提示词、输入和输出；本地估算并保留 20% 余量。长内容最多分 8 段后整合，会增加请求和费用。请勿超过服务商提供的实际上下文长度。")}));
