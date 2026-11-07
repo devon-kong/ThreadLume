@@ -166,20 +166,10 @@ export function renderUsageDetails(document, record) {
 }
 
 export function createUsageDisplay(document) {
-  const summary = el(document, "span", { class: "pk-ai-usage-summary" }),
-    details = el(document, "details", { class: "pk-ai-usage-disclosure" }),
-    label = el(document, "summary", { text: t("详情") }),
-    content = el(document, "div", { class: "pk-ai-usage-details" });
-  details.append(label, content);
-  const root = el(
-    document,
-    "div",
-    { class: "pk-ai-usage", hidden: true },
-    summary,
-    details,
-  );
-  let lastRecord = null,
-    lastLanguage = null;
+  const root = el(document, "span", {
+    class: "pk-ai-usage-summary",
+    hidden: true,
+  });
   return {
     root,
     update(
@@ -187,7 +177,6 @@ export function createUsageDisplay(document) {
       { busy = false, elapsedMs = record?.elapsedMs ?? 0, warning = false } = {},
     ) {
       const totals = usageTotals(record);
-      root.hidden = false;
       const parts = [];
       if (record || busy) {
         parts.push(
@@ -204,23 +193,11 @@ export function createUsageDisplay(document) {
           parts.push(t("用量可能不完整"));
       } else parts.push(t("暂无统计记录"));
       if (warning) parts.push(t("记录保存失败"));
-      summary.textContent = parts.join(" · ");
-      details.hidden = !record;
-      label.textContent = t("详情");
-      if (
-        record &&
-        (record !== lastRecord || getUILanguage() !== lastLanguage)
-      ) {
-        const top = content.scrollTop;
-        content.replaceChildren(renderUsageDetails(document, record));
-        content.scrollTop = top;
-        lastRecord = record;
-        lastLanguage = getUILanguage();
-      }
+      root.textContent = parts.join(" · ");
+      root.hidden = parts.length === 0;
     },
     hide() {
       root.hidden = true;
-      details.open = false;
     },
   };
 }

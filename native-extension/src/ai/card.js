@@ -61,7 +61,7 @@ export function createCard({document,input,preferences,onRetry=()=>{},onSettings
  }
  bar.append(el(document,'span',{class:'pk-ai-heading'},el(document,'span',{text:input.kind==='video'?t("视频解读"):t("长文解读")}),status),search,el(document,'div',{class:'pk-ai-language-anchor'},languageButton,languagePanel),tablist);
  const copyLabel=()=>view==='mindmap'?t("复制大纲"):t("复制"),copy=button(document,t("复制"),async()=>{try{const data=results[view]||drafts[view],text=view==='mindmap'&&(!tasks[view]||results[view])?treeOutline(data?.tree||[]):data?.text||'';await (win.navigator.clipboard||globalThis.navigator?.clipboard).writeText((results[view]?'':t("未完成\n"))+text);if(destroyed)return;copy.textContent=t("已复制");clearTimeout(copyTimer);copyTimer=setTimeout(()=>copy.textContent=copyLabel(),1500);}catch{if(!destroyed)copy.textContent=t("复制失败");}},'pk-ai-icon');
- const footerText=el(document,'span',{});footer.append(footerText,usageDisplay.root,stop,copy,expand,fold);root.append(bar,taskInfo,searchPanel,body,footer);
+ const footerText=el(document,'span',{});footer.append(footerText,usageDisplay.root,el(document,'span',{class:'pk-ai-footer-spring'}),stop,copy,expand,fold);root.append(bar,taskInfo,searchPanel,body,footer);
  function geometry(){
   closeLanguage();
   const available=win.innerHeight-68-8-160-16;if(available<180)collapsed=true;

@@ -171,3 +171,9 @@ The reader AI card now keeps every persistent line single-row. The standalone ge
 `npm run test:native` passed **721 tests, 0 failed, 0 skipped**, including the single-output Native build and network-isolation checks. Updated coverage asserts the cached marker in the status line, the unavailable-statistics line for cached output without records, per-view provider-name isolation in the footer without a generic AI fallback, the absent caption-snapshot note and the compact statistics wording. String cleanup removed the retired entries from the message table.
 
 Rendering the compacted chrome in a real browser on a live X page is **NOT_TESTED** in this pass; layout behavior beyond the jsdom fixtures (popover upward placement, collapsed-state hiding, ellipsis degradation) needs one unpacked-extension reload to confirm visually.
+
+## Reader footer grouping follow-up — 8 November 2026
+
+Browser review of the compacted chrome asked for the statistics to sit directly after the model name instead of floating toward the action buttons, and for the inline Details disclosure to be removed. The footer now groups the model name and the statistics on the left (separated by the same interpunct as the status line) with a flexible spring before the action buttons, and the Details link, its popover and their styles are gone. Full per-request details remain available in Settings → Data call history, which requires the existing "Save call history" preference. The footer budget drops to roughly 480 px against about 634 px available at a 1,280 px window.
+
+`npm run test:native` passed **721 tests, 0 failed, 0 skipped**, including the single-output Native build and network-isolation checks. The retired disclosure had no remaining test or settings references; the shared record renderer stays in use by the Data call-history view.

@@ -6,7 +6,6 @@ export const MESSAGES=Object.freeze({
 "保存调用记录":"Save call history",
 "用于比较模型的用量与耗时。最多保留 30 天、500 条任务记录。":"Compare model usage and timing. Keep up to 500 tasks for 30 days.",
 "关闭后，新任务仅在内存中显示统计。正在记录的任务会完成当前记录。":"When turned off, new task statistics stay in memory. Tasks already being recorded finish their current record.",
-"详情":"Details",
 "输入 Token":"Input tokens",
 "输出 Token":"Output tokens",
 "耗时 {seconds} 秒":"Elapsed {seconds} s",
