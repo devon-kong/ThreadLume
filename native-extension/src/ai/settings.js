@@ -113,7 +113,7 @@ function openProviderDialog(service){
  form.append(name.wrap,url.wrap,endpoint,el(d,'div',{class:'pk-provider-columns'},protocol,model.wrap));
  // The saved key is prefilled into the masked input; the inline eye only
  // toggles its visibility, and edits overwrite the stored key on save.
- const keyEye=identified(button(d,'',()=>setKeyVisible(!keyVisible)),'pk-provider-key-eye');
+ const keyEye=identified(button(d,'',()=>setKeyVisible(!keyVisible),'pk-provider-key-eye'),'pk-provider-key-eye');
  function setKeyVisible(value){
   keyVisible=value;key.input.type=value?'text':'password';keyEye.replaceChildren(icon(d,value?'eyeoff':'eye'));
   const label=t(value?"隐藏 API Key":"显示 API Key");keyEye.title=label;keyEye.setAttribute('aria-label',label);keyEye.setAttribute('aria-pressed',String(value));
